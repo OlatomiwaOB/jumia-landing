@@ -1,0 +1,11 @@
+# onlyBuiltDependencies:
+#   - bigint-buffer
+#   - bufferutil
+#   - core-js
+#   - keccak
+#   - sharp
+#   - unrs-resolver
+#   - utf-8-validate
+
+packages:
+  - "."

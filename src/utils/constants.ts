@@ -1,0 +1,24 @@
+export const LIMIT = 10;
+export const SUPER_ADMIN = 'super_admin';
+export const STORE_OWNER = 'store_owner';
+export const STAFF = 'staff';
+export const CUSTOMER = 'CUSTOMER'
+export const BUSINESS_MANAGER = 'BUSINESS_MANAGER'
+export const OPERATIONS = 'OPERATIONS';
+export const TOKEN_OPERATIONS = 'token_operations';
+export const PERMISSIONS_OPERATIONS = 'permissions_operations';
+export const AUTH_CRED_OPERATIONS = 'AUTH_CRED_OPERATIONS';
+export const RIDERS = 'RIDERS';
+export const TOKEN_RIDERS = 'token_riders';
+export const PERMISSIONS_RIDERS = 'permissions_riders';
+export const AUTH_CRED_RIDERS = 'AUTH_CRED_RIDERS';
+export const TOKEN = 'token';
+export const TOKEN_CUSTOMER = 'token_customer'
+export const PERMISSIONS = 'permissions';
+export const PERMISSIONS_CUSTOMER = 'permissions_customer'
+export const AUTH_CRED = 'AUTH_CRED_STORE_OWNER';
+export const AUTH_CRED_CUSTOMER = 'AUTH_CRED_CUSTOMER'
+export const CART_KEY = 'pick-cart';
+export const CHECKOUT = 'pickbazar-checkout';
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+export const ACCEPTED_FILE_TYPES = "image/*,application/pdf,application/zip,application/vnd.rar,application/epub+zip,.psd"

@@ -1,0 +1,22 @@
+import Header from "@/components/test-theme/header"
+import Providers from './providers'
+import { Suspense } from "react";
+
+export default function AppLayoutTest({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <div className="bg-[#f9f9f9] min-h-screen font-sans">
+      <Providers>
+        <div>
+          <Suspense fallback={<div className="h-20 bg-white"></div>}>
+            <Header />
+          </Suspense>
+          {children}
+        </div>
+      </Providers>
+    </div>
+  );
+}
