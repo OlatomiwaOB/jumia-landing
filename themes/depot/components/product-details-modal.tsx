@@ -1,19 +1,32 @@
 'use client';
 import React from 'react';
+import { MouseEvent } from "react";
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import Image from 'next/image';
 import { ProductProps } from '@/types/index';
 import { useCart } from '@/store/cart';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
+import { ArrowRight } from 'lucide-react';
+import { getProductHref } from "@/utils/product-route";
+import { useRouter } from 'next/navigation';
+
 
 interface ProductDetailsModalProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  product: ProductProps | null;
+  product: ProductProps;
+  onClick: () => void;
+  storeCode?: string;
 }
 
-const ProductDetailsModal = ({ isOpen, setIsOpen, product }: ProductDetailsModalProps) => {
+const ProductDetailsModal = ({ isOpen, setIsOpen, product, onClick, storeCode }: ProductDetailsModalProps) => {
   const { inCart, addToCart, singleQuantity, increment, decrement } = useCart();
+  const router = useRouter();
+
+  const handleProductNavigation = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    router.push(getProductHref(product , storeCode));
+  };
 
   if (!product) return null;
 
@@ -35,7 +48,11 @@ const ProductDetailsModal = ({ isOpen, setIsOpen, product }: ProductDetailsModal
         {product.name}
       </DialogTitle>
       <DialogContent
-        className="min-w-5xl max-h-[90vh] md:h-[600px] overflow-hidden p-0 rounded-none border-none"
+        className="sm:w-4xl min-w-5xl max-h-[90vh] md:h-[600px] overflow-y-auto p-0 rounded-none border-none"
+        style={{
+          scrollbarWidth: 'none',
+          scrollbarColor: 'transparent',
+        }}
       >
         <div className="flex flex-col md:flex-row w-full h-full bg-white">
           {/* Image Section */}
@@ -68,27 +85,27 @@ const ProductDetailsModal = ({ isOpen, setIsOpen, product }: ProductDetailsModal
             </h2>
 
             <p className="text-xl text-[#666] mb-8 font-light">
-              ${product.salePrice ?? product.salePrice ?? product.oldPrice ?? 160}
+              {formatPrice(product.salePrice ?? 0, ((product.ccy as CurrencyCode) || "NGN"))}
             </p>
 
             <div className="mb-10 text-[#777] leading-relaxed text-sm font-light flex-grow">
               <p className="mb-6">{product.description || 'A minimal contemporary piece for your specific needs.'}</p>
 
-              <div className="space-y-3 pt-6 border-t border-gray-100">
+              <div className="space-y-3 pt-6 px-4 border-t border-gray-100">
                 {product.brand && (
-                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Brand:</span> <span>{product.brand}</span></p>
+                  <p className="flex justify-between w-full"><span className="font-semibold text-black uppercase text-xs tracking-widest">Brand:</span> <span>{product.brand}</span></p>
                 )}
                 {product.category && (
-                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Category:</span> <span>{product.category}</span></p>
+                  <p className="flex justify-between w-full"><span className="font-semibold text-black uppercase text-xs tracking-widest">Category:</span> <span>{product.category}</span></p>
                 )}
                 {product.color && (
-                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Color:</span> <span>{product.color}</span></p>
+                  <p className="flex justify-between w-full"><span className="font-semibold text-black uppercase text-xs tracking-widest">Color:</span> <span>{product.color}</span></p>
                 )}
                 {product.itemSize && (
-                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Size:</span> <span>{product.itemSize}</span></p>
+                  <p className="flex justify-between w-full"><span className="font-semibold text-black uppercase text-xs tracking-widest">Size:</span> <span>{product.itemSize}</span></p>
                 )}
                 {product.qtyInStore !== undefined && (
-                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Availability:</span> <span>{(product.qtyInStore > 0) ? `${product.qtyInStore} IN STOCK` : 'OUT OF STOCK'}</span></p>
+                  <p className="flex justify-between w-full"><span className="font-semibold text-black uppercase text-xs tracking-widest">Availability:</span> <span>{(product.qtyInStore > 0) ? `${product.qtyInStore} IN STOCK` : 'OUT OF STOCK'}</span></p>
                 )}
               </div>
             </div>
@@ -124,7 +141,17 @@ const ProductDetailsModal = ({ isOpen, setIsOpen, product }: ProductDetailsModal
                   </button>
                 </div>
               )}
-
+              <div className="absolute bottom-6 right-6 flex flex-col space-y-2 text-xs font-semibold tracking-widest">
+                <button
+                  type="button"
+                  className="cursor-pointer flex items-center justify-center text-accent hover:opacity-90 transition-colors"
+                  onClick={handleProductNavigation}
+                  aria-label={`Open ${product.name} page`}
+                >
+                  View Full
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
-import Header from "@/components/test-theme/header"
+import Header from "./components/header"
+import Footer from "./components/footer";
 import Providers from './providers'
 import { Suspense } from "react";
 
-export default function AppLayoutTest({
+export default function DepotLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -13,8 +14,9 @@ export default function AppLayoutTest({
         <div>
           <Suspense fallback={<div className="h-20 bg-white"></div>}>
             <Header />
+            {children}
+            <Footer />
           </Suspense>
-          {children}
         </div>
       </Providers>
     </div>

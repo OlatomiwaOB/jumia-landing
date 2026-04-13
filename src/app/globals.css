@@ -247,7 +247,7 @@
 
 
 @import "tailwindcss";
-@source "../../../test-app";
+@source "../../../themes/depot";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -344,12 +344,12 @@ body {
   --success: oklch(61.464% 0.12869 163.14);
   --warning: oklch(0.828 0.189 84.429);
   /* Progress Ring Colors */
-    --progress-track: 0 0% 90%;
-    --progress-fill: linear-gradient(135deg, hsl(142 76% 36%), hsl(48 100% 67%), hsl(35 100% 55%));
+  --progress-track: 0 0% 90%;
+  --progress-fill: linear-gradient(135deg, hsl(142 76% 36%), hsl(48 100% 67%), hsl(35 100% 55%));
 
-     /* Gradient Variables */
-    --score-gradient: linear-gradient(135deg, hsl(0 84% 60%), hsl(35 100% 55%), hsl(48 100% 67%), hsl(142 76% 36%));
-    --card-gradient: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--accent) 5%, transparent));
+  /* Gradient Variables */
+  --score-gradient: linear-gradient(135deg, hsl(0 84% 60%), hsl(35 100% 55%), hsl(48 100% 67%), hsl(142 76% 36%));
+  --card-gradient: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), color-mix(in srgb, var(--accent) 5%, transparent));
 }
 
 .dark {
@@ -390,6 +390,7 @@ body {
     @apply border-border outline-ring/50;
     font-family: var(--selected-font)
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -399,40 +400,47 @@ body {
   .bg-card-gradient-primary {
     background: linear-gradient(135deg, #1e3a8a, #3b82f6);
   }
+
   .bg-card-gradient-secondary {
     background: linear-gradient(135deg, #7c3aed, #a855f7);
   }
+
   .bg-card-gradient-accent {
     background: linear-gradient(135deg, #0369a1, #0ea5e9);
   }
+
   .bg-card-gradient-success {
     background: linear-gradient(135deg, #059669, #10b981);
   }
-  
+
   .shadow-card-primary {
     box-shadow: 0 20px 40px -12px rgba(30, 58, 138, 0.3);
   }
+
   .shadow-card-secondary {
     box-shadow: 0 20px 40px -12px rgba(124, 58, 237, 0.3);
   }
+
   .shadow-card-accent {
     box-shadow: 0 20px 40px -12px rgba(3, 105, 161, 0.3);
   }
+
   .shadow-card-success {
     box-shadow: 0 20px 40px -12px rgba(5, 150, 105, 0.3);
   }
+
   .shadow-card-glow {
     box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
   }
 
-   .score-gradient {
+  .score-gradient {
     background: var(--score-gradient);
   }
-  
+
   .card-gradient {
     background: var(--card-gradient);
   }
-  
+
   .progress-ring {
     fill: none;
     stroke-linecap: round;
@@ -442,23 +450,23 @@ body {
     stroke: hsl(var(--progress-track));
   }
 
-   .progress-fill {
+  .progress-fill {
     stroke: url(#scoreGradient);
     stroke-dasharray: 0 100;
     animation: progress-fill 2s ease-out forwards;
   }
-  
+
   @keyframes progress-fill {
     from {
       stroke-dasharray: 0 100;
     }
   }
-  
+
   .score-card {
     position: relative;
     overflow: hidden;
   }
-  
+
   .score-card::before {
     content: '';
     position: absolute;
@@ -476,9 +484,11 @@ body {
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -487,6 +497,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -518,7 +529,7 @@ body {
   overflow-x: auto;
 }
 
-.rc-table-custom .rc-table-thead > tr > th {
+.rc-table-custom .rc-table-thead>tr>th {
   background: hsl(var(--muted));
   border-bottom: 1px solid hsl(var(--border));
   padding: 12px 16px;
@@ -528,33 +539,33 @@ body {
   color: hsl(var(--muted-foreground));
 }
 
-.rc-table-custom .rc-table-thead > tr > th:first-child {
+.rc-table-custom .rc-table-thead>tr>th:first-child {
   border-top-left-radius: 8px;
 }
 
-.rc-table-custom .rc-table-thead > tr > th:last-child {
+.rc-table-custom .rc-table-thead>tr>th:last-child {
   border-top-right-radius: 8px;
 }
 
-.rc-table-custom .rc-table-tbody > tr > td {
+.rc-table-custom .rc-table-tbody>tr>td {
   padding: 12px 16px;
   border-bottom: 1px solid hsl(var(--border));
   font-size: 14px;
 }
 
-.rc-table-custom .rc-table-tbody > tr:hover > td {
+.rc-table-custom .rc-table-tbody>tr:hover>td {
   background: hsl(var(--muted) / 0.5);
 }
 
-.rc-table-custom .rc-table-tbody > tr:last-child > td {
+.rc-table-custom .rc-table-tbody>tr:last-child>td {
   border-bottom: none;
 }
 
-.rc-table-custom .rc-table-tbody > tr:last-child > td:first-child {
+.rc-table-custom .rc-table-tbody>tr:last-child>td:first-child {
   border-bottom-left-radius: 8px;
 }
 
-.rc-table-custom .rc-table-tbody > tr:last-child > td:last-child {
+.rc-table-custom .rc-table-tbody>tr:last-child>td:last-child {
   border-bottom-right-radius: 8px;
 }
 
@@ -567,40 +578,40 @@ body {
   @apply w-full;
 }
 
-.credit-scoring-table .rc-table-thead > tr > th {
+.credit-scoring-table .rc-table-thead>tr>th {
   @apply bg-muted/50 border-b border-border px-4 py-3 text-left text-sm font-semibold text-foreground;
 }
 
-.credit-scoring-table .rc-table-tbody > tr {
+.credit-scoring-table .rc-table-tbody>tr {
   @apply border-b border-border hover:bg-muted/30 transition-colors duration-200;
 }
 
-.credit-scoring-table .rc-table-tbody > tr > td {
+.credit-scoring-table .rc-table-tbody>tr>td {
   @apply px-4 py-4 text-sm align-top;
 }
 
-.credit-scoring-table .rc-table-tbody > tr:last-child {
+.credit-scoring-table .rc-table-tbody>tr:last-child {
   @apply border-b-0;
 }
 
 /* rc-table */
 
-.rc-table table{
+.rc-table table {
   @apply min-w-full border-collapse w-full;
 }
 
-.rc-table tr{
+.rc-table tr {
   @apply border-b border-border
 }
 
-.rc-table th{
+.rc-table th {
   @apply px-3 py-3 text-left text-xs font-medium text-muted-foreground bg-muted/50 whitespace-nowrap border
 }
 
-.rc-table tbody tr{
+.rc-table tbody tr {
   @apply border-b border-border hover:bg-muted/50 transition-colors
 }
 
-.rc-table tbody td{
+.rc-table tbody td {
   @apply px-3 py-3 text-sm align-top border
 }

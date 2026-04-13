@@ -42,6 +42,14 @@ const storefrontConfigs = {
       description: 'Revolutionising the e-commerce world',
     }
   },
+  depot: {
+    name: 'Depot',
+    favicon: '/favicons/fortitude.ico', // Reusing for now or can be custom
+    metadata: {
+      title: 'DEPOT | Home',
+      description: 'Curated essentials for everyday living.',
+    }
+  },
 };
 
 function getCurrentStorefront() {

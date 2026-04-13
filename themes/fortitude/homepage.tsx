@@ -5,10 +5,10 @@ import { Suspense } from 'react'
 
 const Home = dynamic(() => import('./page'), {
   ssr: false,
-  loading: () => <Loader text='Loading test-app page...' />
+  loading: () => <Loader text='Loading Fortitude page...' />
 })
 
-const HomePageTestApp = () => {
+const FortitudeHomePage = () => {
   return (
     <Suspense>
       <Home />
@@ -16,4 +16,4 @@ const HomePageTestApp = () => {
   )
 }
 
-export default HomePageTestApp
+export default FortitudeHomePage

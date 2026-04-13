@@ -1,12 +1,21 @@
 
 import React, { lazy, ReactNode, Suspense } from 'react'
 
-const AppLayoutTestApp = lazy(()=>import('../../../test-app/layout'))
+const AppLayoutDepot = lazy(()=>import('../../../themes/depot/layout'))
+const AppLayoutFortitude = lazy(()=>import('../../../themes/fortitude/layout'))
 
 const AppLayout = ({children}: {children: ReactNode}) => {
-  if (process.env?.NEXT_PUBLIC_STORE_FRONT === 'test-app'){
+  const storefront = process.env?.NEXT_PUBLIC_STORE_FRONT;
+  
+  if (storefront === 'depot'){
     return (
-        <AppLayoutTestApp>{children}</AppLayoutTestApp>
+        <AppLayoutDepot>{children}</AppLayoutDepot>
+    );
+  }
+  
+  if (storefront === 'fortitude'){
+    return (
+        <AppLayoutFortitude>{children}</AppLayoutFortitude>
     );
   }
 }

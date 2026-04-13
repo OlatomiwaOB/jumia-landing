@@ -4,8 +4,11 @@ import Loader from '@/components/ui/loader'
 
 
 const entityObject = {
-  'test-app': {
-    name: 'Depot | home'
+  'depot': {
+    name: 'DEPOT | home'
+  },
+  'fortitude': {
+    name: 'Fortitude | home'
   }
 }
 
@@ -14,11 +17,18 @@ export const metadata: Metadata = {
 }
 
 // Lazy loading components
-const HomePageTestApp = lazy(() => import('../../../test-app/homepage'))
+const HomePageDepot = lazy(() => import('../../../themes/depot/homepage'))
+const HomePageFortitude = lazy(() => import('../../../themes/fortitude/homepage'))
 
 const HomePage = () => {
-  if (process?.env?.NEXT_PUBLIC_STORE_FRONT === 'test-app') {
-    return <Suspense fallback={<Loader text='Loading...'/>}><HomePageTestApp /></Suspense>
+  const storefront = process?.env?.NEXT_PUBLIC_STORE_FRONT;
+
+  if (storefront === 'depot') {
+    return <Suspense fallback={<Loader text='Loading...' />}><HomePageDepot /></Suspense>
+  }
+
+  if (storefront === 'fortitude') {
+    return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>
   }
 }
 

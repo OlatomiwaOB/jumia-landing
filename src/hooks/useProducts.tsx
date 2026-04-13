@@ -11,7 +11,16 @@ export const useProducts = (
     pageSize: number = 200
 ) =>{
       const { data,isLoading, error } = useQuery({
-      queryKey: ["products",category,name,retryProducts],
+      queryKey: [
+        "products",
+        storeCode,
+        entityCode,
+        category,
+        name,
+        retryProducts,
+        pageNumber,
+        pageSize
+      ],
       queryFn: () => {
         return axiosInstanceNoAuth.request({
           method: "GET",
@@ -27,7 +36,8 @@ export const useProducts = (
           }
         })
         .then(response => response.data)
-      }
+      },
+      enabled: Boolean(entityCode)
     });
 
     return {data, isLoading, error}
