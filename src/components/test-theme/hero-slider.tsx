@@ -28,18 +28,21 @@ export default function HeroSlider({ products }: HeroSliderProps) {
   const activeProduct = sliderProducts[currentStep];
 
   return (
-    <div className="relative w-full h-[80vh] bg-[#f4f4f4] flex items-center overflow-hidden">
+    <div className="relative w-full h-[80vh] bg-white flex items-center overflow-hidden">
       
+      {/* Background with left gutter */}
+      <div className="absolute top-0 right-0 h-full w-[90%] md:w-[94%] bg-[#f4f4f4] z-0"></div>
+
       {/* Left Navigation Steps */}
-      <div className="absolute left-10 md:left-24 flex flex-col space-y-6 z-20">
+      <div className="absolute left-4 md:left-8 flex flex-col space-y-6 z-20">
         {sliderProducts.map((_, idx) => (
           <button 
             key={idx} 
             onClick={() => setCurrentStep(idx)}
-            className={`flex items-center space-x-4 transition-all duration-300 ${currentStep === idx ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
+            className={`flex items-center space-x-4 transition-all duration-300 ${currentStep === idx ? 'opacity-100 text-black' : 'opacity-60 text-gray-500 hover:opacity-100'}`}
           >
             <span className="font-semibold text-sm">0{idx + 1}</span>
-            <div className={`h-[1px] bg-black transition-all duration-300 ${currentStep === idx ? 'w-12' : 'w-6'}`}></div>
+            <div className={`transition-all duration-300 ${currentStep === idx ? 'h-[2px] w-16 bg-black' : 'h-[1px] w-6 bg-gray-400'}`}></div>
           </button>
         ))}
       </div>

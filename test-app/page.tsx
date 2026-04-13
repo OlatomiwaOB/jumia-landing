@@ -18,7 +18,7 @@ export default function HomeTestApp() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storeCode = searchParams ? searchParams.get('storeCode') || 'STO0715' : 'STO0715';
+  const storeCode = searchParams ? searchParams.get('storeCode') || '' : '';
   const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 

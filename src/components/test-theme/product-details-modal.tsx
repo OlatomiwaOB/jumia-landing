@@ -62,7 +62,7 @@ const ProductDetailsModal = ({ isOpen, setIsOpen, product }: ProductDetailsModal
           </div>
 
           {/* Details Section */}
-          <div className="w-full md:w-1/2 p-8 md:p-14 flex flex-col justify-center overflow-y-auto">
+          <div className="w-full md:w-1/2 p-8 md:p-14 flex flex-col justify-start overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <h2 className="text-2xl md:text-3xl font-bold text-black uppercase tracking-widest mb-4">
               {product.name}
             </h2>
@@ -71,18 +71,26 @@ const ProductDetailsModal = ({ isOpen, setIsOpen, product }: ProductDetailsModal
                ${product.salePrice ?? product.price ?? product.oldPrice ?? 160}
             </p>
 
-            <div className="mb-10 text-[#777] leading-relaxed text-sm font-light space-y-4">
-              <p>{product.description || 'A minimal contemporary piece for your specific needs.'}</p>
+            <div className="mb-10 text-[#777] leading-relaxed text-sm font-light flex-grow">
+              <p className="mb-6">{product.description || 'A minimal contemporary piece for your specific needs.'}</p>
               
-              {product.color && (
-                <p><span className="font-semibold text-black uppercase text-xs tracking-widest">Color:</span> {product.color}</p>
-              )}
-              {product.itemSize && (
-                <p><span className="font-semibold text-black uppercase text-xs tracking-widest">Size:</span> {product.itemSize}</p>
-              )}
-              {product.qtyInStore !== undefined && (
-                <p><span className="font-semibold text-black uppercase text-xs tracking-widest">Availability:</span> {(product.qtyInStore > 0) ? `${product.qtyInStore} IN STOCK` : 'OUT OF STOCK'}</p>
-              )}
+              <div className="space-y-3 pt-6 border-t border-gray-100">
+                {product.brand && (
+                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Brand:</span> <span>{product.brand}</span></p>
+                )}
+                {product.category && (
+                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Category:</span> <span>{product.category}</span></p>
+                )}
+                {product.color && (
+                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Color:</span> <span>{product.color}</span></p>
+                )}
+                {product.itemSize && (
+                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Size:</span> <span>{product.itemSize}</span></p>
+                )}
+                {product.qtyInStore !== undefined && (
+                  <p className="flex justify-between w-64"><span className="font-semibold text-black uppercase text-xs tracking-widest">Availability:</span> <span>{(product.qtyInStore > 0) ? `${product.qtyInStore} IN STOCK` : 'OUT OF STOCK'}</span></p>
+                )}
+              </div>
             </div>
 
             {/* Actions */}
