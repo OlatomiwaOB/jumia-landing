@@ -1,15 +1,15 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Header from '@/../fortitude-app/layout/header';
-import Footer from '@/../fortitude-app/layout/footer';
+// import Header from '@/../fortitude-app/layout/header';
+// import Footer from '@/../fortitude-app/layout/footer';
 import notFound from "@/components/images/not-found.png"
 
 
 function NotFoundContent() {
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <div className="min-h-screen flex items-center justify-center bg-gray-50 mb-8">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">page not found/being cooked 🧑‍🍳</h2>
@@ -31,7 +31,7 @@ function NotFoundContent() {
           </div>
         </div>
       </div>
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }

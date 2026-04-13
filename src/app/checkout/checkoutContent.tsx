@@ -4,14 +4,12 @@ import { useToast } from '@/app/hooks/use-toast';
 import { useCart } from '@/store/cart';
 import { useForm } from 'react-hook-form';
 import CartView from '@/components/checkout/cart-view';
-import UsdtPayment from '@/components/checkout/usdt-payment';
 import BankPayment from '@/components/checkout/bank-payment';
 import { useSearchParams, useRouter } from 'next/navigation';
 import BnplManager from '@/components/checkout/bnpl_checkout/bnpl-manager';
 import z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import RexpayPayment from '@/components/checkout/rexpay-payment';
-import SolanaPay from '@/components/checkout/solana/solana-pay';
 import WalletPayment from '@/components/checkout/wallet-payment';
 import { Button } from '@/components/ui/button';
 import axiosCustomer from '@/utils/fetch-function-customer';
@@ -343,21 +341,6 @@ const CheckoutContent = () => {
   };
 
   const PaymentView = () => {
-    if (selectedPayment == 'crypto_token') {
-      return (
-        <Suspense>
-          <UsdtPayment
-            setCurrentStep={setCurrentStep}
-            currentStep={currentStep}
-            wallets={wallets}
-            form={form}
-            orderTotal={orderTotal}
-            checkoutData={checkoutData}
-            totalVat={totalVat}
-          />
-        </Suspense>
-      );
-    }
 
     if (selectedPayment === 'rexpay') {
       return (
@@ -395,17 +378,6 @@ const CheckoutContent = () => {
           isCallback={isRexpayCallback}
           onSuccess={handleRexpaySuccess}
           form={form}
-          orderTotal={orderTotal}
-          totalVat={totalVat}
-
-        />
-      );
-    }
-
-    if (selectedPayment === 'solana_pay') {
-      return (
-        <SolanaPay
-          setCurrentStep={setCurrentStep}
           orderTotal={orderTotal}
           totalVat={totalVat}
 
