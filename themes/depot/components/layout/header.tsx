@@ -8,12 +8,18 @@ import { SheetTrigger } from '@/components/ui/sheet';
 import Cart from '@/components/ui/cart';
 import SearchInput from '@/components/ui/search-input';
 import { ShoppingBag, X } from 'lucide-react';
+import CustomerLoginModal from "@/components/ui/customer-login-modal";
+import useCustomer from '@/store/customerStore';
+
 
 export default function Header() {
   const [openSearch, setOpenSearch] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cart, getCartTotal, mainCcy } = useCart();
   const [isMounted, setIsMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+
+  const { customer } = useCustomer()
 
   useEffect(() => {
     setIsMounted(true);
@@ -67,13 +73,29 @@ export default function Header() {
             </CartWrapper>
 
             {/* Login Link */}
-            <Link href="/customer-onboarding" target="_blank" className="flex items-center hover:text-black transition-colors gap-2">
+            <div className="flex items-center hover:text-black transition-colors gap-2">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
-              LOGIN
-            </Link>
+              <div className="flex-col items-start">
+                {customer?.firstname ? (
+                  <Link
+                    href="/dashboard"
+                    className="text-xs md:text-sm font-semibold hover:underline hover:text-accent"
+                  >
+                    {customer.firstname}
+                  </Link>
+                ) : (
+                  <span
+                    className="text-xs md:text-sm font-semibold hover:underline hover:text-accent"
+                    onClick={() => setIsOpen(true)}
+                  >
+                    LOGIN
+                  </span>
+                )}
+              </div>
+            </div>
 
             {/* Search Icon */}
             <button
@@ -212,18 +234,35 @@ export default function Header() {
               <div className="my-6 border-t border-gray-100" />
 
               {/* Account */}
-              <Link
-                href="/customer-onboarding"
-                target="_blank"
+              <div
                 className="flex items-center gap-3 py-3 px-3 text-xs font-semibold tracking-[0.25em] text-[#555] hover:text-black hover:bg-gray-50 rounded-lg transition-all"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setIsOpen(true);
+                }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                   <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-                LOGIN / REGISTER
-              </Link>
+                <div className="flex-col items-start">
+                  {customer?.firstname ? (
+                    <Link
+                      href="/dashboard"
+                      className="text-xs md:text-sm font-semibold hover:underline hover:text-accent"
+                    >
+                      {customer.firstname}
+                    </Link>
+                  ) : (
+                    <span
+                      className="text-xs md:text-sm font-semibold hover:underline hover:text-accent"
+                      onClick={() => setIsOpen(true)}
+                    >
+                      LOGIN / REGISTER
+                    </span>
+                  )}
+                </div>
+              </div>
             </nav>
           </div>
         </div>
@@ -247,6 +286,8 @@ export default function Header() {
         </SheetTrigger>
         <Cart />
       </CartWrapper>
+
+      <CustomerLoginModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </>
   );
 }

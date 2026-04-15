@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import HeroSlider from "./components/hero-slider";
-import { ProductCard } from "./components/products-card";
+import HeroSlider from "./components/utils/hero-slider";
+import { ProductCard } from "./components/utils/products-card";
 import { ProductProps } from '@/types';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import ProductDetailsModal from './components/product-details-modal';
+import ProductDetailsModal from './components/utils/product-details-modal';
 import { useCategories } from '@/hooks/useCategories';
 import { getCategoryHref } from '@/utils/product-route';
 

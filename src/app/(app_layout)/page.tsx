@@ -2,13 +2,12 @@ import { Suspense, lazy } from 'react'
 import { Metadata } from 'next'
 import Loader from '@/components/ui/loader'
 
-
 const entityObject = {
   'depot': {
     name: 'DEPOT | home'
   },
   'fortitude': {
-    name: 'Fortitude | home'
+    name: 'FORTITUDE | home'
   }
 }
 
@@ -27,9 +26,7 @@ const HomePage = () => {
     return <Suspense fallback={<Loader text='Loading...' />}><HomePageDepot /></Suspense>
   }
 
-  if (storefront === 'fortitude') {
-    return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>
-  }
+  return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>
 }
 
-export default HomePage
+export default HomePage

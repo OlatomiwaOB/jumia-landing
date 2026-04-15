@@ -11,18 +11,18 @@ const nextConfig = {
     unoptimized: true,
   },
   ...(process.env.NODE_ENV === 'production' && {
-     compiler: {
+    compiler: {
       removeConsole: true
-     },
-     devIndicators: false
+    },
+    devIndicators: false
   }),
-   webpack: (config, { isServer }) => {
-      if (!isServer) {
-        config.resolve.fallback = {
-          ...config.resolve.fallback,
-          ...webpackFallback
-        }
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        ...webpackFallback
       }
+    }
     // Prevent errors from React Native imports in MetaMask SDK
     config.resolve.fallback = {
       ...config.resolve.fallback,
@@ -34,18 +34,6 @@ const nextConfig = {
     };
 
     return config;
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/fortitude/:path*',
-        destination: '/fortitude-app/:path*',
-      },
-      {
-        source: '/fortitude',
-        destination: '/fortitude-app',
-      }
-    ]
   },
 }
 

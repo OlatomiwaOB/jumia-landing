@@ -1,4 +1,4 @@
-import DepotThemeProductPage from '@themes/depot/components/product-page';
+import DepotThemeProductPage from '@themes/depot/components/utils/product-page';
 
 export default function ProductSlugPage() {
   return <DepotThemeProductPage />;

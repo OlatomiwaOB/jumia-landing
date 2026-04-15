@@ -1,8 +1,6 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-// import Header from '@/../fortitude-app/layout/header';
-// import Footer from '@/../fortitude-app/layout/footer';
 import notFound from "@/components/images/not-found.png"
 
 

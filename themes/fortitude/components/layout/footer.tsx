@@ -61,10 +61,10 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="md:col-span-4">
             <Link href="/">
-              <span className="text-2xl font-bold tracking-[0.3em] text-black">DEPOT</span>
+              <span className="text-2xl font-bold tracking-tight text-accent italic">FORTITUDE</span>
             </Link>
-            <p className="mt-4 text-sm leading-6 text-[#777] max-w-xs">
-              Curated essentials for everyday living. Quality products, minimal design, thoughtful details.
+            <p className="mt-4 text-sm leading-6 text-gray-600 max-w-xs">
+              Empowering your shopping experience with quality, reliability, and value.
             </p>
             {/* Social Links */}
             <div className="mt-6 flex gap-4">
@@ -72,7 +72,7 @@ export default function Footer() {
                 <a
                   key={item.name}
                   href={item.href}
-                  className="text-[#999] hover:text-black transition-colors"
+                  className="text-gray-400 hover:text-accent transition-colors"
                   aria-label={item.name}
                 >
                   <item.icon aria-hidden="true" className="size-5" />
@@ -83,13 +83,13 @@ export default function Footer() {
 
           {/* Shop Links */}
           <div className="md:col-span-2">
-            <h3 className="text-xs font-semibold tracking-[0.25em] text-black uppercase">Shop</h3>
+            <h3 className="text-sm font-semibold text-gray-900">Shop</h3>
             <ul className="mt-4 space-y-3">
               {navigation.shop.map((item) => (
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    className="text-sm text-[#777] hover:text-black transition-colors"
+                    className="text-sm text-gray-600 hover:text-accent transition-colors"
                   >
                     {item.name}
                   </a>
@@ -100,13 +100,13 @@ export default function Footer() {
 
           {/* Company Links */}
           <div className="md:col-span-2">
-            <h3 className="text-xs font-semibold tracking-[0.25em] text-black uppercase">Company</h3>
+            <h3 className="text-sm font-semibold text-gray-900">Company</h3>
             <ul className="mt-4 space-y-3">
               {navigation.company.map((item) => (
                 <li key={item.name}>
                   <a
                     href={item.href}
-                    className="text-sm text-[#777] hover:text-black transition-colors"
+                    className="text-sm text-gray-600 hover:text-accent transition-colors"
                   >
                     {item.name}
                   </a>
@@ -117,9 +117,9 @@ export default function Footer() {
 
           {/* Newsletter */}
           <div className="md:col-span-4">
-            <h3 className="text-xs font-semibold tracking-[0.25em] text-black uppercase">Newsletter</h3>
-            <p className="mt-4 text-sm text-[#777]">
-              Subscribe for updates on new arrivals and special offers.
+            <h3 className="text-sm font-semibold text-gray-900">Stay Updated</h3>
+            <p className="mt-4 text-sm text-gray-600">
+              Get the latest updates on new arrivals and exclusive deals.
             </p>
             <form className="mt-4 flex gap-2">
               <label htmlFor="footer-email" className="sr-only">
@@ -131,12 +131,11 @@ export default function Footer() {
                 type="email"
                 required
                 placeholder="Enter your email"
-                autoComplete="email"
-                className="flex-1 min-w-0 rounded-none border border-gray-200 bg-white px-4 py-3 text-sm text-black placeholder:text-[#aaa] focus:border-black focus:outline-none transition-colors"
+                className="flex-1 min-w-0 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-black focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition-shadow"
               />
               <button
                 type="submit"
-                className="bg-black text-white px-6 py-3 text-xs font-semibold tracking-[0.2em] hover:bg-[#333] transition-colors"
+                className="bg-accent text-white px-6 py-2 text-sm font-semibold rounded-md hover:bg-accent-foreground transition-colors"
               >
                 JOIN
               </button>
@@ -146,13 +145,13 @@ export default function Footer() {
 
         {/* Bottom Copyright Bar */}
         <div className="border-t border-gray-100 py-8 flex flex-col items-center gap-4 md:flex-row md:justify-between">
-          <p className="text-xs text-[#999] tracking-wider">
-            &copy; {new Date().getFullYear()} DEPOT. All rights reserved.
+          <p className="text-xs text-gray-500">
+            &copy; {new Date().getFullYear()} FORTITUDE. All rights reserved.
           </p>
-          <div className="flex gap-6 text-xs text-[#999] tracking-wider">
-            <a href="#" className="hover:text-black transition-colors">Privacy</a>
-            <a href="#" className="hover:text-black transition-colors">Terms</a>
-            <a href="#" className="hover:text-black transition-colors">Cookies</a>
+          <div className="flex gap-6 text-xs text-gray-500">
+            <a href="#" className="hover:text-accent transition-colors">Privacy</a>
+            <a href="#" className="hover:text-accent transition-colors">Terms</a>
+            <a href="#" className="hover:text-accent transition-colors">Cookies</a>
           </div>
         </div>
       </div>

@@ -18,33 +18,9 @@ const funnelDisplay = Funnel_Display({
 });
 
 const storefrontConfigs = {
-  h2p: {
-    name: 'Help2Pay',
-    favicon: '/favicons/h2p.ico',
-    metadata: {
-      title: 'Help2Pay',
-      description: 'Revolutionising the e-commerce world',
-    }
-  },
-  fortitude: {
-    name: 'Fortitude',
-    favicon: '/favicons/fortitude.ico',
-    metadata: {
-      title: 'Fortitude Direct',
-      description: 'Community Meets Commerce',
-    }
-  },
-  theme1: {
-    name: 'Help2Pay',
-    favicon: '/favicons/h2p.ico',
-    metadata: {
-      title: 'Help2Pay',
-      description: 'Revolutionising the e-commerce world',
-    }
-  },
   depot: {
     name: 'Depot',
-    favicon: '/favicons/fortitude.ico', // Reusing for now or can be custom
+    favicon: '/favicons/fortitude.ico',
     metadata: {
       title: 'DEPOT | Home',
       description: 'Curated essentials for everyday living.',
@@ -54,7 +30,7 @@ const storefrontConfigs = {
 
 function getCurrentStorefront() {
   const storefrontKey = process.env?.NEXT_PUBLIC_STORE_FRONT as keyof typeof storefrontConfigs;
-  return storefrontConfigs[storefrontKey] || storefrontConfigs.fortitude;
+  return storefrontConfigs[storefrontKey] || storefrontConfigs.depot;
 }
 
 export async function generateMetadata(): Promise<Metadata> {

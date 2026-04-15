@@ -13,7 +13,8 @@ const SearchInput = ({ onClose }:{ onClose: () => void }) => {
 
     const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        router.push(`?name=${searchTerm}`)
+        router.push(`/shop?search=${searchTerm}`)
+        if (onClose) onClose()
     }
 
 
