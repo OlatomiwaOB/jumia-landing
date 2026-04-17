@@ -43,6 +43,7 @@ interface CartStore {
   removeItem: (id: number|undefined) => void;
   clearCart: () => void;
   getCartTotal: () => number;
+  totalItems: number;
   mainCcy: ()=>string | undefined;
   usdTotal: ()=> number;
 }
@@ -57,6 +58,7 @@ export const useCart = create<CartStore>()(
         const currency = cart.length > 0 ? cart[0].ccy : '';
         return currency;
       },
+      totalItems: 0,
 
       inCart: (id) => {
         const { cart } = get();
@@ -85,7 +87,10 @@ export const useCart = create<CartStore>()(
             return item;
           });
           
-          return { cart: updatedCart };
+          return { 
+            cart: updatedCart,
+            totalItems: state.totalItems + 1
+          };
         }),
         
       decrement: (payload) =>
@@ -102,7 +107,12 @@ export const useCart = create<CartStore>()(
             return item;
           });
           
-          return { cart: updatedCart };
+          const totalItemsDelta = updatedCart.reduce((acc, item) => acc + item.quantity, 0) - state.totalItems;
+
+          return { 
+            cart: updatedCart,
+            totalItems: state.totalItems + totalItemsDelta
+          };
         }),
       
       // Cart modifications
@@ -119,7 +129,10 @@ export const useCart = create<CartStore>()(
               subTotal: payload.salePrice
             };
             
-            return { cart: [...state.cart, newItem] };
+            return { 
+              cart: [...state.cart, newItem],
+              totalItems: state.totalItems + 1
+            };
           }
           
           // If product already exists, return unchanged cart
@@ -127,11 +140,15 @@ export const useCart = create<CartStore>()(
         }),
         
       removeItem: (id) =>
-        set((state) => ({
-          cart: state.cart.filter(item => item.id !== id)
-        })),
+        set((state) => {
+          const itemToRemove = state.cart.find(item => item.id === id);
+          return {
+            cart: state.cart.filter(item => item.id !== id),
+            totalItems: state.totalItems - (itemToRemove?.quantity || 0)
+          };
+        }),
         
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => set({ cart: [], totalItems: 0 }),
       
       // Calculate total cart value
       getCartTotal: () => {
@@ -145,7 +162,7 @@ export const useCart = create<CartStore>()(
     }),
     {
       name: 'cart-storage-storefront', // Unique name for localStorage
-      partialize: (state) => ({ cart: state.cart }), // Only persist the cart items
+      partialize: (state) => ({ cart: state.cart, totalItems: state.totalItems }), // Only persist the cart items
     }
   )
 );

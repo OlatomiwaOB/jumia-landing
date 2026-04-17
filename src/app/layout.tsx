@@ -26,6 +26,14 @@ const storefrontConfigs = {
       description: 'Curated essentials for everyday living.',
     }
   },
+  vogue: {
+    name: 'Vogue',
+    favicon: '/favicons/vogue.ico',
+    metadata: {
+      title: 'VOGUE | Home',
+      description: 'Premium fashion and wearables.',
+    }
+  },
 };
 
 function getCurrentStorefront() {

@@ -7,6 +7,10 @@ import DepotCategoryContent from '../../../../themes/depot/components/shop/depot
 import FortitudeLayout from '../../../../themes/fortitude/layout'
 import FortitudeCategoryContent from '../../../../themes/fortitude/components/shop/fortitude-category-content'
 
+// Vogue Theme Imports
+import VogueLayout from '../../../../themes/vogue/layout'
+import VogueCategoryContent from '../../../../themes/vogue/components/shop/vogue-category-content'
+
 const CategoryPage = () => {
     const storefront = process.env.NEXT_PUBLIC_STORE_FRONT;
     const isDepot = storefront === 'depot';
@@ -18,6 +22,16 @@ const CategoryPage = () => {
                     <DepotCategoryContent />
                 </Suspense>
             </DepotLayout>
+        )
+    }
+
+    if (storefront === 'vogue') {
+        return (
+            <VogueLayout>
+                <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                    <VogueCategoryContent />
+                </Suspense>
+            </VogueLayout>
         )
     }
 

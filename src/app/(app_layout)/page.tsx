@@ -8,6 +8,9 @@ const entityObject = {
   },
   'fortitude': {
     name: 'FORTITUDE | home'
+  },
+  'vogue': {
+    name: 'VOGUE | home'
   }
 }
 
@@ -18,12 +21,17 @@ export const metadata: Metadata = {
 // Lazy loading components
 const HomePageDepot = lazy(() => import('../../../themes/depot/homepage'))
 const HomePageFortitude = lazy(() => import('../../../themes/fortitude/homepage'))
+const HomePageVogue = lazy(() => import('../../../themes/vogue/homepage'))
 
 const HomePage = () => {
   const storefront = process?.env?.NEXT_PUBLIC_STORE_FRONT;
 
   if (storefront === 'depot') {
     return <Suspense fallback={<Loader text='Loading...' />}><HomePageDepot /></Suspense>
+  }
+
+  if (storefront === 'vogue') {
+    return <Suspense fallback={<Loader text='Loading...' />}><HomePageVogue /></Suspense>
   }
 
   return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>

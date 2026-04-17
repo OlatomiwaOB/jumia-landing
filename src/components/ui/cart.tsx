@@ -377,7 +377,7 @@ import axiosInstanceNoAuth from '@/utils/fetch-function-auth'
 interface Product {
     storeCode: string
     storeName: string
-    id: number
+    id?: number
     code: string
     name: string
     qtyInStore: number
@@ -389,7 +389,7 @@ interface Product {
 }
 
 interface CartItem {
-    id: number
+    id?: number
     code: string
     name: string
     qtyInStore: number
@@ -450,29 +450,6 @@ const Cart = () => {
     });
 
     const hasItemsExceedingStock = itemsExceedingStock.length > 0;
-
-    const cartByStore = enhancedCart.reduce((acc, item) => {
-        const store = item.storeCode || 'UNKNOWN';
-        if (!acc[store]) {
-            acc[store] = {
-                storeCode: store,
-                storeName: item.storeName || 'Unknown Store',
-                items: [],
-                total: 0
-            };
-        }
-        acc[store].items.push(item);
-        acc[store].total += item.subTotal;
-        return acc;
-    }, {} as Record<string, {
-        storeCode: string;
-        storeName: string;
-        items: CartItemWithStore[];
-        total: number;
-    }>);
-
-    const stores = Object.values(cartByStore);
-    const hasMultipleStores = stores.length > 1;
 
     const outOfStockItems = enhancedCart.filter(item => (item.qtyInStore ?? 0) <= 0);
     const hasOutOfStockItems = outOfStockItems.length > 0;
@@ -639,23 +616,6 @@ const Cart = () => {
         mutate(payload)
     }
 
-    const clearStoreItems = (storeCode: string) => {
-        const storeItems = cartByStore[storeCode]?.items || [];
-        storeItems.forEach(item => {
-            removeItem(item.id);
-        });
-        toast.success(`Cleared items from ${cartByStore[storeCode]?.storeName}`);
-    }
-
-    const getStoreColor = (storeCode: string) => {
-        const colors = [
-            'border-red-300', 'border-blue-300', 'border-green-300',
-            'border-yellow-300', 'border-purple-300', 'border-pink-300',
-            'border-indigo-300', 'border-orange-300', 'border-teal-300'
-        ];
-        const index = storeCode.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-        return colors[index];
-    }
 
     return (
         <>
@@ -666,31 +626,6 @@ const Cart = () => {
                     <span>{enhancedCart.length > 1 ? `${enhancedCart.length} items` : `${enhancedCart.length} item`}</span>
                 </SheetHeader>
 
-                {/* {hasMultipleStores && (
-                    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mx-2 mt-2">
-                        <div className="flex items-start gap-2">
-                            <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                            <div className="flex-1">
-                                <p className="text-yellow-800 text-sm font-medium">
-                                    Multiple stores detected
-                                </p>
-                                <p className="text-yellow-700 text-xs mt-1">
-                                    We currently do not support multi-store ordering. Please clear items to include items from only a single store.
-                                </p>
-                                <div className="mt-2 text-xs text-yellow-800">
-                                    <p>Stores in cart:</p>
-                                    <ul className="list-disc list-inside ml-2">
-                                        {stores.map(store => (
-                                            <li key={store.storeCode}>
-                                                {store.storeName} ({store.items.length} items)
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )} */}
 
                 <div className='flex-1 h-full overflow-y-auto py-4'
                     style={{
@@ -721,191 +656,159 @@ const Cart = () => {
                         </div>
                     )}
 
-                    {stores.map((store) => (
-                        <div key={store.storeCode} className="mb-4">
-                            <div className="px-2 mb-2 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <span className={`text-xs font-medium ${hasMultipleStores ? 'text-accent' : 'text-gray-600'}`}>
-                                        {store.storeName}
-                                    </span>
-                                    <span className="text-xs text-gray-500">
-                                        ({store.items.length} item{store.items.length !== 1 ? 's' : ''})
-                                    </span>
-                                </div>
-                                {hasMultipleStores && (
-                                    <button
-                                        onClick={() => clearStoreItems(store.storeCode)}
-                                        className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center gap-1 px-2 py-1 hover:bg-red-50 rounded"
-                                    >
-                                        <Trash2 size={12} />
-                                        Clear Store
-                                    </button>
-                                )}
-                            </div>
+                    <div className="border-t border-gray-100 mt-2">
+                        {enhancedCart.map((item, index) => {
+                            const isOutOfStock = (item.qtyInStore ?? 0) <= 0;
+                            const currentQuantity = singleQuantity(item.id);
+                            const exceedsStock = currentQuantity > (item.qtyInStore ?? 0);
+                            const overQuantity = currentQuantity - (item.qtyInStore ?? 0);
 
-                            <div className={`rounded-lg ${hasMultipleStores ? getStoreColor(store.storeCode) : 'border-gray-200'} border`}>
-                                {store.items.map((item, index) => {
-                                    const isOutOfStock = (item.qtyInStore ?? 0) <= 0;
-                                    const currentQuantity = singleQuantity(item.id);
-                                    const exceedsStock = currentQuantity > (item.qtyInStore ?? 0);
-                                    const overQuantity = currentQuantity - (item.qtyInStore ?? 0);
-
-                                    return (
-                                        <div
-                                            key={`${item.id}-${item.quantity}-${index}`}
-                                            className={`${store.items.length === index + 1 ? 'border-b-0' : 'border-b'} border-gray-200 relative`}
-                                        >
-                                            {(isOutOfStock || exceedsStock) && (
-                                                <div className="absolute inset-0 bg-gray-100 bg-opacity-80 z-10 rounded flex flex-col items-center justify-center gap-2">
-                                                    {isOutOfStock ? (
-                                                        <>
-                                                            <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                                                Out of Stock
-                                                            </div>
-                                                            <div className="text-red-700 text-sm font-medium text-center px-2">
-                                                                {item.name}
-                                                            </div>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                                                Exceeds Stock
-                                                            </div>
-                                                            <div className="text-orange-700 text-sm font-medium text-center px-2">
-                                                                {item.name}
-                                                            </div>
-                                                            <div className="text-orange-600 text-xs text-center px-2">
-                                                                You have {overQuantity} more than available stock
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                    <button
-                                                        onClick={() => removeItem(item.id)}
-                                                        className="flex items-center gap-1 text-red-600 hover:text-red-800 text-xs font-medium transition-colors"
-                                                    >
-                                                        <Trash2 size={14} />
-                                                        Remove from cart
-                                                    </button>
-                                                </div>
+                            return (
+                                <div
+                                    key={`${item.id}-${item.quantity}-${index}`}
+                                    className={`${enhancedCart.length === index + 1 ? 'border-b-0' : 'border-b'} border-gray-200 relative`}
+                                >
+                                    {(isOutOfStock || exceedsStock) && (
+                                        <div className="absolute inset-0 bg-gray-100 bg-opacity-80 z-10 rounded flex flex-col items-center justify-center gap-2">
+                                            {isOutOfStock ? (
+                                                <>
+                                                    <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                                        Out of Stock
+                                                    </div>
+                                                    <div className="text-red-700 text-sm font-medium text-center px-2">
+                                                        {item.name}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <div className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                                        Exceeds Stock
+                                                    </div>
+                                                    <div className="text-orange-700 text-sm font-medium text-center px-2">
+                                                        {item.name}
+                                                    </div>
+                                                    <div className="text-orange-600 text-xs text-center px-2">
+                                                        You have {overQuantity} more than available stock
+                                                    </div>
+                                                </>
                                             )}
-                                            <div className='p-4 flex items-center gap-3'>
-                                                <div className='flex flex-col items-center gap-2'>
-                                                    <button
-                                                        onClick={() => !isOutOfStock && !exceedsStock && increment(item)}
-                                                        disabled={isOutOfStock || exceedsStock || currentQuantity >= (item.qtyInStore ?? 0)}
-                                                        className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${isOutOfStock || exceedsStock || currentQuantity >= (item.qtyInStore ?? 0)
-                                                            ? 'bg-gray-200 cursor-not-allowed opacity-50'
-                                                            : 'bg-[#f3f4f6]'
-                                                            }`}
-                                                    >
-                                                        <Plus size={12} />
-                                                    </button>
-                                                    <span className={`text-sm font-medium ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : ''}`}>
-                                                        {currentQuantity}
-                                                    </span>
-                                                    <button
-                                                        onClick={() => !isOutOfStock && !exceedsStock && decrement(item)}
-                                                        disabled={isOutOfStock || exceedsStock || currentQuantity <= 1}
-                                                        className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${isOutOfStock || exceedsStock || currentQuantity <= 1
-                                                            ? 'bg-gray-200 cursor-not-allowed opacity-50'
-                                                            : 'bg-[#f3f4f6]'
-                                                            }`}
-                                                    >
-                                                        <Minus size={12} />
-                                                    </button>
-                                                </div>
+                                            <button
+                                                onClick={() => removeItem(item.id)}
+                                                className="flex items-center gap-1 text-red-600 hover:text-red-800 text-xs font-medium transition-colors"
+                                            >
+                                                <Trash2 size={14} />
+                                                Remove from cart
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className='p-4 flex items-center gap-3'>
+                                        <div className='flex flex-col items-center gap-2'>
+                                            <button
+                                                onClick={() => !isOutOfStock && !exceedsStock && increment(item)}
+                                                disabled={isOutOfStock || exceedsStock || currentQuantity >= (item.qtyInStore ?? 0)}
+                                                className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${isOutOfStock || exceedsStock || currentQuantity >= (item.qtyInStore ?? 0)
+                                                    ? 'bg-gray-200 cursor-not-allowed opacity-50'
+                                                    : 'bg-[#f3f4f6]'
+                                                    }`}
+                                            >
+                                                <Plus size={12} />
+                                            </button>
+                                            <span className={`text-sm font-medium ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : ''}`}>
+                                                {currentQuantity}
+                                            </span>
+                                            <button
+                                                onClick={() => !isOutOfStock && !exceedsStock && decrement(item)}
+                                                disabled={isOutOfStock || exceedsStock || currentQuantity <= 1}
+                                                className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${isOutOfStock || exceedsStock || currentQuantity <= 1
+                                                    ? 'bg-gray-200 cursor-not-allowed opacity-50'
+                                                    : 'bg-[#f3f4f6]'
+                                                    }`}
+                                            >
+                                                <Minus size={12} />
+                                            </button>
+                                        </div>
 
-                                                <div className={`w-12 h-12 rounded flex items-center justify-center flex-shrink-0 ${(isOutOfStock || exceedsStock) ? 'bg-gray-100' : 'bg-gray-100'
+                                        <div className={`w-12 h-12 rounded flex items-center justify-center flex-shrink-0 ${(isOutOfStock || exceedsStock) ? 'bg-gray-100' : 'bg-gray-100'
+                                            }`}>
+                                            {item.picture ? (
+                                                <img
+                                                    src={item.picture}
+                                                    alt={item.name}
+                                                    className='w-full h-full object-cover rounded'
+                                                />
+                                            ) : (
+                                                <div className='w-8 h-8 bg-gray-300 rounded'></div>
+                                            )}
+                                        </div>
+
+                                        <div className='flex-1 min-w-0'>
+                                            <div className='flex items-center gap-3'>
+                                                <h3 className={`font-medium text-sm truncate ${(isOutOfStock || exceedsStock) ? 'text-gray-600' : 'text-gray-900'
                                                     }`}>
-                                                    {item.picture ? (
-                                                        <img
-                                                            src={item.picture}
-                                                            alt={item.name}
-                                                            className='w-full h-full object-cover rounded'
-                                                        />
-                                                    ) : (
-                                                        <div className='w-8 h-8 bg-gray-300 rounded'></div>
+                                                    {item.name}
+                                                </h3>
+                                            </div>
+                                            <div className='flex flex-col space-y-1 mt-1'>
+                                                <span className={`font-medium text-sm ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : 'text-accent'
+                                                    }`}>
+                                                    {formatPrice(item.salePrice, item?.ccy as CurrencyCode)}
+                                                </span>
+                                                <span className={`text-xs ${(isOutOfStock || exceedsStock) ? 'text-gray-400' : 'text-gray-500'
+                                                    }`}>
+                                                    1 X {item.quantity} pcs
+                                                </span>
+                                                {exceedsStock && !isOutOfStock && (
+                                                    <div className="flex items-center gap-1 mt-1">
+                                                        <AlertCircle className="w-3 h-3 text-orange-500" />
+                                                        <span className="text-xs text-orange-600">
+                                                            Stock: {item.qtyInStore} units available
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className='flex flex-col items-end gap-2'>
+                                            <button
+                                                onClick={() => removeItem(item.id)}
+                                                className={`hover:text-gray-600 ${(isOutOfStock || exceedsStock) ? 'text-gray-400' : 'text-gray-400'
+                                                    }`}
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                            <div className='flex flex-col items-end'>
+                                                <span className={`font-semibold text-sm ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : ''
+                                                    }`}>
+                                                    {formatPrice(item.subTotal, item?.ccy as CurrencyCode)}
+                                                </span>
+                                                {item.oldPrice && item.oldPrice > item.salePrice && !isOutOfStock && !exceedsStock && (
+                                                    <span className='text-xs text-gray-500 line-through'>
+                                                        {formatPrice(item.oldPrice * item.quantity, item?.ccy as CurrencyCode)}
+                                                    </span>
+                                                )}
+                                                <div className='flex justify-between items-center gap-2'>
+                                                    {(Number(item?.discount ?? 0) > 0) && !isOutOfStock && !exceedsStock && (
+                                                        <>
+                                                            <div className="text-accent text-xs font-semibold inline-block">
+                                                                {Number(item?.discount ?? 0)}% off {(item.quantity > 1) && (
+                                                                    <span>each</span>
+                                                                )}
+                                                            </div><span>•</span>
+                                                        </>
                                                     )}
-                                                </div>
-
-                                                <div className='flex-1 min-w-0'>
-                                                    <div className='flex items-center gap-3'>
-                                                        <h3 className={`font-medium text-sm truncate ${(isOutOfStock || exceedsStock) ? 'text-gray-600' : 'text-gray-900'
-                                                            }`}>
-                                                            {item.name}
-                                                        </h3>
-                                                    </div>
-                                                    <div className='flex flex-col space-y-1 mt-1'>
-                                                        <span className={`font-medium text-sm ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : 'text-accent'
-                                                            }`}>
-                                                            {formatPrice(item.salePrice, item?.ccy as CurrencyCode)}
+                                                    {item.oldPrice && item.oldPrice > item.salePrice && !isOutOfStock && !exceedsStock && (
+                                                        <span className='text-xs text-green-600'>
+                                                            Saved: {formatPrice((item.oldPrice * item.quantity) - item.subTotal, item?.ccy as CurrencyCode)}
                                                         </span>
-                                                        <span className={`text-xs ${(isOutOfStock || exceedsStock) ? 'text-gray-400' : 'text-gray-500'
-                                                            }`}>
-                                                            1 X {item.quantity} pcs
-                                                        </span>
-                                                        {exceedsStock && !isOutOfStock && (
-                                                            <div className="flex items-center gap-1 mt-1">
-                                                                <AlertCircle className="w-3 h-3 text-orange-500" />
-                                                                <span className="text-xs text-orange-600">
-                                                                    Stock: {item.qtyInStore} units available
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                <div className='flex flex-col items-end gap-2'>
-                                                    <button
-                                                        onClick={() => removeItem(item.id)}
-                                                        className={`hover:text-gray-600 ${(isOutOfStock || exceedsStock) ? 'text-gray-400' : 'text-gray-400'
-                                                            }`}
-                                                    >
-                                                        <X size={16} />
-                                                    </button>
-                                                    <div className='flex flex-col items-end'>
-                                                        <span className={`font-semibold text-sm ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : ''
-                                                            }`}>
-                                                            {formatPrice(item.subTotal, item?.ccy as CurrencyCode)}
-                                                        </span>
-                                                        {item.oldPrice && item.oldPrice > item.salePrice && !isOutOfStock && !exceedsStock && (
-                                                            <span className='text-xs text-gray-500 line-through'>
-                                                                {formatPrice(item.oldPrice * item.quantity, item?.ccy as CurrencyCode)}
-                                                            </span>
-                                                        )}
-                                                        <div className='flex justify-between items-center gap-2'>
-                                                            {(Number(item?.discount ?? 0) > 0) && !isOutOfStock && !exceedsStock && (
-                                                                <>
-                                                                    <div className="text-accent text-xs font-semibold inline-block">
-                                                                        {Number(item?.discount ?? 0)}% off {(item.quantity > 1) && (
-                                                                            <span>each</span>
-                                                                        )}
-                                                                    </div><span>•</span>
-                                                                </>
-                                                            )}
-                                                            {item.oldPrice && item.oldPrice > item.salePrice && !isOutOfStock && !exceedsStock && (
-                                                                <span className='text-xs text-green-600'>
-                                                                    Saved: {formatPrice((item.oldPrice * item.quantity) - item.subTotal, item?.ccy as CurrencyCode)}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </div>
-
-                            {hasMultipleStores && (
-                                <div className="text-right px-2 mt-1">
-                                    <span className="text-xs text-gray-600">
-                                        Store Total: {formatPrice(store.total, ccy as CurrencyCode)}
-                                    </span>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    ))}
+                            );
+                        })}
+                    </div>
                 </div>
 
                 <SheetFooter>
