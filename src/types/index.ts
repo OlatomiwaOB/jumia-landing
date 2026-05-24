@@ -27,6 +27,7 @@ export interface ProductProps {
   storeCode?: string | null;
   storeName?: string | null;
   storeLocationCity?: string | null;
+  imageClass?: string;
 }
 
 export interface Category {

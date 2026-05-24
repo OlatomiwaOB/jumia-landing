@@ -11,6 +11,10 @@ import FortitudeCategoryContent from '../../../../themes/fortitude/components/sh
 import VogueLayout from '../../../../themes/vogue/layout'
 import VogueCategoryContent from '../../../../themes/vogue/components/shop/vogue-category-content'
 
+// Traditional Taste Theme Imports
+import TraditionalTasteLayout from '../../../../themes/traditional-taste/layout'
+import TraditionalTasteCategoryContent from '../../../../themes/traditional-taste/components/shop/depot-category-content'
+
 const CategoryPage = () => {
     const storefront = process.env.NEXT_PUBLIC_STORE_FRONT;
     const isDepot = storefront === 'depot';
@@ -32,6 +36,16 @@ const CategoryPage = () => {
                     <VogueCategoryContent />
                 </Suspense>
             </VogueLayout>
+        )
+    }
+
+    if (storefront === 'traditional-taste') {
+        return (
+            <TraditionalTasteLayout>
+                <Suspense fallback={<div className="min-h-screen bg-white" />}>
+                    <TraditionalTasteCategoryContent />
+                </Suspense>
+            </TraditionalTasteLayout>
         )
     }
 

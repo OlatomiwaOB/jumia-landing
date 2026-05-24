@@ -34,6 +34,14 @@ const storefrontConfigs = {
       description: 'Premium fashion and wearables.',
     }
   },
+  'traditional-taste': {
+    name: 'Traditional Taste',
+    favicon: '/favicons/fortitude.ico',
+    metadata: {
+      title: 'Traditional Taste | Home',
+      description: 'Traditional Taste Home',
+    }
+  },
 };
 
 function getCurrentStorefront() {

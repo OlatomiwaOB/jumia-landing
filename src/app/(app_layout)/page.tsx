@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 const HomePageDepot = lazy(() => import('../../../themes/depot/homepage'))
 const HomePageFortitude = lazy(() => import('../../../themes/fortitude/homepage'))
 const HomePageVogue = lazy(() => import('../../../themes/vogue/homepage'))
+const HomePageTraditionalTaste = lazy(() => import('../../../themes/traditional-taste/homepage'))
 
 const HomePage = () => {
   const storefront = process?.env?.NEXT_PUBLIC_STORE_FRONT;
@@ -32,6 +33,10 @@ const HomePage = () => {
 
   if (storefront === 'vogue') {
     return <Suspense fallback={<Loader text='Loading...' />}><HomePageVogue /></Suspense>
+  }
+
+  if (storefront === 'traditional-taste') {
+    return <Suspense fallback={<Loader text='Loading...' />}><HomePageTraditionalTaste /></Suspense>
   }
 
   return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>
