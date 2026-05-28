@@ -1,9 +1,10 @@
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import React from 'react'
-import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+import { Control, FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
 import { FormData } from '../SignUpForm'
 import { TermsAndConditions } from '@/components/Customer/onboarding/terms-and-conditions'
+import { Label } from '@/components/ui/label'
 
 // Static array of major countries with their codes
 const countries = [
@@ -57,25 +58,34 @@ const countries = [
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 type Props = {
-    register: UseFormRegister<FormData>,
-    errors: FieldErrors<FormData>,
-    watchedValues: FormData,
-    setValue: UseFormSetValue<FormData>
+  register: UseFormRegister<FormData>,
+  errors: FieldErrors<FormData>,
+  watchedValues: FormData,
+  setValue: UseFormSetValue<FormData>
+  control: Control<FormData>
 }
 
-const LocationDetails = ({errors, register, setValue, watchedValues}: Props) => {
-  return (
-    <><div className="space-y-4">
+const LocationDetails = ({ errors, register, setValue, watchedValues, control }: Props) => {
+  const isFormValid = () => {
+    return (
+      watchedValues.country &&
+      watchedValues.state &&
+      watchedValues.city &&
+      watchedValues.address
+    );
+  }
 
+  return (
+    <div className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="country" className="text-sm font-medium text-gray-700">
-          Country
-        </label>
+        <Label htmlFor="country">
+          Country <span className="text-red-500">*</span>
+        </Label>
         <Select
           value={watchedValues.country}
           onValueChange={(value) => setValue("country", value, { shouldValidate: true })}
         >
-          <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <SelectTrigger>
             <SelectValue placeholder="Select your country" />
           </SelectTrigger>
           <SelectContent>
@@ -90,43 +100,47 @@ const LocationDetails = ({errors, register, setValue, watchedValues}: Props) => 
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="state" className="text-sm font-medium text-gray-700">
-          State/Province
-        </label>
+        <Label htmlFor="state">
+          State/Province <span className="text-red-500">*</span>
+        </Label>
         <Input
           id="state"
           {...register("state", { required: "State/Province is required" })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your state or province" />
+          placeholder="Enter your state or province"
+        />
         {errors.state && <p className="text-red-500 text-xs">{errors.state.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="city" className="text-sm font-medium text-gray-700">
-          City
-        </label>
+        <Label htmlFor="city">
+          City <span className="text-red-500">*</span>
+        </Label>
         <Input
           id="city"
           {...register("city", { required: "City is required" })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your city" />
+          placeholder="Enter your city"
+        />
         {errors.city && <p className="text-red-500 text-xs">{errors.city.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="address" className="text-sm font-medium text-gray-700">
-          Address
-        </label>
+        <Label htmlFor="address">
+          Address <span className="text-red-500">*</span>
+        </Label>
         <Input
           id="address"
           {...register("address", { required: "Address is required" })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your business address" />
+          placeholder="Enter your business address"
+        />
         {errors.address && <p className="text-red-500 text-xs">{errors.address.message}</p>}
       </div>
+
+      {isFormValid() && (
+        <div className="space-y-2 border-t border-gray-200">
+          <TermsAndConditions register={register} errors={errors} control={control} />
+        </div>
+      )}
     </div>
-    <TermsAndConditions register={register} errors={errors} />
-    </>
   );
 };
 

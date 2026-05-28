@@ -1,7 +1,11 @@
+'use client'
+
 import { usePermission } from "@/hooks/usePermissionBusiness";
 import KYCDocumentsPageContent from "./pageContent"
+import { usePageMetadata } from "@/hooks/usePageMetadata";
 
 const KYCDocumentsPage = () => {
+    usePageMetadata("KYC DOCUMENTS", "Upload and manage your identity verification documents")
     const { usePermissionGuard } = usePermission();
 
     usePermissionGuard('VIEW_KYC', {

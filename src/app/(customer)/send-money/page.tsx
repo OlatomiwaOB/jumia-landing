@@ -1,39 +1,19 @@
+'use client'
 import { TransferForm } from '@/components/Customer/send-money/send-money-from'
+import { usePageMetadata } from '@/hooks/usePageMetadata';
 import React from 'react'
-import { AlertCircle } from 'lucide-react';
 
 const SendMoneyPage = () => {
+  usePageMetadata('Send Money', 'View and manage financial transactions');
   const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';
 
   if (!isH2P) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="bg-accent/10 rounded-full p-4">
-              <AlertCircle className="w-8 h-8 text-accent/60" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Send Money
-          </h1>
-
-          <p className="text-gray-600 mb-6">
-            This feature is coming soon. We're working hard to bring you a seamless way to send money securely.
-          </p>
-
-          <div className="space-y-3">
-            <p className="text-sm text-gray-500">
-              ✓ Quick transfers<br />
-              ✓ Secure transactions<br />
-              ✓ Multiple currencies
-            </p>
-          </div>
-
-          <p className="text-xs text-gray-400 mt-8">
-            Stay tuned for updates
-          </p>
-        </div>
+      <div className="flex flex-col items-center justify-center py-16 mt-20 gap-3">
+        <p className="text-2xl font-medium text-dark-gray">Coming Soon</p>
+        <p className="text-sm text-medium-gray text-center max-w-[300px]">
+          We're working hard to bring you a seamless way to send money securely. Quick transfers, secure transactions, multiple currencies
+        </p>
       </div>
     );
   }

@@ -3,6 +3,7 @@ import { FieldErrors, UseFormRegister, UseFormWatch } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { FormData } from '../SignUpForm'
 import { Eye, EyeOff } from 'lucide-react'
+import { Label } from '@/components/ui/label'
 
 type Props = {
     errors: FieldErrors<FormData>,
@@ -69,7 +70,7 @@ const PasswordStrengthIndicator: React.FC<{ password: string }> = ({ password })
 
     return (
         <div className="mt-1 space-y-1">
-            <div className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 text-xs">
                 <span className="text-muted-foreground">Strength:</span>
                 <span className={`font-medium ${getStrengthTextColor()}`}>
                     {getStrengthText()}
@@ -110,9 +111,9 @@ const PasswordDetails = ({ errors, register, watch }: Props) => {
     return (
         <div className="space-y-4">
             <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="password">
                     Password <span className="text-red-500">*</span>
-                </label>
+                </Label>
                 <div className="relative">
                     <Input
                         id="password"
@@ -131,12 +132,11 @@ const PasswordDetails = ({ errors, register, watch }: Props) => {
                                 }
                             }
                         })}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter your password"
+                        placeholder="Enter password"
                     />
                     <button
                         type="button"
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-gray-700 focus:outline-none"
                         onClick={togglePasswordVisibility}
                     >
                         {showPassword ? (
@@ -146,17 +146,15 @@ const PasswordDetails = ({ errors, register, watch }: Props) => {
                         )}
                     </button>
                 </div>
-                {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-
                 {passwordValue && (
                     <PasswordStrengthIndicator password={passwordValue} />
                 )}
             </div>
 
             <div className="space-y-2">
-                <label htmlFor="cPassword" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="cPassword">
                     Confirm Password <span className="text-red-500">*</span>
-                </label>
+                </Label>
                 <div className="relative">
                     <Input
                         id="cPassword"
@@ -166,12 +164,11 @@ const PasswordDetails = ({ errors, register, watch }: Props) => {
                             validate: (value) =>
                                 value === watch("password") || "Password does not match",
                         })}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Confirm your password"
+                        placeholder="Confirm password"
                     />
                     <button
                         type="button"
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-gray-700 focus:outline-none"
                         onClick={toggleConfirmPasswordVisibility}
                     >
                         {showConfirmPassword ? (
@@ -184,13 +181,13 @@ const PasswordDetails = ({ errors, register, watch }: Props) => {
                 {errors.cPassword && <p className="text-red-500 text-xs">{errors.cPassword.message}</p>}
             </div>
 
-            <div className="rounded-lg bg-blue-50 p-3 border border-blue-200">
-                <h4 className="text-sm font-medium text-blue-800 mb-2">Password Requirements:</h4>
-                <ul className="text-xs text-blue-700 space-y-1">
+            <div className="bg-faded-accent/5 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-dark-gray mb-2">Password Requirements:</h4>
+                <ul className="text-xs font-normal text-medium-gray space-y-1">
                     <li>• At least 8 characters long</li>
-                    <li>• Include uppercase and lowercase letters</li>
-                    <li>• Include numbers</li>
-                    <li>• Include special characters (!@#$%^&* etc.)</li>
+                    <li>• May include uppercase and lowercase letters</li>
+                    <li>• May include numbers</li>
+                    <li>• May include special characters (!@#$%^&* etc.)</li>
                 </ul>
             </div>
         </div>

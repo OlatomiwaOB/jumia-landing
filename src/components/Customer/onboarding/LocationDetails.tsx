@@ -1,11 +1,11 @@
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import React from 'react'
-import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+import { Control, FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
 import { FormData } from '../SignUpForm'
 import { TermsAndConditions } from '@/components/Customer/onboarding/terms-and-conditions'
+import { Label } from '@/components/ui/label'
 
-// Static array of nationalities with their codes and phone codes
 const nationalities = [
   // { nationality: "Afghan", code: "AF", phoneCode: "+93" },
   // { nationality: "Argentine", code: "AR", phoneCode: "+54" },
@@ -61,10 +61,10 @@ type Props = {
   errors: FieldErrors<FormData>,
   watchedValues: FormData,
   setValue: UseFormSetValue<FormData>
+  control: Control<FormData>
 }
 
-const LocationDetails = ({ errors, register, setValue, watchedValues }: Props) => {
-  // Helper function to get the display value for the select
+const LocationDetails = ({ errors, register, setValue, watchedValues, control }: Props) => {
   const getSelectedNationalityDisplay = () => {
     if (!watchedValues.nationality) return "";
 
@@ -76,48 +76,72 @@ const LocationDetails = ({ errors, register, setValue, watchedValues }: Props) =
     }
   };
 
+  const isFormValid = () => {
+    return (
+      watchedValues.nationality &&
+      watchedValues.city &&
+      watchedValues.address
+    );
+  }
+
   return (
-    <><div className="space-y-4">
-      <div className="space-y-2">
-        <label htmlFor="nationality" className="text-sm font-medium text-gray-700">
-          Nationality <span className="text-red-500">*</span>
-        </label>
-        <Select
-          value={watchedValues.nationality}
-          onValueChange={(value) => setValue("nationality", value, { shouldValidate: true })}
-        >
-          <SelectTrigger className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <SelectValue placeholder="Select your nationality">
-              {getSelectedNationalityDisplay()}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {nationalities.map((item) => (
-              <SelectItem
-                key={item.code}
-                value={JSON.stringify(item)} // Store the entire object as JSON string
-              >
-                {item.nationality} ({item.phoneCode})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.nationality && <p className="text-red-500 text-xs">{errors.nationality.message}</p>}
+    <>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="nationality">
+            Nationality <span className="text-red-500">*</span>
+          </Label>
+          <Select
+            value={watchedValues.nationality}
+            onValueChange={(value) => setValue("nationality", value, { shouldValidate: true })}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select nationality">
+                {getSelectedNationalityDisplay()}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {nationalities.map((item) => (
+                <SelectItem
+                  key={item.code}
+                  value={JSON.stringify(item)}
+                >
+                  {item.nationality} ({item.phoneCode})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.nationality && <p className="text-red-500 text-xs">{errors.nationality.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="address">
+            Home Address <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="address"
+            {...register("address", { required: "Address is required" })}
+            placeholder="Enter address" />
+          {errors.address && <p className="text-red-500 text-xs">{errors.address.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city">
+            City <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="city"
+            {...register("city", { required: "City is required" })}
+            placeholder="Enter city" />
+          {errors.city && <p className="text-red-500 text-xs">{errors.city.message}</p>}
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="city" className="text-sm font-medium text-gray-700">
-          City <span className="text-red-500">*</span>
-        </label>
-        <Input
-          id="city"
-          {...register("city", { required: "City is required" })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Enter your city" />
-        {errors.city && <p className="text-red-500 text-xs">{errors.city.message}</p>}
-      </div>
-    </div>
-    <TermsAndConditions register={register} errors={errors} />
+      {isFormValid() && (
+        <div className="space-y-2 border-t border-gray-200">
+          <TermsAndConditions register={register} errors={errors} control={control} />
+        </div>
+      )}
     </>
   );
 };

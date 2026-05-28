@@ -1,30 +1,92 @@
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ArrowLeft, CheckCircle } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useMutation } from "@tanstack/react-query"
 import axiosCustomer from "@/utils/fetch-function-no-auth"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation"
+import { Label } from "../ui/label"
+import { PinInput } from "../ui/pin-input"
 
 interface OtpVerificationProps {
   onBack: () => void
   isLoading?: boolean
   email?: string
   phoneNumber?: string
+  onSuccess?: () => void
+  autoResendOtp?: boolean
 }
+
+const useAutoResendOtp = (email: string | undefined, shouldAutoResend: boolean) => {
+  const didResend = useRef(false);
+
+  const mutation = useMutation({
+    mutationFn: () => axiosCustomer.request({
+      url: '/usermanager/resendotp',
+      method: 'GET',
+      params: {
+        username: email || '',
+        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+      },
+    }),
+    onSuccess: (data) => {
+      if (data?.data?.code !== '000') {
+        toast.error(data?.data?.desc || 'Failed to resend OTP')
+        return
+      }
+      toast.success(data?.data?.desc || 'OTP sent successfully')
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.desc || "Failed to resend OTP")
+    }
+  });
+
+  useEffect(() => {
+    if (shouldAutoResend && email && !didResend.current) {
+      didResend.current = true;
+      mutation.mutate();
+    }
+  }, [shouldAutoResend, email]);
+
+  return mutation;
+};
 
 export function OtpVerification({
   onBack,
   isLoading = false,
   email,
-  phoneNumber
+  phoneNumber,
+  onSuccess,
+  autoResendOtp = false
 }: OtpVerificationProps) {
-  const [otp, setOtp] = useState(["", "", "", ""])
+  const [otp, setOtp] = useState("")
   const [isResending, setIsResending] = useState(false)
   const [countdown, setCountdown] = useState(30)
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const router = useRouter()
+
+  useAutoResendOtp(email, autoResendOtp);
+
+  const resendOTPMutation = useMutation({
+    mutationFn: () => axiosCustomer.request({
+      url: '/usermanager/resendotp',
+      method: 'GET',
+      params: {
+        username: email || '',
+        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+      },
+    }),
+    onSuccess: (data) => {
+      setIsResending(false)
+      if (data?.data?.code !== '000') {
+        toast.error(data?.data?.desc || 'Failed to resend OTP')
+        return
+      }
+      toast.success(data?.data?.desc || 'OTP sent successfully')
+      setCountdown(30)
+    },
+    onError: (error: any) => {
+      setIsResending(false)
+      toast.error(error.response?.data?.desc || "Failed to resend OTP")
+    }
+  })
 
   useEffect(() => {
     if (countdown > 0) {
@@ -44,13 +106,10 @@ export function OtpVerification({
         toast.error(data?.data?.desc)
         return
       }
-      toast?.success(data?.data?.desc)
-      setTimeout(() => {
-        router?.push(`/customer-login`)
-      }, 5000)
+      onSuccess?.()
+      toast?.success('OTP verified successfully!')
     },
     onError: (error) => {
-      // console.log(error);
       toast.error('Something went wrong!')
     }
   })
@@ -58,92 +117,31 @@ export function OtpVerification({
   const onVerify = () => {
     const payload = {
       email,
-      otp: otp.join('')
+      otp: otp
     }
-
     mutate(payload)
   }
-
-  const handleChange = (element: HTMLInputElement, index: number) => {
-    if (isNaN(Number(element.value))) return false
-
-    const newOtp = [...otp]
-    newOtp[index] = element.value
-    setOtp(newOtp)
-
-    // Focus next input
-    if (element.value && index < 5) {
-      inputRefs.current[index + 1]?.focus()
-    }
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus()
-    }
-  }
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault()
-    const pastedData = e.clipboardData.getData("text/plain").slice(0, 4)
-
-    if (/^\d+$/.test(pastedData)) {
-      const newOtp = Array.from(pastedData.padEnd(4, "")).slice(0, 4)
-      setOtp(newOtp)
-
-      // Focus the next empty input or the last one
-      const nextEmptyIndex = newOtp.findIndex(digit => digit === "")
-      const focusIndex = nextEmptyIndex === -1 ? 5 : nextEmptyIndex
-      inputRefs.current[focusIndex]?.focus()
-    }
-  }
-
-  const resendOTPMutation = useMutation({
-    mutationFn: () => axiosCustomer.request({
-      url: '/usermanager/resendotp',
-      method: 'GET',
-      params: {
-        username: email || '',
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
-        action: 'RESEND_OTP'
-      },
-    }),
-    onSuccess: (data) => {
-      setIsResending(false)
-      if (data?.data?.code !== '000') {
-        toast.error(data?.data?.desc || 'Failed to resend OTP')
-        return
-      }
-      toast.success(data?.data?.desc || 'OTP sent successfully')
-      setCountdown(30)
-    },
-    onError: (error: any) => {
-      setIsResending(false)
-      toast.error(error.response?.data?.desc || "Failed to resend OTP")
-    }
-  })
 
   const handleResendOtp = async () => {
     if (!email) {
       toast.error("Email not available")
       return
     }
-
     setIsResending(true)
     resendOTPMutation.mutate()
   }
 
-  const isOtpComplete = otp.every(digit => digit !== "")
+  const isOtpComplete = otp.length === 4
 
   return (
-    <div className="w-full max-w-md space-y-6">
+    <div className="w-full max-w-md space-y-6 p-5 bg-white rounded-lg justify-self-center mt-20">
       <div className="space-y-2">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">VERIFY OTP</h1>
+        <div className="">
+          <h1 className="text-lg text-center sm:text-xl font-medium text-dark-gray">Verify OTP</h1>
         </div>
-        <p className="text-gray-600 text-sm leading-relaxed ml-11">
-          We've sent a 4-digit verification code to {""}
-          <span className="font-medium text-gray-900">
+        <p className="text-medium-gray text-center text-xs leading-relaxed">
+          We've sent a 4-digit verification code to {""} <br />
+          <span className="font-medium text-faded-accent">
             {email && (() => {
               const [username, domain] = email.split('@');
               return `${username[0]}***@${domain}`;
@@ -154,69 +152,59 @@ export function OtpVerification({
       </div>
 
       <div className="space-y-6">
-        <div className="flex justify-center">
-          <CheckCircle className="w-16 h-16 text-green-500" />
-        </div>
-
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-center text-gray-700">
-            Enter verification code
-          </label>
+          <Label className="text-center block">
+            Enter Verification Code
+          </Label>
 
-          <div className="flex justify-center space-x-3">
-            {otp.map((digit, index) => (
-              <Input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el) as any}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(e.target, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                onPaste={handlePaste}
-                className="w-12 h-12 text-center text-lg font-semibold border-2 focus:border-accent/60 focus:ring-0"
-                disabled={isLoading}
-              />
-            ))}
+          <PinInput
+            value={otp}
+            onChange={setOtp}
+            disabled={isLoading}
+            className="justify-center text-dark-gray"
+            inputClassName="w-12 h-12 text-lg font-semibold bg-accent/10 border-accent focus:border-accent focus:ring-accent"
+            autoFocus
+          />
+
+          <div className="text-xs flex items-center justify-center gap-2">
+            <p className="text-medium-gray">
+              Didn't get a code?
+            </p>
+
+            <div>
+              {countdown > 0 ? (
+                <p className="text-faded-accent">
+                  Resend in {countdown}s
+                </p>
+              ) : (
+                <button
+                  onClick={handleResendOtp}
+                  disabled={isResending}
+                  className="text-xs flex items-center text-faded-accent hover:text-accent/70 font-medium disabled:opacity-50"
+                >
+                  {isResending ? (
+                    <>
+                      Sending...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    </>
+                  ) : (
+                    "Click to Resend"
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="mt-10">
           <Button
             onClick={onVerify}
             disabled={!isOtpComplete || isPending}
-            className="w-full bg-accent/60 hover:bg-accent/70 text-white py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full"
           >
-            {isPending ? "Verifying..." : "Verify Code"}
+            {isPending ? "Verifying..." : "Verify"}
           </Button>
-
-          <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">
-              Didn't receive the code?
-            </p>
-
-            {countdown > 0 ? (
-              <p className="text-sm text-gray-500">
-                Resend in {countdown}s
-              </p>
-            ) : (
-              <button
-                onClick={handleResendOtp}
-                disabled={isResending}
-                className="text-sm text-accent/60 hover:text-accent/70 font-medium disabled:opacity-50"
-              >
-                {isResending ? "Sending..." : "Resend Code"}
-              </button>
-            )}
-          </div>
         </div>
-      </div>
-
-      <div className="text-center">
-        <span className="text-sm text-gray-600">
-          Enter the 4-digit code to complete verification
-        </span>
       </div>
     </div>
   )

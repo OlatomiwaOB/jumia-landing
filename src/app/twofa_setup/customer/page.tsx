@@ -31,7 +31,7 @@ const TwoFaSetupPage = () => {
     }
     },[])
   return (
-    <PrivateRoute requiredPermissions={[CUSTOMER]}>
+    // <PrivateRoute requiredPermissions={[CUSTOMER]}>
         <div className='min-h-screen flex items-center justify-center'>
             <Card className='w-[min(100%,500px)]'>
                 <CardHeader>
@@ -58,7 +58,7 @@ const TwoFaSetupPage = () => {
                 </CardContent>
             </Card>
         </div>
-    </PrivateRoute>
+    // </PrivateRoute>
   )
 }
 

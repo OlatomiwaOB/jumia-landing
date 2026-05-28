@@ -2,46 +2,38 @@
 
 import { DashboardHeader } from '@/components/Operations/dashboard-header'
 import { DashboardSidebar } from '@/components/Operations/dashboard-sidebar'
-import { OPERATIONS } from '@/utils/constants'
+import { OPERATIONS, REVENUE_ASSURANCE } from '@/utils/constants'
 import PrivateRoute from '@/utils/private-route-operations'
 import React, { ReactNode } from 'react'
 import TwoFaWrapper from '../TwoFaWrapperOperations'
+import { PageProvider } from '@/hooks/metadata-context'
 
 interface OperationsDashboardLayoutProps {
   children: ReactNode
-  showSidebar?: boolean
-  headerTitle?: string
 }
 
-const OperationsDashboardLayout = ({ 
-  children, 
-  showSidebar = true,
-  headerTitle 
+const OperationsDashboardLayout = ({
+  children,
 }: OperationsDashboardLayoutProps) => {
   return (
-    <PrivateRoute requiredPermissions={[OPERATIONS]}>
-      <TwoFaWrapper>
-        <div className="min-h-screen bg-background">
-          <div className="lg:grid lg:grid-cols-[1fr_5.5fr]">
-            {/* Sidebar - hidden on mobile, sticky on desktop */}
-            {showSidebar && (
+    <PrivateRoute requiredPermissions={[OPERATIONS, REVENUE_ASSURANCE]}>
+      <PageProvider>
+        <TwoFaWrapper>
+          <div className="min-h-screen bg-[#F5F5F5]">
+            <div className="lg:grid lg:grid-cols-[1fr_5.5fr]">
               <div className="hidden lg:sticky lg:bottom-0 lg:block lg:left-0 lg:top-0 lg:h-screen max-w-[300px]">
                 <DashboardSidebar />
               </div>
-            )}
-            
-            {/* Main Content */}
-            <div className="w-full overflow-x-auto h-full">
-              <DashboardHeader />
-              
-              {/* Dashboard Content */}
-              <main className={`p-4 lg:p-6 space-y-4 lg:space-y-6 ${!showSidebar ? 'lg:col-span-full' : ''}`}>
-                {children}
-              </main>
+              <div className="w-full overflow-x-auto h-full">
+                <DashboardHeader />
+                <main className='px-2 lg:px-4 py-2 lg:py-4'>
+                  {children}
+                </main>
+              </div>
             </div>
           </div>
-        </div>
-      </TwoFaWrapper>
+        </TwoFaWrapper>
+      </PageProvider>
     </PrivateRoute>
   )
 }

@@ -1,164 +1,150 @@
 'use client'
-import React, { useState } from 'react'
-import TransactionsFilter from './transactions-filter'
-import { useQuery } from '@tanstack/react-query'
-import axiosCustomer from '@/utils/fetch-function-customer'
-import TransactionsList from './transactions-list'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import axiosCustomer from '@/utils/fetch-function-customer';
 import Papa from 'papaparse';
-import { Button } from '@/components/ui/button'
-import { Download } from 'lucide-react'
+import TransactionsFilter, { TransactionFilterState } from './transactions-filter';
+import TransactionsList, { Transaction } from './transactions-list';
 
-interface FilterState {
-  searchTerm: string;
-  status: string;
-  startDate: string;
-  endDate: string;
-}
+const ddmmyyyyToDate = (ddmmyyyy: string): Date | null => {
+  if (!ddmmyyyy) return null;
+  const datePart = ddmmyyyy.split(' ')[0];
+  const separator = datePart.includes('/') ? '/' : '-';
+  const [dd, mm, yyyy] = datePart.split(separator);
 
-interface Transaction {
-  date: string;
-  amount: number;
-  currency: string | null;
-  status: string;
-  fromAddress: string;
-  name: string;
-  tranRefNo: string;
-  externalRefNo: string;
-}
+  if (!dd || !mm || !yyyy) return null;
+  const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+const ddmmyyyyToISO = (ddmmyyyy: string): string => {
+  if (!ddmmyyyy) return '';
+
+  const datePart = ddmmyyyy.split(' ')[0];
+  const separator = datePart.includes('/') ? '/' : '-';
+  const [dd, mm, yyyy] = datePart.split(separator);
+
+  if (!dd || !mm || !yyyy) return '';
+  return `${dd}-${mm}-${yyyy}`;
+};
 
 const exportToCSV = (transactions: Transaction[]) => {
-  if (!transactions || transactions.length === 0) {
-    alert('No data to export');
-    return;
-  }
-
-  const csvData = transactions.map(transaction => ({
-    'Reference No': transaction.tranRefNo,
-    'Date': transaction.date,
-    'Customer Name': transaction.name,
-    'Amount': transaction.amount,
-    'Currency': transaction.currency || 'N/A',
-    'Status': transaction.status,
-    // 'From Address': transaction.fromAddress || 'N/A',
-    'External Reference': transaction.externalRefNo || 'N/A'
-  }));
-
-  const csv = Papa.unparse(csvData);
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  if (!transactions?.length) { alert('No data to export'); return; }
+  const csv = Papa.unparse(
+    transactions.map((t) => ({
+      'Reference No': t.tranRefNo,
+      'Date': t.date,
+      'Customer Name': t.name,
+      'Amount': t.amount,
+      'Currency': t.currency || 'N/A',
+      'Status': t.status,
+      'External Ref': t.externalRefNo || 'N/A',
+    }))
+  );
   const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-
-  link.setAttribute('href', url);
-  link.setAttribute('download', `transactions-${new Date().toISOString().split('T')[0]}.csv`);
+  link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+  link.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
   link.style.visibility = 'hidden';
-
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
 
-const TransactionsManager = () => {
-  const [filters, setFilters] = useState<FilterState>({
+const TransactionsManager: React.FC = () => {
+
+  const [filters, setFilters] = useState<TransactionFilterState>({
     searchTerm: '',
     status: 'all',
     startDate: '',
-    endDate: ''
+    endDate: '',
   });
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['customer-recent-trans', filters],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['customer-transactions', filters.status, filters.startDate, filters.endDate],
     queryFn: () => {
-      const params: any = {
-          pageNumber: 1,
-          pageSize: 50
-      };
-
-      if (filters.searchTerm) {
-        params.tranRefNo = filters.searchTerm;
-      }
-      if (filters.status && filters.status !== 'all') {
-        params.status = filters.status;
-      }
-      if (filters.startDate) {
-        params.startDate = filters.startDate;
-      }
-      if (filters.endDate) {
-        params.endDate = filters.endDate;
-      }
-
+      const params: Record<string, any> = { pageNumber: 1, pageSize: 5000 };
+      if (filters.status !== 'all') params.status = filters.status;
+      if (filters.startDate) params.startDate = ddmmyyyyToISO(filters.startDate);
+      if (filters.endDate) params.endDate = ddmmyyyyToISO(filters.endDate);
       return axiosCustomer.request({
         url: '/customer-dashboard/fetchRecentTrans',
         method: 'GET',
-        params
+        params,
       });
-    }
+    },
   });
 
-  const handleFilterChange = (newFilters: FilterState) => {
-    setFilters(newFilters);
-  };
+  const allTransactions: Transaction[] = data?.data?.transactions || [];
 
-  const transactions = data?.data?.transactions || [];
+  const filteredTransactions = useMemo(() => {
+    let r = allTransactions;
 
-  const handleExport = () => {
-    exportToCSV(transactions);
-  };
+    const s = filters.searchTerm.toLowerCase().trim();
+    if (s) {
+      r = r.filter((t) =>
+        t.tranRefNo?.toLowerCase().includes(s) ||
+        t.name?.toLowerCase().includes(s)
+      );
+    }
+
+    if (filters.status !== 'all') {
+      r = r.filter((t) => t.status?.toLowerCase() === filters.status.toLowerCase());
+    }
+
+    const startDate = ddmmyyyyToDate(filters.startDate);
+    const endDate = ddmmyyyyToDate(filters.endDate);
+
+    if (startDate) {
+      r = r.filter((t) => {
+        const dateStr = t.date.split(' ')[0];
+        const separator = dateStr.includes('/') ? '/' : '-';
+        const [dd, mm, yyyy] = dateStr.split(separator);
+        const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+        return !isNaN(d.getTime()) && d >= startDate;
+      });
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      r = r.filter((t) => {
+        const dateStr = t.date.split(' ')[0];
+        const separator = dateStr.includes('/') ? '/' : '-';
+        const [dd, mm, yyyy] = dateStr.split(separator);
+        const d = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+        return !isNaN(d.getTime()) && d <= end;
+      });
+    }
+
+    return r;
+  }, [allTransactions, filters]);
 
   return (
-    <main className='space-y-5'>
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Transactions
-            </h1>
-            <p className="text-muted-foreground">
-              Accurate tracking for your transactions
-            </p>
-          </div>
-        </div>
-        <div className="text-right">
-          <p className="text-2xl font-bold text-foreground">{transactions.length}</p>
-          <p className="text-sm text-muted-foreground">Total Transactions</p>
-        </div>
+    <div className="min-h-screen px-2">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-semibold text-dark-gray">Transactions</h2>
       </div>
 
-      <TransactionsFilter onFilterChange={handleFilterChange} />
+      <div className="mb-4">
+        <TransactionsFilter
+          onFilterChange={setFilters}
+          onExport={() => exportToCSV(filteredTransactions)}
+          totalCount={filteredTransactions.length}
+        />
+      </div>
 
-      <Card className="border-gray-200 shadow-sm">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base lg:text-lg font-semibold text-gray-900">
-              Transactions
-            </CardTitle>
-            <Button variant="outline" size="sm" className="gap-2" onClick={handleExport} disabled={transactions.length === 0}>
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Export</span>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <p className="text-gray-500">Loading transactions...</p>
-            </div>
-          ) : error ? (
-            <div className="flex justify-center items-center h-40">
-              <p className="text-red-500">Error loading transactions</p>
-            </div>
-          ) : transactions.length === 0 ? (
-            <div className="flex justify-center items-center h-40">
-              <p className="text-gray-500">No transactions found</p>
-            </div>
-          ) : (
-            <TransactionsList data={transactions} />
-          )}
-        </CardContent>
-      </Card>
-    </main >
-  )
-}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="flex items-center justify-center py-20 text-red-400 text-sm">
+          Error loading transactions
+        </div>
+      ) : (
+        <TransactionsList data={filteredTransactions} itemsPerPage={15} />
+      )}
+    </div>
+  );
+};
 
-export default TransactionsManager
+export default TransactionsManager;
