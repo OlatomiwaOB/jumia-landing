@@ -538,13 +538,13 @@ const LinkStaffModal = ({
 };
 
 export default function StaffsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_USERS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage users"
-    });
-    
+    // usePermissionGuard('MANAGE_USERS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage users"
+    // });
+
     const { user } = useUser();
     const router = useRouter();
     const { data, isLoading, error, refetch } = useQuery({

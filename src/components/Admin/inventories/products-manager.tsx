@@ -279,7 +279,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
             Product Images
           </PermissionButton>
 
-          <PermissionButton
+          {/* <PermissionButton
             requiredPermissions={['MANAGE_INVENTORY']}
             requireAll={true}
             hideIfNoPermission={false}
@@ -288,7 +288,14 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
           >
             <Plus className="h-4 w-4" />
             Add Product
-          </PermissionButton>
+          </PermissionButton> */}
+
+          <Button
+            className="cursor-pointer flex items-center gap-2"
+            onClick={() => router.push('/admin/inventories/create-product')}>
+            <Plus className="h-4 w-4" />
+            Add Product
+          </Button>
         </div>
       </div>
 

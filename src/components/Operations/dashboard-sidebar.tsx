@@ -49,6 +49,7 @@ interface NavGroup {
   requiredPermissions?: string[];
 }
 
+/*
 const navigationGroups: NavGroup[] = [
   {
     name: 'Dashboard',
@@ -127,6 +128,78 @@ const navigationGroups: NavGroup[] = [
     ]
   },
 ];
+*/
+
+const navigationGroups: NavGroup[] = [
+  {
+    name: 'Dashboard',
+    icon: LayoutDashboard,
+    items: [
+      { name: 'Dashboard', href: '/operations/dashboard', icon: LayoutDashboard },
+    ]
+  },
+  {
+    name: 'User & Access Mgt.',
+    icon: Users,
+    items: [
+      { name: 'Users', href: '/operations/users', icon: User },
+      { name: 'Business', href: '/operations/business', icon: Store },
+      { name: 'Riders', href: '/operations/riders', icon: Bike },
+      { name: 'Approvals', href: '/operations/approvals', icon: BadgeCheck },
+      { name: 'Role and Permissions', href: '/operations/roles', icon: UserCog2 }
+    ]
+  },
+  {
+    name: 'Transaction & Payment Mgt.',
+    icon: CreditCard,
+    items: [
+      { name: 'Transactions', href: '/operations/transactions', icon: Banknote },
+      { name: 'Transaction Type', href: '/operations/transaction-type', icon: Settings2 },
+      { name: 'Payment Methods', href: '/operations/payment-methods', icon: CreditCard },
+    ]
+  },
+  {
+    name: 'Product & Inventory Mgt.',
+    icon: Package,
+    items: [
+      { name: 'Inventories', href: '/operations/inventories', icon: ShoppingBasket },
+      { name: 'Billers', href: '/operations/billers', icon: Banknote },
+    ]
+  },
+  {
+    name: 'Order, Delivery & Logistics',
+    icon: Truck,
+    items: [
+      { name: 'Orders', href: '/operations/orders', icon: Clock },
+      { name: 'Delivery Options', href: '/operations/delivery-options', icon: Box },
+      { name: 'Delivery Requests', href: '/operations/delivery-requests', icon: Truck },
+      { name: 'Pickup Locations', href: '/operations/pickup-locations', icon: MapPin },
+    ]
+  },
+  {
+    name: 'Financial Mgt.',
+    icon: PiggyBank,
+    items: [
+      { name: 'Settlements', href: '/operations/settlements', icon: ArrowLeftRight },
+      { name: 'Subscriptions', href: '/operations/subscriptions', icon: PiggyBank },
+    ]
+  },
+  {
+    name: 'System Configuration',
+    icon: Settings2,
+    items: [
+      { name: 'Lookup Data', href: '/operations/lookup-data', icon: FileText },
+      { name: 'Message Templates', href: '/operations/message-templates', icon: ClipboardList },
+    ]
+  },
+  {
+    name: 'Reporting & Analytics',
+    icon: LayoutDashboard,
+    items: [
+      { name: 'Reports', href: '/operations/reports', icon: LayoutDashboard },
+    ]
+  },
+];
 
 interface SidebarGroupProps {
   group: NavGroup;
@@ -144,14 +217,16 @@ const isPathMatchingItem = (pathname: string, itemHref: string): boolean => {
 const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: SidebarGroupProps) => {
   const [isOpen, setIsOpen] = useState(true);
 
-  const accessibleItems = useMemo(() => {
-    return group.items.filter(item => {
-      if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
-        return true;
-      }
-      return item.requiredPermissions.some(permission => userPermissions.includes(permission));
-    });
-  }, [group.items, userPermissions]);
+  // const accessibleItems = useMemo(() => {
+  //   return group.items.filter(item => {
+  //     if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+  //       return true;
+  //     }
+  //     return item.requiredPermissions.some(permission => userPermissions.includes(permission));
+  //   });
+  // }, [group.items, userPermissions]);
+
+  const accessibleItems = group.items;
 
   const hasActiveChild = accessibleItems.some(item => isPathMatchingItem(pathname, item.href));
 
@@ -161,9 +236,9 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
   }
 
   // If group requires permissions and user doesn't have access, don't render
-  if (group.requiredPermissions && group.requiredPermissions.length > 0 && !hasGroupAccess) {
-    return null;
-  }
+  // if (group.requiredPermissions && group.requiredPermissions.length > 0 && !hasGroupAccess) {
+  //   return null;
+  // }
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -215,25 +290,27 @@ export const DashboardSidebar = () => {
   const { hasAnyPermission, userPermissions } = usePermission();
 
   // Filter navigation groups based on user permissions
-  const accessibleGroups = useMemo(() => {
-    return navigationGroups.filter(group => {
-      // Check group-level permissions
-      if (group.requiredPermissions && group.requiredPermissions.length > 0) {
-        const hasGroupAccess = hasAnyPermission(group.requiredPermissions);
-        if (!hasGroupAccess) return false;
-      }
+  // const accessibleGroups = useMemo(() => {
+  //   return navigationGroups.filter(group => {
+  //     // Check group-level permissions
+  //     if (group.requiredPermissions && group.requiredPermissions.length > 0) {
+  //       const hasGroupAccess = hasAnyPermission(group.requiredPermissions);
+  //       if (!hasGroupAccess) return false;
+  //     }
+  //
+  //     // Check if group has any accessible items
+  //     const hasAccessibleItems = group.items.some(item => {
+  //       if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+  //         return true;
+  //       }
+  //       return hasAnyPermission(item.requiredPermissions);
+  //     });
+  //
+  //     return hasAccessibleItems;
+  //   });
+  // }, [userPermissions, hasAnyPermission]);
 
-      // Check if group has any accessible items
-      const hasAccessibleItems = group.items.some(item => {
-        if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
-          return true;
-        }
-        return hasAnyPermission(item.requiredPermissions);
-      });
-
-      return hasAccessibleItems;
-    });
-  }, [userPermissions, hasAnyPermission]);
+  const accessibleGroups = navigationGroups;
 
   return (
     <div className="w-full bg-accent h-full flex flex-col">

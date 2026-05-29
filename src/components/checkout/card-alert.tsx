@@ -91,7 +91,8 @@ const CardAlert = ({
       }
 
       if (paymentMethod === 'card' && data?.data?.paymentLinkUrl) {
-        window.open(data?.data?.paymentLinkUrl, '_blank')
+        // window.open(data?.data?.paymentLinkUrl, '_blank')
+        router.push(data?.data?.paymentLinkUrl)
         return
       }
     },
@@ -99,6 +100,8 @@ const CardAlert = ({
       toast.error('Something went wrong!')
     }
   })
+
+  console.log(paymentMethod)
 
   const buildOrderPayload = (bnplData?: any) => {
     const orderItems = cart.map(item => ({

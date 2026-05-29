@@ -51,19 +51,19 @@ const countries = [
   // { name: "Thailand", code: "TH" },
   // { name: "Turkey", code: "TR" },
   // { name: "United Arab Emirates", code: "AE" },
-  // { name: "United Kingdom", code: "GB" },
+  { name: "United Kingdom", code: "GB" },
   // { name: "United States", code: "US" },
   // { name: "Vietnam", code: "VN" }
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 type Props = {
-    register: UseFormRegister<FormData>,
-    errors: FieldErrors<FormData>,
-    watchedValues: FormData,
-    setValue: UseFormSetValue<FormData>
+  register: UseFormRegister<FormData>,
+  errors: FieldErrors<FormData>,
+  watchedValues: FormData,
+  setValue: UseFormSetValue<FormData>
 }
 
-const LocationDetails = ({errors, register, setValue, watchedValues}: Props) => {
+const LocationDetails = ({ errors, register, setValue, watchedValues }: Props) => {
   return (
     <><div className="space-y-4">
 
@@ -125,7 +125,7 @@ const LocationDetails = ({errors, register, setValue, watchedValues}: Props) => 
         {errors.address && <p className="text-red-500 text-xs">{errors.address.message}</p>}
       </div>
     </div>
-    <TermsAndConditions register={register} errors={errors} />
+      <TermsAndConditions register={register} errors={errors} />
     </>
   );
 };

@@ -21,12 +21,12 @@ import { Label } from '@/components/ui/label';
 import { usePermission } from '@/hooks/usePermissionBusiness';
 
 export default function ReportDetailPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('CAN_VIEW_REPORTS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to view reports"
-    });
+    // usePermissionGuard('CAN_VIEW_REPORTS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to view reports"
+    // });
     const params = useParams();
     const router = useRouter();
     const reportCode = params.reportCode as string;

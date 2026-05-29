@@ -359,12 +359,12 @@ const ApproveAllDocumentsModal = ({
 
 
 export default function MerchantDetailsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_MERCHANTS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage merchants"
-    });
+    // usePermissionGuard('MANAGE_MERCHANTS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage merchants"
+    // });
 
     const router = useRouter();
     const params = useParams();

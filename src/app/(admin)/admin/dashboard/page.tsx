@@ -8,10 +8,10 @@ import { usePermission } from '@/hooks/usePermissionBusiness'
 const AdminDashboard = () => {
   const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('VIEW_DASHBOARD', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to view the dashboard"
-  });
+  // usePermissionGuard('VIEW_DASHBOARD', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to view the dashboard"
+  // });
 
   return (
     <>

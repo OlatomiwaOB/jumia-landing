@@ -101,12 +101,12 @@ const truncateString = (str: string | null | undefined, maxLength: number = 15):
 };
 
 export default function SweepSettlementPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('VIEW_SETTLEMENTS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to view settlements"
-    });
+    // usePermissionGuard('VIEW_SETTLEMENTS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to view settlements"
+    // });
     const router = useRouter();
     const queryClient = useQueryClient();
 

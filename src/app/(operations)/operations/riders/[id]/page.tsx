@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 
 interface Rider {
     id: number;
@@ -460,12 +460,12 @@ const RiderApproveModal = ({
 };
 
 export default function RiderDetailsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_RIDERS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage riders"
-    });
+    // usePermissionGuard('MANAGE_RIDERS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage riders"
+    // });
     const router = useRouter();
     const params = useParams();
     const riderId = params.id as string;

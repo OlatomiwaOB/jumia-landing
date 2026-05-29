@@ -293,11 +293,11 @@ const CheckoutContent = () => {
 
       const receiptPayload = {
         orderNo: checkoutData.orderNo,
-        entityCode: "FTD",
+        entityCode: customer?.entityCode || 'H2P',
         customerEmail: customer?.username || "",
         ordDate: checkoutData.orderDate,
         // salePerson: "",
-        storeCode: storeCode || checkoutData.storeCode || "STO0715",
+        storeCode: storeCode || checkoutData.storeCode || "STO0813",
         delivery: isDelivery,
         pickupId: isDelivery ? undefined : checkoutData.selectedStore,
       };
@@ -461,7 +461,7 @@ const CheckoutContent = () => {
             orderTotal={orderTotal}
             shippingFee={shippingFee}
             totalVat={totalVat}
-            // shippingVat={shippingVat}
+          // shippingVat={shippingVat}
           />
         )}
 

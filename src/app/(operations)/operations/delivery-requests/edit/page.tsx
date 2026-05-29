@@ -31,12 +31,12 @@ interface DeliveryRequestFormData {
 }
 
 export default function EditDeliveryRequestPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_DELIVERY_REQUESTS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage delivery requests"
-    });
+    // usePermissionGuard('MANAGE_DELIVERY_REQUESTS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage delivery requests"
+    // });
     const searchParams = useSearchParams();
     const requestId = searchParams.get('id');
     const router = useRouter();

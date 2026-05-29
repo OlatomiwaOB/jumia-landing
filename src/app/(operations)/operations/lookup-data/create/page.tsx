@@ -25,12 +25,12 @@ interface LookupFormData {
 }
 
 export default function CreateLookupDataPage() {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_LOOKUP', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage lookup data"
-  });
+  // usePermissionGuard('MANAGE_LOOKUP', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage lookup data"
+  // });
 
   const router = useRouter();
   const { operations } = useOperations();

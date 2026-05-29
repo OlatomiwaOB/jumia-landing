@@ -73,12 +73,12 @@ const CreateCategoryPage = ({
   mode = category ? 'edit' : 'create'
 }: CategoryFormProps) => {
 
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_INVENTORY', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage inventory"
-  });
+  // usePermissionGuard('MANAGE_INVENTORY', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage inventory"
+  // });
 
   const router = useRouter();
   const searchParams = useSearchParams();

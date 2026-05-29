@@ -692,7 +692,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lock, Tag, Eye, ShieldCheck, ArrowLeft } from "lucide-react";
-import { useCart } from "@/store/cart";
+import { CartItem, useCart } from "@/store/cart";
 import { formatPrice } from "@/utils/helperfns";
 import { CheckoutStep } from "@/app/checkout/checkoutContent";
 import { UseFormReturn } from "react-hook-form";
@@ -702,30 +702,30 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
 
-interface CartItem {
-  id?: number;
-  name: string;
-  image?: string;
-  price?: number;
-  quantity: number;
-  picture?: string;
-  salePrice?: number;
-  oldPrice?: number;
-  description?: string;
-  category?: string;
-  code?: string;
-  itemSize?: string;
-  color?: string;
-  qtyInStore?: number;
-  unit?: string;
-  model?: string;
-  barCode?: string;
-  expiryDate?: string;
-  ccy?: string;
-  discount?: number;
-  vat?: number;
-  vatRate?: number;
-}
+// interface CartItem {
+//   id?: number;
+//   name?: string | undefined;
+//   image?: string;
+//   price?: number;
+//   quantity: number;
+//   picture?: string;
+//   salePrice?: number;
+//   oldPrice?: number;
+//   description?: string;
+//   category?: string;
+//   code?: string;
+//   itemSize?: string;
+//   color?: string;
+//   qtyInStore?: number;
+//   unit?: string;
+//   model?: string;
+//   barCode?: string;
+//   expiryDate?: string;
+//   ccy?: string;
+//   discount?: number;
+//   vat?: number;
+//   vatRate?: number;
+// }
 
 interface PickupLocation {
   id: number;
@@ -796,19 +796,19 @@ export const CartReview = ({
     enabled: shippingMethod === 'pickup',
   });
 
-  const activePickupLocations = pickupData?.data?.pickupLocations?.filter((location: PickupLocation) =>
-    location?.status?.toUpperCase() === "ACTIVE"
-  ) || [];
+  // const activePickupLocations = pickupData?.data?.pickupLocations?.filter((location: PickupLocation) =>
+  //   location?.status?.toUpperCase() === "ACTIVE"
+  // ) || [];
 
   const isSelectedStoreActive = () => {
     if (shippingMethod !== 'pickup' || !selectedStore) return true;
 
-    return activePickupLocations.some((location: any) => location.id === selectedStore);
+    return pickupData?.data?.pickupLocations?.some((location: any) => location.id === selectedStore);
   };
 
   const getSelectedPickupLocation = (): PickupLocation | null => {
     if (!selectedStore) return null;
-    return activePickupLocations.find((location: PickupLocation) => location.id === selectedStore) || null;
+    return pickupData?.data?.pickupLocations?.find((location: PickupLocation) => location.id === selectedStore) || null;
   };
 
   const areSelectionsFresh = () => {
@@ -1380,7 +1380,7 @@ export const CartReview = ({
             <DialogTitle>All Cart Items ({cart.length})</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            {cart.map((item) => {
+            {cart.map((item: CartItem) => {
               const itemVat = (item as any).vat || 0;
               const itemTotalVat = itemVat * item.quantity;
               const itemDiscountAmount = item.oldPrice && item.salePrice

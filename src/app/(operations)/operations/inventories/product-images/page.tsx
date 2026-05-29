@@ -11,7 +11,7 @@ import useUser from "@/store/userStore";
 import { toast } from "sonner";
 import Image from "next/image";
 import placeholder from "@/components/images/placeholder-product.webp";
-import { usePermission } from "@/hooks/usePermission";
+// import { usePermission } from "@/hooks/usePermission";
 
 interface Product {
   id: string;
@@ -32,12 +32,12 @@ interface UploadingState {
 }
 
 const ProductImagesPage = () => {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_INVENTORY', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage inventory"
-  });
+  // usePermissionGuard('MANAGE_INVENTORY', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage inventory"
+  // });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [uploadingStates, setUploadingStates] = useState<UploadingState>({});

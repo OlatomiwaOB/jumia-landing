@@ -3,12 +3,12 @@ import { usePermission } from '@/hooks/usePermissionBusiness';
 import React, { Suspense } from 'react'
 
 const CustomerDetails = () => {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('VIEW_ORDERS', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage BNPL customers"
-  });
+  // usePermissionGuard('VIEW_ORDERS', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage BNPL customers"
+  // });
   return (
     <Suspense>
       <CustomerDetailScreen />

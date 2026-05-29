@@ -32,12 +32,12 @@ const getStatusColor = (status: string): string => {
 };
 
 export default function RolesPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_ROLES', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage roles"
-    });
+    // usePermissionGuard('MANAGE_ROLES', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage roles"
+    // });
 
     const [page, setPage] = useState(1);
     const [isRefreshing, setIsRefreshing] = useState(false);

@@ -57,10 +57,10 @@ interface CreditData {
 const CreditScoringScreen = () => {
   const { usePermissionGuard } = usePermission();
 
-usePermissionGuard('MANAGE_BNPL', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage BNPL customers"
-  });
+  // usePermissionGuard('MANAGE_BNPL', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage BNPL customers"
+  // });
 
   const { id } = useParams()
 

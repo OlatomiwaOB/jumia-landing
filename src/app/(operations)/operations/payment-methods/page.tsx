@@ -10,13 +10,15 @@ import { PaymentMethodModal } from "@/components/Admin/payment-methods/payment-m
 import axiosOperations from "@/utils/fetch-function-op-auth";
 import { usePermission } from "@/hooks/usePermission";
 
-const PaymentMethods: React.FC = () => {
-  const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_PAYMENT_METHODS', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage payment methods"
-  });
+const storeCode = process?.env?.NEXT_PUBLIC_STORE_CODE || 'STO0813'
+const PaymentMethods: React.FC = () => {
+  // const { usePermissionGuard } = usePermission();
+
+  // usePermissionGuard('MANAGE_PAYMENT_METHODS', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage payment methods"
+  // });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<PaymentMethod | null>(null);
@@ -32,7 +34,7 @@ const PaymentMethods: React.FC = () => {
       url: '/payment-methods/fetch',
       method: 'GET',
       params: {
-        storeCode: 'STO0715',
+        storeCode: storeCode,
       }
     })
   });
@@ -42,7 +44,7 @@ const PaymentMethods: React.FC = () => {
       url: '/payment-methods/save',
       method: 'POST',
       params: {
-        storeCode: 'STO0715',
+        storeCode: storeCode,
       },
       data
     }),

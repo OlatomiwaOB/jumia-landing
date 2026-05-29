@@ -102,9 +102,9 @@
 
 // const isPathMatchingItem = (pathname: string, itemHref: string): boolean => {
 //   if (pathname === itemHref) return true;
-  
+
 //   if (pathname.startsWith(itemHref + '/')) return true;
-  
+
 //   return false;
 // };
 
@@ -138,7 +138,7 @@
 //         <ul className="mt-1 space-y-0.5">
 //           {group.items.map((item) => {
 //             const isActive = isPathMatchingItem(pathname, item.href);
-            
+
 //             return (
 //               <li key={item.name}>
 //                 <Link
@@ -257,6 +257,7 @@ interface NavGroup {
   requiredPermissions?: string[];
 }
 
+/*
 const navigationGroups: NavGroup[] = [
   {
     name: 'Dashboard',
@@ -319,6 +320,63 @@ const navigationGroups: NavGroup[] = [
     ]
   },
 ];
+*/
+
+const navigationGroups: NavGroup[] = [
+  {
+    name: 'Dashboard',
+    icon: Home,
+    items: [
+      { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+    ]
+  },
+  {
+    name: 'Order & Transaction Mgt.',
+    icon: ShoppingCart,
+    items: [
+      { name: 'Orders', href: '/admin/orders', icon: Clock },
+      { name: 'Transactions', href: '/admin/transactions', icon: PiggyBank },
+    ]
+  },
+  {
+    name: 'Store & Inventory Mgt.',
+    icon: StoreIcon,
+    items: [
+      { name: 'Inventories', href: '/admin/inventories', icon: ShoppingBasket },
+      { name: 'Stores', href: '/admin/stores', icon: StoreIcon },
+      { name: 'Store Settings', href: '/admin/settings', icon: Settings },
+    ]
+  },
+  {
+    name: 'User & Customer Mgt.',
+    icon: UsersRoundIcon,
+    items: [
+      { name: 'Users', href: '/admin/users', icon: UsersRoundIcon },
+      { name: 'BNPL Customers', href: '/admin/bnpl-customers', icon: UserCog },
+    ]
+  },
+  {
+    name: 'Compliance',
+    icon: Shield,
+    items: [
+      { name: 'KYC Documents', href: '/admin/kyc-documents', icon: Folder },
+    ]
+  },
+  {
+    name: 'Payment Mgt.',
+    icon: CreditCard,
+    items: [
+      { name: 'Payment Methods', href: '/admin/payment-methods', icon: CreditCard },
+    ]
+  },
+  {
+    name: 'Reports & Analytics',
+    icon: LayoutDashboard,
+    items: [
+      { name: 'Reports', href: '/admin/reports', icon: LayoutDashboard },
+    ]
+  },
+];
 
 interface SidebarGroupProps {
   group: NavGroup;
@@ -336,14 +394,16 @@ const SidebarGroup = ({ group, pathname, userPermissions }: SidebarGroupProps) =
   const [isOpen, setIsOpen] = useState(true);
 
   // Filter items based on user permissions
-  const accessibleItems = useMemo(() => {
-    return group.items.filter(item => {
-      if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
-        return true;
-      }
-      return item.requiredPermissions.some(permission => userPermissions.includes(permission));
-    });
-  }, [group.items, userPermissions]);
+  // const accessibleItems = useMemo(() => {
+  //   return group.items.filter(item => {
+  //     if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+  //       return true;
+  //     }
+  //     return item.requiredPermissions.some(permission => userPermissions.includes(permission));
+  //   });
+  // }, [group.items, userPermissions]);
+
+  const accessibleItems = group.items;
 
   const hasActiveChild = accessibleItems.some(item => isPathMatchingItem(pathname, item.href));
 
@@ -353,12 +413,14 @@ const SidebarGroup = ({ group, pathname, userPermissions }: SidebarGroupProps) =
   }
 
   // Check group-level permissions
-  const hasGroupAccess = useMemo(() => {
-    if (!group.requiredPermissions || group.requiredPermissions.length === 0) {
-      return true;
-    }
-    return group.requiredPermissions.some(permission => userPermissions.includes(permission));
-  }, [group.requiredPermissions, userPermissions]);
+  // const hasGroupAccess = useMemo(() => {
+  //   if (!group.requiredPermissions || group.requiredPermissions.length === 0) {
+  //     return true;
+  //   }
+  //   return group.requiredPermissions.some(permission => userPermissions.includes(permission));
+  // }, [group.requiredPermissions, userPermissions]);
+
+  const hasGroupAccess = true;
 
   // If group requires permissions and user doesn't have access, don't render
   if (!hasGroupAccess) {
@@ -386,7 +448,7 @@ const SidebarGroup = ({ group, pathname, userPermissions }: SidebarGroupProps) =
         <ul className="mt-1 space-y-0.5">
           {accessibleItems.map((item) => {
             const isActive = isPathMatchingItem(pathname, item.href);
-            
+
             return (
               <li key={item.name}>
                 <Link
@@ -415,44 +477,45 @@ export const DashboardSidebar = () => {
   const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL_WHITE;
 
   // Filter navigation groups based on user permissions
-  const accessibleGroups = useMemo(() => {
-    return navigationGroups.filter(group => {
-      // Check group-level permissions
-      if (group.requiredPermissions && group.requiredPermissions.length > 0) {
-        const hasGroupAccess = hasAnyPermission(group.requiredPermissions);
-        if (!hasGroupAccess) return false;
-      }
+  // const accessibleGroups = useMemo(() => {
+  //   return navigationGroups.filter(group => {
+  //     // Check group-level permissions
+  //     if (group.requiredPermissions && group.requiredPermissions.length > 0) {
+  //       const hasGroupAccess = hasAnyPermission(group.requiredPermissions);
+  //       if (!hasGroupAccess) return false;
+  //     }
+  //
+  //     // Check if group has any accessible items
+  //     const hasAccessibleItems = group.items.some(item => {
+  //       if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
+  //         return true;
+  //       }
+  //       return hasAnyPermission(item.requiredPermissions);
+  //     });
+  //
+  //     return hasAccessibleItems;
+  //   });
+  // }, [userPermissions, hasAnyPermission]);
 
-      // Check if group has any accessible items
-      const hasAccessibleItems = group.items.some(item => {
-        if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
-          return true;
-        }
-        return hasAnyPermission(item.requiredPermissions);
-      });
-
-      return hasAccessibleItems;
-    });
-  }, [userPermissions, hasAnyPermission]);
+  const accessibleGroups = navigationGroups;
 
   return (
-    <div className="w-full bg-accent-foreground h-full flex flex-col">
+    <div className="w-full bg-accent h-full flex flex-col">
       <div className="p-4">
-        <div className="flex items-center justify-center">
-          <Link href="/admin/dashboard" className="block">
+        <div className="flex items-center">
+          <Link href="/admin/dashboard" className="relative w-[120px] h-[70px] shadow-sm">
             <Image
               src={logoUrl || 'logo.png'}
               alt='logo'
-              width={180}
-              height={40}
-              className='w-full max-w-[180px] h-auto object-contain'
+              fill
+              className='object-fill rounded-md'
               priority
             />
           </Link>
         </div>
       </div>
 
-      <nav 
+      <nav
         className="flex-1 py-4 px-3 overflow-y-auto w-full"
         style={{
           scrollbarWidth: 'none',
@@ -462,9 +525,9 @@ export const DashboardSidebar = () => {
         <ul className="space-y-1">
           {accessibleGroups.map((group) => (
             <li key={group.name}>
-              <SidebarGroup 
-                group={group} 
-                pathname={pathname} 
+              <SidebarGroup
+                group={group}
+                pathname={pathname}
                 userPermissions={userPermissions}
               />
             </li>

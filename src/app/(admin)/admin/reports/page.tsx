@@ -17,12 +17,12 @@ interface ReportDefinition {
 }
 
 export default function ReportsPage(): React.ReactElement {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('CAN_VIEW_REPORTS', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to view reports"
-  });
+  // usePermissionGuard('CAN_VIEW_REPORTS', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to view reports"
+  // });
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
 

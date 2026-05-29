@@ -21,7 +21,7 @@ import {
     CartesianGrid,
     Tooltip,
 } from 'recharts';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 
 interface DashboardResponse {
     responseCode: string;
@@ -262,12 +262,12 @@ const HorizontalBarChart = ({ data, title, valuePrefix = '₦' }: { data: any[];
 };
 
 export default function OperationsDashboard() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('VIEW_DASHBOARD', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to view dashboard"
-    });
+    // usePermissionGuard('VIEW_DASHBOARD', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to view dashboard"
+    // });
 
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);

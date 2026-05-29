@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 import { PermissionButton } from '@/components/Operations/permission/permission-button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -681,12 +681,12 @@ const MobileMerchantCard = ({ merchant, onViewDetails }: { merchant: Merchant; o
 };
 
 export default function MerchantsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('VIEW_MERCHANTS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to view business list"
-    });
+    // usePermissionGuard('VIEW_MERCHANTS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to view business list"
+    // });
 
     const { data, isLoading, error, refetch } = useQuery({
         queryKey: ['merchants'],

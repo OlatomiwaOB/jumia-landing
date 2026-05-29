@@ -32,12 +32,12 @@ interface StoreFormData {
 }
 
 export default function CreateStorePage() {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_STORES', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage stores"
-  });
+  // usePermissionGuard('MANAGE_STORES', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage stores"
+  // });
   const searchParams = useSearchParams();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingStoreCode, setEditingStoreCode] = useState<string | null>(null);

@@ -1,7 +1,7 @@
-import Header from "./components/layout/header"
 import Footer from "./components/layout/footer";
 import Providers from '../depot/providers' // Reusing the same providers
 import { Suspense } from "react";
+import { Header } from "./components/layout/header";
 
 export default function FortitudeLayout({
   children,

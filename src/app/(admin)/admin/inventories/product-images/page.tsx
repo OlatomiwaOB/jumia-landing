@@ -32,12 +32,12 @@ interface UploadingState {
 }
 
 const ProductImagesPage = () => {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_INVENTORY', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage inventory"
-  });
+  // usePermissionGuard('MANAGE_INVENTORY', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage inventory"
+  // });
   const [searchTerm, setSearchTerm] = useState("");
   const [uploadingStates, setUploadingStates] = useState<UploadingState>({});
   const [successStates, setSuccessStates] = useState<{ [key: string]: boolean }>({});

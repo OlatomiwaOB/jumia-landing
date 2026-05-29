@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation } from '@tanstack/react-query';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 import { PermissionButton } from '@/components/Operations/permission/permission-button';
 import { useRouter } from 'next/navigation';
 
@@ -636,12 +636,12 @@ const ApproveMerchantModal = ({
 };
 
 export default function ApprovalsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('CAN_APPROVE', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to approve business"
-    });
+    // usePermissionGuard('CAN_APPROVE', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to approve business"
+    // });
 
     const { data, isLoading, error, refetch } = useQuery({
         queryKey: ['unverified-merchants'],

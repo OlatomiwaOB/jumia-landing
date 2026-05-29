@@ -37,12 +37,12 @@ interface DeliveryOptionApiResponse {
 }
 
 export default function SaveDeliveryOptionPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_DELIVERY_OPTIONS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage delivery options"
-    });
+    // usePermissionGuard('MANAGE_DELIVERY_OPTIONS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage delivery options"
+    // });
     const searchParams = useSearchParams();
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);

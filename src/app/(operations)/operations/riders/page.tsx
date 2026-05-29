@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import useGetLookup from '@/app/hooks/useGetLookup';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 import { PermissionButton } from '@/components/Operations/permission/permission-button';
 import { useRouter } from 'next/navigation';
 
@@ -739,12 +739,12 @@ const RiderViewModal = ({
 };
 
 export default function RidersPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('VIEW_RIDERS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to view riders"
-    });
+    // usePermissionGuard('VIEW_RIDERS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to view riders"
+    // });
 
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');

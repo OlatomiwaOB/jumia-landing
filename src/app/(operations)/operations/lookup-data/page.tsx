@@ -14,12 +14,12 @@ import { any } from 'zod/mini';
 import { usePermission } from '@/hooks/usePermission';
 
 export default function LookupDataPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_LOOKUP', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage lookup data"
-    });
+    // usePermissionGuard('MANAGE_LOOKUP', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage lookup data"
+    // });
     const [page, setPage] = useState(1);
     const [visible, setVisible] = useState(false);
     const [applyFilter, setApplyFilter] = useState(false);

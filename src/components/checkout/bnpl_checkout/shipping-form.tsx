@@ -545,6 +545,7 @@ import useGetLookup from "@/app/hooks/useGetLookup";
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
+import { UseFormReturn } from "react-hook-form";
 
 interface ShippingFormProps {
   setCurrentStep: (currentStep: CheckoutStep) => void;
@@ -586,11 +587,11 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     enabled: shippingMethod === 'pickup',
   });
 
-  const activePickupLocations = pickupData?.data?.pickupLocations.filter((method: any) =>
-    method?.status?.toUpperCase() === "ACTIVE"
-  ) || [];
+  // const activePickupLocations = pickupData?.data?.pickupLocations.filter((method: any) =>
+  //   method?.status?.toUpperCase() === "ACTIVE"
+  // ) || [];
 
-  const pickupStores = activePickupLocations.map((location: any) => ({
+  const pickupStores = pickupData?.data?.pickupLocations?.map((location: any) => ({
     id: location.id,
     name: location.name,
     address: location.location || '',
@@ -608,9 +609,9 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
 
   useEffect(() => {
     setValue("shippingMethod", undefined);
-    setValue("pickupStore", null);
-    setValue("selectedAddressId", null);
-    setValue("shippingOption", null);
+    setValue("pickupStore", undefined);
+    setValue("selectedAddressId", undefined);
+    setValue("shippingOption", undefined);
     setValue("fullName", "");
     setValue("street", "");
     setValue("landmark", "");
@@ -629,7 +630,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     let shippingAmount = 0;
 
     if (shippingMethod === 'pickup' && selectedStore) {
-      const selectedPickupLocation = activePickupLocations.find((loc: any) => loc.id === selectedStore);
+      const selectedPickupLocation = pickupStores.find((loc: any) => loc.id === selectedStore);
       shippingAmount = selectedPickupLocation?.amount || 0;
     } else if (shippingMethod === 'delivery' && selectedShippingOption) {
       const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedShippingOption);
@@ -641,7 +642,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     if (method === 'delivery') {
-      setValue("pickupStore", null);
+      setValue("pickupStore", undefined);
       setValue("fullName", "");
       setValue("street", "");
       setValue("landmark", "");
@@ -651,8 +652,8 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       setValue("country", "");
       setValue("addressType", "");
     } else if (method === 'pickup') {
-      setValue("shippingOption", null);
-      setValue("selectedAddressId", null);
+      setValue("shippingOption", undefined);
+      setValue("selectedAddressId", undefined);
       setValue("street", "");
       setValue("landmark", "");
       setValue("zipCode", "");
@@ -672,7 +673,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
   };
 
   const handleAddressSelect = (address: any) => {
-    setValue("pickupStore", null);
+    setValue("pickupStore", undefined);
     setValue("addressType", address.addressType);
     setValue("selectedAddressId", address.id);
     setValue("street", address.street || '');

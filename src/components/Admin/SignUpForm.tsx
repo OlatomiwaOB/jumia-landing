@@ -57,7 +57,7 @@ export function SignUpForm() {
   const totalSteps = 5
   const router = useRouter()
   const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg";
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
 
   const { location } = useLocationStore()
 
@@ -134,9 +134,9 @@ export function SignUpForm() {
           watchedValues.bvnPhoto
       case 2:
         return watchedValues.email && watchedValues.mobileNo.length === 11
-        // watchedValues.subscriptionType && 
-        // watchedValues.tierCode && 
-        
+      // watchedValues.subscriptionType && 
+      // watchedValues.tierCode && 
+
       case 3:
         return watchedValues.identificationType &&
           watchedValues.merchantLogo &&

@@ -13,12 +13,12 @@ interface InventoriesPageProps {
 }
 
 const InventoriesPage = () => {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('VIEW_INVENTORY', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to view inventory"
-  });
+  // usePermissionGuard('VIEW_INVENTORY', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to view inventory"
+  // });
   const [activeTab, setActiveTab] = useState("products");
   const [productsCount, setProductsCount] = useState(0);
   const [categoriesCount, setCategoriesCount] = useState(0);

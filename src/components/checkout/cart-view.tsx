@@ -39,7 +39,7 @@ const CartView = ({
   shippingFee,
   totalVat,
   // shippingVat
-  
+
 }: CartViewProps) => {
   const { cart, getCartTotal, mainCcy } = useCart()
   const ccy = mainCcy()
@@ -56,7 +56,7 @@ const CartView = ({
 
   useEffect(() => {
     if (!searchParams?.get('storeCode')) {
-      router.push(`?storeCode=STO0715`);
+      router.push(`?storeCode=${customer?.storeCode || 'STO0813'}`);
     }
   }, [router, searchParams]);
 

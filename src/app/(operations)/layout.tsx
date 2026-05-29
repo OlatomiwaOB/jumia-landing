@@ -13,10 +13,10 @@ interface OperationsDashboardLayoutProps {
   headerTitle?: string
 }
 
-const OperationsDashboardLayout = ({ 
-  children, 
+const OperationsDashboardLayout = ({
+  children,
   showSidebar = true,
-  headerTitle 
+  headerTitle
 }: OperationsDashboardLayoutProps) => {
   return (
     <PrivateRoute requiredPermissions={[OPERATIONS]}>
@@ -29,11 +29,11 @@ const OperationsDashboardLayout = ({
                 <DashboardSidebar />
               </div>
             )}
-            
+
             {/* Main Content */}
             <div className="w-full overflow-x-auto h-full">
               <DashboardHeader />
-              
+
               {/* Dashboard Content */}
               <main className={`p-4 lg:p-6 space-y-4 lg:space-y-6 ${!showSidebar ? 'lg:col-span-full' : ''}`}>
                 {children}

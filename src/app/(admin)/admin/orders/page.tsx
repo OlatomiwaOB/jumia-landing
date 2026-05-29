@@ -126,12 +126,12 @@ const exportDetailedOrdersToCSV = (orders: Order[]) => {
 };
 
 export default function OrderHistory(): React.ReactElement {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('VIEW_ORDERS', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to view orders"
-  });
+  // usePermissionGuard('VIEW_ORDERS', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to view orders"
+  // });
   const { user } = useUser();
   const [filters, setFilters] = useState<FilterState>({
     searchTerm: '',

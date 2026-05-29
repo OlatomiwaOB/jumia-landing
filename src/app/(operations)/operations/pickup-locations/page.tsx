@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 
 interface PickupLocation {
     id: number;
@@ -335,12 +335,12 @@ const MobileLocationCard = ({ location, onViewDetails }: { location: PickupLocat
 };
 
 export default function PickupLocationsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_PICKUP_LOCATIONS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage pickup locations"
-    });
+    // usePermissionGuard('MANAGE_PICKUP_LOCATIONS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage pickup locations"
+    // });
 
     const router = useRouter();
     const { data, isLoading, error, refetch } = useQuery({

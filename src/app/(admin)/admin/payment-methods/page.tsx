@@ -14,10 +14,10 @@ import { usePermission } from "@/hooks/usePermissionBusiness";
 const PaymentMethods: React.FC = () => {
   const { usePermissionGuard } = usePermission();
 
-usePermissionGuard('MANAGE_PAYMENT_METHODS', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage payment methods"
-  });
+  // usePermissionGuard('MANAGE_PAYMENT_METHODS', {
+  //     redirectToNotPermitted: true,
+  //     toastMessage: "You don't have permission to manage payment methods"
+  //   });
   const [modalOpen, setModalOpen] = useState(false);
   const [editData, setEditData] = useState<PaymentMethod | null>(null);
   const [currentPage, setCurrentPage] = useState(1);

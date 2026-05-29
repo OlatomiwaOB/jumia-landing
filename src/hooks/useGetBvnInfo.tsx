@@ -1,12 +1,14 @@
 import axiosInstance from '@/utils/fetch-function';
 import { useMutation } from '@tanstack/react-query';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
+
+const entityCode = process.env.NEXT_PUBLIC_ENTITY_CODE || 'H2P'
 
 export const useGetBvnInfo = () => {
   const mutation = useMutation({
     mutationFn: (bvn: string) => {
       return axiosInstance.request({
-        url: `verifyme/identity?entityId=FTD&bvn=${bvn}`,
+        url: `verifyme/identity?entityId=${entityCode}&bvn=${bvn}`,
         method: 'POST',
       });
     },

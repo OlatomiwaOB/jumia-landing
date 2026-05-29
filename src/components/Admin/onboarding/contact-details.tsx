@@ -74,11 +74,11 @@ const ContactDetails = ({ register, errors, watchedValues, setValue }: Props) =>
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <p>
           See more about our <a href="https://www.fortitudedirect.com/pricing" target='_blank' className="text-accent underline">subscription plans</a>.
         </p>
-      </div>
+      </div> */}
 
       <div>
         <h2 className="text-lg font-semibold text-gray-900">Contact Details</h2>

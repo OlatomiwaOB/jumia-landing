@@ -8,15 +8,15 @@ import { useQuery } from '@tanstack/react-query';
 import axiosOperations from '@/utils/fetch-function-op-auth';
 import Link from 'next/link';
 import TemplateList from '@/components/Operations/message-templates/template-list';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 
 export default function MessagingTemplatesPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_MESSAGE_TEMPLATES', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage message templates"
-    });
+    // usePermissionGuard('MANAGE_MESSAGE_TEMPLATES', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage message templates"
+    // });
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
 

@@ -20,7 +20,7 @@ import placeholder from "@/components/images/placeholder-product.webp"
 import { Input } from "@/components/ui/input";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { usePermission } from '@/hooks/usePermissionBusiness';
+// import { usePermission } from '@/hooks/usePermissionBusiness';
 
 interface Store {
     id: number;
@@ -355,12 +355,12 @@ const MobileStoreCard = ({ store, onViewDetails }: { store: Store; onViewDetails
 };
 
 export default function StoresPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_STORES', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage stores"
-    });
+    // usePermissionGuard('MANAGE_STORES', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage stores"
+    // });
     const { user } = useUser();
     const router = useRouter();
     const { data, isLoading, error, refetch } = useQuery({

@@ -17,7 +17,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from 'sonner';
-import { usePermission } from '@/hooks/usePermission';
+// import { usePermission } from '@/hooks/usePermission';
 
 interface DeliveryOption {
     id: number;
@@ -398,12 +398,12 @@ const DynamicTable = ({
 };
 
 export default function DeliveryOptionsPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_DELIVERY_OPTIONS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage delivery options"
-    });
+    // usePermissionGuard('MANAGE_DELIVERY_OPTIONS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage delivery options"
+    // });
     const router = useRouter();
     const [deletingOption, setDeletingOption] = useState<DeliveryOption | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)

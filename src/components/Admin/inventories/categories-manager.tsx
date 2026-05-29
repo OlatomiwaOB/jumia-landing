@@ -39,6 +39,8 @@ interface CategoriesManagerProps {
   onCountChange?: (count: number) => void;
 }
 
+const storeCode = process?.env?.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+
 const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
@@ -212,12 +214,12 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
             </DialogContent>
           </Dialog> */}
 
-          {/* <Link href="/admin/inventories/create-category" passHref>
+          <Link href="/admin/inventories/create-category" passHref>
             <Button className="transition-smooth" variant="secondary">
               <Plus className="h-4 w-4 mr-2" />
               Add Category
             </Button>
-          </Link> */}
+          </Link>
         </div>
       </div>
 

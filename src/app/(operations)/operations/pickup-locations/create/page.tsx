@@ -26,12 +26,12 @@ interface PickupLocationFormData {
 }
 
 export default function CreateEditPickupLocationPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_PICKUP_LOCATIONS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage pickup locations"
-    });
+    // usePermissionGuard('MANAGE_PICKUP_LOCATIONS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage pickup locations"
+    // });
     const searchParams = useSearchParams();
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);

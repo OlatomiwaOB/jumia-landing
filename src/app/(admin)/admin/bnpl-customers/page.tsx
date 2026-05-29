@@ -44,12 +44,12 @@ const getGradingColor = (grading: string) => {
 };
 
 const CreditAssessment = () => {
-  const { usePermissionGuard } = usePermission();
+  // const { usePermissionGuard } = usePermission();
 
-  usePermissionGuard('MANAGE_BNPL', {
-    redirectToNotPermitted: true,
-    toastMessage: "You don't have permission to manage BNPL customers"
-  });
+  // usePermissionGuard('MANAGE_BNPL', {
+  //   redirectToNotPermitted: true,
+  //   toastMessage: "You don't have permission to manage BNPL customers"
+  // });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';

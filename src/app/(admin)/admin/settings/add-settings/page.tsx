@@ -63,12 +63,12 @@ const settingTypeDescriptions = {
 };
 
 export default function CreateStoreSettingPage() {
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_STORE_SETTINGS', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage store settings"
-    });
+    // usePermissionGuard('MANAGE_STORE_SETTINGS', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage store settings"
+    // });
     const searchParams = useSearchParams();
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingSettingId, setEditingSettingId] = useState<string | null>(null);

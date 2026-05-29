@@ -162,14 +162,13 @@ export const DashboardSidebar = () => {
   return (
     <div className="w-full bg-accent h-full flex flex-col">
       <div className="p-4">
-        <div className="flex items-center justify-center p-2">
-          <Link href="/dashboard" className="block">
+        <div className="flex items-center">
+          <Link href="/admin/dashboard" className="relative w-[120px] h-[70px] shadow-sm">
             <Image
               src={logoUrl || 'logo.png'}
               alt='logo'
-              width={180}
-              height={40}
-              className='w-full max-w-[180px] h-auto object-contain'
+              fill
+              className='object-fill rounded-md'
               priority
             />
           </Link>
