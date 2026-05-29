@@ -1,13 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Calendar, ChevronDown, RefreshCw } from 'lucide-react';
+import { EyeIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosOperations from '@/utils/fetch-function-op-auth';
 import cn from 'classnames';
+import { DateRangePicker } from "@/components/ui/date-range-picker"
 
 import {
     PieChart,
@@ -20,8 +19,13 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
+    BarChart,
+    Bar,
+    Legend,
 } from 'recharts';
-// import { usePermission } from '@/hooks/usePermission';
+import { usePermission } from '@/hooks/usePermission';
+import { usePageMetadata } from '@/hooks/usePageMetadata';
+import { ArrowIcon } from '@/components/icons/icons';
 
 interface DashboardResponse {
     responseCode: string;
@@ -30,10 +34,34 @@ interface DashboardResponse {
     totalUsers: number;
     totalMerchants: number;
     totalRiders: number;
+    orderVolume?: number;
+    merchantActivityBreakdown?: {
+        activeMerchants?: number;
+        inactiveMerchants?: number;
+    };
+    customerActivityBreakdown?: {
+        activeCustomers?: number;
+        inactiveCustomers?: number;
+    };
+    topCustomers?: Array<{
+        customer_name?: string;
+        customer_id?: string;
+        total_spend?: number;
+        order_count?: number;
+    }>;
+    transactionValueAndVolume?: Array<{
+        tran_type: string;
+        volume: number;
+        value: number;
+    }>;
     merchantStatusBreakdown: {
         APPROVED: number;
         PENDING: number;
         DECLINED: number;
+    };
+    orderVolumeSummary?: {
+        order_value: number;
+        order_volume: number;
     };
     monthlyRevenueTrend: Array<{
         volume: number;
@@ -52,377 +80,542 @@ interface DashboardResponse {
         order_count?: number;
         rider_id?: string;
         total_sales?: number;
+        fullname?: string;
+        total_revenue?: number;
+        delivery_count?: number;
+        username?: string;
     }>;
 }
 
-const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-NG', {
+const formatCurrency = (amount: number): string =>
+    new Intl.NumberFormat('en-NG', {
         style: 'currency',
         currency: 'NGN',
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0
+        maximumFractionDigits: 0,
     }).format(amount);
-};
 
-const formatNumber = (num: number): string => {
-    return new Intl.NumberFormat('en-NG').format(num);
-};
+const formatNumber = (num: number): string =>
+    new Intl.NumberFormat('en-NG').format(num);
 
-const MetricCard = ({
-    title,
-    value,
-    isPrimary = false
-}: {
-    title: string;
-    value: string | number;
-    isPrimary?: boolean;
-}) => {
-    return (
-        <Card className={cn(
-            'relative overflow-hidden border border-accent/20 rounded-xl transition-all duration-300',
-            isPrimary
-                ? 'bg-accent text-white'
-                : 'bg-white text-accent-foreground'
-        )}>
-            <div className="absolute top-0 right-0 w-40 h-40 overflow-hidden">
-                <div className={cn(
-                    "rounded-xl absolute top-4 -right-22 rotate-40 w-44 h-25 transform origin-center",
-                    isPrimary ? "bg-white/20" : "bg-accent/30"
-                )} />
-                <div className={cn(
-                    "rounded-xl absolute top-8 -right-24 rotate-40 w-44 h-30 transform origin-center",
-                    isPrimary ? "bg-white/20" : "bg-accent/30"
-                )} />
+const WalletCard = ({ value }: { value: string }) => (
+    <Card
+        className="relative overflow-hidden rounded-2xl border-0 shadow-none"
+        style={{
+            backgroundImage: 'url("/images/wallet-bg.png")',
+            backgroundColor: '#F56B08',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            minHeight: 110,
+        }}
+    >
+        <CardContent className="relative z-10 p-6 flex justify-between">
+            <div>
+                <p className="text-[#F7CFB5] text-sm font-medium mb-1.5">Total Revenue</p>
+                <p className="text-white text-3xl font-semibold tracking-tight">{value}</p>
             </div>
+            <div className='p-2 bg-[#F1702D] rounded-full max-h-fit'>
+                <EyeIcon className='text-white' />
+            </div>
+        </CardContent>
+    </Card>
+);
 
-            <CardContent className="p-6 relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                    <span className={cn(
-                        "text-sm font-medium",
-                        isPrimary ? "text-white/90" : "text-accent-foreground/70"
-                    )}>
-                        {title}
-                    </span>
-                </div>
+const StatCard = ({ title, value }: { title: string; value: string | number }) => (
+    <Card className="rounded-2xl bg-white border-0 shadow-none">
+        <CardContent className="p-6">
+            <p className="text-medium-gray text-sm font-medium mb-1.5">{title}</p>
+            <p className="text-dark-gray text-3xl font-semibold">{value}</p>
+        </CardContent>
+    </Card>
+);
 
-                <p className={cn(
-                    "text-3xl font-bold mb-2",
-                    isPrimary ? "text-white" : "text-accent-foreground"
-                )}>
-                    {value}
-                </p>
-            </CardContent>
-        </Card>
+const RADIAN = Math.PI / 180;
+
+const renderCustomizedLabel = ({
+    cx, cy, midAngle, outerRadius, value, fill,
+}: any) => {
+    // 1. Point where line touches the pie edge
+    const touchX = cx + outerRadius * Math.cos(-midAngle * RADIAN);
+    const touchY = cy + outerRadius * Math.sin(-midAngle * RADIAN);
+
+    // 2. Short radial extension (~5px) before curve starts
+    const radialLen = 5;
+    const p1x = cx + (outerRadius + radialLen) * Math.cos(-midAngle * RADIAN);
+    const p1y = cy + (outerRadius + radialLen) * Math.sin(-midAngle * RADIAN);
+
+    // 3. Elbow point — where horizontal arm starts (~22px out from pie)
+    const elbowLen = 10;
+    const isRight = Math.cos(-midAngle * RADIAN) >= 0;
+    const ex = cx + (outerRadius + elbowLen) * Math.cos(-midAngle * RADIAN);
+    const ey = cy + (outerRadius + elbowLen) * Math.sin(-midAngle * RADIAN);
+
+    // 4. Tip of horizontal arm (15px horizontal from elbow)
+    const armLen = 70;
+    const tipX = ex + (isRight ? armLen : -armLen);
+    const tipY = ey;
+
+    const textAnchor = isRight ? 'start' : 'end';
+    const textX = tipX + (isRight ? 4 : -4);
+
+    return (
+        <g>
+            {/* Dot where line meets pie */}
+            <circle cx={touchX} cy={touchY} r={0} fill={fill} />
+
+            {/* Path: radial nub → cubic curve → horizontal arm */}
+            <path
+                d={`M${touchX},${touchY} L${p1x},${p1y} C${p1x},${p1y} ${ex},${ey} ${ex},${ey} L${tipX},${tipY}`}
+                stroke={fill}
+                fill="none"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+
+            {/* Number BELOW the horizontal tip */}
+            <text
+                x={textX}
+                y={tipY + 14}
+                textAnchor={textAnchor}
+                fill="#212121"
+                fontSize={12}
+                fontWeight={600}
+            >
+                {formatNumber(value)}
+            </text>
+        </g>
     );
+};
+
+const MERCHANT_STATUS_COLORS = {
+    Approved: '#018E25',
+    Pending: '#F59E0B',
+    Declined: '#FF383C',
 };
 
 const DonutChart = ({ data }: { data: Array<{ name: string; value: number; color: string }> }) => {
     const total = data.reduce((sum, item) => sum + item.value, 0);
-
     return (
         <div className="relative flex justify-center items-center">
-            <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
+            <ResponsiveContainer width="100%" height={210}>
+                <PieChart margin={{ top: 40, right: 60, bottom: 40, left: 60 }}>
                     <Pie
                         data={data}
                         cx="50%"
                         cy="50%"
-                        innerRadius={80}
-                        outerRadius={120}
+                        innerRadius={40}   // ← much smaller inner circle
+                        outerRadius={90}  // ← thick ring
                         paddingAngle={2}
                         dataKey="value"
                         stroke="none"
                         startAngle={90}
                         endAngle={-270}
+                        labelLine={false}
+                        label={renderCustomizedLabel}
                     >
                         {data.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                     </Pie>
                     <Tooltip
-                        formatter={(value: number) => [formatNumber(value), '']}
-                        contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                        formatter={(value: any) => [formatNumber(value as number), '']}
+                        contentStyle={{ borderRadius: '15px', border: '1px solid #e5e7eb', fontSize: 10 }}
                     />
                 </PieChart>
             </ResponsiveContainer>
-            <div className="absolute text-center">
-                <p className="text-2xl font-bold text-accent-foreground">{formatNumber(total)}</p>
-                <p className="text-xs text-accent-foreground/70">Total Merchants</p>
+
+            <div className="absolute text-center pointer-events-none">
+                <p className="text-2xl font-bold text-dark-gray">{formatNumber(total)}</p>
             </div>
         </div>
     );
 };
 
-const RevenueTrendChart = ({ data }: { data: Array<{ month_name: string; total_amount: number }> }) => {
-    const filteredData = data.filter(item => item.total_amount > 0 || item.month_name !== '');
-    const displayData = filteredData.length > 0 ? filteredData : data;
+const CustomRevenueDot = (props: any) => {
+    const { cx, cy, fill } = props;
+    return (
+        <g>
+            <circle cx={cx} cy={cy} r={10} fill={fill} opacity={0.18} />
+            <circle cx={cx} cy={cy} r={6} fill={fill} opacity={0.35} />
+            <circle cx={cx} cy={cy} r={4} fill={fill} stroke="#fff" strokeWidth={1.5} />
+        </g>
+    );
+};
 
-    const maxRevenue = Math.max(...displayData.map(item => item.total_amount), 0);
-    const yAxisMax = Math.ceil(maxRevenue / 150000) * 150000 || 150000;
+const CustomActiveRevenueDot = (props: any) => {
+    const { cx, cy } = props;
+    return (
+        <g>
+            <circle cx={cx} cy={cy} r={14} fill="#F56B08" opacity={0.15} />
+            <circle cx={cx} cy={cy} r={9} fill="#F56B08" opacity={0.3} />
+            <circle cx={cx} cy={cy} r={5} fill="#F56B08" stroke="#fff" strokeWidth={2} />
+        </g>
+    );
+};
+
+const RevenueTrendChart = ({
+    data,
+}: {
+    data: Array<{ month_name: string; total_amount: number }>;
+}) => {
+    const displayData = data.filter((d) => d.month_name !== '');
+    const amounts = displayData.map((d) => d.total_amount).filter((v) => v > 0);
+    const minAmount = amounts.length > 0 ? Math.min(...amounts) : 0;
+    const maxAmount = amounts.length > 0 ? Math.max(...amounts) : 150000;
+    const yMin = minAmount > 0 ? Math.floor(minAmount / 10000) * 10000 : 0;
+    const yMax = Math.ceil(maxAmount / 10000) * 10000 + 10000;
 
     return (
         <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={displayData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
+            <LineChart data={displayData} margin={{ top: 20, right: 24, left: 8, bottom: 10 }}>
                 <CartesianGrid
-                    strokeDasharray="5 5"
-                    stroke="#e2e8f0"
-                    vertical={false}
+                    strokeDasharray="4 4"
+                    stroke="#9E9E9E"
+                    horizontal={true}
+                    vertical={true}
                 />
                 <XAxis
                     dataKey="month_name"
-                    axisLine={false}
+                    axisLine={{ stroke: '#9E9E9E', strokeWidth: 1.5 }}
                     tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
+                    tick={{ fill: '#212121', fontSize: 12 }}
                 />
                 <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#64748b', fontSize: 12 }}
-                    tickFormatter={(value) => `₦${value / 1000}k`}
-                    domain={[0, yAxisMax]}
+                    tick={{ fill: '#212121', fontSize: 12 }}
+                    tickFormatter={(v) => `₦${v / 1000}k`}
+                    domain={[yMin, yMax]}
                 />
                 <Tooltip
-                    formatter={(value: number) => [formatCurrency(value), 'Revenue']}
-                    contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                    formatter={(value: any) => [formatCurrency(value as number), 'Revenue']}
+                    contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 13 }}
                 />
                 <defs>
-                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#D8480B" stopOpacity={0.8} />
-                        <stop offset="100%" stopColor="#d26131" stopOpacity={0.8} />
+                    <linearGradient id="revenueLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#F56B08" />
+                        <stop offset="100%" stopColor="#F56B08" />
                     </linearGradient>
-                    <filter id="shadow" x="-0.5" y="-0.5" width="2" height="2">
-                        <feDropShadow dx="2" dy="2" stdDeviation="2" floodColor="#8B5F4C" floodOpacity="0.3" />
-                    </filter>
                 </defs>
                 <Line
                     type="monotone"
                     dataKey="total_amount"
-                    stroke="url(#lineGradient)"
-                    strokeWidth={3}
-                    dot={{
-                        fill: '#D8480B',
-                        stroke: '#D8480B',
-                        strokeWidth: 2,
-                        r: 5,
-                        filter: 'url(#shadow)'
-                    }}
-                    activeDot={{ r: 7, fill: '#d26131', stroke: '#D8480B', strokeWidth: 2 }}
+                    stroke="url(#revenueLineGradient)"
+                    strokeWidth={2.5}
+                    dot={<CustomRevenueDot fill="#F56B08" />}
+                    activeDot={<CustomActiveRevenueDot />}
                 />
             </LineChart>
         </ResponsiveContainer>
     );
 };
 
-const HorizontalBarChart = ({ data, title, valuePrefix = '₦' }: { data: any[]; title: string; valuePrefix?: string }) => {
+const HorizontalBarChart = ({
+    data,
+    valuePrefix = '₦',
+    showCount = false,
+    countLabel = 'orders',
+}: {
+    data: any[];
+    title?: string;
+    valuePrefix?: string;
+    showCount?: boolean;
+    countLabel?: string;
+}) => {
     if (!data || data.length === 0) {
         return (
-            <div className="flex items-center justify-center h-64 text-accent-foreground/50">
+            <div className="flex items-center justify-center h-40 text-medium-gray text-sm">
                 No data available
             </div>
         );
     }
-
-    const maxRevenue = Math.max(...data.map(item => item.total_sales || item.revenue || 0));
-
+    const maxRevenue = Math.max(...data.map((item) => item.total_sales || item.total_spend || 0));
     return (
-        <div className="space-y-4">
-            <div className="space-y-3">
-                {data.map((item, index) => {
-                    const revenue = item.total_sales || item.revenue || 0;
-                    const percentage = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
-                    const name = item.business_name || item.name || item.rider_name || 'Unknown';
-
-                    return (
-                        <div key={item.merchant_id || item.rider_id || index} className="space-y-1">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-accent-foreground/80 truncate max-w-[60%]" title={name}>
-                                    {name}
-                                </span>
-                                <span className="font-medium text-accent-foreground whitespace-nowrap">
+        <div className="space-y-3">
+            {data.map((item, index) => {
+                const revenue = item.total_sales || item.total_spend || 0;
+                const count = item.order_count || item.delivery_count || 0;
+                const pct = maxRevenue > 0 ? (revenue / maxRevenue) * 100 : 0;
+                const name =
+                    item.business_name || item.customer_name || item.rider_name || 'Unknown';
+                return (
+                    <div key={item.merchant_id || item.rider_id || item.customer_id || index} className="space-y-1.5">
+                        <div className="flex justify-between items-baseline gap-2">
+                            <span className="text-sm text-medium-gray font-medium truncate max-w-[55%]" title={name}>
+                                {name}
+                            </span>
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                                {showCount && count > 0 && (
+                                    <span className="text-[10px] text-medium-gray bg-gray-50 px-2 py-0.5 rounded-full">
+                                        {formatNumber(count)} {countLabel}
+                                    </span>
+                                )}
+                                <span className="text-sm font-semibold text-dark-gray whitespace-nowrap">
                                     {valuePrefix}{formatNumber(revenue)}
                                 </span>
                             </div>
-                            <div className="relative h-8 bg-accent/10 rounded-lg overflow-hidden">
-                                <div
-                                    className="absolute left-0 top-0 h-full bg-accent rounded-lg transition-all duration-500"
-                                    style={{ width: `${percentage}%` }}
-                                />
-                                {/* {percentage > 15 && (
-                                    <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-white font-medium">
-                                        {valuePrefix}{formatNumber(revenue)}
-                                    </div>
-                                )} */}
-                            </div>
                         </div>
-                    );
-                })}
-            </div>
+                        <div className="relative h-5 bg-[#FEE9DA] overflow-hidden">
+                            <div
+                                className="absolute left-0 top-0 h-full transition-all duration-500"
+                                style={{
+                                    width: `${pct}%`,
+                                    backgroundColor: '#F78939',
+                                }}
+                            />
+                        </div>
+                    </div>
+                );
+            })}
         </div>
     );
 };
 
-export default function OperationsDashboard() {
-    // const { usePermissionGuard } = usePermission();
+const ActiveInactiveChart = ({
+    merchants,
+    customers,
+}: {
+    merchants: { active: number; inactive: number };
+    customers: { active: number; inactive: number };
+}) => {
+    const data = [
+        {
+            name: 'Merchants',
+            Active: merchants.active,
+            Inactive: merchants.inactive,
+        },
+        {
+            name: 'Customers',
+            Active: customers.active,
+            Inactive: customers.inactive,
+        },
+    ];
+    return (
+        <ResponsiveContainer width="100%" height={210}>
+            <BarChart data={data} barCategoryGap="35%" barGap={4} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" vertical={false} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#212121', fontSize: 13 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#212121', fontSize: 12 }} />
+                <Tooltip
+                    formatter={(value: any) => [formatNumber(value as number), '']}
+                    contentStyle={{ borderRadius: '10px', border: '1px solid #e5e7eb', fontSize: 13 }}
+                />
+                <Legend wrapperStyle={{ fontSize: 13, paddingTop: 8 }} />
+                <Bar dataKey="Active" fill="#018E25" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="Inactive" fill="#FF383C" radius={[6, 6, 0, 0]} />
+            </BarChart>
+        </ResponsiveContainer>
+    );
+};
 
-    // usePermissionGuard('VIEW_DASHBOARD', {
-    //     redirectToNotPermitted: true,
-    //     toastMessage: "You don't have permission to view dashboard"
-    // });
+const TxCard = ({
+    label,
+    count,
+    value,
+    color,
+}: {
+    label: string;
+    count: number;
+    value: number;
+    color: string;
+}) => (
+    <div
+        className="rounded-xl p-4 border border-gray-100 bg-white flex flex-col gap-1 shadow-sm"
+        style={{ borderLeft: `4px solid ${color}` }}
+    >
+        <p className="text-medium-gray text-xs font-semibold">{label}</p>
+        <p className="text-dark-gray  text-lg font-bold">{formatCurrency(value)}</p>
+        <p className="text-medium-gray  text-xs">{formatNumber(count)} transactions</p>
+    </div>
+);
+
+const filterOptions = [
+    { value: 'this_week', label: 'This Week' },
+    { value: 'last_week', label: 'Last Week' },
+    { value: 'this_month', label: 'This Month' },
+    { value: 'last_month', label: 'Last Month' },
+    { value: 'this_year', label: 'This Year' },
+    { value: 'custom', label: 'Custom Range' },
+];
+
+const calculateDateRange = (
+    filter: string,
+    customStart?: string,
+    customEnd?: string
+) => {
+    const now = new Date();
+    let start = new Date();
+    let end = new Date();
+    const fmt = (d: Date) =>
+        `${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1)
+            .toString()
+            .padStart(2, '0')}-${d.getFullYear()}`;
+
+    switch (filter) {
+        case 'this_week':
+            start = new Date(now);
+            start.setDate(now.getDate() - now.getDay());
+            start.setHours(0, 0, 0, 0);
+            end = new Date();
+            break;
+        case 'last_week':
+            start = new Date(now);
+            start.setDate(now.getDate() - now.getDay() - 7);
+            start.setHours(0, 0, 0, 0);
+            end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            end.setHours(23, 59, 59, 999);
+            break;
+        case 'this_month':
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date();
+            break;
+        case 'last_month':
+            start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            end = new Date(now.getFullYear(), now.getMonth(), 0);
+            break;
+        case 'this_year':
+            start = new Date(now.getFullYear(), 0, 1);
+            end = new Date();
+            break;
+        case 'custom':
+            if (customStart && customEnd) {
+                const [sD, sM, sY] = customStart.split('-');
+                const [eD, eM, eY] = customEnd.split('-');
+                start = new Date(+sY, +sM - 1, +sD);
+                end = new Date(+eY, +eM - 1, +eD);
+            }
+            break;
+        default:
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+            end = new Date();
+    }
+    return { startDate: fmt(start), endDate: fmt(end) };
+};
+
+const formatDisplayDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    try {
+        const [day, month, year] = dateStr.split('-');
+        return new Date(+year, +month - 1, +day).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    } catch {
+        return dateStr;
+    }
+};
+
+export default function OperationsDashboard() {
+    usePageMetadata('Operations Dashboard', 'Overview of key metrics and performance indicators.')
+    const { usePermissionGuard } = usePermission();
+    usePermissionGuard('VIEW_DASHBOARD', {
+        redirectToNotPermitted: true,
+        toastMessage: "You don't have permission to view dashboard",
+    });
 
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [showCalendar, setShowCalendar] = useState(false);
-    const [customStartDate, setCustomStartDate] = useState('');
-    const [customEndDate, setCustomEndDate] = useState('');
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
-    const [selectedFilter, setSelectedFilter] = useState('this_month');
-
-    const filterOptions = [
-        { value: 'this_week', label: 'This Week' },
-        { value: 'last_week', label: 'Last Week' },
-        { value: 'this_month', label: 'This Month' },
-        { value: 'last_month', label: 'Last Month' },
-        { value: 'this_year', label: 'This Year' },
-        { value: 'custom', label: 'Custom Range' },
-    ];
-
-    const calculateDateRange = (filter: string, customStart?: string, customEnd?: string) => {
-        const now = new Date();
-        let start = new Date();
-        let end = new Date();
-
-        switch (filter) {
-            case 'this_week':
-                const day = now.getDay();
-                start = new Date(now);
-                start.setDate(now.getDate() - day);
-                start.setHours(0, 0, 0, 0);
-                end = new Date();
-                break;
-            case 'last_week':
-                const lastWeekStart = new Date(now);
-                lastWeekStart.setDate(now.getDate() - now.getDay() - 7);
-                lastWeekStart.setHours(0, 0, 0, 0);
-                start = lastWeekStart;
-                end = new Date(lastWeekStart);
-                end.setDate(lastWeekStart.getDate() + 6);
-                end.setHours(23, 59, 59, 999);
-                break;
-            case 'this_month':
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date();
-                break;
-            case 'last_month':
-                start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                end = new Date(now.getFullYear(), now.getMonth(), 0);
-                break;
-            case 'this_year':
-                start = new Date(now.getFullYear(), 0, 1);
-                end = new Date();
-                break;
-            case 'custom':
-                if (customStart && customEnd) {
-                    const [sDay, sMonth, sYear] = customStart.split('-');
-                    const [eDay, eMonth, eYear] = customEnd.split('-');
-                    start = new Date(parseInt(sYear), parseInt(sMonth) - 1, parseInt(sDay));
-                    end = new Date(parseInt(eYear), parseInt(eMonth) - 1, parseInt(eDay));
-                }
-                break;
-            default:
-                start = new Date(now.getFullYear(), now.getMonth(), 1);
-                end = new Date();
-        }
-
-        return {
-            startDate: `${start.getDate().toString().padStart(2, '0')}-${(start.getMonth() + 1).toString().padStart(2, '0')}-${start.getFullYear()}`,
-            endDate: `${end.getDate().toString().padStart(2, '0')}-${(end.getMonth() + 1).toString().padStart(2, '0')}-${end.getFullYear()}`
-        };
-    };
-
-    const formatDisplayDate = (dateStr: string) => {
-        if (!dateStr) return '';
-        try {
-            const [day, month, year] = dateStr.split('-');
-            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        } catch {
-            return dateStr;
-        }
-    };
-
-    const formatDateForApi = (date: Date): string => {
-        return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
-    };
+    const [selectedFilter, setSelectedFilter] = useState('this_year');
+    const filterRef = useRef<HTMLDivElement>(null);
 
     const { data: dashboardData, isLoading, error, refetch } = useQuery<DashboardResponse>({
         queryKey: ['dashboard-summary', dateRange.startDate, dateRange.endDate],
         queryFn: async () => {
-            const params: any = {
-                startDate: dateRange.startDate,
-                endDate: dateRange.endDate,
-                entityCode: process.env.NEXT_PUBLIC_ENTITYCODE
-            };
-
             const response = await axiosOperations.request({
                 method: 'GET',
                 url: '/store-dashboard/adminSummary',
-                params,
+                params: {
+                    startDate: dateRange.startDate,
+                    endDate: dateRange.endDate,
+                    entityCode: process.env.NEXT_PUBLIC_ENTITYCODE,
+                },
             });
             return response.data;
         },
         enabled: !!dateRange.startDate && !!dateRange.endDate,
     });
 
-    // Handle filter change
+    useEffect(() => {
+        setDateRange(calculateDateRange('this_year'));
+    }, []);
+
     const handleFilterChange = (filter: string) => {
         setSelectedFilter(filter);
         if (filter === 'custom') {
-            setShowCalendar(true);
+            setShowDatePicker(true);
             setIsFilterOpen(false);
         } else {
-            const range = calculateDateRange(filter);
-            setDateRange(range);
+            setDateRange(calculateDateRange(filter));
             setIsFilterOpen(false);
         }
     };
 
-    const handleCustomDateApply = () => {
-        if (customStartDate && customEndDate) {
-            const range = calculateDateRange('custom', customStartDate, customEndDate);
-            setDateRange(range);
-            setShowCalendar(false);
-            setSelectedFilter('custom');
-        }
+    const handleDateRangeApply = (start: string, end: string) => {
+        setDateRange({ startDate: start, endDate: end });
+        setShowDatePicker(false);
+        setSelectedFilter('custom');
     };
 
-    const handleCustomDateCancel = () => {
-        setCustomStartDate('');
-        setCustomEndDate('');
-        setShowCalendar(false);
-    };
-
-    useEffect(() => {
-        const initialRange = calculateDateRange('this_month');
-        setDateRange(initialRange);
-    }, []);
-
-    const merchantStatusData = dashboardData?.merchantStatusBreakdown ? [
-        { name: 'Approved', value: dashboardData.merchantStatusBreakdown.APPROVED || 0, color: '#D8480B' },
-        { name: 'Pending', value: dashboardData.merchantStatusBreakdown.PENDING || 0, color: '#F59E0B' },
-        { name: 'Declined', value: dashboardData.merchantStatusBreakdown.DECLINED || 0, color: '#ff0303' },
-    ] : [];
+    const merchantStatusData = dashboardData?.merchantStatusBreakdown
+        ? [
+            { name: 'Approved', value: dashboardData.merchantStatusBreakdown.APPROVED || 0, color: MERCHANT_STATUS_COLORS.Approved },
+            { name: 'Pending', value: dashboardData.merchantStatusBreakdown.PENDING || 0, color: MERCHANT_STATUS_COLORS.Pending },
+            { name: 'Declined', value: dashboardData.merchantStatusBreakdown.DECLINED || 0, color: MERCHANT_STATUS_COLORS.Declined },
+        ]
+        : [];
 
     const revenueTrendData = dashboardData?.monthlyRevenueTrend || [];
+    const topMerchantsData = dashboardData?.topMerchants || [];
+    const topRidersData = dashboardData?.topRiders || [];
+    const topCustomersData = dashboardData?.topCustomers || [];
 
-    const topMerchantsData = dashboardData?.topMerchants
+    const txDataArray = dashboardData?.transactionValueAndVolume || [];
+    const txTypes = [
+        {
+            label: 'Transfer',
+            color: '#9200C7',
+            count: txDataArray.find(t => t.tran_type === 'Transfer')?.volume || 0,
+            value: txDataArray.find(t => t.tran_type === 'Transfer')?.value || 0
+        },
+        {
+            label: 'Bill Payment',
+            color: '#F59E0B',
+            count: txDataArray.find(t => t.tran_type === 'Bill Payment')?.volume || 0,
+            value: txDataArray.find(t => t.tran_type === 'Bill Payment')?.value || 0
+        },
+        {
+            label: 'Data',
+            color: '#018E25',
+            count: txDataArray.find(t => t.tran_type === 'Data')?.volume || 0,
+            value: txDataArray.find(t => t.tran_type === 'Data')?.value || 0
+        },
+        {
+            label: 'Airtime',
+            color: '#FF383C',
+            count: txDataArray.find(t => t.tran_type === 'Airtime')?.volume || 0,
+            value: txDataArray.find(t => t.tran_type === 'Airtime')?.value || 0
+        },
+    ];
 
-    const topRidersData = dashboardData?.topRiders
+    const merchants = {
+        active: dashboardData?.merchantActivityBreakdown?.activeMerchants || 0,
+        inactive: dashboardData?.merchantActivityBreakdown?.inactiveMerchants || 0,
+    };
+    const customers = {
+        active: dashboardData?.customerActivityBreakdown?.activeCustomers || 0,
+        inactive: dashboardData?.customerActivityBreakdown?.inactiveCustomers || 0,
+    };
 
     if (isLoading && !dashboardData) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                    <p className="mt-2 text-accent-foreground/70">Loading dashboard data...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-faded-accent mx-auto" />
+                    <p className="mt-3 text-gray-500 text-sm">Loading dashboard data…</p>
                 </div>
             </div>
         );
@@ -430,14 +623,10 @@ export default function OperationsDashboard() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-500 mb-2">Error loading dashboard data</p>
-                    <Button
-                        variant="outline"
-                        onClick={() => refetch()}
-                        className="border-accent/20 hover:bg-accent/10"
-                    >
+                    <p className="text-red-500 mb-3 text-sm">Error loading dashboard data</p>
+                    <Button variant="outline" onClick={() => refetch()} className="border-gray-200">
                         Try Again
                     </Button>
                 </div>
@@ -446,253 +635,248 @@ export default function OperationsDashboard() {
     }
 
     return (
-        <div className="min-h-screen bg-white">
-            <div className="container mx-auto p-6">
-                <div className="mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <>
+            <div className="min-h-screen">
+                <div className="container mx-auto px-2">
+                    <div className="mb-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-accent-foreground mb-2">
-                                Operations Dashboard
-                            </h1>
-                            <p className="text-accent-foreground/70">
-                                Overview of key metrics and performance indicators
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            {/* <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => refetch()}
-                                className="border-accent/20 hover:bg-accent/10"
-                            >
-                                <RefreshCw className="w-4 h-4 mr-2" />
-                                Refresh
-                            </Button> */}
-
-                            <div className="relative">
-                                <button
-                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                    className="flex items-center justify-between gap-2 rounded-lg border border-accent/20 bg-white px-4 py-2 text-sm font-medium text-accent-foreground shadow-sm hover:bg-accent/5 focus:outline-none focus:ring-2 focus:ring-accent/20"
-                                    style={{ minWidth: '200px' }}
-                                >
-                                    <Calendar className="h-4 w-4 text-accent" />
-                                    <span>
-                                        {filterOptions.find(opt => opt.value === selectedFilter)?.label || 'Select Filter'}
+                            {dateRange.startDate && dateRange.endDate && (
+                                <p className="text-sm font-medium text-medium-gray mt-1">
+                                    Showing data from{' '}
+                                    <span className="font-semibold">
+                                        {formatDisplayDate(dateRange.startDate)}
+                                    </span>{' '}
+                                    to{' '}
+                                    <span className="font-semibold">
+                                        {formatDisplayDate(dateRange.endDate)}
                                     </span>
-                                    <ChevronDown className={`h-4 w-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                {isFilterOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() => setIsFilterOpen(false)}
-                                        />
-                                        <div className="absolute right-0 z-20 mt-1 w-48 rounded-md border border-accent/20 bg-white py-1 shadow-lg">
-                                            {filterOptions.map((option) => (
-                                                <button
-                                                    key={option.value}
-                                                    onClick={() => handleFilterChange(option.value)}
-                                                    className={`block w-full px-4 py-2 text-left text-sm hover:bg-accent/5 ${selectedFilter === option.value
-                                                        ? 'bg-accent/10 text-accent'
-                                                        : 'text-accent-foreground'
-                                                        }`}
-                                                >
-                                                    {option.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                                </p>
+                            )}
                         </div>
-                    </div>
 
-                    {dateRange.startDate && dateRange.endDate && (
-                        <div className="mt-2 flex justify-end">
-                            <p className="text-sm text-accent-foreground/70">
-                                Showing data from {formatDisplayDate(dateRange.startDate)} to {formatDisplayDate(dateRange.endDate)}
-                            </p>
-                        </div>
-                    )}
-                </div>
+                        <div className="relative" ref={filterRef}>
+                            <button
+                                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                className="flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-dark-gray hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-faded-accent/10"
+                                style={{ minWidth: '150px' }}
+                            >
+                                <span className="flex-1 text-left">
+                                    {filterOptions.find((o) => o.value === selectedFilter)?.label || 'Select Filter'}
+                                </span>
+                                <ArrowIcon
+                                    className={`h-4 w-4 text-dark-gray scale-80 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`}
+                                />
+                            </button>
 
-                {showCalendar && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                        <div className="rounded-lg bg-white p-6 shadow-xl" style={{ width: '400px' }}>
-                            <h3 className="text-lg font-medium text-accent-foreground mb-4">Select Date Range</h3>
-
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="startDate" className="text-accent-foreground">Start Date</Label>
-                                    <Input
-                                        id="startDate"
-                                        type="date"
-                                        value={customStartDate ? (() => {
-                                            const [day, month, year] = customStartDate.split('-');
-                                            return `${year}-${month}-${day}`;
-                                        })() : ''}
-                                        onChange={(e) => {
-                                            const date = e.target.value;
-                                            if (date) {
-                                                const [year, month, day] = date.split('-');
-                                                setCustomStartDate(`${day}-${month}-${year}`);
-                                            }
-                                        }}
-                                        className="border-accent/20 focus:border-accent"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="endDate" className="text-accent-foreground">End Date</Label>
-                                    <Input
-                                        id="endDate"
-                                        type="date"
-                                        value={customEndDate ? (() => {
-                                            const [day, month, year] = customEndDate.split('-');
-                                            return `${year}-${month}-${day}`;
-                                        })() : ''}
-                                        onChange={(e) => {
-                                            const date = e.target.value;
-                                            if (date) {
-                                                const [year, month, day] = date.split('-');
-                                                setCustomEndDate(`${day}-${month}-${year}`);
-                                            }
-                                        }}
-                                        className="border-accent/20 focus:border-accent"
-                                        min={customStartDate ? (() => {
-                                            const [day, month, year] = customStartDate.split('-');
-                                            return `${year}-${month}-${day}`;
-                                        })() : undefined}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mt-6 flex justify-end gap-3">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleCustomDateCancel}
-                                    className="border-accent/20 hover:bg-accent/10"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={handleCustomDateApply}
-                                    disabled={!customStartDate || !customEndDate}
-                                    className="bg-accent hover:bg-accent/90 text-white"
-                                >
-                                    Apply
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <MetricCard
-                        title="Total Revenue"
-                        value={formatCurrency(dashboardData?.totalRevenue || 0)}
-                        isPrimary={true}
-                    />
-                    <MetricCard
-                        title="Total Users"
-                        value={formatNumber(dashboardData?.totalUsers || 0)}
-                    />
-                    <MetricCard
-                        title="Total Merchants"
-                        value={formatNumber(dashboardData?.totalMerchants || 0)}
-                    />
-                    <MetricCard
-                        title="Total Riders"
-                        value={formatNumber(dashboardData?.totalRiders || 0)}
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <Card className="border-accent/20 shadow-sm">
-                        <CardHeader className="border-b border-accent/10">
-                            <CardTitle className="text-lg font-semibold text-accent-foreground">
-                                Merchant Status
-                            </CardTitle>
-                            <p className="text-xs text-accent-foreground/70 mt-1">
-                                Distribution of merchant approval status
-                            </p>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            {merchantStatusData.length > 0 && merchantStatusData.some(s => s.value > 0) ? (
+                            {isFilterOpen && (
                                 <>
-                                    <DonutChart data={merchantStatusData} />
-                                    <div className="flex justify-center gap-6 mt-4">
-                                        {merchantStatusData.map((status) => (
-                                            <div key={status.name} className="flex items-center gap-2">
-                                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: status.color }} />
-                                                <span className="text-sm text-accent-foreground/80">{status.name}</span>
-                                                <span className="text-sm font-semibold text-accent-foreground">{formatNumber(status.value)}</span>
-                                            </div>
+                                    <div className="fixed inset-0 z-10" onClick={() => setIsFilterOpen(false)} />
+                                    <div className="absolute right-0 z-20 mt-2 w-52 rounded-lg border border-gray-100 bg-white py-1.5 shadow-lg">
+                                        {filterOptions.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                onClick={() => handleFilterChange(option.value)}
+                                                className={cn(
+                                                    'block w-full px-4 py-2.5 text-left text-sm transition-colors',
+                                                    selectedFilter === option.value
+                                                        ? 'bg-faded-accent/10 text-text font-medium'
+                                                        : 'text-medium-gray hover:bg-gray-50'
+                                                )}
+                                            >
+                                                {option.label}
+                                            </button>
                                         ))}
                                     </div>
                                 </>
-                            ) : (
-                                <div className="flex items-center justify-center h-64 text-accent-foreground/50">
-                                    No merchant status data available
-                                </div>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
 
-                    <Card className="border-accent/20 shadow-sm">
-                        <CardHeader className="border-b border-accent/10">
-                            <CardTitle className="text-lg font-semibold text-accent-foreground">
-                                Revenue Trend
-                            </CardTitle>
-                            <p className="text-xs text-accent-foreground/70 mt-1">
-                                Monthly revenue performance
-                            </p>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            {revenueTrendData.length > 0 && revenueTrendData.some(r => r.total_amount > 0) ? (
-                                <RevenueTrendChart data={revenueTrendData} />
-                            ) : (
-                                <div className="flex items-center justify-center h-64 text-accent-foreground/50">
-                                    No revenue data available
+                    {showDatePicker && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                            <div className="bg-white rounded-2xl shadow-2xl p-6 w-[680px] max-w-[95vw]">
+                                <h3 className="text-base font-semibold text-dark-gray mb-4">Select Date Range</h3>
+                                <DateRangePicker
+                                    onApply={handleDateRangeApply}
+                                    onCancel={() => setShowDatePicker(false)}
+                                    initialStartDate={dateRange.startDate}
+                                    initialEndDate={dateRange.endDate}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+                        <WalletCard value={formatCurrency(dashboardData?.totalRevenue || 0)} />
+                        <StatCard title="Total Users" value={formatNumber(dashboardData?.totalUsers || 0)} />
+                        <StatCard title="Total Merchants" value={formatNumber(dashboardData?.totalMerchants || 0)} />
+                        <StatCard title="Total Riders" value={formatNumber(dashboardData?.totalRiders || 0)} />
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 mb-6">
+                        <StatCard title="Order Volume" value={formatNumber(dashboardData?.orderVolumeSummary?.order_volume || 0)} />
+                        <StatCard title="Active Merchants" value={formatNumber(merchants.active)} />
+                        <StatCard title="Inactive Merchants" value={formatNumber(merchants.inactive)} />
+                        <StatCard title="Active Customers" value={formatNumber(customers.active)} />
+                        <StatCard title="Inactive Customers" value={formatNumber(customers.inactive)} />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                        <Card className="rounded-2xl border-0 bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Merchant Status
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">
+                                    Distribution of merchant approval status
+                                </p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {merchantStatusData.some((s) => s.value > 0) ? (
+                                    <>
+                                        <DonutChart data={merchantStatusData} />
+                                        <div className="flex justify-center gap-6 mt-4">
+                                            {merchantStatusData.map((s) => (
+                                                <div key={s.name} className="flex items-center gap-1.5">
+                                                    <span className="w-2.5 h-2.5 rounded-full" style={{ background: s.color }} />
+                                                    <span className="text-xs text-dark-gray">{s.name}</span>
+                                                    {/* <span className="text-xs font-semibold text-gray-700">{formatNumber(s.value)}</span> */}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex items-center justify-center h-64 text-medium-gray text-sm">
+                                        No data available
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        <Card className="rounded-2xl border-0 bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Revenue Trend
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">Monthly revenue performance</p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {revenueTrendData.some((r) => r.total_amount > 0) ? (
+                                    <RevenueTrendChart data={revenueTrendData} />
+                                ) : (
+                                    <div className="flex items-center justify-center h-64 text-medium-gray text-sm">
+                                        No revenue data available
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+                        <Card className="rounded-2xl border-0 bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Active vs Inactive
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">
+                                    Merchants and customers engagement breakdown
+                                </p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <ActiveInactiveChart merchants={merchants} customers={customers} />
+                            </CardContent>
+                        </Card>
+
+                        <Card className="rounded-2xl border-0 bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Transaction Value &amp; Volume
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">
+                                    Transfer · Bill Payment · Data · Airtime
+                                </p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <div className="grid grid-cols-2 gap-3">
+                                    {txTypes.map((tx) => (
+                                        <TxCard
+                                            key={tx.label}
+                                            label={tx.label}
+                                            count={tx.count}
+                                            value={tx.value}
+                                            color={tx.color}
+                                        />
+                                    ))}
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card className="border-accent/20 shadow-sm">
-                        <CardHeader className="border-b border-accent/10">
-                            <CardTitle className="text-lg font-semibold text-accent-foreground">
-                                Top Merchants by Revenue
-                            </CardTitle>
-                            <p className="text-xs text-accent-foreground/70 mt-1">
-                                Highest earning merchants in selected period
-                            </p>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <HorizontalBarChart data={topMerchantsData} title="" />
-                        </CardContent>
-                    </Card>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                        <Card className="rounded-2xl border-0 bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Top Merchants by Revenue
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">
+                                    Highest earning merchants in selected period
+                                </p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <HorizontalBarChart data={topMerchantsData} showCount={true} countLabel="orders" />
+                            </CardContent>
+                        </Card>
 
-                    <Card className="border-accent/20 shadow-sm">
-                        <CardHeader className="border-b border-accent/10">
-                            <CardTitle className="text-lg font-semibold text-accent-foreground">
-                                Top Riders by Revenue
-                            </CardTitle>
-                            <p className="text-xs text-accent-foreground/70 mt-1">
-                                Highest earning riders in selected period
-                            </p>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            <HorizontalBarChart data={topRidersData} title="" />
-                        </CardContent>
-                    </Card>
+                        <Card className="rounded-2xl border-0 shadow-sm bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Top Riders by Revenue
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">
+                                    Highest earning riders in selected period
+                                </p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <HorizontalBarChart
+                                    data={topRidersData.map((rider) => ({
+                                        rider_name: rider.fullname || rider.rider_name,
+                                        rider_id: rider.rider_id || rider.username,
+                                        total_sales: rider.total_revenue || rider.total_sales || 0,
+                                        delivery_count: rider.delivery_count || 0,
+                                    }))}
+                                    showCount={true}
+                                    countLabel="deliveries"
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <Card className="rounded-2xl border-0 bg-white shadow-none">
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-md font-semibold text-dark-gray">
+                                    Top Customers
+                                </CardTitle>
+                                <p className="text-xs text-medium-gray -mt-1">
+                                    Highest spending customers in selected period
+                                </p>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                <HorizontalBarChart
+                                    data={topCustomersData.map((c) => ({
+                                        customer_name: c.customer_name,
+                                        customer_id: c.customer_id,
+                                        total_spend: c.total_spend,
+                                        order_count: c.order_count
+                                    }))}
+                                    showCount={true}
+                                    countLabel="orders"
+                                    valuePrefix="₦"
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </>
     );
 }

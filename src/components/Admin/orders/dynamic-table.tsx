@@ -846,12 +846,12 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex justify-between text-sm">
+                    {/* <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Delivery Fee:</span>
                       <span className="font-medium">
                         {selectedOrder.ccy || 'NGN'} {selectedOrder.deliveryFee?.toFixed(2) || '0.00'}
                       </span>
-                    </div>
+                    </div> */}
 
                     {selectedOrder.totalDiscount > 0 && (
                       <div className="flex justify-between text-sm">

@@ -50,9 +50,9 @@ const CreditScoreDashboard: React.FC<CreditScoreDashboardProps> = ({
   data,
   className
 }) => {
-    const {customer} = useCustomer()
-    console.log(data);
-    
+  const { customer } = useCustomer()
+  console.log(data);
+
   return (
     data?.scoreDetails ? <div className={cn("max-w-4xl mx-auto p-6 space-y-8", className)}>
       {/* Header */}
@@ -62,56 +62,56 @@ const CreditScoreDashboard: React.FC<CreditScoreDashboardProps> = ({
       </div>
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-         {/* Main Score Display */}
-      <Card className="p-8 bg-card border-0 shadow-lg">
-        <div className="flex flex-col items-center space-y-6">
-          <CircularProgress 
-            score={data?.totalScore} 
-            maxScore={100}
-            size={100}
-            strokeWidth={16}
-          />
-          
-          <div className="text-center space-y-3">
-            <Badge 
-              variant="outline" 
-              className={cn("text-lg px-6 py-2 font-semibold", getRatingColor(data?.rating))}
-            >
-              {data?.rating}
-            </Badge>
-            
-            <div className="text-xl font-bold text-accent">
-              {getStatusMessage(data?.rating)}
-            </div>
-            
-            <div className="text-sm text-muted-foreground">
-              Score: {data?.totalScore}/100
-            </div>
-          </div>
-        </div>
-      </Card>
+        {/* Main Score Display */}
+        <Card className="p-8 bg-card border-0 shadow-lg">
+          <div className="flex flex-col items-center space-y-6">
+            <CircularProgress
+              score={data?.totalScore}
+              maxScore={100}
+              size={100}
+              strokeWidth={16}
+            />
 
-      {/* Approved Amount */}
-      {data?.approvedAmount > 0 && (
-        <Card className="p-6 bg-card border-0 shadow-sm card-gradient flex items-center justify-center">
-          <div className="text-center space-y-2">
-            <h3 className="text-lg font-semibold text-foreground">Approved Credit Limit</h3>
-            <div className="text-3xl font-bold text-accent">
-              {formatPrice(data?.approvedAmount, customer?.ccy as CurrencyCode)}
+            <div className="text-center space-y-3">
+              <Badge
+                variant="outline"
+                className={cn("text-lg px-6 py-2 font-semibold", getRatingColor(data?.rating))}
+              >
+                {data?.rating}
+              </Badge>
+
+              <div className="text-xl font-bold text-accent">
+                {getStatusMessage(data?.rating)}
+              </div>
+
+              <div className="text-sm text-muted-foreground">
+                Score: {data?.totalScore}/100
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Based on your current credit profile
-            </p>
           </div>
         </Card>
-      )}
+
+        {/* Approved Amount */}
+        {data?.approvedAmount > 0 && (
+          <Card className="p-6 bg-card border-0 shadow-sm card-gradient flex items-center justify-center">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold text-foreground">Approved Credit Limit</h3>
+              <div className="text-3xl font-bold text-accent">
+                {formatPrice(data?.approvedAmount, customer?.ccy as CurrencyCode)}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Based on your current credit profile
+              </p>
+            </div>
+          </Card>
+        )}
 
       </div>
-     
+
       {/* Score Breakdown */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-foreground text-center">Score Breakdown</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {data?.scoreDetails?.map((detail) => (
             <ScoreCard
@@ -136,10 +136,13 @@ const CreditScoreDashboard: React.FC<CreditScoreDashboardProps> = ({
         </div>
       </Card>
     </div>
-    : 
-    <div className="flex items-center justify-center h-64">
-      <p className="text-muted-foreground">No credit score data available.</p>
-    </div>
+      :
+      <div className="flex flex-col items-center justify-center py-16 mt-20 gap-3">
+        <p className="text-2xl font-medium text-dark-gray">Coming Soon</p>
+        <p className="text-sm text-medium-gray text-center max-w-[300px]">
+          We're working hard to bring you a seamless way to monitor your credit score and financial health.
+        </p>
+      </div>
   );
 };
 

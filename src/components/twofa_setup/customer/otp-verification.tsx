@@ -46,8 +46,17 @@ export function OtpVerification() {
             return
         }
         // console.log(customer);
-        
-        setCustomer({...customer,twoFaSetupRequired:'N'})
+
+        if (!customer) {
+          toast?.error('Customer data is missing.')
+          return
+        }
+
+        setCustomer({
+          ...customer,
+          twoFaSetupRequired: 'N',
+          userPermissions: customer.userPermissions ?? []
+        })
         toast?.success(data?.data?.desc)
         // Redirect to the original intended page or dashboard
           router?.push(decodeURIComponent(returnUrl))

@@ -3,13 +3,8 @@
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-// import posIcon from '@/assets/ecommerce-svg.jpg'
 import Image from "next/image"
 import { useMutation } from "@tanstack/react-query"
-import axiosInstance from "@/utils/fetch-function"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Personal from "./onboarding/Personal"
@@ -20,7 +15,11 @@ import { formatDateToDDMMYYYY } from "@/utils/helperfns"
 import axiosCustomer from "@/utils/fetch-function-no-auth"
 import Link from "next/link"
 import { OtpVerification } from "./otp-verification"
-
+import SignUpBanner from "@/components/images/auth-banner.png"
+import logo from "@/components/images/direct-logo.png"
+import { SuccessTag, CheckIcon } from "../icons/icons"
+import { Loader2 } from "lucide-react"
+import { useLocationStore } from "@/store/locationStore"
 
 export interface FormData {
   firstname: string
@@ -30,6 +29,7 @@ export interface FormData {
   nationality: string
   state?: string
   city: string
+  address: string
   password: string
   cPassword: string
   gender: string
@@ -42,10 +42,12 @@ export interface FormData {
 }
 
 export function SignUpForm() {
+  const currentYear = new Date().getFullYear()
   const [currentStep, setCurrentStep] = useState(1)
-  const [onboardStep, setOnBoardStep] = useState<'register' | 'otp'>('register')
+  const [onboardStep, setOnBoardStep] = useState<'register' | 'otp' | 'success'>('register')
   const totalSteps = 4
   const router = useRouter()
+  const { location } = useLocationStore()
   const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg";
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
 
@@ -56,6 +58,9 @@ export function SignUpForm() {
     watch,
     setValue,
     getValues,
+    control,
+    setError,
+    clearErrors,
     formState: { errors, isValid },
     trigger,
   } = useForm<FormData>({
@@ -69,6 +74,7 @@ export function SignUpForm() {
       nationality: "",
       state: "",
       city: "",
+      address: "",
       password: "",
       cPassword: "",
       dateOfBirth: '',
@@ -113,7 +119,7 @@ export function SignUpForm() {
       channel: 'WEB',
       customerType: "",
       deviceId: "",
-      geolocation: "",
+      geolocation: location ? `${location?.latitude}, ${location?.longitude}` : '',
       lastname: value?.lastname,
       name: value?.firstname,
       middlename: "",
@@ -121,6 +127,7 @@ export function SignUpForm() {
       email: value?.email,
       entityCode: entityCode,
       city: value?.city,
+      address: value?.address,
       countryCode: nationalityData?.code,
       gender: value?.gender,
       onboardingId: "",
@@ -131,7 +138,7 @@ export function SignUpForm() {
       referralCode: "",
       ...(value.identificationType === 'bvn' && { bvn: value.bvn }),
       ...(value.identificationType === 'nin' && { nin: value.nin }),
-      // photoLink: value?.customerPic || "jbj"
+      // photoLink: value?.customerPic || ""
     }
 
     mutate(payload)
@@ -190,7 +197,7 @@ export function SignUpForm() {
           watchedValues.password === watchedValues.cPassword &&
           isPasswordStrongEnough(watchedValues.password)
       case 4:
-        return watchedValues.city && watchedValues?.nationality && watchedValues.agreeToTerms
+        return watchedValues.city && watchedValues.address && watchedValues?.nationality && watchedValues.agreeToTerms
       default:
         return false
     }
@@ -227,7 +234,7 @@ export function SignUpForm() {
       case 3:
         return ["password", "cPassword"]
       case 4:
-        return ["nationality", "city", "agreeToTerms"]
+        return ["nationality", "city", 'address', "agreeToTerms"]
       default:
         return []
     }
@@ -243,6 +250,8 @@ export function SignUpForm() {
           setValue={setValue}
           watchedValues={watchedValues}
           watch={watch}
+          setError={setError}
+          clearErrors={clearErrors}
         />
 
 
@@ -264,6 +273,7 @@ export function SignUpForm() {
           register={register}
           setValue={setValue}
           watchedValues={watchedValues}
+          control={control}
         />
 
       default:
@@ -290,15 +300,23 @@ export function SignUpForm() {
     setOnBoardStep('register')
   }
 
+  const handleLogin = () => {
+    router.push("/customer-login")
+  }
+
   return (
-    <div className="max-h-screen flex flex-col lg:flex-row">
-
-      <div className="absolute top-0 left-0 right-0 h-2 bg-accent z-20"></div>
-
-      <div className="h-screen hidden lg:flex lg:w-1/2 bg-gray-100 items-center justify-center p-8">
-        <div className="w-full h-full flex items-center justify-center">
+    <div className="flex flex-col lg:flex-row bg-[#F9FAFB]">
+      <div className='hidden lg:block lg:w-1/2 h-screen sticky top-0 p-4'>
+        <div className="bg-gradient-to-b from-[#F9FAFB] to-[#FE7211] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative">
           <Image
-            src={bannerUrl}
+            src={logo}
+            alt="Logo"
+            width={600}
+            height={600}
+            className="absolute top-0 left-0 p-5 max-w-[250px] h-auto object-contain"
+          />
+          <Image
+            src={SignUpBanner}
             alt="POS System Illustration"
             width={600}
             height={600}
@@ -307,95 +325,143 @@ export function SignUpForm() {
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 items-center justify-center p-4 sm:p-6 lg:p-8 pt-8 flex-1 overflow-y-auto">
-        {
-          onboardStep === 'otp'
-            ?
-            <OtpVerification
-              onBack={handleBackToRegistration}
-              email={getValues('email')}
-            />
-            :
-            <div className="w-full max-w-md space-y-6 w-full  mx-auto ">
-              <div className="space-y-2">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Customer Onboarding</h1>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Welcome, complete your user registration to get started.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center mb-6 relative">
-                <div className="flex items-center">
-                  {[1, 2, 3, 4].map((step, index) => (
-                    <div key={step} className="flex items-center">
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium relative z-10 ${step <= currentStep ? "bg-accent text-white" : "bg-gray-200 text-gray-600"
-                          }`}
-                      >
-                        {step}
-                      </div>
-                      {index < 3 && <div className={`w-20 h-0.5 ${step < currentStep ? "bg-accent" : "bg-gray-200"}`} />}
+      <div className="w-full lg:w-1/2 min-h-screen flex flex-col">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-8">
+          {
+            onboardStep === 'otp'
+              ?
+              <OtpVerification
+                onBack={handleBackToRegistration}
+                email={getValues('email')}
+                onSuccess={() => setTimeout(() => { setOnBoardStep('success') }, 3000)}
+              />
+              :
+              onboardStep === 'success'
+                ?
+                <>
+                  <div className="flex flex-col w-full max-w-md space-y-4 p-5 bg-white rounded-lg justify-self-center mt-20">
+                    <div className="flex items-center justify-center">
+                      <SuccessTag />
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="text-lg text-center sm:text-xl font-medium text-dark-gray">Success!</div>
+                    <div className="text-center text-medium-gray text-center text-xs leading-relaxed">
+                      Welcome aboard, {getValues('firstname')}! You have created an account successfully.
+                      Please login to view dashboard.
+                    </div>
 
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-gray-900">{getStepTitle()}</h2>
-                {renderStep()}
-
-                <div className="flex justify-between space-x-4">
-                  <Button
-                    type="button"
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    variant="outline"
-                    className="flex items-center space-x-2 px-6 py-3 disabled:opacity-50 bg-transparent"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>Previous</span>
-                  </Button>
-
-                  {currentStep < totalSteps ? (
                     <Button
-                      type="button"
-                      onClick={nextStep}
-                      disabled={!isStepComplete()}
-                      className="flex items-center space-x-2 bg-accent hover:bg-accent/70 text-white px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                      size='lg'
+                      onClick={handleLogin}
                     >
-                      <span>Next</span>
-                      <ChevronRight className="w-4 h-4" />
+                      Back to Login
                     </Button>
-                  ) : (
-                    <Button
-                      type="submit"
-                      onClick={handleSubmit(onSubmit)}
-                      disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
-                      className="bg-accent hover:bg-accent/70 text-white px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                  </div>
+                </>
+                :
+                <div className="w-full max-w-md space-y-6 w-full  mx-auto ">
+                  <div className="space-y-1 text-center">
+                    <h1 className="text-lg sm:text-xl font-medium text-dark-gray">Customer Onboarding</h1>
+                    <p className="text-medium-gray text-xs leading-relaxed">
+                      Welcome, complete your user registration to get started.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center justify-center mb-3 relative">
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4].map((step, index) => (
+                        <div key={step} className="flex items-center">
+                          <div
+                            className={`relative z-10 transition-all duration-200 ${step < currentStep
+                              ? "text-white"
+                              : step === currentStep
+                                ? "text-faded-accent"
+                                : "text-gray-300"
+                              }`}
+                          >
+                            {step < currentStep ? (
+                              <div className="w-4.5 h-4.5 rounded-full bg-faded-accent flex items-center justify-center">
+                                <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />
+                              </div>
+                            ) : (
+                              <>
+                                <div className={`w-4.5 h-4.5 rounded-full border-2 ${step === currentStep ? "border-faded-accent" : "border-gray-300"
+                                  }`} />
+                                <div className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${step === currentStep ? "bg-faded-accent" : "bg-gray-300"
+                                  }`} />
+                              </>
+                            )}
+                          </div>
+                          {index < 3 && (
+                            <div
+                              className={`w-24 h-0.5 transition-colors duration-200 ${step < currentStep ? "bg-faded-accent" : "bg-gray-200"
+                                }`}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h2 className="text-center text-md font-normal text-dark-gray">{getStepTitle()}</h2>
+
+                    <div className="bg-white p-5 rounded-lg">
+                      {renderStep()}
+
+                      <div className="flex justify-between mt-10">
+                        <Button
+                          type="button"
+                          onClick={prevStep}
+                          disabled={currentStep === 1}
+                          variant="ghost"
+                          className="border-2 border-input"
+                        >
+                          <span>Previous</span>
+                        </Button>
+
+                        {currentStep < totalSteps ? (
+                          <Button
+                            type="button"
+                            onClick={nextStep}
+                            disabled={!isStepComplete()}
+                          >
+                            <span>Next</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            type="submit"
+                            onClick={handleSubmit(onSubmit)}
+                            disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
+                          >
+                            {isPending ? (
+                              <>
+                                Submitting...
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              </>
+                            ) : (
+                              "Complete Registration"
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <span className="text-sm font-normal text-medium-gray">Already have an account? {''}</span>
+                    <Link
+                      href="/customer-login"
+                      className="text-sm text-faded-accent hover:text-accent/70"
                     >
-                      {isPending ? "Submitting..." : "Complete Registration"}
-                    </Button>
-                  )}
+                      Sign in
+                    </Link>
+                  </div>
                 </div>
-              </div>
-
-              <div className="text-center">
-                <span className="text-sm text-gray-600">
-                  Step {currentStep} of {totalSteps}
-                </span>
-              </div>
-
-              <div className="text-center">
-                <span className="text-sm text-gray-600">Already registered? </span>
-                <Link
-                  href="/customer-login"
-                  className="text-sm text-accent hover:text-accent/70 font-medium"
-                >
-                  Sign in
-                </Link>
-              </div>
-            </div>
-        }
+          }
+        </div>
+        <div className="text-center w-full text-xs text-[#9E9E9E] py-4 mt-auto">
+          © {currentYear} Fortitude. All Right Reserved
+        </div>
       </div>
     </div>
   )

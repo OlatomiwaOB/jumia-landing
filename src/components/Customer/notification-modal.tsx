@@ -1,15 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosCustomer from '@/utils/fetch-function-customer';
@@ -18,20 +10,15 @@ import {
     Bell,
     Info,
     AlertCircle,
-    CheckCircle,
     MessageSquare,
-    TrendingUp,
-    Archive,
-    ArchiveX,
     ChevronDown,
     ChevronRight,
-    Mail,
-    MailOpen,
     Star,
-    Clock,
     RefreshCw,
-    Banknote
+    Banknote,
+    X,
 } from 'lucide-react';
+import { ArchiveIcon } from '../icons/icons';
 
 interface Notification {
     id: number;
@@ -42,110 +29,106 @@ interface Notification {
     logo: string;
     username: string;
     status: 'UNREAD' | 'READ' | 'ARCHIVED';
+    audience: string;
+    createdDate: string;
 }
 
 interface NotificationsModalProps {
     isOpen: boolean;
     onClose: () => void;
+    anchorRef: React.RefObject<HTMLElement>;
+    onNotificationRead?: () => void;
 }
 
 const getNotificationIcon = (type: Notification['notificationType']) => {
     switch (type) {
-        case 'BROADCAST':
-            return <Bell className="w-4 h-4" />;
-        case 'NEW':
-            return <Star className="w-4 h-4" />;
-        case 'TRANSACTION':
-            return <Banknote className="w-4 h-4" />;
-        case 'FEEDBACK':
-            return <MessageSquare className="w-4 h-4" />;
-        case 'STATUS':
-            return <AlertCircle className="w-4 h-4" />;
-        case 'INFO':
-            return <Info className="w-4 h-4" />;
-        default:
-            return <Bell className="w-4 h-4" />;
+        case 'BROADCAST': return <Bell className="w-4 h-4" />;
+        case 'NEW': return <Star className="w-4 h-4" />;
+        case 'TRANSACTION': return <Banknote className="w-4 h-4" />;
+        case 'FEEDBACK': return <MessageSquare className="w-4 h-4" />;
+        case 'STATUS': return <AlertCircle className="w-4 h-4" />;
+        case 'INFO': return <Info className="w-4 h-4" />;
+        default: return <Bell className="w-4 h-4" />;
     }
 };
 
-const getStatusIcon = (status: Notification['status']) => {
-    switch (status) {
-        case 'UNREAD':
-            return <Mail className="w-3 h-3" />;
-        case 'READ':
-            return <MailOpen className="w-3 h-3" />;
-        case 'ARCHIVED':
-            return <Archive className="w-3 h-3" />;
-    }
-};
-
-const NotificationDetailModal = ({
+const NotificationDetailPanel = ({
     notification,
-    isOpen,
     onClose,
-    onArchive
+    onArchive,
 }: {
-    notification: Notification | null;
-    isOpen: boolean;
+    notification: Notification;
     onClose: () => void;
     onArchive: (id: number) => void;
-}) => {
-    if (!notification) return null;
+}) => (
+    <div className="flex flex-col h-full">
 
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader className='flex flex-col'>
-                    <DialogTitle className="flex items-center gap-2">
-                        {getNotificationIcon(notification.notificationType)}
-                        <span>{notification.title}</span>
-                    </DialogTitle>
-                    <DialogDescription>
-                        {``}
-                    </DialogDescription>
-                </DialogHeader>
+        <div className="flex items-center justify-between px-5 pt-5 pb-2">
+            <div className="flex items-center gap-2">
+                <h2 className="text-base font-semibold text-dark-gray">{notification.title}</h2>
+            </div>
+            <button
+                onClick={onClose}
+                className="bg-white p-1 rounded-full text-medium-gray hover:opacity-100 opacity-70 transition-opacity"
+            >
+                <X className="w-4 h-4" />
+            </button>
+        </div>
 
-                <div className="py-4">
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                        <p className="text-sm whitespace-pre-wrap">{notification.message}</p>
-                    </div>
-                </div>
+        <div className="px-5 pb-2">
+            <p className="text-xs text-medium-gray">{notification.createdDate}</p>
+        </div>
 
-                <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={onClose}>
-                        Close
-                    </Button>
-                    {notification.status !== 'ARCHIVED' && (
-                        <Button
-                            variant="secondary"
-                            onClick={() => {
-                                onArchive(notification.id);
-                                onClose();
-                            }}
-                        >
-                            <ArchiveX className="w-4 h-4 mr-2" />
-                            Archive
-                        </Button>
-                    )}
-                </div>
-            </DialogContent>
-        </Dialog>
-    );
-};
+        <div className="flex-1 overflow-y-auto px-4 pt-3 pb-2" style={{ scrollbarWidth: 'none' }}>
+            <div className="bg-white rounded-2xl p-4">
+                <p className="text-sm text-dark-gray whitespace-pre-wrap">{notification.message}</p>
+            </div>
+        </div>
 
-const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
+        <div className="flex items-center rounded-b-2xl justify-end gap-3 p-4 bg-white">
+            <Button variant="outline" onClick={onClose}>
+                Close
+            </Button>
+            {notification.status !== 'ARCHIVED' && (
+                <Button
+                    onClick={() => {
+                        onArchive(notification.id);
+                        onClose();
+                    }}
+                >
+                    <ArchiveIcon className="w-4 h-4 mr-2" />
+                    Archive
+                </Button>
+            )}
+        </div>
+    </div>
+);
+
+const NotificationsModal = ({ isOpen, onClose, anchorRef, onNotificationRead }: NotificationsModalProps) => {
     const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
-    const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [showArchived, setShowArchived] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const queryClient = useQueryClient();
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handler = (e: MouseEvent) => {
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+                anchorRef.current && !anchorRef.current.contains(e.target as Node)
+            ) {
+                onClose();
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [isOpen, onClose, anchorRef]);
+
     const { data: notificationsData, isLoading, refetch } = useQuery({
-        queryKey: ['notifications'],
+        queryKey: ['notifications-modal'],
         queryFn: async () => {
             const response = await axiosCustomer.get('/notification/fetch', {
-                params: {
-                    status: ''
-                }
+                params: { status: '' }
             });
             return response.data.notificationInfo as Notification[];
         },
@@ -154,14 +137,11 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
     const updateStatusMutation = useMutation({
         mutationFn: async ({ id, status }: { id: number; status: string }) => {
-            const response = await axiosCustomer.post('/notification/update-status', {
-                id,
-                status
-            });
+            const response = await axiosCustomer.post('/notification/update-status', { id, status });
             return response.data;
         },
         onSuccess: (_, variables) => {
-            queryClient.setQueryData(['notifications'], (oldData: Notification[] | undefined) => {
+            queryClient.setQueryData(['notifications-modal'], (oldData: Notification[] | undefined) => {
                 if (!oldData) return oldData;
                 return oldData.map(notification =>
                     notification.id === variables.id
@@ -172,6 +152,8 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
             if (variables.status === 'ARCHIVED') {
                 toast.success('Message archived successfully');
+            } else if (variables.status === 'READ') {
+                onNotificationRead?.();
             }
         },
         onError: () => {
@@ -181,8 +163,6 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
 
     const handleNotificationClick = (notification: Notification) => {
         setSelectedNotification(notification);
-        setIsDetailOpen(true);
-
         if (notification.status === 'UNREAD') {
             updateStatusMutation.mutate({ id: notification.id, status: 'READ' });
         }
@@ -192,9 +172,10 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         updateStatusMutation.mutate({ id, status: 'ARCHIVED' });
     };
 
+    const handleBackToList = () => setSelectedNotification(null);
+
     const groupedNotifications = React.useMemo(() => {
         if (!notificationsData) return { unread: [], read: [], archived: [] };
-
         return {
             unread: notificationsData.filter(n => n.status === 'UNREAD'),
             read: notificationsData.filter(n => n.status === 'READ'),
@@ -202,215 +183,192 @@ const NotificationsModal = ({ isOpen, onClose }: NotificationsModalProps) => {
         };
     }, [notificationsData]);
 
+    if (!isOpen) return null;
+
     return (
         <>
-            <Dialog open={isOpen} onOpenChange={onClose}>
-                <DialogContent className="sm:max-w-[600px] h-[600px] flex flex-col p-0 gap-0">
-                    <DialogHeader className="px-6 py-4 border-b">
-                        <div className=''>
-                            <div className="flex items-center gap-5">
-                                <DialogTitle className="flex items-center gap-2">
-                                    <Bell className="w-5 h-5" />
-                                    Notifications
-                                </DialogTitle>
+            <div
+                className="fixed bg-black/50 inset-0 z-40"
+                onClick={onClose}
+            />
 
+            <div
+                ref={dropdownRef}
+                className="fixed z-50 right-4 top-[72px] w-[340px] sm:w-[400px] bg-[#F5F5F5] rounded-2xl shadow-2xl border border-gray-100 flex flex-col"
+                style={{ maxHeight: 'calc(100vh - 96px)' }}
+            >
+                {selectedNotification ? (
+                    <NotificationDetailPanel
+                        notification={selectedNotification}
+                        onClose={handleBackToList}
+                        onArchive={handleArchive}
+                    />
+                ) : (
+                    <>
+                        <div className="flex items-center justify-between px-3 mx-4 pt-5 pb-1 border-b border-gray-100">
+                            <div className="flex items-center gap-1">
+                                <h2 className="text-lg font-semibold text-dark-gray">Notifications</h2>
                                 <Button
                                     variant="ghost"
-                                    size="sm"
+                                    size="xs"
                                     onClick={() => refetch()}
                                     disabled={isLoading}
                                 >
-                                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                                    <RefreshCw className={`w-2 h-2 ${isLoading ? 'animate-spin' : ''}`} />
                                 </Button>
                             </div>
-                            <DialogDescription>
-                                Stay updated with your latest notifications
-                            </DialogDescription>
+                            <button
+                                onClick={onClose}
+                                className="ring-offset-background bg-white p-2 rounded-full cursor-pointer text-dark-gray opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none absolute top-4 right-4"
+                            >
+                                <X className="w-5 h-5 text-medium-gray" />
+                            </button>
                         </div>
-                    </DialogHeader>
 
-                    <ScrollArea className="flex-1 p-4">
-                        {isLoading ? (
-                            <div className="flex items-center justify-center h-32">
-                                <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                {groupedNotifications.unread.length > 0 && (
-                                    <div className="space-y-2">
-                                        <h3 className="text-sm font-semibold flex items-center gap-2">
-                                            <Badge variant="default" className="bg-accent">Unread</Badge>
-                                            <span className="text-xs text-muted-foreground">{groupedNotifications.unread.length}</span>
-                                        </h3>
+                        <div className="overflow-y-auto flex-1 mb-2 mx-4 rounded-2xl px-3" style={{ scrollbarWidth: 'none' }}>
+                            {isLoading ? (
+                                <div className="flex items-center justify-center h-32">
+                                    <RefreshCw className="w-6 h-6 animate-spin text-medium-gray" />
+                                </div>
+                            ) : (
+                                <div className="space-y-4 pb-2">
+                                    {groupedNotifications.unread.length > 0 && (
                                         <div className="space-y-2">
-                                            {groupedNotifications.unread.map((notification) => (
-                                                <button
-                                                    key={notification.id}
-                                                    onClick={() => handleNotificationClick(notification)}
-                                                    className="w-full text-left p-3 rounded-lg bg-accent/20 hover:bg-accent/40 transition-colors border-2 border-accent/60"
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="mt-0.5 text-accent">
-                                                            {getNotificationIcon(notification.notificationType)}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <span className="font-medium text-sm">{notification.title}</span>
-                                                                <div className="h-4 text-accent">
-                                                                    {getStatusIcon(notification.status)}
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-xs font-light line-clamp-2">
-                                                                {notification.message}
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <Badge className="bg-accent text-[10px] h-5">New</Badge>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                className="h-6 w-6"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleArchive(notification.id);
-                                                                }}
-                                                            >
-                                                                <ArchiveX className="w-3 h-3" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {groupedNotifications.read.length > 0 && (
-                                    <div className="space-y-2">
-                                        <h3 className="text-sm font-semibold flex items-center gap-2">
-                                            <Badge variant="outline" className='border-2 border-accent-foreground/80'>Read</Badge>
-                                            <span className="text-xs text-muted-foreground">{groupedNotifications.read.length}</span>
-                                        </h3>
-                                        <div className="space-y-2">
-                                            {groupedNotifications.read.map((notification) => (
-                                                <button
-                                                    key={notification.id}
-                                                    onClick={() => handleNotificationClick(notification)}
-                                                    className="w-full text-left p-3 rounded-lg bg-accent-foreground/20 hover:bg-accent-foreground/40 transition-colors border-2 border-accent-foreground/60"
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <div className="mt-0.5 text-muted-foreground">
-                                                            {getNotificationIcon(notification.notificationType)}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <span className="font-medium text-sm">
-                                                                    {notification.title}
-                                                                </span>
-                                                                <div className="h-4 text-accent">
-                                                                    {getStatusIcon(notification.status)}
-                                                                </div>
-                                                            </div>
-                                                            <p className="text-xs font-light line-clamp-2">
-                                                                {notification.message}
-                                                            </p>
-                                                        </div>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="h-6 w-6"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleArchive(notification.id);
-                                                            }}
-                                                        >
-                                                            <ArchiveX className="w-3 h-3" />
-                                                        </Button>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {groupedNotifications.archived.length > 0 && (
-                                    <div className="space-y-2 border-t pt-4">
-                                        <button
-                                            onClick={() => setShowArchived(!showArchived)}
-                                            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors w-full"
-                                        >
-                                            {showArchived ? (
-                                                <ChevronDown className="w-4 h-4" />
-                                            ) : (
-                                                <ChevronRight className="w-4 h-4" />
-                                            )}
-                                            <Archive className="w-4 h-4" />
-                                            <span>Archived Messages</span>
-                                            <Badge variant="secondary" className="ml-2">
-                                                {groupedNotifications.archived.length}
-                                            </Badge>
-                                        </button>
-
-                                        {showArchived && (
-                                            <div className="space-y-2 mt-2">
-                                                {groupedNotifications.archived.map((notification) => (
+                                            <div className="flex items-center gap-2 px-1">
+                                                <Badge className="bg-faded-accent text-white text-xs font-medium px-2 py-0.5">All</Badge>
+                                                <Badge className="bg-white text-medium-gray border-1 border-gray-200 text-xs font-medium px-2 py-0.5">Unread ({groupedNotifications.unread.length})</Badge>
+                                                <span className="text-xs text-medium-gray"></span>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {groupedNotifications.unread.map((notification) => (
                                                     <button
                                                         key={notification.id}
                                                         onClick={() => handleNotificationClick(notification)}
-                                                        className="w-full text-left p-3 rounded-lg bg-muted/10 hover:bg-muted/20 transition-colors opacity-70"
+                                                        className="w-full text-left p-4 rounded-xl bg-white hover:shadow-md transition-all border border-accent/20"
                                                     >
-                                                        <div className="flex items-start gap-3">
-                                                            <div className="mt-0.5 text-muted-foreground">
-                                                                {getNotificationIcon(notification.notificationType)}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
                                                                 <div className="flex items-center gap-2 mb-1">
-                                                                    <span className="font-medium text-xs text-muted-foreground">
-                                                                        {notification.title}
-                                                                    </span>
+                                                                    <span className="font-semibold text-sm text-dark-gray">{notification.title}</span>
+                                                                    <Badge className="bg-white border-1 border-faded-accent text-faded-accent text-[10px] px-2 py-0 font-medium">New</Badge>
                                                                 </div>
-                                                                <p className="text-xs text-muted-foreground/70 line-clamp-1">
-                                                                    {notification.message}
+                                                                <p className="text-xs text-medium-gray line-clamp-2">{notification.message}</p>
+                                                            </div>
+                                                            <div className='flex flex-col justify-end'>
+                                                                <p className="text-xs text-medium-gray">
+                                                                    {notification.createdDate.split(' ')[0]}
                                                                 </p>
+                                                                <div className='justify-end items-end flex'>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-6 w-6"
+                                                                        onClick={(e) => { e.stopPropagation(); handleArchive(notification.id); }}
+                                                                    >
+                                                                        <ArchiveIcon className="w-3 h-3" />
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </button>
                                                 ))}
                                             </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                {!isLoading &&
-                                    groupedNotifications.unread.length === 0 &&
-                                    groupedNotifications.read.length === 0 &&
-                                    groupedNotifications.archived.length === 0 && (
-                                        <div className="flex flex-col items-center justify-center h-32 text-center">
-                                            <Bell className="w-8 h-8 text-muted-foreground mb-2" />
-                                            <p className="text-sm text-muted-foreground">No notifications yet</p>
                                         </div>
                                     )}
-                            </div>
-                        )}
-                    </ScrollArea>
 
-                    <div className="border-t p-4 flex justify-between items-center">
-                        <span className="text-xs text-muted-foreground">
-                            {groupedNotifications.unread.length} unread, {groupedNotifications.read.length} read
-                        </span>
-                        <Button variant="ghost" size="sm" onClick={onClose}>
-                            Close
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+                                    {groupedNotifications.read.length > 0 && (
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2">
+                                                <Badge className="bg-white text-medium-gray border-1 border-gray-200 text-xs font-medium px-2 py-0.5">Read ({groupedNotifications.read.length})</Badge>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {groupedNotifications.read.map((notification) => (
+                                                    <button
+                                                        key={notification.id}
+                                                        onClick={() => handleNotificationClick(notification)}
+                                                        className="w-full text-left p-4 rounded-xl bg-white hover:shadow-md transition-all border border-gray-100"
+                                                    >
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <span className="font-semibold text-sm text-dark-gray">{notification.title}</span>
+                                                                </div>
+                                                                <p className="text-xs text-medium-gray font-light line-clamp-2">{notification.message}</p>
+                                                            </div>
+                                                            <div className='flex flex-col justify-end'>
+                                                                <p className="text-xs text-medium-gray">
+                                                                    {notification.createdDate.split(' ')[0]}
+                                                                </p>
+                                                                <div className='justify-end items-end flex'>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        className="h-6 w-6"
+                                                                        onClick={(e) => { e.stopPropagation(); handleArchive(notification.id); }}
+                                                                    >
+                                                                        <ArchiveIcon className="w-3 h-3" />
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-            <NotificationDetailModal
-                notification={selectedNotification}
-                isOpen={isDetailOpen}
-                onClose={() => setIsDetailOpen(false)}
-                onArchive={handleArchive}
-            />
+                                    {groupedNotifications.archived.length > 0 && (
+                                        <div className="space-y-2 border-t border-gray-200 pt-4">
+                                            <button
+                                                onClick={() => setShowArchived(!showArchived)}
+                                                className="flex items-center gap-2 text-sm font-semibold text-dark-gray hover:text-accent transition-colors w-full px-1"
+                                            >
+                                                {showArchived ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                                <ArchiveIcon className="w-4 h-4" />
+                                                <span>Archived Messages</span>
+                                                <Badge className="bg-gray-100 text-dark-gray text-xs font-medium">
+                                                    {groupedNotifications.archived.length}
+                                                </Badge>
+                                            </button>
+
+                                            {showArchived && (
+                                                <div className="space-y-2 mt-2">
+                                                    {groupedNotifications.archived.map((notification) => (
+                                                        <button
+                                                            key={notification.id}
+                                                            onClick={() => handleNotificationClick(notification)}
+                                                            className="w-full text-left p-4 rounded-xl bg-white/50 hover:bg-white transition-all border border-gray-100"
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <div className="flex-1 min-w-0">
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <span className="font-medium text-xs text-medium-gray">{notification.title}</span>
+                                                                    </div>
+                                                                    <p className="text-xs text-medium-gray/50 line-clamp-1">{notification.message}</p>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {!isLoading &&
+                                        groupedNotifications.unread.length === 0 &&
+                                        groupedNotifications.read.length === 0 &&
+                                        groupedNotifications.archived.length === 0 && (
+                                            <div className="flex flex-col items-center justify-center h-32 text-center">
+                                                <Bell className="w-8 h-8 text-medium-gray mb-2" />
+                                                <p className="text-sm text-medium-gray font-medium">No notifications yet</p>
+                                            </div>
+                                        )}
+                                </div>
+                            )}
+                        </div>
+                    </>
+                )}
+            </div>
         </>
     );
 };

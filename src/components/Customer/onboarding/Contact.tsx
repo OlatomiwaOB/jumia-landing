@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input'
 import React from 'react'
 import { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
 import { FormData } from '../SignUpForm'
+import { Label } from '@/components/ui/label'
 
 
 type Props = {
@@ -14,9 +15,9 @@ const ContactDetails = ({errors,register}:Props) => {
    return (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="email">
                 Email <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -27,16 +28,15 @@ const ContactDetails = ({errors,register}:Props) => {
                     message: "Invalid email address",
                   },
                 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your email address"
+                placeholder="Enter email address"
               />
               {errors.email && <p className="text-red-500 text-xs">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="mobileNo" className="text-sm font-medium text-gray-700">
+              <Label htmlFor="mobileNo">
                 Mobile Number <span className="text-red-500">*</span>
-              </label>
+              </Label>
               <Input
                 id="mobileNo"
                 type="tel"
@@ -48,8 +48,7 @@ const ContactDetails = ({errors,register}:Props) => {
                     message: "Mobile number must be 11 digits",
                   },
                 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter your mobile number"
+                placeholder="Enter mobile number"
               />
               {errors.mobileNo && <p className="text-red-500 text-xs">{errors.mobileNo.message}</p>}
             </div>
