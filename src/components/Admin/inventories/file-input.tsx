@@ -10,14 +10,16 @@ interface FileUploadProps {
   accept?: string;
   label?: string;
   className?: string;
+  isUploading?: boolean;
 }
 
-const FileUpload = ({ 
-  onFileSelect, 
-  currentFileUrl, 
-  accept = "*", 
+const FileUpload = ({
+  onFileSelect,
+  currentFileUrl,
+  accept = "*",
   label = "File",
-  className 
+  className,
+  isUploading
 }: FileUploadProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentFileUrl || null);
@@ -25,10 +27,10 @@ const FileUpload = ({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-    onFileSelect();
+      onFileSelect();
     }
   };
 
@@ -52,7 +54,7 @@ const FileUpload = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      <Card 
+      <Card
         className={cn(
           "border-2 border-dashed transition-smooth cursor-pointer hover:border-primary/50",
           isDragOver ? "border-primary bg-primary/5" : "border-border",
@@ -67,8 +69,8 @@ const FileUpload = ({
           {preview ? (
             <div className="relative">
               <div className="w-full h-32 bg-muted rounded-lg overflow-hidden mb-4">
-                <img 
-                  src={preview} 
+                <img
+                  src={preview}
                   alt={label}
                   className="w-full h-full object-cover"
                 />
@@ -105,7 +107,7 @@ const FileUpload = ({
           )}
         </CardContent>
       </Card>
-      
+
       {/* Hidden file input - positioned outside the card */}
       <input
         type="file"
@@ -113,8 +115,9 @@ const FileUpload = ({
         onChange={onFileSelect}
         data-file-upload
         className="hidden"
+        disabled={isUploading}
       />
-      
+
       <div className="flex gap-2">
         <Button
           type="button"
@@ -125,6 +128,7 @@ const FileUpload = ({
             fileInput?.click();
           }}
           className="flex-1"
+          disabled={isUploading}
         >
           <Upload className="h-4 w-4 mr-2" />
           Choose {label}

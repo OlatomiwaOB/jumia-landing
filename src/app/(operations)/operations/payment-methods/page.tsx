@@ -302,7 +302,7 @@ const PaymentMethods: React.FC = () => {
         queryFn: () => axiosOperations.request<PaymentMethodsResponse>({
             url: '/payment-methods/fetch',
             method: 'GET',
-            params: { storeCode: 'STO0715' }
+            // params: { storeCode: 'STO4430' }
         })
     });
 

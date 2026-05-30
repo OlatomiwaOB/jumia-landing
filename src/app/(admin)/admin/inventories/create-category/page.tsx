@@ -94,7 +94,7 @@ const CreateCategoryPage = ({
     });
 
     const queryClient = useQueryClient();
-    const { fileUrl, handleFileChange } = useFileUpload();
+    const { fileUrl, handleFileChange, isUploadingFile } = useFileUpload();
 
     const watchedImageURL = watch("logo");
 
@@ -438,6 +438,7 @@ const CreateCategoryPage = ({
                                         currentFileUrl={watchedImageURL}
                                         accept="image/*"
                                         label="Upload Category Logo"
+                                        isUploading={isUploadingFile}
                                     />
 
                                     <div className="text-xs text-muted-foreground">
@@ -465,7 +466,7 @@ const CreateCategoryPage = ({
                     <Button
                         type="submit"
                         className="bg-accent hover:bg-accent/90 text-white flex items-center gap-2 px-6 py-2"
-                        disabled={isPending}
+                        disabled={isPending || isUploadingFile}
                     >
                         <Save className="h-4 w-4" />
                         {isPending ? 'Processing...' : (isEditMode ? "Update Category" : "Create Category")}

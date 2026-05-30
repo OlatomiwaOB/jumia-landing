@@ -348,9 +348,10 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstanceNoAuth from "@/utils/fetch-function-auth";
 import { ProductProps } from "@/types";
-import ProductDetailsModal from "@/utils/product-details";
+// import ProductDetailsModal from "@/utils/product-details";
 import { useSearchParams } from "next/navigation";
 import { CurrencyCode, formatPrice } from "@/utils/helperfns";
+import ProductDetailsModal from "@/utils/checkout-product-details";
 
 function SliderBackground() {
   return (
@@ -581,9 +582,8 @@ export default function HeroSlider() {
                   animate="visible"
                   variants={contentVariants}
                 >
-                  {`${(slide.description || "No description available.").substring(0, isMobile ? 60 : 120)}${
-                    (slide.description || "").length > (isMobile ? 60 : 120) ? "…" : ""
-                  }`}
+                  {`${(slide.description || "No description available.").substring(0, isMobile ? 60 : 120)}${(slide.description || "").length > (isMobile ? 60 : 120) ? "…" : ""
+                    }`}
                 </motion.p>
 
                 {/* {slide.salePrice && (
@@ -623,9 +623,8 @@ export default function HeroSlider() {
                 key={index}
                 onClick={() => goToSlide(index)}
                 aria-label={`Go to slide ${index + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  currentSlide === index ? "bg-white w-4" : "bg-white/40 hover:bg-white/60 w-1.5"
-                }`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${currentSlide === index ? "bg-white w-4" : "bg-white/40 hover:bg-white/60 w-1.5"
+                  }`}
               />
             ))}
           </div>

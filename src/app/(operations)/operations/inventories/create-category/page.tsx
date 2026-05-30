@@ -500,6 +500,7 @@ import { usePermission } from "@/hooks/usePermission";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
 import Image from "next/image";
 import { CameraIcon } from "@/components/icons/icons";
+import { StoreCombobox } from "@/components/shared/StoreCombobox";
 
 interface CategoryFormProps {
   category?: Category;
@@ -564,15 +565,15 @@ const CreateCategoryPage = ({
   const [isEditMode, setIsEditMode] = useState(mode === 'edit');
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editingCategoryCode, setEditingCategoryCode] = useState<string | null>(null);
-  
+
   const { register, watch, handleSubmit, control, reset, formState: { errors } } = useForm<Category>({
     defaultValues: {
-      id: 0, code: "", name: "", description: "", sector: "", logo: "", tags: "", topCategory: "",
+      id: 0, code: "", name: "", description: "", sector: "", logo: "", tags: "", topCategory: "", storeCode: "",
     }
   });
 
   const queryClient = useQueryClient();
-  const { fileUrl, handleFileChange, fileInputRef, previewUrl, setPreviewUrl, setFileUrl } = useFileUpload();
+  const { fileUrl, handleFileChange, fileInputRef, previewUrl, setPreviewUrl, setFileUrl, isUploadingFile } = useFileUpload();
   const watchedImageURL = watch("logo");
 
   useEffect(() => {
@@ -607,13 +608,14 @@ const CreateCategoryPage = ({
           logo: category?.logo || "",
           tags: category?.tags || "",
           topCategory: category?.topCategory || "",
+          storeCode: category?.storeCode || "",
         };
         reset(categoryObj);
       } else {
         toast.error('Category not found');
       }
     } else if (!isEditMode) {
-      reset({ id: 0, code: "", name: "", description: "", sector: "", logo: "", tags: "", topCategory: "" });
+      reset({ id: 0, code: "", name: "", description: "", sector: "", logo: "", tags: "", topCategory: "", storeCode: "" });
     }
   }, [categoryData, isEditMode, reset]);
 
@@ -669,12 +671,17 @@ const CreateCategoryPage = ({
         topCategory: values?.topCategory,
         sector: values?.sector,
         entityCode: operations?.entityCode,
+        // storeCode: values?.storeCode,
+        storeCode: 'STO4430'
       };
       await saveCategory(payload);
     } catch (error) {
       toast.error(`Failed to ${isEditMode ? 'update' : 'create'} category`);
     }
   };
+
+  console.log('fileUrl', fileUrlFormatted(fileUrl));
+
 
   if (isLoadingCategory) {
     return (
@@ -744,6 +751,23 @@ const CreateCategoryPage = ({
                   />
                 </FormField>
 
+                {/* <FormField label="Store" required>
+                  <Controller
+                    name="storeCode"
+                    control={control}
+                    rules={{ required: "Store is required" }}
+                    render={({ field }) => (
+                      <StoreCombobox
+                        value={field.value!}
+                        onChange={field.onChange}
+                        axiosInstance={axiosOperations}
+                        // merchantCode={operations?.merchantCode!}
+                        error={errors.storeCode?.message}
+                      />
+                    )}
+                  />
+                </FormField> */}
+
                 <FormField label="Category Level">
                   <Controller
                     name="topCategory" control={control}
@@ -792,7 +816,7 @@ const CreateCategoryPage = ({
                       )}
 
                       <div className="border-2 border-dashed border-faded-accent rounded-lg p-6 text-center hover:border-orange-300 transition-colors">
-                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="logo-upload" />
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="logo-upload" disabled={isUploadingFile} />
                         <Label htmlFor="logo-upload" className="cursor-pointer">
                           <div className="flex flex-col items-center gap-2">
                             <CameraIcon className="w-8 h-8 text-faded-accent" />
@@ -811,7 +835,7 @@ const CreateCategoryPage = ({
 
             <div className="flex justify-end gap-4 pt-4">
               <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending || isUploadingFile}>
                 {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : (isEditMode ? 'Update Category' : 'Create Category')}
               </Button>
             </div>

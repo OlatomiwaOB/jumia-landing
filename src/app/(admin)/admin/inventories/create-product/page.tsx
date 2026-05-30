@@ -1094,9 +1094,8 @@
 //   );
 // };
 
-// export default CreateProductPage;
-
 "use client";
+import { StoreCombobox } from "@/components/shared/StoreCombobox";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -1224,7 +1223,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
   const { mutate: saveProduct, isPending } = useProductMutation(isEditMode);
   const { data: categories, isLoading: isLoadingCategories } = useCategories();
   const { user } = useUser();
-  const { fileUrl, handleFileChange, fileInputRef, previewUrl, setPreviewUrl, setFileUrl } = useFileUpload();
+  const { fileUrl, handleFileChange, fileInputRef, previewUrl, setPreviewUrl, setFileUrl, isUploadingFile } = useFileUpload();
 
   const watchedImageURL = watch("imageURL");
   const watchedonSale = watch("onSale");
@@ -1387,7 +1386,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         unitQuantity: values?.unitQuantity || 'Piece',
         imageURL: fileUrl ? fileUrlFormatted(fileUrl) : (fileUrlFormatted(values?.imageURL) || ""),
         costPrice: values?.costPrice,
-        storeId: user?.storeCode,
+        storeId: values?.storeId || user?.storeCode,
         barCode: values?.barCode,
         brand: values?.brand,
         ccy: values?.ccy || 'NGN',
@@ -1479,6 +1478,23 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
 
                 <FormField label="Brand">
                   <Input {...register("brand")} placeholder="Enter brand" />
+                </FormField>
+
+                <FormField label="Store" required>
+                  <Controller
+                    name="storeId"
+                    control={control}
+                    rules={{ required: "Store is required" }}
+                    render={({ field }) => (
+                      <StoreCombobox
+                        value={field.value}
+                        onChange={field.onChange}
+                        axiosInstance={axiosInstance}
+                        merchantCode={user?.merchantCode}
+                        error={errors.storeId?.message}
+                      />
+                    )}
+                  />
                 </FormField>
 
                 <div className="col-span-2">
@@ -1750,7 +1766,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                         </div>
                       )}
                       <div className="border-2 border-dashed border-faded-accent rounded-lg p-6 text-center hover:border-orange-300 transition-colors">
-                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="photo-upload" />
+                        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="photo-upload" disabled={isUploadingFile} />
                         <Label htmlFor="photo-upload" className="cursor-pointer">
                           <div className="flex flex-col items-center gap-2">
                             <CameraIcon className="w-8 h-8 text-faded-accent" />
@@ -1770,7 +1786,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
 
             <div className="flex justify-end gap-4 pt-4">
               <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending || isUploadingFile}>
                 {isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</> : (isEditMode ? 'Update Product' : 'Create Product')}
               </Button>
             </div>

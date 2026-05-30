@@ -483,12 +483,12 @@ const TablePagination = ({
 
 export default function RolesPage() {
     usePageMetadata('Role & Permission', 'Manage user roles and their permissions.');
-    const { usePermissionGuard } = usePermission();
+    // const { usePermissionGuard } = usePermission();
 
-    usePermissionGuard('MANAGE_ROLES', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage roles"
-    });
+    // usePermissionGuard('MANAGE_ROLES', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage roles"
+    // });
 
     const router = useRouter();
     const [searchTerm, setSearchTerm] = useState('');
@@ -517,6 +517,9 @@ export default function RolesPage() {
     });
 
     const rolesData: Role[] = apiData || [];
+
+    console.log(rolesData);
+
 
     const filtered = useMemo(() => {
         return rolesData.filter((role: Role) => {
@@ -603,6 +606,12 @@ export default function RolesPage() {
                         >
                             Create Role
                         </PermissionButton>
+                        {/* <button
+                            onClick={() => setCreateModalOpen(true)}
+                            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white"
+                        >
+                            Create Role
+                        </button> */}
                     </div>
                 </div>
             </div>
@@ -672,6 +681,7 @@ export default function RolesPage() {
                                                                 size="xs" variant="action">
                                                                 <EditIcon className="w-4 h-4" />
                                                             </PermissionButton>
+
                                                         </div>
                                                     </td>
                                                 </tr>

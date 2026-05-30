@@ -1,12 +1,12 @@
 import { DashboardHeader } from '@/components/Customer/dashboard-header'
 import { DashboardSidebar } from '@/components/Customer/dashboard-sidebar'
-import { PageProvider } from '@/hooks/metadata-context'
 import { CUSTOMER } from '@/utils/constants'
 import PrivateRoute from '@/utils/private-route-customer'
 
 
 import React, { ReactNode } from 'react'
 import TwoFaWrapper from '../TwoFaWrapper'
+import { PageProvider } from '@/hooks/metadata-context'
 
 const CustomerDashboardLayout = ({ children }: { children: ReactNode }) => {
   return (

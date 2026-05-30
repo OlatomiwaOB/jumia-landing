@@ -162,7 +162,7 @@ const SidebarGroup = ({ group, pathname }: SidebarGroupProps) => {
           )}
         >
           <IconComponent className="w-5 h-5 flex-shrink-0" />
-          <span className="font-medium truncate">{group.name}</span>
+          <span className={cn('font-medium truncate text-white', isActive && 'text-accent')}>{group.name}</span>
         </Link>
       </div>
     );
@@ -174,16 +174,16 @@ const SidebarGroup = ({ group, pathname }: SidebarGroupProps) => {
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="w-full">
         <div className={cn(
-          'flex items-center justify-between gap-2 px-4 py-3 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs w-full',
-          hasActiveChild && 'bg-white text-faded-accent'
+          'flex items-center  justify-between gap-2 px-4 py-3 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs w-full',
+          hasActiveChild && 'bg-white text-accent'
         )}>
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             <IconComponent className="w-5 h-5 flex-shrink-0" />
-            <span className="font-medium truncate">{group.name}</span>
+            <span className={cn('font-medium truncate text-white', hasActiveChild && 'text-accent')}>{group.name}</span>
           </div>
           <ArrowIcon
             className={cn(
-              "w-3 h-3 rotate-270 flex-shrink-0 text-sidebar-text transition-transform duration-200",
+              "w-3 h-3 rotate-270 flex-shrink-0 text-white text-sidebar-text transition-transform duration-200",
               isOpen && "rotate-360 text-faded-accent"
             )}
           />
@@ -201,11 +201,11 @@ const SidebarGroup = ({ group, pathname }: SidebarGroupProps) => {
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center px-4 py-3 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs ml-7',
-                      isActive && 'bg-[#EA813C] text-white font-medium'
+                      'flex items-center px-4 py-3  rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs ml-7',
+                      isActive && 'bg-[#EA813C] text-accent font-medium'
                     )}
                   >
-                    <span className="truncate">{item.name}</span>
+                    <span className="truncate text-white">{item.name}</span>
                   </Link>
                 </li>
               );
@@ -238,23 +238,22 @@ export const DashboardSidebar = () => {
   return (
     <>
       <div
-        className="w-full h-full flex flex-col"
-        style={{
-          background: `
-            radial-gradient(ellipse at 75% 70%, rgba(255,160,60,0.45) 0%, transparent 55%),
-            linear-gradient(180deg, #F56B08 0%, #D4580A 40%, #AE4F12 70%, #A83E00 100%)
-          `,
-        }}
+        className="w-full h-full flex flex-col bg-accent"
+      // style={{
+      //   background: `
+      //     radial-gradient(ellipse at 75% 70%, rgba(255,160,60,0.45) 0%, transparent 55%),
+      //     linear-gradient(180deg, #F56B08 0%, #D4580A 40%, #AE4F12 70%, #A83E00 100%)
+      //   `,
+      // }}
       >
         <div className="py-6 px-3 border-b-2 border-[#EA813C]">
           <div className="flex items-center justify-start">
-            <Link href="/dashboard" className="block">
+            <Link href="/dashboard" className="block relative w-[120px] h-[80px]">
               <Image
                 src={logoUrl || 'logo.png'}
                 alt='logo'
-                width={130}
-                height={35}
-                className='w-full max-w-[150px] h-auto object-contain'
+                fill
+                className='object-fill'
                 priority />
             </Link>
           </div>

@@ -249,6 +249,9 @@ export const DashboardSidebar = () => {
   const { hasAnyPermission, userPermissions } = usePermission();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
+  console.log('operations', operations);
+
+
   const accessibleGroups = useMemo(() => {
     return navigationGroups.filter(group => {
       if (group.requiredPermissions && group.requiredPermissions.length > 0) {
@@ -285,23 +288,23 @@ export const DashboardSidebar = () => {
   return (
     <>
       <div
-        className="w-full h-full flex flex-col"
-        style={{
-          background: `
-            radial-gradient(ellipse at 75% 70%, rgba(255,160,60,0.45) 0%, transparent 55%),
-            linear-gradient(180deg, #F56B08 0%, #D4580A 40%, #AE4F12 70%, #A83E00 100%)
-          `,
-        }}
+        className="w-full h-full flex flex-col bg-accent"
+
+      // style={{
+      //   background: `
+      //     radial-gradient(ellipse at 75% 70%, rgba(255,160,60,0.45) 0%, transparent 55%),
+      //     linear-gradient(180deg, #F56B08 0%, #D4580A 40%, #AE4F12 70%, #A83E00 100%)
+      //   `,
+      // }}
       >
         <div className="py-6 px-3 border-b-2 border-[#EA813C]">
           <div className="flex items-center justify-start">
-            <Link href="/operations/dashboard" className="block">
+            <Link href="/operations/dashboard" className="block h-[70px] w-[120px] relative">
               <Image
                 src={logoUrl || 'logo.png'}
                 alt='logo'
-                width={130}
-                height={35}
-                className='w-full max-w-[150px] h-auto object-contain'
+                fill
+                className='object-fill'
                 priority />
             </Link>
           </div>

@@ -104,7 +104,7 @@ export default function CreatePaymentMethodPage() {
         queryFn: () => axiosOperations.request({
             url: '/payment-methods/fetch',
             method: 'GET',
-            params: { storeCode: 'STO0715' }
+            params: { storeCode: 'STO4430' }
         }),
     });
 
@@ -149,7 +149,7 @@ export default function CreatePaymentMethodPage() {
         mutationFn: (data: any) => axiosOperations.request({
             url: '/payment-methods/save',
             method: 'POST',
-            params: { storeCode: 'STO0715' },
+            params: { storeCode: 'STO4430' },
             data
         }),
         onSuccess: (data) => {

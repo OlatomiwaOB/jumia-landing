@@ -6,7 +6,8 @@ import { EyeIcon } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axiosOperations from '@/utils/fetch-function-op-auth';
 import cn from 'classnames';
-import { DateRangePicker } from "@/components/ui/date-range-picker"
+// import {} from 'date-range-picker'
+
 
 import {
     PieChart,
@@ -692,7 +693,7 @@ export default function OperationsDashboard() {
                         </div>
                     </div>
 
-                    {showDatePicker && (
+                    {/* {showDatePicker && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                             <div className="bg-white rounded-2xl shadow-2xl p-6 w-[680px] max-w-[95vw]">
                                 <h3 className="text-base font-semibold text-dark-gray mb-4">Select Date Range</h3>
@@ -704,7 +705,7 @@ export default function OperationsDashboard() {
                                 />
                             </div>
                         </div>
-                    )}
+                    )} */}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
                         <WalletCard value={formatCurrency(dashboardData?.totalRevenue || 0)} />

@@ -103,11 +103,11 @@ const PermissionCheckbox = ({
 
 export default function EditRolePage() {
     usePageMetadata('Role & Permission', 'Edit role permissions and details.');
-    const { usePermissionGuard } = usePermission();
-    usePermissionGuard('MANAGE_ROLES', {
-        redirectToNotPermitted: true,
-        toastMessage: "You don't have permission to manage roles"
-    });
+    // const { usePermissionGuard } = usePermission();
+    // usePermissionGuard('MANAGE_ROLES', {
+    //     redirectToNotPermitted: true,
+    //     toastMessage: "You don't have permission to manage roles"
+    // });
 
     const router = useRouter();
     const searchParams = useSearchParams();

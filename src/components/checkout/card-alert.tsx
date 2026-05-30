@@ -112,6 +112,7 @@ const CardAlert = ({
       amount: item?.subTotal,
       discount: 0,
       picture: item?.picture,
+      storeCode: item?.storeCode,
       vat: (item as any).vat || 0,
     }))
 
@@ -131,6 +132,7 @@ const CardAlert = ({
       totalDiscount: 0,
       deliveryOption: getValues('shippingMethod'),
       paymentMethod: paymentMethod?.toUpperCase(),
+      // paymentMethod: 'STRIPE_CARD',
       couponCode: "",
       subtotal: subtotal,
       totalVat: totalVat,

@@ -1200,6 +1200,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
     toastMessage: "You don't have permission to manage inventory"
   });
 
+
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isEditMode, setIsEditMode] = useState(mode === 'edit');
@@ -1218,6 +1220,17 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
   const { operations } = useOperations();
   const { fileUrl, handleFileChange, fileInputRef, previewUrl, setPreviewUrl, setFileUrl } = useFileUpload();
 
+  // const { data: stores } = useQuery({
+  //   queryKey: ['merchant-stores'],
+  //   queryFn: () => axiosOperations({
+  //     url: '/store/merchant',
+  //     params: {
+  //       merchantCode: operations?.merchantCode,
+  //       pageSize: 100,
+  //       pageNumber: 1
+  //     }
+  //   })
+  // })
   const watchedImageURL = watch("imageURL");
   const watchedonSale = watch("onSale");
 

@@ -263,6 +263,7 @@ export interface PaymentMethod {
   recommendedTitle: string | null;
   subTitle: string;
   features: string[];
+  storeCode?: string | null
 }
 
 export interface PaymentMethodsResponse {
