@@ -4,60 +4,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ProductProps } from '@/types';
 
-// Mocking the featured products based on the menu list (distinct from Best Sellers)
-const featuredProducts = [
-  {
-    id: 1,
-    name: 'Postpartum & Busy Mum Bundle',
-    description: 'A chef-prepared, nutrient-rich solution designed specifically to nourish mums and busy families. Includes 80 delicious meal components!',
-    price: '469.00',
-    image: '/images/mock/mixed_platter.png',
-    link: '/shop?category=bundles'
-  },
-  {
-    id: 2,
-    name: 'Fried Rice with Chicken',
-    description: 'Our signature fried rice recipe includes perfectly diced chicken as standard. Rich in flavor and perfect for any occasion.',
-    price: '40.00',
-    image: '/images/mock/jollof_rice.png',
-    link: '/shop?category=rice-dishes'
-  },
-  {
-    id: 3,
-    name: 'Beans Porridge',
-    description: 'Rich, wholesome, and perfectly spiced beans porridge cooked to absolute perfection. A timeless classic.',
-    price: '55.00',
-    image: '/images/mock/yam_porridge.png',
-    link: '/shop?category=porridges'
-  },
-  {
-    id: 4,
-    name: 'Gizdodo Special',
-    description: 'A mouthwatering fusion of perfectly fried plantain and tender gizzard mixed in our signature spicy pepper sauce.',
-    price: '65.00',
-    image: '/images/mock/moi_moi.png',
-    link: '/shop?category=sides'
-  },
-  {
-    id: 5,
-    name: 'Jumbo Turkey Mid-Wings',
-    description: 'Tender, succulent jumbo turkey mid-wings tossed in our fiery, irresistible signature pepper sauce.',
-    price: '3.00',
-    image: '/images/mock/peppered_snail.png',
-    link: '/shop?category=proteins'
-  },
-  {
-    id: 6,
-    name: 'Classic Moimoi Wraps',
-    description: 'Authentic Nigerian steamed bean pudding, beautifully wrapped in fresh aromatic leaves for that traditional taste.',
-    price: '39.00',
-    image: '/images/mock/moi_moi.png',
-    link: '/shop?category=small-chops'
-  }
-];
+interface FeaturedProductsSliderProps {
+  featuredProducts?: ProductProps[];
+}
 
-export default function FeaturedProductsSlider() {
+export default function FeaturedProductsSlider({ featuredProducts: dynamicProducts = [] }: FeaturedProductsSliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isRTL, setIsRTL] = useState(false);
 
@@ -80,21 +33,18 @@ export default function FeaturedProductsSlider() {
 
   // Auto-rotate every 10 seconds
   useEffect(() => {
-    const maxIndex = featuredProducts.length - 1;
+    if (dynamicProducts.length === 0) return;
+    const maxIndex = dynamicProducts.length - 1;
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
     }, 10000); // 10 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [dynamicProducts.length]);
 
-  const goToNext = () => {
-    setActiveIndex((prev) => (prev >= featuredProducts.length - 1 ? 0 : prev + 1));
-  };
-
-  const goToPrev = () => {
-    setActiveIndex((prev) => (prev <= 0 ? featuredProducts.length - 1 : prev - 1));
-  };
+  if (dynamicProducts.length === 0) {
+    return null;
+  }
 
   return (
     <div className="w-full bg-accent-foreground relative">
@@ -107,20 +57,18 @@ export default function FeaturedProductsSlider() {
         {/* Slider Container */}
         <div
           className="flex transition-transform duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
-          style={{ transform: `translateX(${(isRTL ? 1 : -1) * (featuredProducts.length - 1 - activeIndex) * 100}%)` }}
+          style={{ transform: `translateX(${(isRTL ? 1 : -1) * (dynamicProducts.length - 1 - activeIndex) * 100}%)` }}
         >
-          {[...featuredProducts].reverse().map((product, index) => {
-            const isActive = featuredProducts.length - 1 - index === activeIndex;
+          {[...dynamicProducts].reverse().map((product, index) => {
+            const isActive = dynamicProducts.length - 1 - index === activeIndex;
 
             return (
               <div
-                key={product.id}
+                key={product.id || index}
                 className={`flex flex-col sm:flex-row bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shrink-0 w-full h-auto sm:h-[500px] relative transition-opacity duration-1000 ${isActive ? 'opacity-100' : 'opacity-40'}`}
               >
                 {/* Left Content */}
                 <div className="w-full sm:w-[55%] p-8 sm:p-16 lg:p-20 flex flex-col justify-center items-start z-10 bg-white relative">
-
-
 
                   {/* Premium Badge */}
                   <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-50 text-orange-600 font-extrabold text-[11px] uppercase tracking-widest shadow-sm mb-6 border border-orange-100 mt-12 sm:mt-0">
@@ -135,17 +83,17 @@ export default function FeaturedProductsSlider() {
 
                   {/* Price Tag */}
                   <div className="text-3xl lg:text-4xl font-black text-accent mb-6 flex items-baseline gap-1">
-                    <span className="text-xl lg:text-2xl font-bold">£</span>
-                    {product.price}
+                    <span className="text-xl lg:text-2xl font-bold">{product.ccy === 'GBP' ? '£' : product.ccy === 'USD' ? '$' : '₦'}</span>
+                    {product.salePrice || product.costPrice || 0}
                   </div>
 
                   {/* Description */}
                   <p className="text-gray-500 text-[16px] lg:text-[18px] mb-10 font-medium leading-relaxed max-w-lg">
-                    {product.description}
+                    {product.description || 'Discover our freshly prepared item, rich in flavor and perfect for any occasion.'}
                   </p>
 
                   {/* Button */}
-                  <Link href={product.link}>
+                  <Link href={`/shop?category=${product.category || ''}`}>
                     <button className="group flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-full font-extrabold text-[16px] hover:bg-accent/90 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
                       Buy Now
                       <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
@@ -157,8 +105,8 @@ export default function FeaturedProductsSlider() {
                 <div className="w-full sm:w-[45%] relative h-[300px] sm:h-full flex-shrink-0 bg-gray-50 group">
                   <div className={`absolute inset-0 sm:rounded-l-[200px] overflow-hidden transform origin-right transition-transform duration-[10000ms] ease-linear ${isActive ? 'scale-110' : 'scale-100'} shadow-[-15px_0_40px_rgba(0,0,0,0.06)]`}>
                     <Image
-                      src={product.image}
-                      alt={product.name}
+                      src={product.picture || (product.pictureList && product.pictureList.length > 0 ? product.pictureList[0] : '/placeholder.png')}
+                      alt={product.name || 'Product'}
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 50vw"
