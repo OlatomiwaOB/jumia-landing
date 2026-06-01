@@ -4,6 +4,7 @@ import { DialogDescription, DialogHeader, DialogTitle } from './dialog'
 import { Input } from './input'
 import Link from 'next/link'
 import { Button } from './button'
+import { Checkbox } from './checkbox'
 import { useForm } from 'react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useMutation } from '@tanstack/react-query'
@@ -104,56 +105,73 @@ export const LoginForm = ({ setIsOpen, onForgotPassword }: LoginProps) => {
     }
 
     return (
-        <div className='space-y-3'>
-            <DialogHeader className='flex flex-col'>
-                <DialogTitle className="text-2xl text-center font-medium">Login</DialogTitle>
-                <DialogDescription className="text-sm text-center">Please enter your credentials to continue</DialogDescription>
+        <div className='space-y-6 px-4 py-2 pb-6'>
+            <DialogHeader className='flex flex-col gap-2 pt-2'>
+                <DialogTitle className="text-2xl text-center font-bold">Sign in</DialogTitle>
+                <DialogDescription className="text-[15px] text-center text-gray-500">Please enter your details below to sign in.</DialogDescription>
             </DialogHeader>
 
-            <form className='' onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 {
                     loginStep === 'credentials' ? (
-                        <div className='flex flex-col gap-4'>
+                        <div className='flex flex-col gap-5'>
                             <div>
-                                <Label>Username/Email</Label>
                                 <Input
                                     {...register('username')}
                                     type="text"
-                                    placeholder="Enter your username or email"
-                                    className="mt-2"
+                                    placeholder="Email address *"
+                                    className="rounded-full px-6 py-6 text-[15px] border-gray-200 focus-visible:ring-[#111]"
                                 />
                             </div>
                             <div className='w-full'>
-                                <Label>Password</Label>
                                 <div className="relative">
                                     <Input
                                         {...register('password')}
                                         type={showPassword ? "text" : "password"}
-                                        placeholder="Password"
-                                        className='mt-2'
+                                        placeholder="Password *"
+                                        className='rounded-full px-6 py-6 text-[15px] pr-12 border-gray-200 focus-visible:ring-[#111]'
                                     />
                                     <button
                                         type="button"
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                                        className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-[#111] focus:outline-none transition-colors"
                                         onClick={togglePasswordVisibility}
                                     >
                                         {showPassword ? (
-                                            <EyeOff className="h-4 w-4" />
+                                            <EyeOff className="h-5 w-5" />
                                         ) : (
-                                            <Eye className="h-4 w-4" />
+                                            <Eye className="h-5 w-5" />
                                         )}
                                     </button>
                                 </div>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-1 px-1">
+                                <div className="flex items-center gap-3">
+                                    <Checkbox id="remember-me" className="border-gray-200 rounded-[4px] w-5 h-5 data-[state=checked]:bg-[#111] data-[state=checked]:border-[#111]" />
+                                    <label htmlFor="remember-me" className="text-sm text-gray-500 cursor-pointer">Remember me</label>
+                                </div>
                                 <button
                                     type="button"
-                                    onClick={handleForgotPasswordClick}
-                                    className="text-sm relative right-0 text-accent underline cursor-pointer"
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        push('/my-account/lost-password');
+                                    }}
+                                    className="text-sm text-gray-500 hover:text-[#111] transition-colors cursor-pointer"
                                 >
-                                    Forgot your password?
+                                    Lost your password?
                                 </button>
                             </div>
 
-                            <Button type='submit' className='bg-accent text-white'>{isPending ? 'Logging in...' : 'Login'}</Button>
+                            <div className="flex flex-col gap-3 mt-4">
+                                <Button type='submit' className='bg-[#111] text-white hover:bg-black rounded-full py-7 font-bold text-[15px] w-full shadow-md transition-all'>
+                                    {isPending ? 'Signing in...' : 'Login'}
+                                </Button>
+                                <Link href="/customer-onboarding" target="_blank" className="w-full">
+                                    <Button type='button' variant="outline" className='bg-white text-[#111] border-2 border-[#111] hover:bg-gray-50 rounded-full py-7 font-bold text-[15px] w-full transition-all'>
+                                        Create Account
+                                    </Button>
+                                </Link>
+                            </div>
                         </div>
                     )
                         :
@@ -162,20 +180,13 @@ export const LoginForm = ({ setIsOpen, onForgotPassword }: LoginProps) => {
                                 {...registerOTP('otp')}
                                 type="text"
                                 placeholder="Enter OTP"
-                                className="mb-4"
+                                className="mb-4 rounded-full px-6 py-6"
                                 maxLength={6}
                             />
-                            <Button className='bg-accent text-white w-full' disabled={isPending}>{isPending ? 'Verifying...' : 'Verify OTP'}</Button>
+                            <Button className='bg-[#111] text-white hover:bg-black rounded-full py-6 font-bold w-full' disabled={isPending}>{isPending ? 'Verifying...' : 'Verify OTP'}</Button>
                         </div>
                 }
             </form>
-
-            <p className='text-sm text-center'>
-                Don't have an account?{' '}
-                <Link href={`/customer-onboarding`} className="text-accent underline" target='_blank'>
-                    Register
-                </Link >
-            </p>
         </div>
     )
 }

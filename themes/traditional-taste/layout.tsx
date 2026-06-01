@@ -1,5 +1,6 @@
 import Header from "./components/layout/header"
 import Footer from "./components/layout/footer";
+import FloatingWhatsApp from "./components/layout/floating-whatsapp";
 import Providers from './providers'
 import { Suspense } from "react";
 
@@ -16,6 +17,7 @@ export default function DepotLayout({
             <Header />
             {children}
             <Footer />
+            <FloatingWhatsApp />
           </Suspense>
         </div>
       </Providers>

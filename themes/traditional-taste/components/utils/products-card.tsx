@@ -33,7 +33,7 @@ export function ProductCard({ product, onClick, storeCode }: CardProps) {
 
   return (
     <div
-      className="flex flex-col bg-white rounded-[2rem] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-shadow duration-300 group cursor-pointer border border-gray-50 relative"
+      className="flex flex-col bg-white rounded-[2rem] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] hover:-translate-y-2 transition-all duration-300 group cursor-pointer border border-gray-50 relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
@@ -94,18 +94,18 @@ export function ProductCard({ product, onClick, storeCode }: CardProps) {
         <div className="mt-auto pt-2">
           {quantity <= 0 ? (
             <button
-              className="w-full h-[3rem] bg-[#0F5A3E] text-white rounded-xl flex items-center justify-center gap-2 font-semibold transition-colors hover:bg-[#0a422d] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-[3rem] bg-gradient-to-r from-accent to-accent/80 text-accent-foreground rounded-xl flex items-center justify-center gap-2 font-semibold transition-all duration-300 hover:shadow-[0_8px_20px_rgba(26,92,56,0.25)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed group"
               onClick={handleAddToCart}
               disabled={!inStock}
             >
-              <ShoppingBag size={18} />
-              {inStock ? "Add to Cart" : "Out Of Stock"}
+              <ShoppingBag size={18} className="transition-transform duration-300 group-hover:scale-110" />
+              {inStock ? "Add to bag" : "Out Of Stock"}
             </button>
           ) : (
-            <div className="flex w-full h-[3rem] items-center justify-between border-2 border-[#0F5A3E] rounded-xl px-2 font-semibold text-[#0F5A3E] bg-[#0F5A3E]/5">
-              <button onClick={(e) => { e.stopPropagation(); decrement(product as any); }} className="w-10 h-full flex items-center justify-center hover:bg-[#0F5A3E]/10 rounded-lg text-lg transition-colors">-</button>
+            <div className="flex w-full h-[3rem] items-center justify-between border-2 border-accent rounded-xl px-2 font-semibold text-accent bg-accent/5">
+              <button onClick={(e) => { e.stopPropagation(); decrement(product as any); }} className="w-10 h-full flex items-center justify-center hover:bg-accent/10 rounded-lg text-lg transition-colors">-</button>
               <span>{quantity}</span>
-              <button onClick={(e) => { e.stopPropagation(); increment(product as any); }} className="w-10 h-full flex items-center justify-center hover:bg-[#0F5A3E]/10 rounded-lg text-lg transition-colors">+</button>
+              <button onClick={(e) => { e.stopPropagation(); increment(product as any); }} className="w-10 h-full flex items-center justify-center hover:bg-accent/10 rounded-lg text-lg transition-colors">+</button>
             </div>
           )}
         </div>

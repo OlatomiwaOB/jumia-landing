@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/store/cart';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
@@ -19,6 +20,7 @@ export default function Header() {
   const { cart, getCartTotal, mainCcy } = useCart();
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname();
 
   const { customer } = useCustomer()
 
@@ -59,13 +61,13 @@ export default function Header() {
 
             {/* Navigation - Premium Pill Links */}
             <nav className="flex items-center space-x-2 text-sm font-bold text-gray-600">
-              <Link href="/" className="px-4 py-2 rounded-full hover:bg-accent/10 hover:text-accent transition-all duration-300">Home</Link>
-              <Link href="#" className="flex items-center gap-1 px-4 py-2 rounded-full hover:bg-accent/10 hover:text-accent transition-all duration-300">
+              <Link href="/" className={`px-4 py-2 rounded-full transition-all duration-300 ${pathname === '/' ? 'bg-accent/10 text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}>Home</Link>
+              <Link href="#" className={`flex items-center gap-1 px-4 py-2 rounded-full transition-all duration-300 ${pathname === '/shop' ? 'bg-accent/10 text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}>
                 Shop
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
               </Link>
-              <Link href="#" className="px-4 py-2 rounded-full hover:bg-accent/10 hover:text-accent transition-all duration-300">About</Link>
-              <Link href="#" className="px-4 py-2 rounded-full hover:bg-accent/10 hover:text-accent transition-all duration-300">Contact</Link>
+              <Link href="#" className={`px-4 py-2 rounded-full transition-all duration-300 ${pathname === '/about' ? 'bg-accent/10 text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}>About</Link>
+              <Link href="/contact" className={`px-4 py-2 rounded-full transition-all duration-300 ${pathname === '/contact' ? 'bg-accent/10 text-accent' : 'hover:bg-accent/10 hover:text-accent'}`}>Contact</Link>
             </nav>
           </div>
 
@@ -98,12 +100,12 @@ export default function Header() {
               )}
             </div>
 
-            {/* Cart Trigger - Glowing Button */}
+            {/* Cart Trigger - Brand Color Button */}
             <CartWrapper>
-              <SheetTrigger className="relative flex items-center justify-center w-12 h-12 rounded-full bg-accent text-white hover:bg-accent/90 transition-all duration-300 cursor-pointer shadow-[0_4px_15px_rgba(249,115,22,0.4)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.6)] hover:-translate-y-0.5">
-                <ShoppingBag size={22} strokeWidth={2.5} />
+              <SheetTrigger className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-[#E35920] text-white hover:bg-[#c44920] transition-all duration-300 cursor-pointer shadow-[0_4px_15px_rgba(227,89,32,0.3)] hover:shadow-[0_6px_20px_rgba(227,89,32,0.4)] hover:-translate-y-0.5">
+                <ShoppingBag size={20} strokeWidth={2.5} />
                 {isMounted && itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-[11px] font-black rounded-full h-6 w-6 flex items-center justify-center border-2 border-white shadow-sm">
+                  <span className="absolute -top-2 -right-2 bg-[#111111] text-white text-[11px] font-black rounded-full h-[22px] w-[22px] flex items-center justify-center border-[2px] border-white shadow-sm leading-none">
                     {itemCount > 9 ? '9+' : itemCount}
                   </span>
                 )}
@@ -217,12 +219,16 @@ export default function Header() {
                   { label: 'HOME', href: '/' },
                   { label: 'SHOP', href: '#' },
                   { label: 'ABOUT', href: '#' },
-                  { label: 'CONTACT', href: '#' },
+                  { label: 'CONTACT', href: '/contact' },
                 ].map((item) => (
                   <Link
                     key={item.label}
                     href={item.href}
-                    className="block py-3 px-3 text-xs font-semibold tracking-[0.25em] text-[#555] hover:text-black hover:bg-gray-50 rounded-lg transition-all"
+                    className={`block py-3 px-3 text-xs font-semibold tracking-[0.25em] rounded-lg transition-all ${
+                      pathname === item.href 
+                        ? 'text-accent bg-accent/10' 
+                        : 'text-[#555] hover:text-black hover:bg-gray-50'
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {item.label}
@@ -269,23 +275,25 @@ export default function Header() {
       )}
 
       {/* Desktop Cart Trigger — fixed sidebar button */}
-      <CartWrapper>
-        <SheetTrigger
-          className="hidden lg:block w-[90px] p-3 bg-accent fixed top-[50%] -translate-y-1/2 right-0 z-50 rounded-l-md cursor-pointer space-y-2"
-          aria-label="Open cart"
-        >
-          <div className="flex items-center justify-center gap-1.5 text-white text-[12px] font-semibold">
-            <ShoppingBag size={16} strokeWidth={2.5} />
-            <span>{isMounted ? (itemCount > 1 ? `${itemCount} items` : `${itemCount} item`) : '0 items'}</span>
-          </div>
-          {isMounted && itemCount > 0 && (
-            <div className="text-accent bg-white text-center py-1 rounded-sm text-[12px] font-semibold">
-              {formatPrice(totalAmount, ccy as CurrencyCode)}
+      {pathname !== '/contact' && (
+        <CartWrapper>
+          <SheetTrigger
+            className="hidden lg:block w-[90px] p-3 bg-accent fixed top-[50%] -translate-y-1/2 right-0 z-50 rounded-l-md cursor-pointer space-y-2"
+            aria-label="Open cart"
+          >
+            <div className="flex items-center justify-center gap-1.5 text-white text-[12px] font-semibold">
+              <ShoppingBag size={16} strokeWidth={2.5} />
+              <span>{isMounted ? (itemCount > 1 ? `${itemCount} items` : `${itemCount} item`) : '0 items'}</span>
             </div>
-          )}
-        </SheetTrigger>
-        <Cart />
-      </CartWrapper>
+            {isMounted && itemCount > 0 && (
+              <div className="text-accent bg-white text-center py-1 rounded-sm text-[12px] font-semibold">
+                {formatPrice(totalAmount, ccy as CurrencyCode)}
+              </div>
+            )}
+          </SheetTrigger>
+          <Cart />
+        </CartWrapper>
+      )}
 
       <CustomerLoginModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </>

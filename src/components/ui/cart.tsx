@@ -507,7 +507,7 @@ const Cart = () => {
                                 // isCartEmpty || hasOutOfStockItems || hasMultipleStores || hasItemsExceedingStock
                                 isCartEmpty || hasOutOfStockItems || hasItemsExceedingStock
                                     ? 'bg-accent-foreground cursor-not-allowed hover:bg-accent-foreground'
-                                    : 'bg-accent hover:bg-accent-foreground'
+                                    : 'bg-accent hover:bg-accent3 transition-colors duration-300'
                                 }`}
                             // disabled={isCartEmpty || hasOutOfStockItems || hasMultipleStores || hasItemsExceedingStock || isPending}
                             disabled={isCartEmpty || hasOutOfStockItems || hasItemsExceedingStock || isPending}

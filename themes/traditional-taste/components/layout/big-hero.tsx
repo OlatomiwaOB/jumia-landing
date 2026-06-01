@@ -1,6 +1,10 @@
+"use client";
+
 import Image from 'next/image';
 import { ProductProps } from '@/types';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface BigHeroProps {
   products: ProductProps[];
@@ -8,8 +12,20 @@ interface BigHeroProps {
 
 export default function BigHero({ products }: BigHeroProps) {
   const router = useRouter();
-  // We use our stunning generated image of bold Semo on a white plate with three soups and a white cloth
-  const heroImage = "/three-soups-semo-white-cloth.png";
+  const heroImages = [
+    "/three-soups-semo-white-cloth.png",
+    "/amala_ewedu.png",
+    "/white_rice_stew.png"
+  ];
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + heroImages.length) % heroImages.length);
+  };
 
   return (
     <div className="relative bg-gray-950 overflow-hidden w-full pt-28 pb-44 px-4 md:px-16 text-white">
@@ -54,7 +70,9 @@ export default function BigHero({ products }: BigHeroProps) {
             {/* Buttons */}
             <div className="flex flex-wrap items-center gap-4">
               <button
-                onClick={() => router.push('/shop')}
+                onClick={() => {
+                  document.getElementById('shop-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="px-10 py-5 bg-gradient-to-r from-accent to-orange-500 text-white font-bold text-lg rounded-full transition-all duration-500 flex items-center gap-2 shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:shadow-[0_0_50px_rgba(249,115,22,0.5)] hover:-translate-y-2 group"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="group-hover:scale-110 transition-transform"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
@@ -91,35 +109,52 @@ export default function BigHero({ products }: BigHeroProps) {
         </div>
 
         <div className="relative order-1 md:order-2 flex justify-center items-center w-full z-20">
-          <div className="relative h-[450px] md:h-[650px] w-full max-w-[600px] rounded-[3rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] border-[6px] border-white/5 transform hover:scale-[1.02] hover:-rotate-1 transition-all duration-700 group">
+          
+          {/* Left Arrow (Outside) */}
+          <button 
+            onClick={prevImage}
+            className="absolute left-0 md:-left-8 lg:-left-16 xl:-left-20 top-1/2 -translate-y-1/2 z-30 w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#fbf9f6] flex items-center justify-center text-gray-900 shadow-xl hover:scale-110 transition-transform border border-gray-200"
+          >
+            <ArrowLeft size={28} strokeWidth={1.5} />
+          </button>
+
+          <div className="relative h-[450px] md:h-[650px] w-full max-w-[600px] rounded-[3rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.6)] border-[6px] border-white/5 transform transition-all duration-700 group">
             {/* Inner vignette shadow */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none group-hover:opacity-70 transition-opacity duration-500"></div>
 
             <Image
-              src={heroImage}
+              src={heroImages[currentImageIndex]}
               alt="African Dish"
               fill
-              className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
+              className="object-cover group-hover:scale-[1.03] transition-transform duration-1000 ease-out"
             />
           </div>
 
+          {/* Right Arrow (Outside) */}
+          <button 
+            onClick={nextImage}
+            className="absolute right-0 md:-right-8 lg:-right-16 xl:-right-20 top-1/2 -translate-y-1/2 z-30 w-14 h-14 md:w-16 md:h-16 rounded-full bg-[#fbf9f6] flex items-center justify-center text-gray-900 shadow-xl hover:scale-110 transition-transform border border-gray-200"
+          >
+            <ArrowRight size={28} strokeWidth={1.5} />
+          </button>
+
           {/* Floating Rated Badge */}
           <div 
-            className="absolute -bottom-6 md:-bottom-10 left-0 md:-left-6 z-30 bg-gradient-to-r from-accent to-orange-500 rounded-[2rem] p-4 md:p-6 shadow-[0_20px_50px_rgba(249,115,22,0.4)] flex items-center gap-4 group/badge"
+            className="absolute -bottom-6 md:-bottom-8 left-2 md:-left-4 z-30 bg-gradient-to-r from-accent to-orange-500 rounded-[1.5rem] p-3 md:py-3 md:px-5 shadow-[0_20px_50px_rgba(249,115,22,0.4)] flex items-center gap-3 group/badge"
             style={{ animation: 'floatUpDown 4s ease-in-out infinite' }}
           >
             <style>{`
               @keyframes floatUpDown {
                 0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-15px); }
+                50% { transform: translateY(-10px); }
               }
             `}</style>
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white text-accent flex items-center justify-center group-hover/badge:scale-110 group-hover/badge:rotate-[15deg] transition-all duration-500 shadow-md">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-accent flex items-center justify-center group-hover/badge:scale-110 group-hover/badge:rotate-[15deg] transition-all duration-500 shadow-md">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
-            <div className="flex flex-col pr-2 text-white">
-              <span className="text-[10px] md:text-xs font-bold text-white/80 tracking-[0.2em] uppercase mb-0.5">Rated</span>
-              <span className="text-sm md:text-lg font-bold leading-tight drop-shadow-sm">4.9/5 by Customers</span>
+            <div className="flex flex-col pr-1 text-white">
+              <span className="text-[9px] md:text-[10px] font-bold text-white/80 tracking-[0.2em] uppercase mb-0.5">Rated</span>
+              <span className="text-sm md:text-base font-bold leading-tight drop-shadow-sm whitespace-nowrap">4.9/5 by Customers</span>
             </div>
           </div>
         </div>

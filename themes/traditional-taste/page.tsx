@@ -9,8 +9,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import ProductDetailsModal from './components/utils/product-details-modal';
 import { useCategories } from '@/hooks/useCategories';
-import { getCategoryHref } from '@/utils/product-route';
+import { getCategoryHref, getProductHref } from '@/utils/product-route';
 import { SlidersHorizontal, ChevronRight, ChevronLeft } from 'lucide-react';
+import LimitedOffer from './components/layout/limited-offer';
 
 export default function DepotHome() {
   const [allProducts, setAllProducts] = useState<ProductProps[]>([]);
@@ -24,6 +25,11 @@ export default function DepotHome() {
   const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minRating, setMinRating] = useState('');
 
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE;
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
@@ -85,67 +91,18 @@ export default function DepotHome() {
   }, [featuredProductsData]);
 
   const itemsPerPage = 24;
-  let showcaseProducts = allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  let showcaseProducts: any[] = allProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   // Custom override for the first six lines of cards on Page 1
-  if (currentPage === 1 && showcaseProducts.length >= 4) {
-    const customFirstRow = [
-      { ...showcaseProducts[0], name: "Disha Rice 5kg", salePrice: 9.99, oldPrice: undefined, rating: 5, picture: "/disha-rice.png", id: "mock-disha" },
-      { ...showcaseProducts[0], name: "Tilda Basmati Rice 5kg", salePrice: 11.99, oldPrice: undefined, rating: 5, picture: "/tilda-5kg.png", id: "mock-tilda-5" },
-      { ...showcaseProducts[0], name: "Tilda Long Grain Rice 10kg", salePrice: 16.99, oldPrice: undefined, rating: 4, picture: "/tilda-10kg.png", id: "mock-tilda-10" },
-      { ...showcaseProducts[0], name: "Tilda Long Grain Rice 20kg", salePrice: 28.99, oldPrice: undefined, rating: 4, picture: "/tilda-20kg.png", id: "mock-tilda-20" },
-    ];
 
-    let customSecondRow = [
-      { ...showcaseProducts[0], name: "Aani Basmati Rice 10kg", salePrice: 19.50, oldPrice: undefined, rating: 4, picture: "/aani-10kg.png", id: "mock-aani-10", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Aani Basmati Rice 20kg", salePrice: 35.99, oldPrice: undefined, rating: 4, picture: "/aani-20kg.png", id: "mock-aani-20", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "African Finest Jollof Rice 10kg", salePrice: 19.99, oldPrice: undefined, rating: 5, picture: "/african-finest.png", id: "mock-african", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tolly Boy Rice 5kg", salePrice: 8.99, oldPrice: undefined, rating: 4, picture: "/tolly-boy.png", id: "mock-tolly-5", imageClass: "scale-125 group-hover:scale-[1.35]" },
-    ];
-
-    let customThirdRow = [
-      { ...showcaseProducts[0], name: "Tolly Boy Rice 10kg", salePrice: 15.99, oldPrice: undefined, rating: 4, picture: "/tolly-10kg.png", id: "mock-tolly-10", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tolly Boy Rice 20kg", salePrice: 28.99, oldPrice: undefined, rating: 4, picture: "/tolly-20kg.png", id: "mock-tolly-20", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tropical Sun Basmati Rice 10kg", salePrice: 19.99, oldPrice: undefined, rating: 5, picture: "/tropical-sun.png", id: "mock-tropical", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Knorr Beef Cubes", salePrice: 2.20, oldPrice: undefined, rating: 5, picture: "/knorr-beef.png", id: "mock-knorr", imageClass: "scale-125 group-hover:scale-[1.35]" },
-    ];
-
-    let customFourthRow = [
-      { ...showcaseProducts[0], name: "Maggi Star Cubes", salePrice: 2.20, oldPrice: undefined, rating: 5, picture: "/maggi-cubes.png", id: "mock-maggi", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tasty Cube", salePrice: 3.50, oldPrice: undefined, rating: 4, picture: "/tasty-cube.png", id: "mock-tasty", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Rajah Curry Powder", salePrice: 1.50, oldPrice: undefined, rating: 4, picture: "/rajah-curry.png", id: "mock-rajah-curry", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Rajah Chicken Seasoning 100g", salePrice: 1.50, oldPrice: undefined, rating: 4, picture: "/rajah-chicken.png", id: "mock-rajah-chicken", imageClass: "scale-125 group-hover:scale-[1.35]" },
-    ];
-
-    let customFifthRow = [
-      { ...showcaseProducts[0], name: "Rajah White Pepper 100g", salePrice: 3.50, oldPrice: undefined, rating: 4, picture: "/rajah-white.jpg", id: "mock-rajah-white", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tropical Sun Garlic Powder 500g", salePrice: 5.50, oldPrice: undefined, rating: 4, picture: "/tropical-garlic.jpg", id: "mock-tropical-garlic", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tropical Sun Chicken Seasoning", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/tropical-chicken.png", id: "mock-tropical-chicken", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Ducros Thyme 80g", salePrice: 8.00, oldPrice: undefined, rating: 5, picture: "/ducros-thyme.png", id: "mock-ducros-thyme", imageClass: "scale-125 group-hover:scale-[1.35]" },
-    ];
-
-    let customSixthRow = [
-      { ...showcaseProducts[0], name: "Lasor Pepper Soup Spice", salePrice: 1.99, oldPrice: undefined, rating: 5, picture: "/lasor-pepper.png", id: "mock-lasor-pepper", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Spice City Fried Rice Seasoning", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/spicity-fried.png", id: "mock-spicity-fried", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Spice City Jollof Rice Seasoning", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/spicity-jollof.png", id: "mock-spicity-jollof", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...showcaseProducts[0], name: "Tiger Curry Masala Roll", salePrice: 2.00, oldPrice: undefined, rating: 4, picture: "/tiger-masala.png", id: "mock-tiger-masala", imageClass: "scale-125 group-hover:scale-[1.35]" },
-    ];
-
-    showcaseProducts = [...customFirstRow, ...customSecondRow, ...customThirdRow, ...customFourthRow, ...customFifthRow, ...customSixthRow];
+  // Import mock products
+  const mockedProducts = require('@/utils/mocked-products').getMockedProducts(allProducts[0] || {});
+  
+  if (currentPage >= 1 && currentPage <= 5) {
+     const startIndex = (currentPage - 1) * itemsPerPage;
+     const endIndex = startIndex + itemsPerPage;
+     showcaseProducts = mockedProducts.slice(startIndex, endIndex);
   }
-
-  // Custom override for Page 2 cards
-  if (currentPage === 2) {
-    const page2BaseProduct = allProducts[0] || {};
-    const customPage2Row1 = [
-      { ...page2BaseProduct, name: "Page 2 Product 1", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/placeholder-image.png", id: "p2-mock-1", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...page2BaseProduct, name: "Page 2 Product 2", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/placeholder-image.png", id: "p2-mock-2", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...page2BaseProduct, name: "Page 2 Product 3", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/placeholder-image.png", id: "p2-mock-3", imageClass: "scale-125 group-hover:scale-[1.35]" },
-      { ...page2BaseProduct, name: "Page 2 Product 4", salePrice: 1.99, oldPrice: undefined, rating: 4, picture: "/placeholder-image.png", id: "p2-mock-4", imageClass: "scale-125 group-hover:scale-[1.35]" },
-    ];
-    showcaseProducts = [...customPage2Row1];
-  }
-
   const totalPages = Math.max(5, Math.ceil(allProducts.length / itemsPerPage));
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
@@ -300,27 +257,136 @@ export default function DepotHome() {
       </div>
 
       <div className="container mx-auto py-16 px-4 md:px-16 bg-[#fbf9f6]/50">
-        <section>
+        <section id="shop-section" className="scroll-mt-8">
           {/* Filters Bar */}
-          <div className="flex flex-col md:flex-row justify-between items-center bg-white border border-gray-100 rounded-2xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)] mb-12">
-            <div className="flex items-center gap-6 w-full md:w-auto">
-              <button className="flex items-center gap-2 border border-gray-200 rounded-xl px-4 py-2 hover:bg-gray-50 transition-colors">
-                <SlidersHorizontal size={18} className="text-gray-600" />
-                <span className="font-semibold text-gray-800">Filters</span>
-              </button>
-              <span className="text-gray-500 font-medium">{allProducts.length} products</span>
+          <div className="bg-white border border-gray-100 rounded-[1.5rem] shadow-[0_8px_30px_rgba(0,0,0,0.04)] mb-12 overflow-hidden transition-all duration-300">
+            <div className="flex flex-col md:flex-row justify-between items-center p-5">
+              <div className="flex items-center gap-6 w-full md:w-auto">
+                <button
+                  onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                  className={`flex items-center gap-2.5 rounded-xl px-5 py-2.5 transition-all duration-300 font-bold text-sm ${
+                    isFiltersOpen
+                      ? 'bg-gradient-to-r from-accent to-accent/80 text-accent-foreground shadow-[0_4px_15px_rgba(26,92,56,0.2)] hover:shadow-[0_6px_20px_rgba(26,92,56,0.3)] hover:-translate-y-0.5'
+                      : 'border-2 border-gray-100 text-gray-700 hover:bg-gray-50 hover:border-gray-200 hover:-translate-y-0.5'
+                  }`}
+                >
+                  <SlidersHorizontal size={18} />
+                  <span>Filters</span>
+                </button>
+                <span className="text-gray-500 font-medium">{Math.max(120, allProducts.length)} products</span>
+              </div>
+
+              <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
+                <span className="text-gray-500 font-medium">Sort by:</span>
+                <div className="relative">
+                  <select className="appearance-none border border-gray-200 rounded-xl px-4 py-2 pr-10 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer">
+                    <option>Default</option>
+                    <option>Price: Low to High</option>
+                    <option>Price: High to Low</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-              <span className="text-gray-500 font-medium">Sort by:</span>
-              <div className="relative">
-                <select className="appearance-none border border-gray-200 rounded-xl px-4 py-2 pr-10 bg-white font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer">
-                  <option>Default</option>
-                  <option>Price: Low to High</option>
-                  <option>Price: High to Low</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+            {/* Expandable Filter Panel */}
+            <div 
+              className={`transition-all duration-500 ease-in-out origin-top ${
+                isFiltersOpen ? 'max-h-[800px] opacity-100 scale-y-100' : 'max-h-0 opacity-0 scale-y-95 pointer-events-none'
+              }`}
+            >
+              <div className="border-t border-gray-100 px-6 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gray-50/30">
+                {/* Category */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">Category</label>
+                  <div className="relative">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-2.5 pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+                    >
+                      <option>All Categories</option>
+                      <option>Groceries</option>
+                      <option>Meat</option>
+                      <option>Oil</option>
+                      <option>Dried Foods</option>
+                      <option>Beverages</option>
+                      <option>Snacks</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Min Price */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">Min Price (£)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
+
+                {/* Max Price */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">Max Price (£)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="100"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
+
+                {/* Min Rating */}
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">Min Rating</label>
+                  <div className="relative">
+                    <select
+                      value={minRating}
+                      onChange={(e) => setMinRating(e.target.value)}
+                      className="w-full appearance-none border border-gray-200 rounded-xl px-4 py-2.5 pr-10 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+                    >
+                      <option value="">Any Rating</option>
+                      <option value="4">4+ Stars</option>
+                      <option value="3">3+ Stars</option>
+                      <option value="2">2+ Stars</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear All Filters */}
+                <div className={`col-span-1 sm:col-span-2 lg:col-span-4 flex items-center pt-2 transition-all duration-300 ${
+                  (selectedCategory !== 'All Categories' || minPrice !== '' || maxPrice !== '' || minRating !== '') 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-2 pointer-events-none absolute'
+                }`}>
+                  <button
+                    onClick={() => {
+                      setSelectedCategory('All Categories');
+                      setMinPrice('');
+                      setMaxPrice('');
+                      setMinRating('');
+                    }}
+                    className="flex items-center gap-1.5 text-red-500 hover:text-red-600 font-bold text-sm transition-all duration-300 hover:bg-red-50 px-3 py-1.5 rounded-lg"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                    Clear all filters
+                  </button>
                 </div>
               </div>
             </div>
@@ -349,8 +415,7 @@ export default function DepotHome() {
                     product={product}
                     storeCode={storeCode}
                     onClick={() => {
-                      setSelectedProduct(product);
-                      setIsModalOpen(true);
+                      router.push(getProductHref(product, storeCode));
                     }}
                   />
                 ))}
@@ -363,7 +428,7 @@ export default function DepotHome() {
                   {currentPage > 1 && (
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      className="w-10 h-10 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-all"
+                      className="w-10 h-10 rounded-full bg-white text-[#0F5A3E] border border-gray-200 hover:border-[#E35920] hover:text-[#E35920] hover:bg-orange-50 flex items-center justify-center transition-all shadow-sm"
                     >
                       <ChevronLeft size={16} strokeWidth={2.5} />
                     </button>
@@ -373,8 +438,8 @@ export default function DepotHome() {
                       key={page}
                       onClick={() => setCurrentPage(page)}
                       className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${currentPage === page
-                        ? 'bg-[#0F5A3E] text-white shadow-md'
-                        : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                        ? 'bg-[#E35920] text-white shadow-[0_4px_10px_rgba(227,89,32,0.4)]'
+                        : 'bg-white text-[#0F5A3E] border border-gray-200 hover:border-[#E35920] hover:text-[#E35920] hover:bg-orange-50 shadow-sm'
                         }`}
                     >
                       {page}
@@ -382,7 +447,7 @@ export default function DepotHome() {
                   ))}
                   <button
                     onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    className="w-10 h-10 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 flex items-center justify-center transition-all"
+                    className="w-10 h-10 rounded-full bg-white text-[#0F5A3E] border border-gray-200 hover:border-[#E35920] hover:text-[#E35920] hover:bg-orange-50 flex items-center justify-center transition-all shadow-sm"
                   >
                     <ChevronRight size={16} strokeWidth={2.5} />
                   </button>
@@ -394,6 +459,8 @@ export default function DepotHome() {
           )}
         </section>
       </div>
+
+      <LimitedOffer />
 
       {selectedProduct && (
         <ProductDetailsModal
