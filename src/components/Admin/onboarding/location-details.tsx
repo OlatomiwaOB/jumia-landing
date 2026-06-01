@@ -52,7 +52,7 @@ const countries = [
   // { name: "Thailand", code: "TH" },
   // { name: "Turkey", code: "TR" },
   // { name: "United Arab Emirates", code: "AE" },
-  // { name: "United Kingdom", code: "GB" },
+  { name: "United Kingdom", code: "GB" },
   // { name: "United States", code: "US" },
   // { name: "Vietnam", code: "VN" }
 ].sort((a, b) => a.name.localeCompare(b.name));

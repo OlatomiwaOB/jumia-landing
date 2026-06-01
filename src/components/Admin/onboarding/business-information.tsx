@@ -7,8 +7,9 @@ import useGetLookup from "@/app/hooks/useGetLookup";
 import { toast } from 'sonner'
 import { Label } from '@/components/ui/label'
 import { DatePicker } from "@/components/ui/date-picker"
-import { useValidateIdentity } from '@/hooks/useGetIDType'
+// import { useValidateIdentity } from '@/hooks/useGetIDType'
 import { Loader2 } from 'lucide-react'
+import { useValidateIdentity } from '@/hooks/useGetIDType'
 
 type Props = {
   register: UseFormRegister<FormData>,
@@ -55,7 +56,7 @@ const BusinessInformation = ({ register, errors, watchedValues, setValue, watch,
 
     validateIdentity.mutate(
       {
-        entityId: 'FTD',
+        entityId: 'H2P',
         idNo: idNo,
         idType: idType as 'BVN' | 'NIN',
         firstname: watchedValues.firstname || '',

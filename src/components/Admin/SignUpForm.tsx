@@ -33,27 +33,27 @@ export interface FormData {
   password: string
   cPassword: string
   agreeToTerms: boolean
-  bvn: string
+  bvn?: string
   nin?: string
-  bvnPhoto: string | File
-  gender: string
-  dateOfBirth: string
+  bvnPhoto?: string | File
+  gender?: string
+  dateOfBirth?: string
   businessType: string
   businessRegNo: string
   businessLogo: string | File
   userPhoto: string | File
   docType: string
   docNo: string
-  issueDate: string
-  expiryDate: string
-  utilityBill: string | File
-  cacDocument: string | File
-  identificationType: 'bvn' | 'nin' | ''
-  docIdentificationType: string
-  idFile: string | File
-  merchantLogo: string | File
-  tierCode: string
-  subscriptionType: string
+  issueDate?: string
+  expiryDate?: string
+  utilityBill?: string | File
+  cacDocument?: string | File
+  identificationType?: 'bvn' | 'nin' | ''
+  docIdentificationType?: string
+  idFile?: string | File
+  merchantLogo?: string | File
+  tierCode?: string
+  subscriptionType?: string
 }
 
 export function SignUpForm() {
@@ -147,16 +147,15 @@ export function SignUpForm() {
         return !!watchedValues.businessName &&
           !!watchedValues.businessType &&
           !!watchedValues.firstname &&
-          !!watchedValues.lastname &&
-          !!watchedValues.gender &&
-          !!watchedValues.dateOfBirth &&
-          isIdentificationValid
+          !!watchedValues.lastname
+      // !!watchedValues.gender &&
+      // !!watchedValues.dateOfBirth &&
+      // isIdentificationValid
       case 2:
-        return !!watchedValues.subscriptionType && !!watchedValues.tierCode && !!watchedValues.email && watchedValues.mobileNo?.length === 11
+        return !!watchedValues.email && watchedValues.mobileNo?.length === 11
       case 3:
-        return !!watchedValues.docIdentificationType &&
-          !!watchedValues.merchantLogo &&
-          !!watchedValues.idFile
+        return !!watchedValues.merchantLogo
+      // !!watchedValues.idFile
       case 4:
         return !!watchedValues.password && !!watchedValues.cPassword &&
           watchedValues.password === watchedValues.cPassword &&
@@ -229,7 +228,7 @@ export function SignUpForm() {
         state: getValues().state,
         city: getValues().city,
         deviceId: 'string',
-        dob: getValues().dateOfBirth,
+        dob: getValues().dateOfBirth || '2000-01-01',
         gender: getValues().gender,
         photoLink: `/${getValues().merchantLogo}`,
         bvnPhotoLink: getValues().bvnPhoto,
