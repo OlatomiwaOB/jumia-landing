@@ -13,9 +13,11 @@ import { hasAccess, setAuthCredentials } from "@/utils/auth-utils"
 import axiosInstanceNoAuth from "@/utils/fetch-function-auth"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
 import loginBanner from "@/components/images/auth-banner.png"
-import logo from "@/components/images/direct-logo.png"
 import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
+
+const logo = process?.env?.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+const brandColor = process?.env?.NEXT_PUBLIC_ACCENT_COLOR!
 
 export function SignInForm() {
   const currentYear = new Date().getFullYear()
@@ -98,12 +100,12 @@ export function SignInForm() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-[#F9FAFB]">
       <div className='h-screen hidden lg:flex lg:w-1/2 items-center justify-center p-4'>
-        <div className="bg-gradient-to-b from-[#F9FAFB] to-[#FE7211] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative">
+        <div className={`bg-gradient-to-b from-[#F9FAFB] to-[var(--accent)] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative`}>
           <Image
             src={logo}
             alt="Logo"
-            width={600}
-            height={600}
+            width={100}
+            height={100}
             className="absolute top-0 left-0 p-5 max-w-[250px] h-auto object-contain"
           />
           <Image
@@ -223,7 +225,7 @@ export function SignInForm() {
         </div>
 
         <div className="fixed bottom-4 text-center w-full text-xs text-[#9E9E9E]">
-          © {currentYear} Fortitude. All Right Reserved
+          © {currentYear} Varisa. All Right Reserved
         </div>
       </div>
     </div>
