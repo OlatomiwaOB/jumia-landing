@@ -2,8 +2,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
+import { getCategoryHref } from '@/utils/product-route';
+import { useSearchParams } from 'next/navigation';
 
-const categories = [
+const mockCategories = [
   {
     id: 1,
     title: 'Traditional Soups',
@@ -62,14 +64,33 @@ const categories = [
   },
 ];
 
-export default function CategoryList() {
+interface CategoryListProps {
+  categories?: { code?: string; name?: string; logo?: string }[];
+}
+
+export default function CategoryList({ categories: dynamicCategories }: CategoryListProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStartX = useRef<number | null>(null);
+  
+  const searchParams = useSearchParams();
+  const storeCode = searchParams
+    ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
+    : process.env.NEXT_PUBLIC_STORE_CODE || '';
+
+  const displayCategories = dynamicCategories && dynamicCategories.length > 0
+    ? dynamicCategories.map((c, i) => ({
+        id: c.code || i,
+        title: c.name,
+        productCount: null,
+        image: c.logo || '',
+        link: getCategoryHref(c.code || '', storeCode),
+      }))
+    : mockCategories;
 
   // Group categories into pairs for mobile carousel (2 per slide)
   const mobileChunks = [];
-  for (let i = 0; i < categories.length; i += 2) {
-    mobileChunks.push(categories.slice(i, i + 2));
+  for (let i = 0; i < displayCategories.length; i += 2) {
+    mobileChunks.push(displayCategories.slice(i, i + 2));
   }
 
   const goToPrev = () => setCurrentSlide((p) => Math.max(0, p - 1));
@@ -81,8 +102,8 @@ export default function CategoryList() {
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 40) goToNext();
-    else if (diff < -40) goToPrev();
+    if (diff > 40) goToPrev();
+    else if (diff < -40) goToNext();
     touchStartX.current = null;
   };
 
@@ -98,13 +119,13 @@ export default function CategoryList() {
 
         {/* ── DESKTOP & TABLET GRID ── */}
         <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-8 md:gap-6">
-          {categories.map((category) => (
+          {displayCategories.map((category) => (
             <Link
               key={category.id}
               href={category.link}
-              className="flex flex-col items-center cursor-pointer"
+              className="flex flex-col items-center cursor-pointer group"
             >
-              <div className="relative w-full aspect-square mb-5 transition-transform duration-400 hover:scale-105">
+              <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
                 {category.image ? (
                   <Image
                     src={category.image}
@@ -119,12 +140,14 @@ export default function CategoryList() {
                   </div>
                 )}
               </div>
-              <h3 className="text-[#111] font-extrabold text-[16px] mb-1.5 hover:text-accent transition-colors text-center leading-tight tracking-tight">
+              <h3 className="text-[#111] font-extrabold text-[16px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
                 {category.title}
               </h3>
-              <p className="text-gray-400 font-medium text-[14px]">
-                {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
-              </p>
+              {category.productCount !== null && (
+                <p className="text-gray-400 font-medium text-[14px]">
+                  {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
+                </p>
+              )}
             </Link>
           ))}
         </div>
@@ -146,9 +169,9 @@ export default function CategoryList() {
                     <Link
                       key={category.id}
                       href={category.link}
-                      className="flex-1 flex flex-col items-center cursor-pointer"
+                      className="flex-1 flex flex-col items-center cursor-pointer group"
                     >
-                      <div className="relative w-full aspect-square mb-5 transition-transform duration-400 hover:scale-105">
+                      <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
                         {category.image ? (
                           <Image
                             src={category.image}
@@ -163,12 +186,14 @@ export default function CategoryList() {
                           </div>
                         )}
                       </div>
-                      <h3 className="text-[#111] font-extrabold text-[15px] mb-1.5 hover:text-accent transition-colors text-center leading-tight tracking-tight">
+                      <h3 className="text-[#111] font-extrabold text-[15px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
                         {category.title}
                       </h3>
-                      <p className="text-gray-400 font-medium text-[13px]">
-                        {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
-                      </p>
+                      {category.productCount !== null && (
+                        <p className="text-gray-400 font-medium text-[13px]">
+                          {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
+                        </p>
+                      )}
                     </Link>
                   ))}
                 </div>
