@@ -9,10 +9,10 @@ interface CategoriesResponse {
 }
 
 export const useCategories = (retry?: unknown) => {
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
-  const storeCode = process?.env?.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
+  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['categories', entityCode, storeCode, retry],
     queryFn: () =>
       axiosInstanceNoAuth
@@ -31,5 +31,5 @@ export const useCategories = (retry?: unknown) => {
         .then((response) => response.data as CategoriesResponse),
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch };
 };

@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="w-full">
       {/* Promotional Cards Grid */}
       <PromotionalCards />
-      
+
       {/* Categories List Section */}
       <CategoryList />
 
