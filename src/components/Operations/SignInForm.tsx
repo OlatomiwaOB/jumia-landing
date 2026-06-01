@@ -18,8 +18,8 @@ import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
 import { OPERATIONS, REVENUE_ASSURANCE } from '@/utils/constants'
 
-
-const logo = process?.env?.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
+const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
 export function SignInForm() {
   const currentYear = new Date().getFullYear()
   const [username, setUsername] = useState("")
@@ -31,6 +31,9 @@ export function SignInForm() {
   const [step, setStep] = useState<"credentials" | "otp">("credentials")
   const [rememberMe, setRememberMe] = useState(false)
   const router = useRouter()
+
+  console.log(clientName);
+
 
   const { setOperations } = useOperations()
   const { push } = useRouter()
@@ -345,7 +348,7 @@ export function SignInForm() {
           </div>
 
           <div className="fixed bottom-4 text-center w-full text-xs text-[#9E9E9E]">
-            © {currentYear} Varisa. All Right Reserved
+            © {currentYear} {clientName}. All Right Reserved
           </div>
         </div>
       </div>

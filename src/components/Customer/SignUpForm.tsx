@@ -39,7 +39,8 @@ export interface FormData {
   identificationType?: 'bvn' | 'nin' | ''
   // customerPic: string | File
 }
-const logo = process?.env?.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
+const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
 export function SignUpForm() {
   const currentYear = new Date().getFullYear()
   const [currentStep, setCurrentStep] = useState(1)
@@ -459,7 +460,7 @@ export function SignUpForm() {
           }
         </div>
         <div className="text-center w-full text-xs text-[#9E9E9E] py-4 mt-auto">
-          © {currentYear} Varisa. All Right Reserved
+          © {currentYear} {clientName}. All Right Reserved
         </div>
       </div>
     </div>
