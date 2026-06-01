@@ -32,6 +32,8 @@
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
+  --color-accent2: var(--accent-color2);
+  --color-accent3: var(--accent-color3);
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -68,6 +70,8 @@ body {
   --muted-foreground: oklch(0.556 0 0);
   --accent: var(--accent-env);
   --accent-foreground: var(--accent-foreground-env);
+  --accent2: var(--accent-color2);
+  --accent3: var(--accent-color3);
   --destructive: oklch(0.577 0.245 27.325);
   --font-funnel-display: 'Funnel Display', sans-serif;
   --destructive-foreground: oklch(0.577 0.245 27.325);

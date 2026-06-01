@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getAuthCredentials, logout } from "@/utils/auth-utils-customer"
 
 
-export function Header() {
+export default function Header() {
 
   const [openSearch,setOpenSearch] = useState(false)
   const [isOpen, setIsOpen] = useState(false)

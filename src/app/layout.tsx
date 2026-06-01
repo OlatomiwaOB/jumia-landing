@@ -8,7 +8,7 @@ import { cookieToInitialState } from "wagmi";
 import { getConfig } from "../../wagmi.config";
 import { headers } from "next/headers";
 import AlgorandWalletProvider from "./AlgorandWalletProvider";
-import ScrollToTopButton from "@/components/ui/scroll-to-top-button";
+
 
 const funnelDisplay = Funnel_Display({
   subsets: ["latin"],
@@ -32,6 +32,14 @@ const storefrontConfigs = {
     metadata: {
       title: 'VOGUE | Home',
       description: 'Premium fashion and wearables.',
+    }
+  },
+  'traditional-taste': {
+    name: 'Traditional Taste',
+    favicon: '/favicons/fortitude.ico',
+    metadata: {
+      title: 'Traditional Taste | Home',
+      description: 'Traditional Taste Home',
     }
   },
 };
@@ -63,6 +71,8 @@ export default async function RootLayout({
   const storefront = getCurrentStorefront();
   const accentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR || '0652e9';
   const accentForegroundColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR || '76a2fc';
+  const accentColor2 = process.env.NEXT_PUBLIC_ACCENT_COLOR_2 || '967BB6';
+  const accentColor3 = process.env.NEXT_PUBLIC_ACCENT_COLOR_3 || '2F3E33';
 
   const headersList = await headers();
   const initialState = cookieToInitialState(
@@ -81,6 +91,8 @@ export default async function RootLayout({
           :root {
               --accent-env: #${accentColor};
               --accent-foreground-env: #${accentForegroundColor};
+              --accent-color2: #${accentColor2};
+              --accent-color3: #${accentColor3};
             }
             
             body {
@@ -94,7 +106,7 @@ export default async function RootLayout({
           <AlgorandWalletProvider>
             <LocationProvider autoDetect={true}>
               {children}
-              <ScrollToTopButton threshold={300} smooth={true} />
+
             </LocationProvider>
           </AlgorandWalletProvider>
         </Providers>
