@@ -71,7 +71,7 @@ interface CategoryListProps {
 export default function CategoryList({ categories: dynamicCategories }: CategoryListProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const touchStartX = useRef<number | null>(null);
-  
+
   const searchParams = useSearchParams();
   const storeCode = searchParams
     ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
@@ -79,13 +79,13 @@ export default function CategoryList({ categories: dynamicCategories }: Category
 
   const displayCategories = dynamicCategories && dynamicCategories.length > 0
     ? dynamicCategories.map((c, i) => ({
-        id: c.code || i,
-        title: c.name,
-        productCount: null,
-        image: c.logo || '',
-        link: getCategoryHref(c.code || '', storeCode),
-      }))
-    : mockCategories;
+      id: c.code || i,
+      title: c.name,
+      productCount: null,
+      image: c.logo || '',
+      link: getCategoryHref(c.code || '', storeCode),
+    }))
+    : [];
 
   // Group categories into pairs for mobile carousel (2 per slide)
   const mobileChunks = [];
@@ -111,114 +111,137 @@ export default function CategoryList({ categories: dynamicCategories }: Category
     <div className="w-full bg-accent-foreground">
       <section className="w-full px-4 md:px-8 pt-12 pb-6 md:pt-24 md:pb-20 max-w-[1500px] mx-auto">
         <div className="text-center mb-6">
-          <h2 className="text-[44px] font-extrabold tracking-tight text-[#111] mb-4">Food Categories</h2>
-          <p className="text-gray-500 text-[16px] max-w-2xl mx-auto">
+          <h2 className="text-[44px] font-extrabold tracking-tight text-[#111] mb-4">Categories</h2>
+          {/* <p className="text-gray-500 text-[16px] max-w-2xl mx-auto">
             Good food brings people together. Browse our collection of mouthwatering meals, snacks, drinks, and recipes made to satisfy every appetite.
-          </p>
+          </p> */}
         </div>
 
         {/* ── DESKTOP & TABLET GRID ── */}
         <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-8 md:gap-6">
-          {displayCategories.map((category) => (
-            <Link
-              key={category.id}
-              href={category.link}
-              className="flex flex-col items-center cursor-pointer group"
-            >
-              <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
-                {category.image ? (
-                  <Image
-                    src={category.image}
-                    alt={category.title || ''}
-                    fill
-                    className="object-contain mix-blend-multiply"
-                    sizes="(max-width: 1024px) 33vw, 12vw"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
-                    <span className="text-gray-400 text-xs">No image</span>
-                  </div>
-                )}
+          {
+            displayCategories.length === 0 ? (
+              <div className="col-span-full flex flex-col items-center justify-center py-16">
+                <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+                <p className="text-gray-400 text-lg font-semibold mb-1">No categories available</p>
+                <p className="text-gray-400 text-sm">Check back later for new categories.</p>
               </div>
-              <h3 className="text-[#111] font-extrabold text-[16px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
-                {category.title}
-              </h3>
-              {category.productCount !== null && (
-                <p className="text-gray-400 font-medium text-[14px]">
-                  {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
-                </p>
-              )}
-            </Link>
-          ))}
+            ) : (
+              displayCategories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={category.link}
+                  className="flex flex-col items-center cursor-pointer group"
+                >
+                  <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
+                    {category.image ? (
+                      <Image
+                        src={category.image}
+                        alt={category.title || ''}
+                        fill
+                        className="object-contain mix-blend-multiply"
+                        sizes="(max-width: 1024px) 33vw, 12vw"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                        <span className="text-gray-400 text-xs">No image</span>
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-[#111] font-extrabold text-[16px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
+                    {category.title}
+                  </h3>
+                  {category.productCount !== null && (
+                    <p className="text-gray-400 font-medium text-[14px]">
+                      {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
+                    </p>
+                  )}
+                </Link>
+              )))
+          }
         </div>
 
         {/* ── MOBILE CAROUSEL ── */}
         <div className="sm:hidden mt-10">
-          <div
-            className="relative overflow-hidden"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-          >
-            <div
-              className="flex transition-transform duration-300 ease-out"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-            >
-              {mobileChunks.map((chunk, index) => (
-                <div key={index} className="w-full flex-shrink-0 flex gap-4 px-2">
-                  {chunk.map((category) => (
-                    <Link
-                      key={category.id}
-                      href={category.link}
-                      className="flex-1 flex flex-col items-center cursor-pointer group"
-                    >
-                      <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
-                        {category.image ? (
-                          <Image
-                            src={category.image}
-                            alt={category.title || ''}
-                            fill
-                            className="object-contain mix-blend-multiply"
-                            sizes="(max-width: 768px) 50vw"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
-                            <span className="text-gray-400 text-xs">No image</span>
+          {displayCategories.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <svg className="w-14 h-14 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+              <p className="text-gray-400 text-base font-semibold mb-1">No categories available</p>
+              <p className="text-gray-400 text-sm">Check back later for new categories.</p>
+            </div>
+          ) : (
+            <>
+              <div
+                className="relative overflow-hidden"
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+              >
+                <div
+                  className="flex transition-transform duration-300 ease-out"
+                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                >
+                  {mobileChunks.map((chunk, index) => (
+                    <div key={index} className="w-full flex-shrink-0 flex gap-4 px-2">
+                      {chunk.map((category) => (
+                        <Link
+                          key={category.id}
+                          href={category.link}
+                          className="flex-1 flex flex-col items-center cursor-pointer group"
+                        >
+                          <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
+                            {category.image ? (
+                              <Image
+                                src={category.image}
+                                alt={category.title || ''}
+                                fill
+                                className="object-contain mix-blend-multiply"
+                                sizes="(max-width: 768px) 50vw"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                                <span className="text-gray-400 text-xs">No image</span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <h3 className="text-[#111] font-extrabold text-[15px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
-                        {category.title}
-                      </h3>
-                      {category.productCount !== null && (
-                        <p className="text-gray-400 font-medium text-[13px]">
-                          {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
-                        </p>
-                      )}
-                    </Link>
+                          <h3 className="text-[#111] font-extrabold text-[15px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
+                            {category.title}
+                          </h3>
+                          {category.productCount !== null && (
+                            <p className="text-gray-400 font-medium text-[13px]">
+                              {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
+                            </p>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
                   ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Dots only */}
-          <div className="flex items-center justify-center gap-2.5 mt-8 h-6">
-            {mobileChunks.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentSlide(i)}
-                className="flex items-center justify-center w-6 h-6 pointer-events-auto"
-              >
-                {i === currentSlide ? (
-                  <div className="w-6 h-6 rounded-full border border-accent flex items-center justify-center">
-                    <div className="w-2 h-2 bg-accent rounded-full" />
-                  </div>
-                ) : (
-                  <div className="w-2 h-2 bg-gray-400 rounded-full hover:bg-gray-500 transition-colors" />
-                )}
-              </button>
-            ))}
-          </div>
+              {/* Dots only */}
+              <div className="flex items-center justify-center gap-2.5 mt-8 h-6">
+                {mobileChunks.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentSlide(i)}
+                    className="flex items-center justify-center w-6 h-6 pointer-events-auto"
+                  >
+                    {i === currentSlide ? (
+                      <div className="w-6 h-6 rounded-full border border-accent flex items-center justify-center">
+                        <div className="w-2 h-2 bg-accent rounded-full" />
+                      </div>
+                    ) : (
+                      <div className="w-2 h-2 bg-gray-400 rounded-full hover:bg-gray-500 transition-colors" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>
