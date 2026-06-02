@@ -506,7 +506,7 @@ interface CategoryFormProps {
   category?: Category;
   mode?: 'create' | 'edit';
 }
-
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
 export const sectorOptions = [
   { label: 'Electronics', value: 'Electronics' },
   { label: 'Clothing & Fashion', value: 'Clothing & Fashion' },
@@ -672,7 +672,7 @@ const CreateCategoryPage = ({
         sector: values?.sector,
         entityCode: operations?.entityCode,
         // storeCode: values?.storeCode,
-        storeCode: 'STO4430'
+        storeCode
       };
       await saveCategory(payload);
     } catch (error) {

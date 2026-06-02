@@ -683,7 +683,8 @@ const Personal = ({ register, errors, watchedValues, setValue, watch, setError, 
 
       <div className="space-y-2">
         <Label htmlFor="identificationType">
-          Identification Type <span className="text-red-500">*</span>
+          Identification Type
+          {/* <span className="text-red-500">*</span> */}
         </Label>
         <Select
           value={identificationType}
@@ -705,7 +706,8 @@ const Personal = ({ register, errors, watchedValues, setValue, watch, setError, 
       {identificationType && (
         <div className="space-y-2">
           <label htmlFor={identificationType} className="text-sm font-medium text-gray-700 flex items-center gap-2">
-            {identificationType.toUpperCase()} Number <span className="text-red-500">*</span>
+            {identificationType.toUpperCase()} Number
+            {/* <span className="text-red-500">*</span> */}
             {validateIdentity.isPending && (
               <Loader2 className="h-4 w-4 animate-spin text-accent/80" />
             )}
@@ -781,42 +783,29 @@ const Personal = ({ register, errors, watchedValues, setValue, watch, setError, 
             Date Of Birth <span className="text-red-500">*</span>
           </Label>
           <div className="relative">
-            <DatePicker
+            <Input
               id="dateOfBirth"
-              value={watchedValues.dateOfBirth}
-              onChange={(value) => {
-                if (!isValidated && !isAutoFilling) {
-                  setValue("dateOfBirth", value, { shouldValidate: true })
-                  clearErrors("dateOfBirth")
-                }
-              }}
-              onValidationError={(message) => {
-                if (!isValidated && !isAutoFilling) {
-                  setValue("dateOfBirth", "", { shouldValidate: false })
-                  setError("dateOfBirth", { type: "manual", message })
-                }
-              }}
-              onValidationClear={() => {
-                clearErrors("dateOfBirth")
-              }}
-              onBlur={() => {
-                const value = watch("dateOfBirth")
-                if (value) {
-                  const birthDate = new Date(value)
-                  const today = new Date()
-                  const age = today.getFullYear() - birthDate.getFullYear()
-                  const monthDiff = today.getMonth() - birthDate.getMonth()
+              type="date"
+              {...register("dateOfBirth", { 
+                required: "Date of Birth is required",
+                validate: (value) => {
+                  if (value) {
+                    const birthDate = new Date(value)
+                    const today = new Date()
+                    const age = today.getFullYear() - birthDate.getFullYear()
+                    const monthDiff = today.getMonth() - birthDate.getMonth()
 
-                  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    return age - 1 >= 18 || "You must be at least 18 years old";
+                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                      return age - 1 >= 18 || "You must be at least 18 years old";
+                    }
+                    return age >= 18 || "You must be at least 18 years old";
                   }
-                  return age >= 18 || "You must be at least 18 years old";
+                  return true;
                 }
-              }}
-              placeholder="DOB to be validated"
-              error={!!errors.dateOfBirth}
-              maxDate={getMaxDate()}
-              disabled={(isValidated || isAutoFilling)}
+              })}
+              className={`${(isValidated || isAutoFilling) ? 'bg-gray-50 cursor-not-allowed text-muted-foreground' : ''}`}
+              disabled={isValidated || isAutoFilling}
+              max={`${getMaxDate().getFullYear()}-${(getMaxDate().getMonth() + 1).toString().padStart(2, '0')}-${getMaxDate().getDate().toString().padStart(2, '0')}`}
             />
             {isAutoFilling && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">

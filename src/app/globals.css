@@ -260,6 +260,10 @@ body {
   }
 }
 
+.text-sidebar-text {
+  color: var(--accent-foreground-env);
+}
+
 .card {
   padding: 2em;
 }

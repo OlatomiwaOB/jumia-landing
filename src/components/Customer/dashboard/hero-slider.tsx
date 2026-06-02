@@ -412,6 +412,7 @@ function LoadingSkeleton({ height }: { height: string }) {
   );
 }
 
+const storeCodeEnv = process.env.NEXT_PUBLIC_STORE_CODE!
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState<number>(1);
@@ -421,7 +422,7 @@ export default function HeroSlider() {
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
   const searchParams = useSearchParams();
-  const storeCode = searchParams ? searchParams.get("storeCode") || "" : "";
+  const storeCode = searchParams ? searchParams.get("storeCode") || storeCodeEnv : "";
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);

@@ -72,6 +72,7 @@ const navigationGroups: NavGroup[] = [
     requiredPermissions: ['VIEW_INVENTORY', 'MANAGE_STORES', 'MANAGE_STORE_SETTINGS'],
     items: [
       { name: 'Inventories', href: '/admin/inventories', requiredPermissions: ['VIEW_INVENTORY'] },
+      { name: 'Component Mgt.', href: '/admin/component-management', requiredPermissions: ['VIEW_INVENTORY'] },
       { name: 'Stores', href: '/admin/stores', requiredPermissions: ['MANAGE_STORES'] },
     ]
   },

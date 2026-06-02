@@ -22,7 +22,8 @@ const ContactDetails = ({ register, errors, watchedValues, setValue }: Props) =>
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <div className="space-y-2">
           <Label htmlFor="tierCode">
-            Tier Type <span className="text-red-500">*</span>
+            Tier Type
+            {/* <span className="text-red-500">*</span> */}
           </Label>
           <Select
             value={watchedValues.tierCode}
@@ -47,7 +48,8 @@ const ContactDetails = ({ register, errors, watchedValues, setValue }: Props) =>
 
         <div className="space-y-2">
           <Label htmlFor="subscriptionType">
-            Subscription Type <span className="text-red-500">*</span>
+            Subscription Type
+            {/* <span className="text-red-500">*</span> */}
           </Label>
           <Select
             value={watchedValues.subscriptionType}
@@ -71,7 +73,7 @@ const ContactDetails = ({ register, errors, watchedValues, setValue }: Props) =>
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <p className="text-xs text-dark-gray">
           See more about our{' '}
           <a href="https://www.fortitudedirect.com/pricing" target='_blank' className="text-faded-accent underline">
@@ -79,7 +81,7 @@ const ContactDetails = ({ register, errors, watchedValues, setValue }: Props) =>
           </a>
           .
         </p>
-      </div>
+      </div> */}
 
       <div>
         <h3 className="text-sm font-semibold text-dark-gray mb-4">Contact Details</h3>

@@ -4,7 +4,7 @@ import Loader from '@/components/ui/loader'
 
 const entityObject = {
   'depot': {
-    name: 'DEPOT | home'
+    name: 'DEPOT | home',
   },
   'fortitude': {
     name: 'FORTITUDE | home'
@@ -18,7 +18,7 @@ const entityObject = {
 }
 
 export const metadata: Metadata = {
-  title: entityObject[process?.env?.NEXT_PUBLIC_STORE_FRONT as keyof typeof entityObject]?.name || 'Shop | home',
+  title: entityObject[process.env.NEXT_PUBLIC_STORE_FRONT as keyof typeof entityObject]?.name || 'Shop | home',
 }
 
 // Lazy loading components
@@ -50,4 +50,4 @@ const HomePage = () => {
   return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>
 }
 
-export default HomePage
+export default HomePage

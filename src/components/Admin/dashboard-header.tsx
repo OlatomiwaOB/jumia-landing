@@ -62,20 +62,21 @@ export const DashboardHeader = () => {
           status: ''
         }
       });
-      return response.data.notificationInfo as Notification[];
+      return response.data;
     },
     refetchInterval: 60000,
     refetchIntervalInBackground: true,
   });
 
-  useEffect(() => {
-    if (notificationsData) {
-      const unreadNotifications = notificationsData.filter(
-        notification => notification.status === 'UNREAD'
-      );
-      setUnreadCount(unreadNotifications.length);
-    }
-  }, [notificationsData]);
+  const notificationInfo = notificationsData?.notificationInfo as Notification[]
+  // useEffect(() => {
+  //   if (notificationsData) {
+  //     const unreadNotifications = notificationsData.filter(
+  //       notification => notification.status === 'UNREAD'
+  //     );
+  //     setUnreadCount(unreadNotifications.length);
+  //   }
+  // }, [notificationsData]);
 
   const handleNotificationsOpen = () => {
     setIsNotificationsOpen(true);
@@ -98,6 +99,10 @@ export const DashboardHeader = () => {
   const handleGoToProfile = () => {
     router.push('/admin-profile')
   };
+
+
+  console.log('notificationData', notificationsData);
+
 
   return (
     <>
@@ -144,8 +149,10 @@ export const DashboardHeader = () => {
                 onClick={handleNotificationsOpen}
               >
                 <NotificationIcon className="text-muted-foreground w-6 h-6" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-2.5 right-3.5 bg-faded-accent rounded-full w-2 h-2 flex items-center justify-center"></span>
+                {(notificationsData?.unreadMessages === '99+' || Number(notificationsData?.unreadMessages) > 0) && (
+                  <span className="absolute top-1 right-1 bg-red-500 text-white rounded-full min-w-[18px] h-[18px] text-[10px] font-semibold flex items-center justify-center px-1">
+                    {notificationsData?.unreadMessages}
+                  </span>
                 )}
               </button>
             </div>

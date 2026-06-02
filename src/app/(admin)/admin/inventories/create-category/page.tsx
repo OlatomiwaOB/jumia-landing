@@ -35,7 +35,7 @@ interface CategoryFormProps {
     mode?: 'create' | 'edit';
 }
 
-const storeCode = process?.env?.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
 
 // export const sectorOptions = [
 //   { label: 'Electronics', value: 'electronics' },

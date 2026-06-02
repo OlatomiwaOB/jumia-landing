@@ -607,7 +607,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
         )}
         style={{
           backgroundImage: 'url("/images/wallet-bg.png")',
-          backgroundColor: '#F56B08'
+          backgroundColor: 'var(--accent)'
         }}
       >
         <CardContent className="px-3 py-2 relative z-10">
@@ -622,7 +622,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                   className="w-6 h-4 object-cover"
                 />
               </div>
-              <div className="flex gap-1 items-center justify-center text-xs text-sidebar-text">
+              <div className="flex gap-1 items-center text-white justify-center text-xs text-sidebar-text">
                 <span>{label}</span>
                 <span>•</span>
                 <span>Available Balance</span>
@@ -660,8 +660,8 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                 </Button>
               </div> */}
               <div className="flex items-center">
-                <div className="text-xs font-light text-sidebar-text">
-                  My Fortitude ID:
+                <div className="text-xs text-white/89 font-light text-sidebar-text">
+                  Account Number:
                 </div>
                 <Button
                   variant="ghost"
@@ -670,6 +670,20 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                   className="text-white text-xs hover:text-sidebar-text"
                 >
                   {accountNo}
+                  <CopyIcon className="w-3 h-3" />
+                </Button>
+              </div>
+              <div className="flex items-center">
+                <div className="text-xs text-white/89 font-light text-sidebar-text">
+                  Virtual Account No:
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => copyToClipboard(virtualAccountNo || '')}
+                  className="text-white text-xs hover:text-sidebar-text"
+                >
+                  {virtualAccountNo}
                   <CopyIcon className="w-3 h-3" />
                 </Button>
               </div>
@@ -693,7 +707,19 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
         </CardContent>
       </Card>
 
+
       <Dialog open={showTopUpModal} onOpenChange={setShowTopUpModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className='text-lg font-bold text-dark-gray'>Coming soon</DialogTitle>
+          </DialogHeader>
+          <div className='flex flex-col items-center justify-center py-8'>
+            <p className='text-sm font-normal text-medium-gray'>Top up via bank transfer feature is coming soon</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* <Dialog open={showTopUpModal} onOpenChange={setShowTopUpModal}>
         <DialogContent className="sm:max-w-md rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0" onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogTitle className="sr-only">Top Up via Bank Transfer</DialogTitle>
 
@@ -777,7 +803,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 };
@@ -1045,7 +1071,7 @@ export const WalletOverview = () => {
                   {item.title === "Item Count" ? "Sale Count" : item.title}
                 </p>
                 <p className="text-lg font-bold text-dark-gray">
-                  {item.amount ? `₦${parseFloat(item.amount as string || '0').toLocaleString()}` : '—'}
+                  {item.amount ? `${parseFloat(item.amount as string || '0').toLocaleString()}` : '—'}
                 </p>
                 <p className="text-xs text-medium-gray">
                   {item.volume ? `${item.volume} vol.` : '—'}

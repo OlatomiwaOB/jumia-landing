@@ -9,8 +9,9 @@ import axiosInstance from "@/utils/fetch-function";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import useUser from "@/store/userStore";
-import { SearchSelect } from "@/components/ui/search-select";
+
 import { BankAccountFormData } from "./accounts-management";
+import { SearchSelect } from "@/components/ui/search-select";
 
 interface BankOption {
     code: string;

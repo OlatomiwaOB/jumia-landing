@@ -12,9 +12,8 @@ import {
 } from 'lucide-react';
 import { ProductCard } from './product-card';
 import { ProductProps } from '@/types';
-import ProductDetailsModal from '@/utils/product-details';
+
 import { useCart } from '@/store/cart';
-import { CartDropdown } from '@/components/ui/cart-dropdown';
 import { CurrencyCode, formatPrice, generateRandomNumber, getCurrentDate } from '@/utils/helperfns';
 import { toast } from 'sonner';
 import { getAuthCredentials } from '@/utils/auth-utils-customer';
@@ -23,6 +22,8 @@ import { AxiosError } from 'axios';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
 import { ArrowIcon, CartIcon, ShopIcon, TiktokIcon } from '@/components/icons/icons';
 import { Input } from '@/components/ui/input';
+import ProductDetailsModal from '@/utils/product-details';
+import { CartDropdown } from '@/components/ui/cart-dropdown';
 
 interface StoreDetail {
     id: number;

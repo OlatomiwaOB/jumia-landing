@@ -51,7 +51,7 @@ const nationalities = [
   // { nationality: "Thai", code: "TH", phoneCode: "+66" },
   // { nationality: "Turkish", code: "TR", phoneCode: "+90" },
   // { nationality: "Emirati", code: "AE", phoneCode: "+971" },
-  // { nationality: "British", code: "GB", phoneCode: "+44" },
+  { nationality: "British", code: "GB", phoneCode: "+44" },
   // { nationality: "American", code: "US", phoneCode: "+1" },
   // { nationality: "Vietnamese", code: "VN", phoneCode: "+84" }
 ].sort((a, b) => a.nationality.localeCompare(b.nationality));

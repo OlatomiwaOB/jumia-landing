@@ -106,7 +106,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
         )}
         style={{
           backgroundImage: 'url("/images/wallet-bg.png")',
-          backgroundColor: '#F56B08'
+          backgroundColor: 'var(--accent)'
         }}
       >
         <CardContent className="px-3 py-2 relative z-10">
@@ -146,7 +146,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
             <div className='-space-y-4'>
               <div className="flex items-center">
                 <div className="text-xs font-light text-sidebar-text">
-                  Acct Details:
+                  Virtual Account:
                 </div>
                 <Button
                   variant="ghost"
@@ -154,13 +154,13 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                   onClick={handleCopyAccountNumber}
                   className="text-white text-xs hover:text-sidebar-text"
                 >
-                  Rex MFB <span className='mb-0.5'>-</span> {virtualAccountNo}
+                  {virtualAccountNo}
                   <CopyIcon className="w-3 h-3" />
                 </Button>
               </div>
               <div className="flex items-center">
                 <div className="text-xs font-light text-sidebar-text">
-                  My Fortitude ID:
+                  Account Number:
                 </div>
                 <Button
                   variant="ghost"
@@ -193,6 +193,17 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
       </Card>
 
       <Dialog open={showTopUpModal} onOpenChange={setShowTopUpModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Coming Soon!!</DialogTitle>
+          </DialogHeader>
+          <div>
+            <p className="text-center">This feature will be available soon.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* <Dialog open={showTopUpModal} onOpenChange={setShowTopUpModal}>
         <DialogContent className="sm:max-w-md rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0" onOpenAutoFocus={(e) => e.preventDefault()}>
           <DialogTitle className="sr-only">Top Up via Bank Transfer</DialogTitle>
 
@@ -276,7 +287,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
             </div>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </>
   );
 };

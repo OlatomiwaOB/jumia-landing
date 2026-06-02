@@ -67,7 +67,7 @@ const CartView = ({
       url: '/payment-methods/fetch',
       params: {
         // country: customer?.country || 'NG',
-        storeCode: customer?.storeCode || storeCode,
+        // storeCode: customer?.storeCode || storeCode,
       }
     })
   })

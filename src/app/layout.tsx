@@ -26,6 +26,16 @@ const storefrontConfigs = {
       description: 'Curated essentials for everyday living.',
     }
   },
+
+  varisa: {
+    name: 'Varisa',
+    favicon: '/favicons/varisa.ico',
+    metadata: {
+      title: 'Varisa',
+      description: 'Varisa',
+    }
+  },
+
   vogue: {
     name: 'Vogue',
     favicon: '/favicons/vogue.ico',
@@ -45,7 +55,7 @@ const storefrontConfigs = {
 };
 
 function getCurrentStorefront() {
-  const storefrontKey = process.env?.NEXT_PUBLIC_STORE_FRONT as keyof typeof storefrontConfigs;
+  const storefrontKey = process.env.NEXT_PUBLIC_STORE_FRONT as keyof typeof storefrontConfigs;
   return storefrontConfigs[storefrontKey] || storefrontConfigs.depot;
 }
 

@@ -37,6 +37,8 @@ interface PaymentMethodFormData {
     features: string[];
 }
 
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+
 const FormSection = ({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) => (
     <div className="border-b border-gray-100 pb-6 mb-6 last:border-b-0 last:pb-0 last:mb-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -104,7 +106,7 @@ export default function CreatePaymentMethodPage() {
         queryFn: () => axiosOperations.request({
             url: '/payment-methods/fetch',
             method: 'GET',
-            params: { storeCode: 'STO4430' }
+            params: { storeCode: storeCode }
         }),
     });
 
@@ -149,7 +151,7 @@ export default function CreatePaymentMethodPage() {
         mutationFn: (data: any) => axiosOperations.request({
             url: '/payment-methods/save',
             method: 'POST',
-            params: { storeCode: 'STO4430' },
+            params: { storeCode },
             data
         }),
         onSuccess: (data) => {

@@ -272,3 +272,52 @@ export interface PaymentMethodsResponse {
   responseMessage: string;
   list: PaymentMethod[];
 }
+
+export interface EcomComponent {
+  id: number;
+  componentType: 'BANNER' | 'CONTENT';
+  merchantId: string;
+  storeCode: string;
+  entityCode: string;
+  code: string;
+  title: string;
+  detail: string;
+  subTitle: string;
+  link: string;
+  image1: string;
+  image2: string;
+  createdDate: string;
+  modifiedDate: string;
+  createdBy: string;
+  modifiedBy: string;
+}
+
+export interface EcomComponentListResponse {
+  totalCount: number;
+  totalPages: number;
+  responseCode: string;
+  responseMessage: string;
+  data: EcomComponent[];
+}
+
+export interface EcomComponentSavePayload {
+  componentType: 'BANNER' | 'CONTENT';
+  title: string;
+  detail: string;
+  subTitle?: string;
+  link?: string;
+  image1?: string;
+  image2?: string;
+  storeCode: string;
+}
+
+export interface EcomComponentSaveResponse {
+  code: string;
+  desc: string;
+  nextURL: string;
+  id: string;
+  refNo: string;
+  amount: number;
+  code3: string;
+  listData: Record<string, unknown>[];
+}

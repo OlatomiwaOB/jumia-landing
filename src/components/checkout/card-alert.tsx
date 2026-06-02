@@ -92,7 +92,8 @@ const CardAlert = ({
 
       if (paymentMethod === 'card' && data?.data?.paymentLinkUrl) {
         // window.open(data?.data?.paymentLinkUrl, '_blank')
-        router.push(data?.data?.paymentLinkUrl)
+        clearCart()
+        router?.replace(data?.data?.paymentLinkUrl)
         return
       }
     },
