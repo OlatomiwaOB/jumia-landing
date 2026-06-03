@@ -30,7 +30,7 @@ export default function StripeSuccessPage() {
           <div className="relative w-24 h-24 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: 'var(--accent)' }}>
             <Check className="w-12 h-12 text-white animate-in zoom-in duration-500 delay-300" strokeWidth={3} />
           </div>
-          <Sparkles className="absolute -top-2 -right-2 w-8 h-8 opacity-70 animate-pulse" style={{ color: 'var(--accent)' }} />
+          {/* <Sparkles className="absolute -top-2 -right-2 w-8 h-8 opacity-70 animate-pulse" style={{ color: 'var(--accent)' }} /> */}
         </div>
 
         {/* Text content */}

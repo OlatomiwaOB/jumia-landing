@@ -118,15 +118,15 @@ export const PinInput: React.FC<PinInputProps> = ({
   const getDisplayValue = (index: number) => {
     const char = value[index];
     if (!char) return '';
-    
+
     if (secure || type === 'password') {
       return maskChar;
     }
-    
+
     if (mask && isFocused !== index) {
       return maskChar;
     }
-    
+
     return char;
   };
 
@@ -154,7 +154,7 @@ export const PinInput: React.FC<PinInputProps> = ({
               'bg-accent/10 border-accent/30 focus:bg-accent/20 focus:border-accent',
               'focus:outline-none focus:ring-2 focus:ring-accent/20 focus:ring-offset-1',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              'text-accent-foreground placeholder:text-accent-foreground/50',
+              'text-black placeholder:text-accent-foreground/50',
               'caret-transparent selection:bg-transparent',
               inputClassName
             )}
