@@ -783,7 +783,7 @@ const DeleteProductModal = ({
     onSuccess?: () => void;
 }) => {
     const [isDeleting, setIsDeleting] = useState(false);
-
+    const { user } = useUser()
     const deleteProductMutation = useMutation({
         mutationFn: async (payload: { itemCode: string; entityCode: string }) => {
             return await axiosInstance.delete(`/itemupload/deleteProduct?itemCode=${payload.itemCode}&entityCode=${payload.entityCode}`, {
@@ -810,7 +810,7 @@ const DeleteProductModal = ({
         e.preventDefault();
         if (!product) return;
         setIsDeleting(true);
-        deleteProductMutation.mutate({ itemCode: product.code, entityCode: 'FTD' });
+        deleteProductMutation.mutate({ itemCode: product.code, entityCode: user?.entityCode! });
     };
 
     const handleClose = () => {
