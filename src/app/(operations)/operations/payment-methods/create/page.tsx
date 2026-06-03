@@ -18,6 +18,7 @@ import { useFileUpload } from '@/app/hooks/useUpload';
 import useUser from '@/store/userStore';
 import { PaymentMethod } from '@/types';
 import { CameraIcon } from '@/components/icons/icons';
+import { StoreCombobox } from '@/components/shared/StoreCombobox';
 
 interface PaymentMethodFormData {
     name: string;
@@ -35,6 +36,7 @@ interface PaymentMethodFormData {
     isRecommended: boolean;
     recommendedTitle: string;
     features: string[];
+    storeCode: string;
 }
 
 const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
@@ -79,12 +81,12 @@ export default function CreatePaymentMethodPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { user } = useUser();
 
-    const { register, handleSubmit, control, reset, setValue, watch, formState: { errors } } = useForm<PaymentMethodFormData>({
+    const { register, handleSubmit, control, reset, setValue, watch, formState: { errors }, getValues } = useForm<PaymentMethodFormData>({
         defaultValues: {
             name: '', code: '', paymentType: '', serviceProvider: '',
             fee: '0', feeType: 'FLAT', capLimit: '0', status: 'ACTIVE',
             country: 'ALL', description: '', subTitle: '', logo: '',
-            isRecommended: false, recommendedTitle: '', features: [],
+            isRecommended: false, recommendedTitle: '', features: [], storeCode: ''
         },
     });
 
@@ -106,7 +108,7 @@ export default function CreatePaymentMethodPage() {
         queryFn: () => axiosOperations.request({
             url: '/payment-methods/fetch',
             method: 'GET',
-            params: { storeCode: storeCode }
+            params: { storeCode: getValues('storeCode') || storeCode }
         }),
     });
 
@@ -129,6 +131,7 @@ export default function CreatePaymentMethodPage() {
                 setValue('isRecommended', found.isRecommended || false);
                 setValue('recommendedTitle', found.recommendedTitle || '');
                 setValue('features', found.features || []);
+                setValue('storeCode', found.storeCode || '');
                 if (found.logo) setPreviewUrl(found.logo);
                 setIsFormInitialized(true);
             }
@@ -271,6 +274,13 @@ export default function CreatePaymentMethodPage() {
                                         )}
                                     />
                                 </FormField>
+                                <FormField label="Store Code" required>
+                                    <StoreCombobox
+                                        onChange={(value) => setValue('storeCode', value)}
+                                        axiosInstance={axiosOperations}
+                                        value={getValues('storeCode')}
+                                    />
+                                </FormField>
                                 <FormField label="Cap Limit" required>
                                     <Input {...register('capLimit', { required: true })} placeholder="e.g., 2000" />
                                 </FormField>
@@ -279,7 +289,7 @@ export default function CreatePaymentMethodPage() {
                                         control={control} name="status" rules={{ required: true }}
                                         render={({ field }) => (
                                             <Select value={field.value} onValueChange={field.onChange}>
-                                                <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                                                <SelectTrigger><SelectValue placeholder="Select status" className='w-full' /></SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="ACTIVE">Active</SelectItem>
                                                     <SelectItem value="INACTIVE">Inactive</SelectItem>

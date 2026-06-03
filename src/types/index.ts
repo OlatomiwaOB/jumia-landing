@@ -28,6 +28,7 @@ export interface ProductProps {
   storeName?: string | null;
   storeLocationCity?: string | null;
   imageClass?: string;
+  vat?: string | null;
 }
 
 export interface Category {

@@ -46,7 +46,7 @@ export function StoreCombobox({
   const [search, setSearch] = useState("");
 
   const fetchStores = async ({ pageParam = 1 }) => {
-    if (!merchantCode) return { data: [], totalRecords: 0 };
+    // if (!merchantCode) return { data: [], totalRecords: 0 };
     const res = await axiosInstance.request({
       url: '/store/merchant',
       method: 'GET',

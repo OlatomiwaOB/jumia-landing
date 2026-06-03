@@ -48,6 +48,7 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
         code: product.code,
         qtyInStore: product.qtyInStore ?? 99,
         storeCode: process.env.NEXT_PUBLIC_STORE_CODE || '',
+        vat: product.vat,
       });
       openCart();
     }
@@ -124,7 +125,7 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
           </div>
 
           <div className="relative group/btn">
-            <button 
+            <button
               onClick={(e) => {
                 e.preventDefault();
                 setShowQuickView(true);
@@ -190,17 +191,17 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
       {showQuickView && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           {/* Overlay */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={(e) => {
               e.preventDefault();
               setShowQuickView(false);
             }}
           ></div>
-          
+
           {/* Modal Content */}
           <div className="bg-white rounded-2xl w-full max-w-4xl relative z-10 flex flex-col md:flex-row overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300 max-h-[90vh]">
-            <button 
+            <button
               onClick={(e) => {
                 e.preventDefault();
                 setShowQuickView(false);
@@ -209,32 +210,32 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
             >
               <X size={18} />
             </button>
-            
+
             {/* Image side */}
             <div className="w-full md:w-1/2 bg-gray-50 p-8 flex items-center justify-center min-h-[300px]">
               <div className="relative w-full h-full max-w-[300px] aspect-square">
-                <Image 
-                  src={product.picture || '/product-placeholder-borderless.svg'} 
+                <Image
+                  src={product.picture || '/product-placeholder-borderless.svg'}
                   alt={product.name || 'Product Image'}
                   fill
                   className="object-contain drop-shadow-xl"
                 />
               </div>
             </div>
-            
+
             {/* Details side */}
             <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col overflow-y-auto text-left">
               <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">{product.name}</h2>
               <div className="flex items-center gap-1 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={`${i < rating ? 'text-[#F39C12] fill-[#F39C12]' : 'text-gray-200 fill-gray-200'}`}
-                    />
-                  ))}
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={16}
+                    className={`${i < rating ? 'text-[#F39C12] fill-[#F39C12]' : 'text-gray-200 fill-gray-200'}`}
+                  />
+                ))}
               </div>
-              
+
               <div className="flex items-center gap-3 mb-6">
                 <span className="font-black text-2xl text-accent">
                   {formatPrice(product.salePrice || 0, ccy as any)}
@@ -245,11 +246,11 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
                   </span>
                 )}
               </div>
-              
+
               <p className="text-gray-600 leading-relaxed mb-8">
                 {product.description || "No description available for this item."}
               </p>
-              
+
               <div className="mt-auto">
                 <button
                   onClick={(e) => {

@@ -905,7 +905,7 @@ export const CartReview = ({
       ? `Store Pickup - ${selectedPickupLocation?.name || ''}`
       : "No shipping method";
 
-  const total = subtotal + shipping + totalVat;
+  const total = subtotal + shipping + totalVat + shippingVat;
 
   const totalVatWithShippingVat = totalVat + shippingVat
 
@@ -1091,14 +1091,16 @@ export const CartReview = ({
     // console.log("Shipping method:", shippingMethod);
     // console.log("Selected store:", selectedStore);
 
+    const combinedVat = totalVat + shippingVat;
+    const finalTotal = subtotal + shippingAmount + combinedVat;
+
     const updatedCheckoutData = {
       ...checkoutData,
       subtotal: subtotal,
       shippingFee: shippingAmount,
       shippingName: shippingName,
-      // totalAmount: total,
-      totalAmount: subtotal + shippingAmount + totalVat,
-      totalVat: totalVat + shippingVat,
+      totalAmount: finalTotal,
+      totalVat: combinedVat,
       totalDiscount: totalDiscountAmount,
       shippingMethod,
       selectedShippingOption,
@@ -1107,9 +1109,9 @@ export const CartReview = ({
     };
 
     sessionStorage.setItem('checkout', JSON.stringify(updatedCheckoutData));
-    if (onVatUpdate) onVatUpdate(totalVat + shippingVat);
+    if (onVatUpdate) onVatUpdate(combinedVat);
     if (onSubtotalUpdate) onSubtotalUpdate(subtotal);
-    if (onTotalUpdate) onTotalUpdate(total);
+    if (onTotalUpdate) onTotalUpdate(finalTotal);
 
     setCurrentStep('cart');
   };

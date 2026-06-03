@@ -26,7 +26,8 @@ interface Product {
     oldPrice?: number
     ccy: string
     picture?: string
-    discount?: string
+    discount?: string,
+    vat?: number | null | undefined | string
 }
 
 interface CartItem {
@@ -40,7 +41,8 @@ interface CartItem {
     picture?: string
     discount?: string
     quantity: number
-    subTotal: number
+    subTotal: number,
+    vat?: number | null | undefined | string
 }
 
 interface CartItemWithStore extends CartItem {
@@ -49,7 +51,7 @@ interface CartItemWithStore extends CartItem {
 }
 
 const Cart = () => {
-    const { cart, decrement, increment, removeItem, mainCcy, getCartTotal, singleQuantity } = useCart();
+    const { cart, decrement, increment, removeItem, mainCcy, getCartTotal, singleQuantity, totalVat } = useCart();
     const ccy = mainCcy();
     const totalAmount = getCartTotal();
     const router = useRouter();
@@ -71,7 +73,7 @@ const Cart = () => {
                 url: '/ecommerce/products/list',
                 params: {
                     name: '',
-                    storeCode: '',
+                    storeCode,
                     entityCode: process.env.NEXT_PUBLIC_ENTITYCODE,
                     category: '',
                     tag: '',
@@ -116,7 +118,8 @@ const Cart = () => {
                         picture: freshProduct.picture,
                         discount: freshProduct.discount,
                         ccy: freshProduct.ccy,
-                        subTotal: freshProduct.salePrice * item.quantity
+                        subTotal: freshProduct.salePrice * item.quantity,
+                        vat: freshProduct.vat
                     };
                 }
                 return {
@@ -168,8 +171,10 @@ const Cart = () => {
                     amount: item?.subTotal,
                     discount: item?.discount,
                     picture: item?.picture,
+                    vat: item?.vat
                 })),
                 subtotal: totalAmount,
+                totalVat: totalVat?.(),
                 shippingFee: 0,
                 totalAmount: totalAmount
             };
@@ -224,6 +229,7 @@ const Cart = () => {
             amount: item?.subTotal,
             discount: item?.discount,
             picture: item?.picture,
+            vat: item?.vat,
         }))
 
         const payload = {

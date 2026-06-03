@@ -143,7 +143,7 @@ const CardAlert = ({
       deviceId: customer?.deviceID,
       orderStatus: "",
       paymentStatus: "",
-      storeCode: customer?.storeCode || storeCode,
+      storeCode: storeCode,
       customerName: customer?.fullname,
       username: customer?.username,
       deliveryAddress: {

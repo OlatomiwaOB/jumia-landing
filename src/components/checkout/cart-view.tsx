@@ -136,14 +136,14 @@ const CartView = ({
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>{formatPrice(orderTotal - shippingFee, ccy as CurrencyCode)}</span>
+            <span>{formatPrice(orderTotal - shippingFee - totalVat, ccy as CurrencyCode)}</span>
           </div>
-          {/* {totalVat > 0 && (
+          {totalVat > 0 && (
             <div className="flex justify-between">
               <span>VAT:</span>
               <span>{formatPrice(totalVat, ccy as CurrencyCode)}</span>
             </div>
-          )} */}
+          )}
           <div className="flex justify-between">
             <span>Shipping:</span>
             <span>{formatPrice(shippingFee, ccy as CurrencyCode)}</span>
@@ -152,11 +152,6 @@ const CartView = ({
             <span>Total:</span>
             <span>{formatPrice(orderTotal, ccy as CurrencyCode)}</span>
           </div>
-          {totalVat > 0 && (
-            <p className="text-xs text-muted-foreground text-right">
-              Includes {formatPrice(totalVat, ccy as CurrencyCode)} VAT
-            </p>
-          )}
         </div>
       </div>
 

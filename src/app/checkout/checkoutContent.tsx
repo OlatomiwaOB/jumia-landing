@@ -1,5 +1,5 @@
 'use client';
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useToast } from '@/app/hooks/use-toast';
 import { useCart } from '@/store/cart';
 import { useForm } from 'react-hook-form';
@@ -66,6 +66,12 @@ const CheckoutContent = () => {
   const [totalVat, setTotalVat] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
 
+  // Ref to always hold current values, avoiding stale closures in useCallback
+  const latestValues = useRef({ subtotal: 0, shippingFee: 0, totalVat: 0 });
+  useEffect(() => {
+    latestValues.current = { subtotal, shippingFee, totalVat };
+  }, [subtotal, shippingFee, totalVat]);
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,45 +89,21 @@ const CheckoutContent = () => {
   const router = useRouter();
   const storeCode = searchParams.get('storeCode') || ''
   const { toast } = useToast();
-  const { getCartTotal } = useCart();
+  const { getCartTotal, totalVat: cartVat } = useCart();
   const { customer } = useCustomer();
 
-  const handleVatUpdate = useCallback((vat: number) => {
-    if (vat === totalVat) {
-      // console.log('VAT unchanged, skipping update');
-      return;
-    }
+  console.log(checkoutData);
 
-    // console.log('VAT updated to:', vat);
-    setTotalVat(vat);
-    updateCheckoutWithAllValues(subtotal, shippingFee, vat);
-  }, [totalVat, subtotal, shippingFee]);
+  console.log('cartVat', cartVat?.());
 
-  const handleSubtotalUpdate = useCallback((newSubtotal: number) => {
-    if (newSubtotal === subtotal) {
-      // console.log('Subtotal unchanged, skipping update');
-      return;
-    }
-
-    // console.log('Subtotal updated to:', newSubtotal);
-    setSubtotal(newSubtotal);
-    updateCheckoutWithAllValues(newSubtotal, shippingFee, totalVat);
-  }, [subtotal, shippingFee, totalVat]);
-
-  const handleTotalUpdate = useCallback((newTotal: number) => {
-    if (newTotal === orderTotal) {
-      // console.log('Total unchanged, skipping update');
-      return;
-    }
-
-    // console.log('Total updated to:', newTotal);
-    setOrderTotal(newTotal);
-  }, [orderTotal]);
 
   const updateCheckoutWithAllValues = useCallback((subtotalVal: number, shippingVal: number, vatVal: number) => {
     const totalAmount = subtotalVal + shippingVal + vatVal;
 
     const stored = sessionStorage.getItem('checkout');
+
+    // console.log('stored', JSON.parse(stored!));
+
     const parsedData = stored ? JSON.parse(stored) : {};
 
     const updatedData = {
@@ -143,15 +125,39 @@ const CheckoutContent = () => {
     }
   }, [selectedPayment]);
 
+  const handleVatUpdate = useCallback((vat: number) => {
+    if (vat === latestValues.current.totalVat) return;
+
+    setTotalVat(vat);
+    updateCheckoutWithAllValues(latestValues.current.subtotal, latestValues.current.shippingFee, vat);
+  }, [updateCheckoutWithAllValues]);
+
+  const handleSubtotalUpdate = useCallback((newSubtotal: number) => {
+    if (newSubtotal === latestValues.current.subtotal) return;
+
+    setSubtotal(newSubtotal);
+    updateCheckoutWithAllValues(newSubtotal, latestValues.current.shippingFee, latestValues.current.totalVat);
+  }, [updateCheckoutWithAllValues]);
+
+  const handleTotalUpdate = useCallback((newTotal: number) => {
+    if (newTotal === orderTotal) {
+      // console.log('Total unchanged, skipping update');
+      return;
+    }
+
+    // console.log('Total updated to:', newTotal);
+    setOrderTotal(newTotal);
+  }, [orderTotal]);
+
   useEffect(() => {
     const stored = sessionStorage.getItem('checkout');
     if (stored) {
       const parsedData = JSON.parse(stored);
       setCheckoutData(parsedData);
 
-      const subtotalVal = parsedData.subtotal || getCartTotal();
-      const shippingVal = parsedData.shippingFee || 0;
-      const vatVal = parsedData.totalVat || 0;
+      const subtotalVal = parsedData.subtotal ?? getCartTotal();
+      const shippingVal = parsedData.shippingFee ?? 0;
+      const vatVal = parsedData.totalVat ?? 0;
       const totalAmount = subtotalVal + shippingVal + vatVal;
 
       setSubtotal(subtotalVal);
@@ -183,15 +189,15 @@ const CheckoutContent = () => {
   useEffect(() => {
     if (!checkoutData) return;
 
-    const subtotal = checkoutData.subtotal || getCartTotal();
-    const shipping = checkoutData.shippingFee || 0;
-    const vat = checkoutData.totalVat || 0;
+    const subtotalVal = checkoutData.subtotal ?? getCartTotal();
+    const shipping = checkoutData.shippingFee ?? 0;
+    const vat = checkoutData.totalVat ?? 0;
 
     if (selectedPayment === 'crypto_token') {
-      const cryptoAmount = checkoutData.payingAmount || 0;
+      const cryptoAmount = checkoutData.payingAmount ?? 0;
       setOrderTotal(cryptoAmount + shipping + vat);
     } else {
-      setOrderTotal(subtotal + shipping + vat);
+      setOrderTotal(subtotalVal + shipping + vat);
     }
   }, [selectedPayment, checkoutData, getCartTotal]);
 
@@ -229,28 +235,11 @@ const CheckoutContent = () => {
   }, [form]);
 
   const updateCheckoutData = useCallback((shippingCost: number) => {
-    if (shippingCost === shippingFee) {
-      return;
-    }
+    if (shippingCost === latestValues.current.shippingFee) return;
 
     setShippingFee(shippingCost);
-    updateCheckoutWithAllValues(subtotal, shippingCost, totalVat);
-  }, [subtotal, totalVat, updateCheckoutWithAllValues, shippingFee]);
-
-  useEffect(() => {
-    if (!checkoutData) return;
-
-    const subtotalVal = checkoutData.subtotal || getCartTotal();
-    const shippingVal = checkoutData.shippingFee || 0;
-    const vatVal = checkoutData.totalVat || 0;
-
-    if (selectedPayment === 'crypto_token') {
-      const cryptoAmount = checkoutData.payingAmount || 0;
-      setOrderTotal(cryptoAmount + shippingVal + vatVal);
-    } else {
-      setOrderTotal(subtotalVal + shippingVal + vatVal);
-    }
-  }, [selectedPayment, checkoutData, getCartTotal]);
+    updateCheckoutWithAllValues(latestValues.current.subtotal, shippingCost, latestValues.current.totalVat);
+  }, [updateCheckoutWithAllValues]);
 
   // console.log('Updated checkoutData:', checkoutData);
   // console.log('Order Total:', orderTotal);
