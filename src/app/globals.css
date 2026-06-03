@@ -9,6 +9,12 @@
 }
 
 @theme inline {
+  /* Traditional Taste Theme Colors */
+  --color-tt-primary: var(--color-primary);
+  --color-tt-text: var(--color-text);
+  --color-tt-bg: var(--color-bg-main);
+  --color-tt-peach: var(--color-bg-secondary);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-funnel-display: var(--selected-font);

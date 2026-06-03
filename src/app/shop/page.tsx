@@ -12,8 +12,8 @@ import VogueLayout from '../../../themes/vogue/layout'
 import VogueShopContent from '../../../themes/vogue/components/shop/vogue-shop-content'
 
 // Traditional Taste Theme Imports
-import TraditionalTasteLayout from '../../../themes/traditional-taste/layout'
-import TraditionalTasteShopContent from '../../../themes/traditional-taste/components/shop/depot-shop-content'
+import TraditionalTasteLayout from '../../../themes/traditional-taste-v2/layout'
+import TraditionalTasteShopContent from '../../../themes/traditional-taste-v2/components/shop/traditional-taste-shop-content'
 
 // Varisa Theme Imports
 import VarisaLayout from '../../../themes/varisa/layout'
@@ -43,7 +43,7 @@ const Shop = () => {
         )
     }
 
-    if (storefront === 'traditional-taste') {
+    if (storefront === 'traditional-taste-v2') {
         return (
             <TraditionalTasteLayout>
                 <Suspense fallback={<div className="min-h-screen bg-white" />}>
