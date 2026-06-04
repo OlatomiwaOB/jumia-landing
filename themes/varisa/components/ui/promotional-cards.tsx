@@ -18,7 +18,8 @@ export default function PromotionalCards() {
         pageNumber: 1,
         pageSize: 4,
         componentType: 'BANNER',
-        storeCode: process.env.NEXT_PUBLIC_STORE_CODE
+        storeCode: process.env.NEXT_PUBLIC_STORE_CODE,
+        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE
       }
     }).then(res => res.data),
   });

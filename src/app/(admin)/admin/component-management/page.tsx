@@ -65,6 +65,8 @@ export default function ComponentManagementPage() {
         pageNumber,
         pageSize,
         componentType: filterType || undefined,
+        entityCode: user?.entityCode || undefined,
+        merchantId: user?.merchantCode || undefined,
       }
     }).then(res => res.data),
   });

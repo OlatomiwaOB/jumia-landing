@@ -310,6 +310,9 @@ export interface EcomComponentSavePayload {
   image1?: string;
   image2?: string;
   storeCode: string;
+  entityCode?: string;
+  merchantId?: string;
+  createdBy?: string;
 }
 
 export interface EcomComponentSaveResponse {
