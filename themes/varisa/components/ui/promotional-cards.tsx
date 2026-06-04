@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/utils/fetch-function';
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import type { EcomComponentListResponse } from '@/types';
 
 export default function PromotionalCards() {
@@ -13,7 +13,7 @@ export default function PromotionalCards() {
 
   const { data, isLoading, error } = useQuery<EcomComponentListResponse>({
     queryKey: ['ecom-components-list', 'BANNER'],
-    queryFn: () => axiosInstance.get('/ecom-components/list', {
+    queryFn: () => axiosInstanceNoAuth.get('/ecom-components/list', {
       params: {
         pageNumber: 1,
         pageSize: 4,
