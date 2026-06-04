@@ -40,7 +40,7 @@ interface CartStore {
   closeCart: () => void;
   increment: (payload: CartItem) => void;
   decrement: (payload: CartItem) => void;
-  addToCart: (payload: MenuItem) => void;
+  addToCart: (payload: MenuItem, qty?: number) => void;
   removeItem: (id: number | undefined) => void;
   clearCart: () => void;
   getCartTotal: () => number;
@@ -118,7 +118,7 @@ export const useCart = create<CartStore>()(
         }),
 
       // Cart modifications
-      addToCart: (payload) =>
+      addToCart: (payload, qty = 1) =>
         set((state) => {
           // Check if product already exists in cart
           const existingItemIndex = state.cart.findIndex(item => item.id === payload.id);
@@ -127,13 +127,13 @@ export const useCart = create<CartStore>()(
             // Add new item to cart with quantity and subtotal
             const newItem: CartItem = {
               ...payload,
-              quantity: 1,
-              subTotal: payload.salePrice
+              quantity: qty,
+              subTotal: payload.salePrice * qty
             };
 
             return {
               cart: [...state.cart, newItem],
-              totalItems: state.totalItems + 1
+              totalItems: state.totalItems + qty
             };
           }
 
