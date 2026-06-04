@@ -47,7 +47,7 @@ export default function PromotionalCards() {
           {isLoading ? (
             // Skeleton Loading State
             Array.from({ length: 4 }).map((_, index) => (
-              <div key={index} className="relative h-[480px] rounded-[32px] overflow-hidden bg-gray-200/20 animate-pulse min-w-full md:min-w-0 snap-center shrink-0">
+              <div key={index} className="relative aspect-[3/4] rounded-[32px] overflow-hidden bg-gray-200/20 animate-pulse min-w-full md:min-w-0 snap-center shrink-0">
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] h-14 bg-white/50 rounded-full" />
               </div>
             ))
@@ -59,7 +59,7 @@ export default function PromotionalCards() {
           ) : (
             // Dynamic Banners
             banners.map((banner, index) => (
-              <div key={banner.id || index} className="relative h-[480px] rounded-[32px] overflow-hidden group min-w-full md:min-w-0 snap-center shrink-0 bg-gray-100/10">
+              <div key={banner.id || index} className="relative aspect-[3/4] rounded-[32px] overflow-hidden group min-w-full md:min-w-0 snap-center shrink-0 bg-gray-100/10">
                 {banner.image1 && (
                   <Image
                     src={banner.image1}
