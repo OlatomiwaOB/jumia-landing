@@ -118,10 +118,10 @@ export default function CategoryList({ categories: dynamicCategories }: Category
         </div>
 
         {/* ── DESKTOP & TABLET GRID ── */}
-        <div className="hidden sm:grid sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-8 md:gap-6">
+        <div className="hidden sm:flex sm:flex-wrap sm:justify-center gap-8 md:gap-6">
           {
             displayCategories.length === 0 ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-16">
+              <div className="w-full flex flex-col items-center justify-center py-16">
                 <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
                 </svg>
@@ -133,19 +133,19 @@ export default function CategoryList({ categories: dynamicCategories }: Category
                 <Link
                   key={category.id}
                   href={category.link}
-                  className="flex flex-col items-center cursor-pointer group"
+                  className="flex flex-col items-center cursor-pointer group w-[calc(45%-1rem)] md:w-[calc(33.33%-1.5rem)] lg:w-[calc(16.66%-1.5rem)]"
                 >
-                  <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
+                  <div className="relative w-full mx-auto aspect-square mb-5 transition-all duration-400 group-hover:scale-105 rounded-full overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.06)] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-gray-200/60 group-hover:ring-accent/30 bg-white">
                     {category.image ? (
                       <Image
                         src={category.image}
                         alt={category.title || ''}
                         fill
-                        className="object-contain mix-blend-multiply"
+                        className="object-cover"
                         sizes="(max-width: 1024px) 33vw, 12vw"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                      <div className="w-full h-full bg-gray-50 flex items-center justify-center">
                         <span className="text-gray-400 text-xs">No image</span>
                       </div>
                     )}
@@ -192,17 +192,17 @@ export default function CategoryList({ categories: dynamicCategories }: Category
                           href={category.link}
                           className="flex-1 flex flex-col items-center cursor-pointer group"
                         >
-                          <div className="relative w-full aspect-square mb-5 transition-transform duration-400 group-hover:scale-105">
+                          <div className="relative w-full mx-auto aspect-square mb-5 transition-all duration-400 group-hover:scale-105 rounded-full overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.06)] ring-1 ring-gray-200/60 bg-white">
                             {category.image ? (
                               <Image
                                 src={category.image}
                                 alt={category.title || ''}
                                 fill
-                                className="object-contain mix-blend-multiply"
+                                className="object-cover"
                                 sizes="(max-width: 768px) 50vw"
                               />
                             ) : (
-                              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                              <div className="w-full h-full bg-gray-50 flex items-center justify-center">
                                 <span className="text-gray-400 text-xs">No image</span>
                               </div>
                             )}
