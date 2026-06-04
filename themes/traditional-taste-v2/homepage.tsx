@@ -1,6 +1,7 @@
 import HeroPromoGrid from './components/ui/hero-promo-grid';
 import QuickCategoryPills from './components/ui/quick-category-pills';
 import PriceHitsSection from './components/ui/price-hits-section';
+import CategoryShowcaseSection from './components/ui/category-showcase-section';
 
 export default function Homepage() {
     return (
@@ -8,6 +9,7 @@ export default function Homepage() {
             <QuickCategoryPills />
             <HeroPromoGrid />
             <PriceHitsSection />
+            <CategoryShowcaseSection />
         </div>
     );
 }
