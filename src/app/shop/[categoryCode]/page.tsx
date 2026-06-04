@@ -12,8 +12,8 @@ import VogueLayout from '../../../../themes/vogue/layout'
 import VogueCategoryContent from '../../../../themes/vogue/components/shop/vogue-category-content'
 
 // Traditional Taste Theme Imports
-import TraditionalTasteLayout from '../../../../themes/traditional-taste/layout'
-import TraditionalTasteCategoryContent from '../../../../themes/traditional-taste/components/shop/depot-category-content'
+import TraditionalTasteLayout from '../../../../themes/traditional-taste-v2/layout'
+import TraditionalTasteCategoryContent from '../../../../themes/traditional-taste-v2/components/shop/traditional-taste-category-content'
 
 const CategoryPage = () => {
     const storefront = process.env.NEXT_PUBLIC_STORE_FRONT;
@@ -39,7 +39,7 @@ const CategoryPage = () => {
         )
     }
 
-    if (storefront === 'traditional-taste') {
+    if (storefront === 'traditional-taste-v2') {
         return (
             <TraditionalTasteLayout>
                 <Suspense fallback={<div className="min-h-screen bg-white" />}>

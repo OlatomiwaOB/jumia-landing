@@ -2,24 +2,50 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { Check, Mail, Sparkles } from "lucide-react";
+import { User, AlertCircle, Check, Mail, Sparkles } from "lucide-react";
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
+import { useSearchParams } from "next/navigation";
 
 export default function LimitedOffer() {
   const [email, setEmail] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const searchParams = useSearchParams();
+  const storeCode = searchParams
+    ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
+    : process.env.NEXT_PUBLIC_STORE_CODE || '';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || !name) return;
 
     setIsSubmitting(true);
-    // Simulate API call delay for premium feel
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      await axiosInstanceNoAuth.post('/newsletter/subscribe', {
+        email: email,
+        name: name,
+        storeCode: storeCode,
+        entityCode: entityCode
+      });
+      // on success 
+      setIsError(false);
+      setToastMessage("You're on the list! Thank you for subscribing");
       setShowToast(true);
       setEmail('');
-    }, 600);
+      setName('');
+    } catch (error: any) {
+      // on failure
+      setIsError(true);
+      setToastMessage(error.response?.data?.message || "Failed to subscribe. Please try again.");
+      setShowToast(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -74,24 +100,41 @@ export default function LimitedOffer() {
             </div>
 
             {/* Input Form */}
-            <form onSubmit={handleSubscribe} className="flex flex-col xl:flex-row gap-4 mt-4 w-full max-w-full relative">
-              <div className="relative flex-1 group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-accent transition-colors">
-                  <Mail size={20} />
+            <form onSubmit={handleSubscribe} className="flex flex-col gap-4 mt-4 w-full max-w-full relative">
+              <div className="flex flex-col sm:flex-row gap-4 w-full">
+                {/* Name Input */}
+                <div className="relative flex-[0.8] group min-w-0">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-accent transition-colors">
+                    <User size={20} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Your Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="w-full bg-[#f8fafc] text-[#1a1a1a] placeholder-gray-500 border border-gray-200 rounded-2xl md:rounded-full pl-12 pr-6 py-4 md:py-5 focus:outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all text-base md:text-lg shadow-inner"
+                  />
                 </div>
-                <input
-                  type="email"
-                  placeholder="Enter your email address..."
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full bg-[#f8fafc] text-[#1a1a1a] placeholder-gray-500 border border-gray-200 rounded-2xl md:rounded-full pl-12 pr-6 py-4 md:py-5 focus:outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all text-base md:text-lg shadow-inner"
-                />
+                {/* Email Input */}
+                <div className="relative flex-[1.2] group min-w-0">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-accent transition-colors">
+                    <Mail size={20} />
+                  </div>
+                  <input
+                    type="email"
+                    placeholder="Enter your email address..."
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-[#f8fafc] text-[#1a1a1a] placeholder-gray-500 border border-gray-200 rounded-2xl md:rounded-full pl-12 pr-6 py-4 md:py-5 focus:outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all text-base md:text-lg shadow-inner"
+                  />
+                </div>
               </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group relative bg-accent text-white font-bold px-8 py-4 md:py-5 rounded-2xl md:rounded-full overflow-hidden shadow-[0_10px_20px_rgba(var(--accent),0.3)] hover:shadow-[0_15px_30px_rgba(var(--accent),0.5)] transition-all duration-300 shrink-0 flex items-center justify-center min-w-[160px]"
+                className="group relative bg-accent text-white font-bold px-8 py-4 md:py-5 rounded-2xl md:rounded-full overflow-hidden shadow-[0_10px_20px_rgba(var(--accent),0.3)] hover:shadow-[0_15px_30px_rgba(var(--accent),0.5)] transition-all duration-300 shrink-0 flex items-center justify-center w-full sm:w-auto lg:w-fit"
               >
                 {/* Button shine effect */}
                 <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"></div>
@@ -137,10 +180,10 @@ export default function LimitedOffer() {
         className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white text-accent3 px-8 py-4 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-gray-100 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${showToast ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-8 pointer-events-none'
           }`}
       >
-        <div className="bg-[#25D366] text-white p-1 rounded-full">
-          <Check size={16} strokeWidth={4} />
+        <div className={`p-1 rounded-full text-white ${isError ? 'bg-red-500' : 'bg-[#25D366]'}`}>
+          {isError ? <AlertCircle size={16} strokeWidth={3} /> : <Check size={16} strokeWidth={4} />}
         </div>
-        <span className="font-bold text-base">You're on the list! Thank you for subscribing.</span>
+        <span className="font-bold text-base">{toastMessage}</span>
       </div>
 
     </section>

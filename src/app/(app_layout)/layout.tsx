@@ -4,7 +4,7 @@ import React, { lazy, ReactNode, Suspense } from 'react'
 const AppLayoutDepot = lazy(() => import('../../../themes/depot/layout'))
 const AppLayoutFortitude = lazy(() => import('../../../themes/fortitude/layout'))
 const AppLayoutVogue = lazy(() => import('../../../themes/vogue/layout'))
-const AppLayoutTraditionalTaste = lazy(() => import('../../../themes/traditional-taste/layout'))
+const AppLayoutTraditionalTaste = lazy(() => import('../../../themes/traditional-taste-v2/layout'))
 const AppLayoutVarisa = lazy(() => import('../../../themes/varisa/layout'))
 
 const AppLayout = ({ children }: { children: ReactNode }) => {
@@ -22,7 +22,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
     );
   }
 
-  if (storefront === 'traditional-taste') {
+  if (storefront === 'traditional-taste-v2') {
     return (
       <Suspense><AppLayoutTraditionalTaste>{children}</AppLayoutTraditionalTaste></Suspense>
     );

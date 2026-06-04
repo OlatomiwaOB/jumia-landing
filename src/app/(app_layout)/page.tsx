@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 const HomePageDepot = lazy(() => import('../../../themes/depot/homepage'))
 const HomePageFortitude = lazy(() => import('../../../themes/fortitude/homepage'))
 const HomePageVogue = lazy(() => import('../../../themes/vogue/homepage'))
-const HomePageTraditionalTaste = lazy(() => import('../../../themes/traditional-taste/homepage'))
+const HomePageTraditionalTaste = lazy(() => import('../../../themes/traditional-taste-v2/homepage'))
 const HomePageVarisa = lazy(() => import('../../../themes/varisa/homepage'))
 
 const HomePage = () => {
@@ -39,7 +39,7 @@ const HomePage = () => {
     return <Suspense fallback={<Loader text='Loading...' />}><HomePageVogue /></Suspense>
   }
 
-  if (storefront === 'traditional-taste') {
+  if (storefront === 'traditional-taste-v2') {
     return <Suspense fallback={<Loader text='Loading...' />}><HomePageTraditionalTaste /></Suspense>
   }
 

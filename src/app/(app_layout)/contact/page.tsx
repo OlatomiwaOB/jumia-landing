@@ -12,7 +12,7 @@ const entityObject = {
   'vogue': {
     name: 'VOGUE | Contact'
   },
-  'traditional-taste': {
+  'traditional-taste-v2': {
     name: 'Traditional Taste | Contact Us'
   },
   'varisa': {
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 const ContactPageDepot = lazy(() => import('../../../../themes/depot/contact'))
 const ContactPageFortitude = lazy(() => import('../../../../themes/fortitude/contact'))
 const ContactPageVogue = lazy(() => import('../../../../themes/vogue/contact'))
-const ContactPageTraditionalTaste = lazy(() => import('../../../../themes/traditional-taste/contact'))
+const ContactPageTraditionalTaste = lazy(() => import('../../../../themes/traditional-taste-v2/contact'))
 const ContactPageVarisa = lazy(() => import('../../../../themes/varisa/contact'))
 
 const ContactPage = () => {
@@ -42,7 +42,7 @@ const ContactPage = () => {
     return <Suspense fallback={<Loader text='Loading...' />}><ContactPageVogue /></Suspense>
   }
 
-  if (storefront === 'traditional-taste') {
+  if (storefront === 'traditional-taste-v2') {
     return <Suspense fallback={<Loader text='Loading...' />}><ContactPageTraditionalTaste /></Suspense>
   }
 
