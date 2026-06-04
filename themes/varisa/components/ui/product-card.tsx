@@ -73,12 +73,12 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
 
       {/* Image Container */}
       <div className="relative w-full aspect-square mb-6 flex items-center justify-center">
-        <Link href={getProductHref(product)} className="block relative w-full h-full scale-[0.95] md:scale-[1.08] group-hover:scale-100 md:group-hover:scale-[1.15] transition-transform duration-500 ease-out">
+        <Link href={getProductHref(product)} className="block relative w-full h-full scale-[0.95] md:scale-[1.08] group-hover:scale-100 md:group-hover:scale-[1.15] transition-transform duration-500 ease-out overflow-hidden rounded-md shadow-sm">
           <Image
             src={product.picture || '/product-placeholder-borderless.svg'}
             alt={product.name || 'Product Image'}
             fill
-            className="object-contain mix-blend-multiply drop-shadow-md hover:drop-shadow-lg transition-all duration-500"
+            className="object-cover transition-all duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
           />
         </Link>

@@ -10,9 +10,17 @@ interface BestSellersProps {
 }
 
 export default function BestSellers({ products: dynamicProducts = [], categories: dynamicCategories = [] }: BestSellersProps) {
-  const displayCategories = dynamicCategories.filter(c => c.name && c.code);
+  const preferredOrder = ['Soups & Stews', 'Grills & Peppered Meats', 'Main Meals', 'Sides & Snacks'];
+  const displayCategories = dynamicCategories.filter(c => c.name && c.code).sort((a, b) => {
+    const indexA = preferredOrder.indexOf(a.name!);
+    const indexB = preferredOrder.indexOf(b.name!);
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
   const initialTab = displayCategories.length > 0 ? displayCategories[0].code : 'All';
-  
+
   const [activeTab, setActiveTab] = useState<string | undefined>(initialTab);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [currentDesktopSlide, setCurrentDesktopSlide] = useState(0);
@@ -39,9 +47,26 @@ export default function BestSellers({ products: dynamicProducts = [], categories
   const goToPrev = () => setCurrentSlide((p) => Math.max(0, p - 1));
   const goToNext = () => setCurrentSlide((p) => Math.min(products.length - 1, p + 1));
 
-  const maxDesktopSlide = Math.max(0, products.length - 4);
-  const goToPrevDesktop = () => setCurrentDesktopSlide((p) => Math.max(0, p - 1));
-  const goToNextDesktop = () => setCurrentDesktopSlide((p) => Math.min(maxDesktopSlide, p + 1));
+  const maxDesktopSlide = Math.max(0, products.length - 1);
+  const currentCategoryIndex = displayCategories.findIndex(c => c.code === activeTab);
+  const hasNextCategory = currentCategoryIndex >= 0 && currentCategoryIndex < displayCategories.length - 1;
+  const hasPrevCategory = currentCategoryIndex > 0;
+
+  const goToPrevDesktop = () => {
+    if (currentDesktopSlide === 0 && hasPrevCategory) {
+      handleTabChange(displayCategories[currentCategoryIndex - 1].code);
+    } else {
+      setCurrentDesktopSlide((p) => Math.max(0, p - 1));
+    }
+  };
+
+  const goToNextDesktop = () => {
+    if (currentDesktopSlide === maxDesktopSlide && hasNextCategory) {
+      handleTabChange(displayCategories[currentCategoryIndex + 1].code);
+    } else {
+      setCurrentDesktopSlide((p) => Math.min(maxDesktopSlide, p + 1));
+    }
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -119,15 +144,15 @@ export default function BestSellers({ products: dynamicProducts = [], categories
                 {/* Desktop Arrows */}
                 <button
                   onClick={goToPrevDesktop}
-                  disabled={currentDesktopSlide === 0}
-                  className={`absolute top-[40%] -translate-y-1/2 -left-6 w-12 h-12 bg-white text-gray-900 border border-gray-100 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 z-10 opacity-0 group-hover/desktop-carousel:opacity-100 ${currentDesktopSlide === 0 ? 'cursor-not-allowed opacity-50' : 'hover:bg-accent hover:border-accent hover:text-accent-foreground cursor-pointer'}`}
+                  disabled={currentDesktopSlide === 0 && !hasPrevCategory}
+                  className={`absolute top-[40%] -translate-y-1/2 -left-6 w-12 h-12 bg-white text-gray-900 border border-gray-100 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 z-10 opacity-0 group-hover/desktop-carousel:opacity-100 ${currentDesktopSlide === 0 && !hasPrevCategory ? 'cursor-not-allowed opacity-50' : 'hover:bg-accent hover:border-accent hover:text-accent-foreground cursor-pointer'}`}
                 >
                   <ChevronLeft size={24} strokeWidth={2.5} />
                 </button>
                 <button
                   onClick={goToNextDesktop}
-                  disabled={currentDesktopSlide === maxDesktopSlide}
-                  className={`absolute top-[40%] -translate-y-1/2 -right-6 w-12 h-12 bg-white text-gray-900 border border-gray-100 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 z-10 opacity-0 group-hover/desktop-carousel:opacity-100 ${currentDesktopSlide === maxDesktopSlide ? 'cursor-not-allowed opacity-50' : 'hover:bg-accent hover:border-accent hover:text-accent-foreground cursor-pointer'}`}
+                  disabled={currentDesktopSlide === maxDesktopSlide && !hasNextCategory}
+                  className={`absolute top-[40%] -translate-y-1/2 -right-6 w-12 h-12 bg-white text-gray-900 border border-gray-100 rounded-full flex items-center justify-center shadow-[0_4px_12px_rgba(0,0,0,0.1)] transition-all duration-300 z-10 opacity-0 group-hover/desktop-carousel:opacity-100 ${currentDesktopSlide === maxDesktopSlide && !hasNextCategory ? 'cursor-not-allowed opacity-50' : 'hover:bg-accent hover:border-accent hover:text-accent-foreground cursor-pointer'}`}
                 >
                   <ChevronRight size={24} strokeWidth={2.5} />
                 </button>
