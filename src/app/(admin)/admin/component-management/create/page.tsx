@@ -136,6 +136,9 @@ export default function MutateComponents() {
         link: payload.link || "",
         image1: upload1.fileUrl || payload.image1 || "",
         image2: upload2.fileUrl || payload.image2 || "",
+        entityCode: user?.entityCode || "",
+        merchantId: user?.merchantCode || "",
+        createdBy: user?.username || "",
       }),
     onSuccess: (data) => {
       if (data?.data?.code !== '000' || data?.data?.code !== '00') {
