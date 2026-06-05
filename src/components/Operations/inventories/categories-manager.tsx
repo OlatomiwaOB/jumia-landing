@@ -588,6 +588,7 @@ const DeleteCategoryModal = ({
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const { operations } = useOperations()
   const deleteCategoryMutation = useMutation({
     mutationFn: async (payload: { itemCode: string; entityCode: string }) => {
       return await axiosOperations.delete(`/products/delete-product-category?entityCode=${payload.entityCode}&itemCategoryCode=${payload.itemCode}`, {
@@ -614,7 +615,7 @@ const DeleteCategoryModal = ({
     e.preventDefault();
     if (!category) return;
     setIsDeleting(true);
-    deleteCategoryMutation.mutate({ itemCode: category.code, entityCode: 'FTD' });
+    deleteCategoryMutation.mutate({ itemCode: category.code, entityCode: operations?.entityCode! });
   };
 
   const handleClose = () => {
