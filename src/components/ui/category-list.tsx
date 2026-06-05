@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getCategoryHref } from '@/utils/product-route';
 import { useSearchParams } from 'next/navigation';
 
@@ -70,7 +70,8 @@ interface CategoryListProps {
 
 export default function CategoryList({ categories: dynamicCategories }: CategoryListProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const touchStartX = useRef<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const directionRef = useRef(1);
 
   const searchParams = useSearchParams();
   const storeCode = searchParams
@@ -86,6 +87,56 @@ export default function CategoryList({ categories: dynamicCategories }: Category
       link: getCategoryHref(c.code || '', storeCode),
     }))
     : [];
+
+  const scrollTo = (index: number) => {
+    if (!scrollRef.current) return;
+    setCurrentSlide(index);
+    const width = scrollRef.current.clientWidth;
+    scrollRef.current.scrollTo({
+      left: index * width,
+      behavior: 'smooth'
+    });
+  };
+
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollLeft = scrollRef.current.scrollLeft;
+      const clientWidth = scrollRef.current.clientWidth;
+      if (clientWidth > 0) {
+        const newIndex = Math.round(scrollLeft / clientWidth);
+        if (newIndex !== currentSlide) {
+          setCurrentSlide(newIndex);
+        }
+      }
+    }
+  };
+
+  // Auto-play functionality for mobile
+  useEffect(() => {
+    if (displayCategories.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollWidth, clientWidth, scrollLeft } = scrollRef.current;
+        if (scrollWidth > clientWidth && clientWidth > 0) {
+          const currentIndex = Math.round(scrollLeft / clientWidth);
+          let nextIndex = currentIndex + directionRef.current;
+          
+          if (nextIndex >= displayCategories.length) {
+            directionRef.current = -1;
+            nextIndex = currentIndex - 1;
+          } else if (nextIndex < 0) {
+            directionRef.current = 1;
+            nextIndex = currentIndex + 1;
+          }
+          
+          scrollTo(nextIndex);
+        }
+      }
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [displayCategories.length]);
 
   // Group categories into pairs for mobile carousel (2 per slide)
   const mobileChunks = [];
@@ -109,9 +160,9 @@ export default function CategoryList({ categories: dynamicCategories }: Category
 
   return (
     <div className="w-full bg-accent-foreground">
-      <section className="w-full px-4 md:px-8 pt-12 pb-6 md:pt-24 md:pb-20 max-w-[1500px] mx-auto">
-        <div className="text-center mb-6">
-          <h2 className="text-[44px] font-extrabold tracking-tight text-[#111] mb-4">Categories</h2>
+      <section className="w-full px-4 md:px-8 pt-4 pb-6 md:pt-24 md:pb-20 max-w-[1500px] mx-auto">
+        <div className="text-center mb-2 md:mb-6">
+          <h2 className="text-[44px] font-extrabold tracking-tight text-[#111] mb-2 md:mb-4">Categories</h2>
           {/* <p className="text-gray-500 text-[16px] max-w-2xl mx-auto">
             Good food brings people together. Browse our collection of mouthwatering meals, snacks, drinks, and recipes made to satisfy every appetite.
           </p> */}
@@ -164,78 +215,72 @@ export default function CategoryList({ categories: dynamicCategories }: Category
         </div>
 
         {/* ── MOBILE CAROUSEL ── */}
-        <div className="sm:hidden mt-10">
+        <div className="sm:hidden mt-2 px-4">
           {displayCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <svg className="w-14 h-14 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-              <p className="text-gray-400 text-base font-semibold mb-1">No categories available</p>
-              <p className="text-gray-400 text-sm">Check back later for new categories.</p>
+            <div className="flex flex-col items-center justify-center py-10">
+              <p className="text-gray-400 text-sm font-semibold">No categories available</p>
             </div>
           ) : (
             <>
-              <div
-                className="relative overflow-hidden"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
+              <div 
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4" 
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                <div
-                  className="flex transition-transform duration-300 ease-out"
-                  style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                >
-                  {mobileChunks.map((chunk, index) => (
-                    <div key={index} className="w-full flex-shrink-0 flex gap-4 px-2">
-                      {chunk.map((category) => (
-                        <Link
-                          key={category.id}
-                          href={category.link}
-                          className="flex-1 flex flex-col items-center cursor-pointer group"
-                        >
-                          <div className="relative w-full mx-auto aspect-square mb-5 transition-all duration-400 group-hover:scale-105 rounded-full overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.06)] ring-1 ring-gray-200/60 bg-white">
-                            {category.image ? (
-                              <Image
-                                src={category.image}
-                                alt={category.title || ''}
-                                fill
-                                className="object-cover"
-                                sizes="(max-width: 768px) 50vw"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-gray-50 flex items-center justify-center">
-                                <span className="text-gray-400 text-xs">No image</span>
-                              </div>
-                            )}
-                          </div>
-                          <h3 className="text-[#111] font-extrabold text-[15px] mb-1.5 group-hover:text-accent transition-colors text-center leading-tight tracking-tight">
-                            {category.title}
-                          </h3>
-                          {category.productCount !== null && (
-                            <p className="text-gray-400 font-medium text-[13px]">
-                              {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
-                            </p>
-                          )}
-                        </Link>
-                      ))}
+                {displayCategories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={category.link}
+                    className="flex flex-col items-center cursor-pointer group min-w-full w-full snap-center shrink-0 px-1"
+                  >
+                    <div className="relative w-full aspect-[4/3] mx-auto transition-all duration-300 active:scale-95 rounded-[24px] overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] bg-white">
+                      {category.image ? (
+                        <Image
+                          src={category.image}
+                          alt={category.title || ''}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-50 flex items-center justify-center">
+                          <span className="text-gray-400 text-[12px]">No image available</span>
+                        </div>
+                      )}
+                      
+                      {/* Dark gradient so white text is always readable */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
+                      
+                      <div className="absolute bottom-6 left-0 w-full text-center px-4 pointer-events-none">
+                        <h3 className="text-white font-black text-[28px] leading-tight tracking-tight drop-shadow-md">
+                          {category.title}
+                        </h3>
+                        {category.productCount !== null && (
+                          <p className="text-white/80 font-medium text-[14px] mt-1 drop-shadow-md">
+                            {category.productCount || 0} {(category.productCount === 1) ? 'Product' : 'Products'}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  </Link>
+                ))}
               </div>
 
-              {/* Dots only */}
-              <div className="flex items-center justify-center gap-2.5 mt-8 h-6">
-                {mobileChunks.map((_, i) => (
+              {/* Dots Pagination */}
+              <div className="flex items-center justify-center gap-2.5 mt-2 h-6">
+                {displayCategories.map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setCurrentSlide(i)}
-                    className="flex items-center justify-center w-6 h-6 pointer-events-auto"
+                    onClick={() => scrollTo(i)}
+                    className="flex items-center justify-center w-6 h-6"
                   >
                     {i === currentSlide ? (
                       <div className="w-6 h-6 rounded-full border border-accent flex items-center justify-center">
                         <div className="w-2 h-2 bg-accent rounded-full" />
                       </div>
                     ) : (
-                      <div className="w-2 h-2 bg-gray-400 rounded-full hover:bg-gray-500 transition-colors" />
+                      <div className="w-2 h-2 bg-gray-300 rounded-full hover:bg-gray-400 transition-colors" />
                     )}
                   </button>
                 ))}

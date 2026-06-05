@@ -16,6 +16,7 @@ import Testimonials from './components/ui/testimonials';
 import TopDeals from './components/ui/top-deals';
 
 import LimitedOffer from './components/ui/limited-offer';
+import FeaturesSection from './components/ui/features-section';
 
 export default function HomePage() {
   const [allProducts, setAllProducts] = useState<ProductProps[]>([]);
@@ -119,6 +120,9 @@ export default function HomePage() {
 
       {/* Limited Time Offer / Newsletter Section */}
       <LimitedOffer />
+
+      {/* Features Section (placed here to appear right before the footer) */}
+      <FeaturesSection />
     </div>
   )
 }
