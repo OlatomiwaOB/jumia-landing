@@ -15,6 +15,7 @@ export default function FeaturedProductsSlider({ featuredProducts: dynamicProduc
   const [activeIndex, setActiveIndex] = useState(0);
   const [isRTL, setIsRTL] = useState(false);
 
+  const decodedProductUrl = (url: string) => decodeURIComponent(url);
   // Track RTL changes
   useEffect(() => {
     const html = document.documentElement;

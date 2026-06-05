@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { Phone, Mail, MapPin } from 'lucide-react';
 
 const navigation = {
   quickLinks: [
     { name: 'Shop All', href: '#' },
     { name: 'About Us', href: '#' },
-    { name: 'Contact', href: '#' },
-    { name: 'FAQs', href: '#' },
   ],
   categories: [
     { name: 'Traditional Soups', href: '#' },
@@ -88,17 +87,17 @@ const PaymentIcons = () => {
 
 export default function Footer() {
   return (
-    <footer className="w-full font-sans">
+    <footer id="footer" className="w-full font-sans">
 
       {/* Main Footer Content */}
       <div className="bg-accent3 text-white">
         <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-12">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-y-12 gap-x-10 lg:gap-8">
 
-            {/* Column 1: Brand Info / Contact */}
-            <div className="lg:col-span-6 lg:pr-16">
-              <Link href="/" className="flex items-center gap-3 group mb-6">
+            {/* Column 1: Brand Info */}
+            <div className="lg:col-span-4 lg:pr-8 flex flex-col items-center text-center md:items-start md:text-left">
+              <Link href="/" className="flex items-center justify-center md:justify-start gap-3 group mb-6">
                 <div className="relative w-12 h-[60px] rounded-xl overflow-hidden shadow-lg border border-white/10 bg-white/5 transition-all duration-300">
                   <Image
                     src="/varisa-logo.jpg"
@@ -113,16 +112,11 @@ export default function Footer() {
                 </div>
               </Link>
 
-              <p className="text-[14px] text-white/80 leading-relaxed mb-6">
+              <p className="text-[14px] text-white/80 leading-relaxed mb-8 max-w-sm md:max-w-none">
                 Delivering authentic, mouth-watering Nigerian cuisine and rich cultural flavors straight to your doorstep across the UK.
               </p>
 
-              <div className="space-y-2 mb-8 text-[14px] text-white/80">
-                <p>+44 (0) 123 456 7890</p>
-                <p>info@varisacatering.com</p>
-              </div>
-
-              <div className="flex gap-3">
+              <div className="flex justify-center md:justify-start gap-4">
                 {navigation.social.map((item) => (
                   <a
                     key={item.name}
@@ -137,7 +131,7 @@ export default function Footer() {
             </div>
 
             {/* Column 2: Quick Links */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-2 text-center md:text-left">
               <h3 className="text-lg font-bold text-white mb-6">Our Company</h3>
               <ul className="space-y-4">
                 {navigation.quickLinks.map((item) => (
@@ -154,7 +148,7 @@ export default function Footer() {
             </div>
 
             {/* Column 3: Categories */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 text-center md:text-left">
               <h3 className="text-lg font-bold text-white mb-6">Shop Categories</h3>
               <ul className="space-y-4">
                 {navigation.categories.map((item) => (
@@ -170,30 +164,47 @@ export default function Footer() {
               </ul>
             </div>
 
-
+            {/* Column 4: Contact Us */}
+            <div id="contact-us" className="lg:col-span-3 scroll-mt-24 flex flex-col items-center text-center md:items-start md:text-left">
+              <h3 className="text-lg font-bold text-white mb-6">Contact Us</h3>
+              <div className="space-y-4 text-[14px] text-white/80">
+                <div className="flex items-center justify-center md:justify-start gap-3">
+                  <Phone size={16} className="text-accent" />
+                  <p>+44 (0) 123 456 7890</p>
+                </div>
+                <div className="flex items-center justify-center md:justify-start gap-3">
+                  <Mail size={16} className="text-accent" />
+                  <p>info@varisacatering.com</p>
+                </div>
+                <div className="flex items-start justify-center md:justify-start gap-3 text-left">
+                  <MapPin size={16} className="text-accent mt-1 shrink-0" />
+                  <p>19 Pinehurst Cul De Sac<br />Botley, Southampton<br />Hampshire SO32 2SL</p>
+                </div>
+              </div>
+            </div>
 
           </div>
 
           {/* Bottom Bar */}
-          <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+          <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center md:items-end gap-8">
 
             {/* Bottom Left */}
-            <div className="flex flex-col gap-4">
-              <button className="flex items-center gap-2 text-[14px] text-white/80 hover:text-white w-fit">
+            <div className="flex flex-col items-center md:items-start gap-4">
+              <button className="flex items-center justify-center md:justify-start gap-2 text-[14px] text-white/80 hover:text-white w-fit">
                 <span>🇬🇧</span> United Kingdom (GBP £)
                 <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <p className="text-[14px] text-white/80">
+              <p className="text-[14px] text-white/80 text-center md:text-left">
                 &copy; {new Date().getFullYear()} Varisa Catering. All rights reserved.
               </p>
             </div>
 
             {/* Bottom Right */}
-            <div className="flex flex-col items-start md:items-end gap-5">
+            <div className="flex flex-col items-center md:items-end gap-6">
               <PaymentIcons />
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+              <div className="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-3">
                 {navigation.customerService.map((item) => (
                   <Link
                     key={item.name}

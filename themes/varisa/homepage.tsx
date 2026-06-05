@@ -25,7 +25,7 @@ export default function HomePage() {
   const storeCode = searchParams
     ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
     : process.env.NEXT_PUBLIC_STORE_CODE || '';
-  
+
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE;
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
 
@@ -42,7 +42,7 @@ export default function HomePage() {
           category: '',
           tag: '',
           pageNumber: 1,
-          pageSize: 20
+          pageSize: 50
         }
       }).then(response => response.data)
     },
@@ -87,7 +87,7 @@ export default function HomePage() {
   const categories = (categoriesData?.categories || []).filter(
     (category: { code?: string; name?: string }) => category.code && category.name
   );
-  
+
   const isLoading = featuredLoading || productsLoading || categoriesLoading;
 
   if (isLoading) {
