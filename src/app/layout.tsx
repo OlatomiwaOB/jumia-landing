@@ -8,6 +8,7 @@ import { cookieToInitialState } from "wagmi";
 import { getConfig } from "../../wagmi.config";
 import { headers } from "next/headers";
 import AlgorandWalletProvider from "./AlgorandWalletProvider";
+import ScrollToTop from "@/components/ui/scroll-to-top";
 
 
 const funnelDisplay = Funnel_Display({
@@ -120,6 +121,7 @@ export default async function RootLayout({
             </LocationProvider>
           </AlgorandWalletProvider>
         </Providers>
+        <ScrollToTop />
         <Toaster />
       </body>
     </html>
