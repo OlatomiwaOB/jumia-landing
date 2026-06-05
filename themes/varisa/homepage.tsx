@@ -107,7 +107,7 @@ export default function HomePage() {
       <CategoryList categories={categories} />
 
       {/* Best Sellers Section */}
-      <BestSellers products={allProducts} categories={categories} />
+      <BestSellers products={allProducts} />
 
       {/* Featured Products Slider (Added after Best Sellers) */}
       <FeaturedProductsSlider featuredProducts={featuredDeals} />

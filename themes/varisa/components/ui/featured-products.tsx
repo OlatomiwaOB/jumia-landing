@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProductProps } from '@/types';
+import { getProductHref } from '@/utils/product-route';
 
 interface FeaturedProductsSliderProps {
   featuredProducts?: ProductProps[];
@@ -93,7 +94,7 @@ export default function FeaturedProductsSlider({ featuredProducts: dynamicProduc
                   </p>
 
                   {/* Button */}
-                  <Link href={`/shop?category=${product.category || ''}`}>
+                  <Link href={getProductHref(product)}>
                     <button className="group flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-full font-extrabold text-[16px] hover:bg-accent/90 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
                       Buy Now
                       <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />

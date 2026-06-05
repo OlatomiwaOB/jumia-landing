@@ -46,7 +46,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
         {product.storeCode === "STO0715" && (
           <div className='flex gap-2 float-right'>
             {discount > 0 && (
-              <div className="bg-[#d8480b] text-white text-xs font-semibold px-1 py-0.5 rounded-full inline-block">
+              <div className="bg-accent text-white text-xs font-semibold px-1 py-0.5 rounded-full inline-block">
                 {discount}% OFF
               </div>
             )}
@@ -81,7 +81,7 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
           src={product.picture! || "/placeholder-image.png"}
           alt={'No Image Available'}
           fill
-          className="object-contain rounded-md text-gray-500 text-center"
+          className="object-cover rounded-md text-gray-500 text-center"
         />
       </div>
 
@@ -111,14 +111,14 @@ export const ProductCard = ({ product, onClick }: ProductCardProps) => {
 
       {singleQuantity(product?.id) <= 0 ? (
         <button
-          className="w-full bg-white text-black py-1 px-2 rounded-3xl hover:bg-black hover:text-white transition border-2 border-black hover:border-[#d8480b] font-semibold disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 disabled:hover:text-gray-500 disabled:hover:border-gray-300"
+          className="w-full bg-white text-black py-1 px-2 rounded-3xl hover:bg-black hover:text-white transition border-2 border-black hover:border-accent font-semibold disabled:bg-gray-300 disabled:text-gray-500 disabled:border-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 disabled:hover:text-gray-500 disabled:hover:border-gray-300"
           onClick={handleAddToCart}
           disabled={(product.qtyInStore ?? 0) <= 0}
         >
           {(product.qtyInStore ?? 0) <= 0 ? 'Out of Stock' : 'Add to Cart'}
         </button>
       ) : (
-        <div className="flex items-center justify-between w-full bg-[#d8480b] text-white rounded-3xl overflow-hidden">
+        <div className="flex items-center justify-between w-full bg-accent text-white rounded-3xl overflow-hidden">
           <button
             className="h-full px-3 py-2 hover:bg-[#c23c0a] transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             onClick={handleDecrement}

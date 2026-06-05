@@ -219,8 +219,8 @@ export default function DepotThemeProductPage() {
                       key={`${product.code || product.name}-${index}`}
                       type="button"
                       className={`relative h-24 w-24 shrink-0 overflow-hidden border transition-colors ${index === activeImageIndex
-                          ? 'border-accent'
-                          : 'border-black/10 hover:border-black/30'
+                        ? 'border-accent'
+                        : 'border-black/10 hover:border-black/30'
                         }`}
                       onClick={() => setActiveImageIndex(index)}
                     >
@@ -352,8 +352,8 @@ export default function DepotThemeProductPage() {
                       key={tab.id}
                       type="button"
                       className={`rounded-full px-5 py-3 text-sm font-semibold transition-colors ${activeTab === tab.id
-                          ? 'bg-accent text-accent-foreground'
-                          : 'bg-black/[0.05] text-black/70 hover:bg-black/[0.09]'
+                        ? 'bg-accent text-accent-foreground'
+                        : 'bg-black/[0.05] text-black/70 hover:bg-black/[0.09]'
                         }`}
                       onClick={() => setActiveTab(tab.id)}
                     >
@@ -488,7 +488,7 @@ export default function DepotThemeProductPage() {
         productName={product.name || 'Product'}
       />
 
-      <RecentPurchaseToast entityCode={entityCode} storeCode={storeCode} />
+      {/* <RecentPurchaseToast entityCode={entityCode} storeCode={storeCode} /> */}
     </>
   );
 }

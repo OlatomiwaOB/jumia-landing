@@ -52,16 +52,16 @@ export default function PromotionalCards() {
   // Auto-play functionality for mobile
   useEffect(() => {
     if (banners.length <= 1) return;
-    
+
     const interval = setInterval(() => {
       if (scrollRef.current) {
         const { scrollWidth, clientWidth, scrollLeft } = scrollRef.current;
-        
+
         // Only auto-scroll if the container is actually scrollable (i.e., on mobile)
         if (scrollWidth > clientWidth) {
           const currentIndex = Math.round(scrollLeft / clientWidth);
           let nextIndex = currentIndex + directionRef.current;
-          
+
           // Reverse direction at the ends
           if (nextIndex >= banners.length) {
             directionRef.current = -1;
@@ -70,7 +70,7 @@ export default function PromotionalCards() {
             directionRef.current = 1;
             nextIndex = currentIndex + 1;
           }
-          
+
           scrollTo(nextIndex);
         }
       }

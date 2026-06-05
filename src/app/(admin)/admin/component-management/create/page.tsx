@@ -111,7 +111,7 @@ export default function MutateComponents() {
 
   useEffect(() => {
     if (editData?.data) {
-      const component = editData.data as EcomComponent;
+      const component = editData.data?.data as EcomComponent;
       reset({
         componentType: component.componentType,
         storeCode: component.storeCode,
@@ -153,8 +153,34 @@ export default function MutateComponents() {
     },
   });
 
+  const editMutation = useMutation({
+    mutationFn: (payload: FormValues) => axiosInstance.put(`/ecom-components/${editData?.data?.data?.code}?code=${editData?.data?.data?.code}`, {
+      title: payload.title,
+      detail: payload.detail,
+      link: payload.link || "",
+      image1: upload1.fileUrl || payload.image1 || "",
+      image2: upload2.fileUrl || payload.image2 || "",
+      componentType: payload.componentType,
+    }),
+    onSuccess: (data) => {
+      if (data?.data?.code !== '000') {
+        toast?.error(data?.data?.desc || 'Failed to save component')
+        return;
+      }
+      toast.success(isEdit ? "Component updated successfully" : "Component created successfully");
+      router.push("/admin/component-management");
+    },
+    onError: () => {
+      toast.error("Failed to save component");
+    },
+  })
+
   const onSubmit = (data: FormValues) => {
-    saveMutation.mutate(data);
+    if (isEdit) {
+      editMutation.mutate(data);
+    } else {
+      saveMutation.mutate(data);
+    }
   };
 
   if (isEdit && isFetchingEdit) {
@@ -313,9 +339,9 @@ export default function MutateComponents() {
               <Button type="button" variant="outline" onClick={() => router.back()}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={saveMutation.isPending || upload1.isUploadingFile || upload2.isUploadingFile}>
-                {(upload1.isUploadingFile || upload2.isUploadingFile) ? (
-                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Uploading...</>
+              <Button type="submit" disabled={saveMutation.isPending || upload1.isUploadingFile || upload2.isUploadingFile || editMutation.isPending}>
+                {(upload1.isUploadingFile || upload2.isUploadingFile || editMutation.isPending) ? (
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />{isEdit ? "Updating..." : "Uploading..."}</>
                 ) : saveMutation.isPending ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
                 ) : (
