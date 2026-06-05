@@ -256,7 +256,6 @@ export default function Header() {
           {[
             { label: 'Home', href: '/' },
             { label: 'Shop', href: '/shop' },
-            { label: 'Products', href: '/products' },
             { label: 'About', href: '#' },
             { label: 'Contact', href: '#' },
           ].map((item) => (
@@ -288,36 +287,68 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ── 4. MOBILE MENU ── */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-        }`} style={{ background: '#FFFDF5' }}>
-        {/* Mobile Search */}
-        <div className="px-5 pt-4 pb-2">
-          <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={17} strokeWidth={2.5} />
-            <input
-              type="text"
-              placeholder="I'm looking for..."
-              className="w-full h-11 pl-11 pr-4 rounded-full border border-accent-foreground/20 text-accent3 bg-white focus:outline-none focus:ring-2 focus:ring-accent-foreground/50 text-sm font-medium"
-            />
-          </div>
+      {/* ── 4. MOBILE OFF-CANVAS MENU ── */}
+      {/* Overlay */}
+      <div 
+        className={`fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setMobileMenuOpen(false)}
+      />
+
+      {/* Drawer Dropdown */}
+      <div 
+        className={`fixed top-0 left-0 w-full bg-white z-[110] shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}
+      >
+        {/* Drawer Header */}
+        <div className="bg-accent3 text-white flex items-center justify-between px-5 py-[18px]">
+          <span className="font-bold text-[15px]">Menu</span>
+          <button onClick={() => setMobileMenuOpen(false)} className="hover:text-white/80 transition-colors">
+            <X size={20} strokeWidth={2.5} />
+          </button>
         </div>
-        {/* Mobile Nav */}
-        <nav className="flex flex-col px-5 pb-5 pt-2 gap-1">
-          {['Home', 'Shop', 'Products', 'About', 'Contact'].map((item) => (
+
+        {/* Drawer Content */}
+        <div className="flex flex-col pb-2">
+          <nav className="flex flex-col">
+            {[
+              { name: 'Home', href: '/' },
+              { name: 'Shop', href: '/shop' },
+            ].map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="flex items-center justify-between py-[12px] px-5 border-b border-gray-100 text-[14px] font-bold text-gray-800 hover:text-accent transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {item.name}
+                <ChevronDown className="rotate-[-90deg] text-gray-400" size={16} />
+              </Link>
+            ))}
+
+            {/* Sale */}
             <Link
-              key={item}
-              href={item === 'Home' ? '/' : `/${item.toLowerCase()}`}
-              className="py-2.5 px-3 text-sm font-bold text-gray-900 hover:text-accent hover:bg-gray-50 rounded-lg transition-all duration-200"
+              href="/sale"
+              className="flex items-center justify-between py-[12px] px-5 border-b border-gray-100 text-[14px] font-bold text-gray-800 hover:text-accent transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
             >
-              {item}
+              <div className="flex items-center gap-2">
+                Sale 
+                <span className="bg-accent text-white text-[9px] px-1.5 py-[2px] rounded-sm font-black tracking-wider uppercase">HOT</span>
+              </div>
             </Link>
-          ))}
-          <div className="flex items-center gap-2 py-2.5 px-3">
-            <Link href="/sale" className="text-sm font-bold text-gray-900 hover:text-accent transition-colors">Sale</Link>
-            <span className="text-accent-foreground text-[9px] px-1.5 py-[2px] rounded font-black tracking-widest uppercase bg-accent">HOT</span>
-          </div>
-        </nav>
+
+            {/* Utilities */}
+            <div className="flex flex-col mt-2 mb-6">
+              <button 
+                onClick={() => { setMobileMenuOpen(false); setIsLoginModalOpen(true); }}
+                className="flex items-center gap-3 py-3 px-5 text-[14px] font-medium text-gray-600 hover:text-accent transition-colors w-full text-left"
+              >
+                <User size={20} strokeWidth={1.5} className="text-gray-500" />
+                My account
+              </button>
+            </div>
+          </nav>
+        </div>
+
       </div>
 
       {/* RTL Toggle Button */}
