@@ -96,34 +96,34 @@ export default function FeaturedProductsSlider({ featuredProducts: dynamicProduc
 
                   {/* Button */}
                   <Link href={getProductHref(product)}>
-                    <button className="group flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-full font-extrabold text-[16px] hover:bg-accent/90 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
-                      Buy Now
-                      <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
-                    </button>
-                  </Link>
-                </div>
+      <button className="group flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-full font-extrabold text-[16px] hover:bg-accent/90 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
+        Buy Now
+        <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+      </button>
+    </Link>
+  </div>
 
-                {/* Right Image */}
-                <div className="w-full sm:w-[45%] relative h-[300px] sm:h-full flex-shrink-0 bg-gray-50 group">
-                  <div className={`absolute inset-0 sm:rounded-l-[200px] overflow-hidden transform origin-right transition-transform duration-[10000ms] ease-linear ${isActive ? 'scale-110' : 'scale-100'} shadow-[-15px_0_40px_rgba(0,0,0,0.06)]`}>
-                    <Image
-                      src={product.picture || (product.pictureList && product.pictureList.length > 0 ? product.pictureList[0] : '/placeholder.png')}
-                      alt={product.name || 'Product'}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      priority={isActive}
-                    />
-                    {/* Subtle aesthetic gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-transparent opacity-60 mix-blend-overlay" />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-      </section>
+  {/* Right Image */ }
+  <div className="w-full sm:w-[45%] relative h-[300px] sm:h-full flex-shrink-0 bg-gray-50 group">
+    <div className={`absolute inset-0 sm:rounded-l-[200px] overflow-hidden transform origin-right transition-transform duration-[10000ms] ease-linear ${isActive ? 'scale-110' : 'scale-100'} shadow-[-15px_0_40px_rgba(0,0,0,0.06)]`}>
+      <Image
+        src={product.picture || (product.pictureList && product.pictureList.length > 0 ? product.pictureList[0] : '/placeholder.png')}
+        alt={product.name || 'Product'}
+        fill
+        className="object-cover"
+        sizes="(max-width: 768px) 100vw, 50vw"
+        priority={isActive}
+      />
+      {/* Subtle aesthetic gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-transparent opacity-60 mix-blend-overlay" />
     </div>
+  </div>
+              </div >
+            );
+})}
+        </div >
+
+      </section >
+    </div >
   );
 }

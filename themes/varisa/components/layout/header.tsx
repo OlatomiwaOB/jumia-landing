@@ -135,15 +135,6 @@ export default function Header() {
           {/* Divider */}
           <div className="hidden lg:block w-px h-7 bg-white/15" />
 
-          {/* Wishlist */}
-          <div className="relative cursor-pointer hidden sm:block group">
-            <Heart size={23} className="group-hover:text-accent transition-colors duration-200" strokeWidth={2} />
-            {isMounted && wishlistCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-accent text-white text-[9px] w-[17px] h-[17px] rounded-full flex items-center justify-center font-black">
-                {wishlistCount}
-              </span>
-            )}
-          </div>
 
           {/* Cart */}
           <CartWrapper>
@@ -177,7 +168,7 @@ export default function Header() {
             { label: 'Home', href: '/' },
             { label: 'Shop', href: '/shop' },
             { label: 'About', href: '#' },
-            { label: 'Contact Us', href: '#contact-us' },
+            { label: 'Contact Us', href: '/contact' },
           ].map((item) => {
             const className = "relative flex items-center gap-1 px-5 py-4 text-[14px] font-bold text-gray-900 hover:text-accent transition-colors duration-200 group";
             const content = (
@@ -222,11 +213,11 @@ export default function Header() {
           </div> */}
         </nav>
 
-        {/* Recent view */}
+        {/* Recent view
         <div className="flex items-center gap-2 text-gray-900 cursor-pointer hover:text-accent transition-colors pr-8">
           <Clock size={16} strokeWidth={2.5} />
           <span className="text-[13px] font-extrabold tracking-wide">Recent view product</span>
-        </div>
+        </div> */}
       </div>
 
       {/* ── 4. MOBILE OFF-CANVAS MENU ── */}
@@ -254,7 +245,7 @@ export default function Header() {
             {[
               { name: 'Home', href: '/' },
               { name: 'Shop', href: '/shop' },
-              { name: 'Contact Us', href: '#contact-us' },
+              { name: 'Contact Us', href: '/contact' },
             ].map((item) => {
               const className = "flex items-center justify-between py-[12px] px-5 border-b border-gray-100 text-[14px] font-bold text-gray-800 hover:text-accent transition-colors";
               const content = (
