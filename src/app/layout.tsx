@@ -121,7 +121,7 @@ export default async function RootLayout({
             </LocationProvider>
           </AlgorandWalletProvider>
         </Providers>
-        <ScrollToTop />
+        {process.env.NEXT_PUBLIC_STORE_FRONT === 'varisa' && <ScrollToTop />}
         <Toaster />
       </body>
     </html>

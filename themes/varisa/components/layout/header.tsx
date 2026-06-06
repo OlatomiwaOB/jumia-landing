@@ -17,11 +17,7 @@ import { Search, ShoppingBag, User, Heart, ChevronDown, Clock, Menu, X, ArrowLef
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  const announcements = [
-    { text: "Every Friday — 75% Off on selected dishes. ", actionText: "Shop Sale" },
-    { text: "Sign up for 10% off your first order. ", actionText: "Sign up" }
-  ];
-  const [announcementIndex, setAnnouncementIndex] = useState(0);
+
   const { cart, getCartTotal, mainCcy } = useCart();
   const { totalItems: wishlistCount } = useWishlist();
   const [isMounted, setIsMounted] = useState(false);
@@ -39,13 +35,7 @@ export default function Header() {
     setIsMounted(true);
   }, []);
 
-  // Auto-cycle announcements
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setAnnouncementIndex((prev) => (prev + 1) % announcements.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
+
 
   const itemCount = isMounted ? cart.length : 0;
   const ccy = isMounted ? mainCcy() : '';
@@ -54,47 +44,7 @@ export default function Header() {
   return (
     <header className="w-full sticky top-0 z-50 flex flex-col">
 
-      {/* ── 1. TOP ANNOUNCEMENT BAR ── */}
-      {/* bg: accent2 (lavender) | text: white */}
-      <div className="hidden lg:flex bg-accent2 border-b border-white/10 text-white text-[11px] tracking-wide py-2 px-8 justify-between items-center">
 
-        {/* Left: announcement carousel */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-0.5">
-            <button
-              className="p-1 rounded hover:bg-white/10 hover:text-accent transition-all duration-200"
-              onClick={() => setAnnouncementIndex((prev) => (prev - 1 + announcements.length) % announcements.length)}
-            >
-              <ArrowLeft size={12} />
-            </button>
-            <button
-              className="p-1 rounded hover:bg-white/10 hover:text-accent transition-all duration-200"
-              onClick={() => setAnnouncementIndex((prev) => (prev + 1) % announcements.length)}
-            >
-              <ArrowRight size={12} />
-            </button>
-          </div>
-          <span className="text-white/90 transition-all duration-500">
-            {announcements[announcementIndex].text}
-            <strong className="text-white cursor-pointer hover:underline font-bold">
-              {announcements[announcementIndex].actionText}
-            </strong>
-          </span>
-        </div>
-
-        {/* Right: utility links */}
-        <div className="flex items-center divide-x divide-white/20">
-          <Link href="#" className="px-3 hover:text-white/80 transition-colors">Help Center</Link>
-          <Link href="#" className="px-3 hover:text-white/80 transition-colors">About Us</Link>
-          <Link href="#" className="px-3 hover:text-white/80 transition-colors">Our Stores</Link>
-          <div className="flex items-center gap-1 px-3 cursor-pointer hover:text-white/80 transition-colors">
-            <span>USD $</span><ChevronDown size={11} />
-          </div>
-          <div className="flex items-center gap-1 px-3 cursor-pointer hover:text-white/80 transition-colors">
-            <span>English</span><ChevronDown size={11} />
-          </div>
-        </div>
-      </div>
 
       {/* ── 2. MAIN HEADER BAR ── */}
       {/* bg: accent3 (dark forest green) */}
@@ -167,29 +117,11 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Center: Search Bar */}
-        <div className="hidden md:flex flex-grow max-w-[520px] relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={17} strokeWidth={2.5} />
-          <input
-            type="text"
-            placeholder="I'm looking for..."
-            className="w-full h-11 pl-11 pr-4 rounded-full text-gray-900 bg-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent text-sm font-medium transition-all duration-200"
-          />
-        </div>
+
 
         {/* Right: Action Icons */}
         <div className="flex items-center gap-5 md:gap-7">
 
-          {/* Mobile Search Toggle */}
-          <button
-            className="md:hidden text-white/80 hover:text-accent transition-colors"
-            onClick={() => {
-              setMobileSearchOpen(!mobileSearchOpen);
-              setMobileMenuOpen(false);
-            }}
-          >
-            {mobileSearchOpen ? <X size={24} /> : <Search size={24} />}
-          </button>
 
           {/* Login / Register */}
           <div className="hidden lg:flex items-center gap-3 cursor-pointer" onClick={() => setIsLoginModalOpen(true)}>
@@ -203,15 +135,6 @@ export default function Header() {
           {/* Divider */}
           <div className="hidden lg:block w-px h-7 bg-white/15" />
 
-          {/* Wishlist */}
-          <div className="relative cursor-pointer hidden sm:block group">
-            <Heart size={23} className="group-hover:text-accent transition-colors duration-200" strokeWidth={2} />
-            {isMounted && wishlistCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 bg-accent text-white text-[9px] w-[17px] h-[17px] rounded-full flex items-center justify-center font-black">
-                {wishlistCount}
-              </span>
-            )}
-          </div>
 
           {/* Cart */}
           <CartWrapper>
@@ -235,19 +158,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* ── MOBILE SEARCH DROPDOWN ── */}
-      <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileSearchOpen ? 'max-h-[80px] opacity-100 border-b border-accent-foreground/20' : 'max-h-0 opacity-0'}`} style={{ background: '#FFFDF5' }}>
-        <div className="px-5 py-3">
-          <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={17} strokeWidth={2.5} />
-            <input
-              type="text"
-              placeholder="Search for dishes..."
-              className="w-full h-11 pl-11 pr-4 rounded-full border border-gray-200 text-accent3 bg-white focus:outline-none focus:border-accent-foreground/50 text-sm font-medium"
-            />
-          </div>
-        </div>
-      </div>
+
 
       {/* ── 3. NAVIGATION BAR ── */}
       {/* bg: accent-foreground (cream) | text: gray-900 | hover: accent (dark orange) */}
@@ -257,45 +168,67 @@ export default function Header() {
             { label: 'Home', href: '/' },
             { label: 'Shop', href: '/shop' },
             { label: 'About', href: '#' },
-            { label: 'Contact', href: '#' },
-          ].map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="relative flex items-center gap-1 px-5 py-4 text-[14px] font-bold text-gray-900 hover:text-accent transition-colors duration-200 group"
-            >
-              {item.label}
-              {/* animated underline on hover */}
-              <span className="absolute bottom-0 left-5 right-5 h-[2px] bg-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
-            </Link>
-          ))}
+            { label: 'Contact Us', href: '/contact' },
+          ].map((item) => {
+            const className = "relative flex items-center gap-1 px-5 py-4 text-[14px] font-bold text-gray-900 hover:text-accent transition-colors duration-200 group";
+            const content = (
+              <>
+                {item.label}
+                <span className="absolute bottom-0 left-5 right-5 h-[2px] bg-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
+              </>
+            );
 
-          {/* Sale with HOT badge */}
+            if (item.href.startsWith('#')) {
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={className}
+                  onClick={(e) => {
+                    if (item.href === '#contact-us') {
+                      e.preventDefault();
+                      document.getElementById('contact-us')?.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  {content}
+                </a>
+              );
+            }
+
+            return (
+              <Link key={item.label} href={item.href} className={className}>
+                {content}
+              </Link>
+            );
+          })}
+
+          {/* Sale with HOT badge
           <div className="relative flex items-center gap-1 px-5 py-4 text-[14px] font-bold text-gray-900 hover:text-accent transition-colors duration-200 cursor-pointer group">
             Sale
             <span className="absolute top-2 right-1 text-accent-foreground text-[8px] px-1.5 py-[1px] rounded-[3px] font-black tracking-widest uppercase bg-accent">
               HOT
             </span>
             <span className="absolute bottom-0 left-5 right-5 h-[2px] bg-accent scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left rounded-full" />
-          </div>
+          </div> */}
         </nav>
 
-        {/* Recent view */}
+        {/* Recent view
         <div className="flex items-center gap-2 text-gray-900 cursor-pointer hover:text-accent transition-colors pr-8">
           <Clock size={16} strokeWidth={2.5} />
           <span className="text-[13px] font-extrabold tracking-wide">Recent view product</span>
-        </div>
+        </div> */}
       </div>
 
       {/* ── 4. MOBILE OFF-CANVAS MENU ── */}
       {/* Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setMobileMenuOpen(false)}
       />
 
       {/* Drawer Dropdown */}
-      <div 
+      <div
         className={`fixed top-0 left-0 w-full bg-white z-[110] shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}
       >
         {/* Drawer Header */}
@@ -313,33 +246,53 @@ export default function Header() {
               { name: 'Home', href: '/' },
               { name: 'Shop', href: '/shop' },
               { name: 'Contact Us', href: '/contact' },
-            ].map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="flex items-center justify-between py-[12px] px-5 border-b border-gray-100 text-[14px] font-bold text-gray-800 hover:text-accent transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.name}
-                <ChevronDown className="rotate-[-90deg] text-gray-400" size={16} />
-              </Link>
-            ))}
+            ].map((item) => {
+              const className = "flex items-center justify-between py-[12px] px-5 border-b border-gray-100 text-[14px] font-bold text-gray-800 hover:text-accent transition-colors";
+              const content = (
+                <>
+                  {item.name}
+                  <ChevronDown className="rotate-[-90deg] text-gray-400" size={16} />
+                </>
+              );
 
-            {/* Sale */}
-            <Link
-              href="/sale"
-              className="flex items-center justify-between py-[12px] px-5 border-b border-gray-100 text-[14px] font-bold text-gray-800 hover:text-accent transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <div className="flex items-center gap-2">
-                Sale 
-                <span className="bg-accent text-white text-[9px] px-1.5 py-[2px] rounded-sm font-black tracking-wider uppercase">HOT</span>
-              </div>
-            </Link>
+              if (item.href.startsWith('#')) {
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    className={className}
+                    onClick={(e) => {
+                      if (item.href === '#contact-us') {
+                        e.preventDefault();
+                        setMobileMenuOpen(false);
+                        setTimeout(() => {
+                          document.getElementById('contact-us')?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                      }
+                    }}
+                  >
+                    {content}
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={className}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {content}
+                </Link>
+              );
+            })}
+
+
 
             {/* Utilities */}
             <div className="flex flex-col mt-2 mb-6">
-              <button 
+              <button
                 onClick={() => { setMobileMenuOpen(false); setIsLoginModalOpen(true); }}
                 className="flex items-center gap-3 py-3 px-5 text-[14px] font-medium text-gray-600 hover:text-accent transition-colors w-full text-left"
               >
