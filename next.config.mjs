@@ -152,6 +152,7 @@ const nextConfig = {
         http: false,
         https: false,
         zlib: false,
+        accounts: false,
       }
 
       // Add React Native modules to fallback
@@ -167,6 +168,7 @@ const nextConfig = {
         acc[mod] = false
         return acc
       }, {}),
+      accounts: false,
     }
 
     // Server-side externals for heavy packages
@@ -178,6 +180,7 @@ const nextConfig = {
         'aws-amplify': 'commonjs aws-amplify',
         'pino-pretty': 'commonjs pino-pretty',
       })
+      config.externals.push('accounts')
     }
 
     // Only split chunks in production (adds overhead in dev)

@@ -27,8 +27,8 @@ export default function Providers({ children, initialState }: Props) {
   return (
     <WagmiProvider config={config} initialState={initialState} reconnectOnMount={true}>
       <QueryClientProvider client={queryClient}>
-      {children}
+        {children}
       </QueryClientProvider>
-    </WagmiProvider> 
+    </WagmiProvider>
   )
 }
