@@ -154,7 +154,18 @@ export default function PromotionalCards() {
                 <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${index === 1 ? 'hidden' : ''}`} />
 
                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] z-20">
-                  <Link href={index === 1 ? "/shop" : (banner.link === '#' ? '/shop' : (banner.link || "/shop"))}>
+                  <Link 
+                    href={index === 1 ? "/shop" : (() => {
+                      const link = banner.link;
+                      if (!link || link === '#') return '/shop';
+                      try {
+                        const url = new URL(link);
+                        return url.pathname + url.search + url.hash;
+                      } catch (e) {
+                        return link.startsWith('/') ? link : `/${link}`;
+                      }
+                    })()}
+                  >
                     <button className="w-full bg-white text-gray-900 py-4 rounded-full font-extrabold text-[14px] md:text-[15px] shadow-xl hover:bg-accent3 hover:text-white transition-all duration-300">
                       {index === 1 ? 'Order Now' : (banner.title || 'Shop Now')}
                     </button>

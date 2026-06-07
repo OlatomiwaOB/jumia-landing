@@ -44,4 +44,4 @@ export const getProductGallery = (product?: ProductProps | null) => {
 };
 
 export const findProductBySlug = (products: ProductProps[], slug: string) =>
-  products.find((product) => slugifyProductName(product.name) === slug);
+  products.find((product) => slugifyProductName(product.name) === slugifyProductName(slug));
