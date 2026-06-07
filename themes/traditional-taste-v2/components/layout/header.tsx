@@ -6,19 +6,31 @@ import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 import CartWrapper from '@/components/ui/cart-wrapper';
 import { SheetTrigger } from '@/components/ui/sheet';
 import Cart from '@/components/ui/cart';
-import { ShoppingCart, Search, Mic, MapPin, User, Sun, Moon, ChevronLeft, ChevronRight, Menu, X, List, Mail, Phone, Globe, ChefHat, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Search, Mic, MapPin, User, Sun, Moon, ChevronLeft, ChevronRight, Menu, X, List, Mail, Phone, Globe, ChefHat, ChevronDown, Zap, Home } from 'lucide-react';
 import CustomerLoginModal from "@/components/ui/customer-login-modal";
 import useCustomer from '@/store/customerStore';
 import Image from 'next/image';
 
 const mockCategories = [
-  "Combo & Deals", "Bundle save", "Shop by Category", "Fruit & Vegetables", "Meat & Fish", "Presets", "Template"
+  "Combo & Deals", "Bundle save", "Shop by Category", "Food & Restaurant", "Meat & Fish", "Presets", "Template"
+];
+
+const menuDropdownCategories = [
+  { name: "Combo & Deals", image: null, icon: Zap, iconColor: "text-orange-500" },
+  { name: "Food & Restaurant", image: "/nigerian-food.png" },
+  { name: "Meat & Fish", image: "/frozen-beef.jpg" },
+  { name: "Pantry staples", image: "/cat-groceries.png" },
+  { name: "Dairy", image: "/peak-milk-900g.jpg" },
+  { name: "Bakery", image: "/chin-chin-coconut.jpg" },
+  { name: "Beverages", image: "/chi-exotic.jpg" }
 ];
 
 export default function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
+  const desktopMenuRef = useRef<HTMLDivElement>(null);
   const { cart, getCartTotal, mainCcy } = useCart();
   const { customer } = useCustomer();
 
@@ -59,6 +71,9 @@ export default function Header() {
     const handleClickOutside = (event: MouseEvent) => {
       if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
         setIsLangDropdownOpen(false);
+      }
+      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+        setIsDesktopMenuOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -111,7 +126,7 @@ export default function Header() {
   const handleNextPromo = () => setCurrentPromoIndex((prev) => (prev + 1) % promos.length);
 
   return (
-    <header className={`w-full flex flex-col font-sans relative z-50 shadow-sm border-b transition-colors duration-300 ${isDarkMode ? 'bg-[#0F172A] border-gray-800' : 'bg-white border-gray-100'}`}>
+    <header className={`w-full flex flex-col font-sans sticky top-0 z-50 shadow-sm border-b transition-colors duration-300 ${isDarkMode ? 'bg-[#0F172A] border-gray-800' : 'bg-white border-gray-100'}`}>
 
       {/* ── Layer 1: Top Promo Bar ── */}
       <div
@@ -151,9 +166,8 @@ export default function Header() {
       <div className={`hidden lg:flex w-full justify-between items-center px-10 py-3 border-b text-[13px] font-bold tracking-wide transition-colors duration-300 ${isDarkMode ? 'bg-[#0F172A] border-gray-800 text-gray-300' : 'bg-white border-gray-100 text-gray-600'}`}>
         <div className="flex space-x-6">
           <Link href="#" className="hover:text-tt-primary transition-colors">. About us</Link>
-          <Link href="#" className="hover:text-tt-primary transition-colors">. FAQs</Link>
-          <Link href="#" className="hover:text-tt-primary transition-colors">. News & Article</Link>
-          <Link href="#" className="hover:text-tt-primary transition-colors">. Recipes</Link>
+          <Link href="/contact" className="hover:text-tt-primary transition-colors">. Contact Us</Link>
+          <Link href="#" className="hover:text-tt-primary transition-colors">. Shop</Link>
         </div>
         <div className="flex space-x-8 items-center">
           <span className="flex items-center gap-2 hover:text-tt-primary cursor-pointer transition-colors"><Mail size={14} strokeWidth={2.5} /> example@shopify.com</span>
@@ -214,7 +228,7 @@ export default function Header() {
         <div className="flex lg:hidden items-center justify-between w-full h-14 relative">
           {/* Left: Menu & Search */}
           <div className="flex items-center gap-5">
-            <button 
+            <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`flex justify-center items-center transition-colors hover:opacity-80 ${isMobileMenuOpen ? 'text-tt-primary w-7 h-7' : 'flex-col items-start gap-[5px] w-7 h-7'}`}
             >
@@ -268,10 +282,45 @@ export default function Header() {
         <div className="hidden lg:flex items-center justify-between w-full gap-6">
           {/* Left: Menu + Logo */}
           <div className="flex items-center gap-8">
-            <button className="bg-tt-primary text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-bold text-sm shadow-md hover:bg-orange-600 transition-colors">
-              <Menu size={20} strokeWidth={2.5} />
-              <span>Menu</span>
-            </button>
+            <div className="relative" ref={desktopMenuRef}>
+              <button
+                onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
+                className="bg-tt-primary text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-bold text-sm shadow-md hover:bg-orange-600 transition-colors"
+              >
+                {isDesktopMenuOpen ? <X size={20} strokeWidth={2.5} /> : <Menu size={20} strokeWidth={2.5} />}
+                <span>Menu</span>
+              </button>
+
+              {isDesktopMenuOpen && (
+                <div className={`absolute top-full left-0 mt-3 w-72 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border overflow-hidden z-50 transition-colors duration-300 animate-in fade-in slide-in-from-left-8 ${isDarkMode ? 'bg-[#1C1917] border-gray-800' : 'bg-white border-gray-100'}`}>
+                  <div className="flex flex-col py-2">
+                    {menuDropdownCategories.map((item, idx) => (
+                      <Link
+                        href="#"
+                        key={idx}
+                        className={`flex items-center justify-between px-5 py-3 border-b last:border-b-0 transition-colors group ${isDarkMode ? 'border-gray-800 hover:bg-gray-800' : 'border-gray-50 hover:bg-gray-50'}`}
+                      >
+                        <div className="flex items-center gap-4">
+                          {item.image ? (
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 shadow-sm">
+                              <Image src={item.image} alt={item.name} fill className="object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0">
+                              {item.icon && <item.icon size={20} className={item.iconColor} />}
+                            </div>
+                          )}
+                          <span className={`text-[14px] font-bold transition-colors group-hover:text-tt-primary ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                            {item.name}
+                          </span>
+                        </div>
+                        <ChevronRight size={16} className={`transition-transform group-hover:translate-x-1 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative h-16 w-16 md:h-20 md:w-20 flex-shrink-0 rounded-full overflow-hidden shadow-md transition-transform duration-300 group-hover:scale-105">
@@ -345,90 +394,90 @@ export default function Header() {
         </div>
       </div>
 
-      {/* --- MOBILE FULL SCREEN MENU OVERLAY --- */}
+      {/* --- MOBILE MENU OVERLAY & DRAWER --- */}
       {isMobileMenuOpen && (
-        <div className={`lg:hidden fixed top-[115px] sm:top-[125px] left-0 bottom-0 w-full z-40 flex flex-col shadow-xl overflow-y-auto ${isDarkMode ? 'bg-[#0F172A]' : 'bg-white'}`}>
-          {/* Welcome Banner */}
-          <div className="sticky top-0 z-10 w-full bg-tt-primary text-white py-3.5 px-5 flex items-center justify-between shadow-sm">
-            <span className="text-[13px] font-bold">Welcome to Traditional Taste</span>
-            <div className="flex items-center gap-4">
-              <button onClick={() => setIsOpen(true)} className="hover:opacity-80 transition-opacity">
-                <User size={18} strokeWidth={2.5} />
-              </button>
-              <button onClick={toggleTheme} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <div className={`w-8 h-4.5 rounded-full relative flex items-center px-0.5 transition-colors ${isDarkMode ? 'bg-white/30' : 'bg-black/20'}`}>
-                  <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-transform duration-300 ${isDarkMode ? 'translate-x-3.5' : 'translate-x-0'}`}></div>
-                </div>
-                {isDarkMode ? <Sun size={18} strokeWidth={2.5} /> : <Moon size={18} strokeWidth={2.5} />}
-              </button>
-            </div>
+        <div
+          className="fixed inset-0 bg-black/50 z-[100] lg:hidden animate-in fade-in duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+      <div className={`fixed top-0 left-0 h-full w-[85%] max-w-sm z-[110] shadow-2xl flex flex-col overflow-y-auto transition-transform duration-300 ease-in-out lg:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} ${isDarkMode ? 'bg-[#0F172A]' : 'bg-white'}`}>
+        {/* Welcome Banner */}
+        <div className="sticky top-0 z-10 w-full bg-tt-primary text-white py-3.5 px-5 flex items-center justify-between shadow-sm">
+          <span className="text-[13px] font-bold">Welcome to Traditional Taste</span>
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsOpen(true)} className="hover:opacity-80 transition-opacity">
+              <User size={18} strokeWidth={2.5} />
+            </button>
+            <button onClick={toggleTheme} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <div className={`w-8 h-4.5 rounded-full relative flex items-center px-0.5 transition-colors ${isDarkMode ? 'bg-white/30' : 'bg-black/20'}`}>
+                <div className={`w-3.5 h-3.5 rounded-full bg-white shadow-sm transition-transform duration-300 ${isDarkMode ? 'translate-x-3.5' : 'translate-x-0'}`}></div>
+              </div>
+              {isDarkMode ? <Sun size={18} strokeWidth={2.5} /> : <Moon size={18} strokeWidth={2.5} />}
+            </button>
           </div>
+        </div>
 
-          {/* Main Menu Label */}
-          <div className={`flex items-center gap-3 px-5 py-3 font-bold text-[14px] border-b ${isDarkMode ? 'text-gray-200 border-gray-800' : 'text-tt-primary border-gray-100'}`}>
+        {/* Main Menu Label */}
+        <div className={`flex items-center justify-between px-5 py-3 font-bold text-[14px] border-b ${isDarkMode ? 'text-gray-200 border-gray-800' : 'text-tt-primary border-gray-100'}`}>
+          <div className="flex items-center gap-3">
             <List size={18} strokeWidth={2.5} />
             Main menu
           </div>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="hover:opacity-70 transition-opacity p-1 bg-black/5 rounded-full dark:bg-white/10">
+            <X size={18} strokeWidth={2.5} />
+          </button>
+        </div>
 
-          {/* Menu Links */}
-          <div className="flex flex-col w-full">
-            {mockCategories.map((cat, i) => (
-              <Link 
-                key={i} 
-                href="#" 
-                className={`flex items-center justify-between px-5 py-2.5 border-b text-[12px] font-bold transition-colors ${isDarkMode ? 'border-gray-800 text-gray-300 hover:text-tt-primary' : 'border-gray-100 text-[#1C1917] hover:text-tt-primary'}`}
-              >
-                {cat}
-                <ChevronRight size={14} strokeWidth={2.5} className={isDarkMode ? 'text-gray-600' : 'text-gray-300'} />
-              </Link>
-            ))}
-          </div>
+        {/* Menu Links */}
+        <div className="flex flex-col w-full">
+          {mockCategories.map((cat, i) => (
+            <Link
+              key={i}
+              href="#"
+              className={`flex items-center justify-between px-5 py-2.5 border-b text-[12px] font-bold transition-colors ${isDarkMode ? 'border-gray-800 text-gray-300 hover:text-tt-primary' : 'border-gray-100 text-[#1C1917] hover:text-tt-primary'}`}
+            >
+              {cat}
+              <ChevronRight size={14} strokeWidth={2.5} className={isDarkMode ? 'text-gray-600' : 'text-gray-300'} />
+            </Link>
+          ))}
+        </div>
 
-          {/* Bottom Links */}
-          <div className="mt-4 mb-12 w-full flex flex-col gap-0.5">
-            <Link href="#" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <MapPin size={15} strokeWidth={2} />
-              Store locator
-            </Link>
-            <Link href="#" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
-              About us
-            </Link>
-            <Link href="#" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
-              FAQs
-            </Link>
-            <Link href="#" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
-              News & Article
-            </Link>
-            <Link href="#" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
-              Recipes
-            </Link>
-            
-            <div className={`w-full h-px my-2 opacity-50 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}></div>
-            
-            <Link href="tel:+12345678901" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <Phone size={15} strokeWidth={2} />
-              (+1) 2345678901
-            </Link>
-            <Link href="mailto:example@shopify.com" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
-              <Mail size={15} strokeWidth={2} />
-              example@shopify.com
-            </Link>
+        {/* Bottom Links */}
+        <div className="mt-4 mb-12 w-full flex flex-col gap-0.5">
+          <Link href="/about" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
+            <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
+            About us
+          </Link>
+          <Link href="/shop" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
+            <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
+            Shop
+          </Link>
+          <Link href="/contact" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
+            <span className="w-[15px] text-center text-[10px] opacity-40">•</span>
+            Contact Us
+          </Link>
 
-            <div className="mt-8 flex justify-center w-full">
-              <button className={`flex items-center gap-2 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`}>
-                <Globe size={14} />
-                English (USD $)
-                <ChevronDown size={14} />
-              </button>
-            </div>
+          <div className={`w-full h-px my-2 opacity-50 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}></div>
+
+          <Link href="tel:+12345678901" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
+            <Phone size={15} strokeWidth={2} />
+            (+1) 2345678901
+          </Link>
+          <Link href="mailto:example@shopify.com" className={`flex items-center gap-3 px-5 py-2.5 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-tt-primary' : 'text-gray-600 hover:text-tt-primary'}`}>
+            <Mail size={15} strokeWidth={2} />
+            example@shopify.com
+          </Link>
+
+          <div className="mt-8 flex justify-center w-full">
+            <button className={`flex items-center gap-2 text-[12px] font-bold transition-colors ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`}>
+              <Globe size={14} />
+              English (USD $)
+              <ChevronDown size={14} />
+            </button>
           </div>
         </div>
-      )}
-
+      </div>
       {/* ── Layer 4: Category Navigation ── */}
       <div className={`hidden lg:flex w-full items-center justify-center py-4 border-t space-x-12 text-[14px] font-extrabold transition-colors duration-300 ${isDarkMode ? 'border-gray-800 text-gray-200' : 'border-black/5 text-tt-text'}`}>
 
@@ -448,7 +497,7 @@ export default function Header() {
           Shop by Category <ChevronDown size={14} strokeWidth={2.5} className="text-gray-400 group-hover:text-tt-primary transition-colors ml-0.5" />
         </Link>
         <Link href="#" className="hover:text-tt-primary transition-colors flex items-center gap-1.5 group">
-          Fruit & Vegetables <ChevronDown size={14} strokeWidth={2.5} className="text-gray-400 group-hover:text-tt-primary transition-colors ml-0.5" />
+          Food & Restaurant <ChevronDown size={14} strokeWidth={2.5} className="text-gray-400 group-hover:text-tt-primary transition-colors ml-0.5" />
         </Link>
         <Link href="#" className="hover:text-tt-primary transition-colors flex items-center gap-1.5 group">
           Meat & Fish <ChevronDown size={14} strokeWidth={2.5} className="text-gray-400 group-hover:text-tt-primary transition-colors ml-0.5" />
@@ -460,6 +509,38 @@ export default function Header() {
           Template <ChevronDown size={14} strokeWidth={2.5} className="text-gray-400 group-hover:text-tt-primary transition-colors ml-0.5" />
         </Link>
 
+      </div>
+
+      {/* --- MOBILE BOTTOM NAVIGATION BAR --- */}
+      <div className={`lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around py-3 px-2 border-t shadow-[0_-5px_15px_-10px_rgba(0,0,0,0.1)] transition-colors duration-300 ${isDarkMode ? 'bg-[#0F172A] border-gray-800' : 'bg-white border-gray-100'}`}>
+        <Link href="/" className={`flex flex-col items-center gap-1 hover:text-tt-primary transition-colors ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <Home size={22} strokeWidth={2} />
+          <span className="text-[10px] font-bold">Home</span>
+        </Link>
+        <Link href="/shop" className={`flex flex-col items-center gap-1 hover:text-tt-primary transition-colors ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <List size={22} strokeWidth={2} />
+          <span className="text-[10px] font-bold">Shop</span>
+        </Link>
+        <button onClick={() => setIsMobileMenuOpen(true)} className={`flex flex-col items-center gap-1 transition-colors ${isMobileMenuOpen ? 'text-tt-primary' : (isDarkMode ? 'text-gray-400' : 'text-gray-500')}`}>
+          <Menu size={22} strokeWidth={2.5} />
+          <span className="text-[10px] font-bold">Menu</span>
+        </button>
+        <CartWrapper>
+          <SheetTrigger className={`relative flex flex-col items-center gap-1 hover:text-tt-primary transition-colors ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <ShoppingCart size={22} strokeWidth={2} />
+            <span className="text-[10px] font-bold">Cart</span>
+            {isMounted && itemCount > 0 && (
+              <span className="absolute -top-1.5 right-1.5 bg-tt-primary text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center border border-white">
+                {itemCount}
+              </span>
+            )}
+          </SheetTrigger>
+          <Cart />
+        </CartWrapper>
+        <button onClick={() => setIsOpen(true)} className={`flex flex-col items-center gap-1 hover:text-tt-primary transition-colors ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <User size={22} strokeWidth={2} />
+          <span className="text-[10px] font-bold">Profile</span>
+        </button>
       </div>
 
       {/* Login Modal Integration */}

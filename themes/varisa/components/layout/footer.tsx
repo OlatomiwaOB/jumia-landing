@@ -5,7 +5,7 @@ import { Phone, Mail, MapPin } from 'lucide-react';
 const navigation = {
   quickLinks: [
     { name: 'Shop All', href: '/shop' },
-    { name: 'About Us', href: '#' },
+    { name: 'About Us', href: '/about' },
     { name: 'Contact Us', href: '/contact' },
   ],
   categories: [

@@ -22,7 +22,7 @@ export default function TraditionalTasteLayout({
       } as React.CSSProperties}
     >
       <Providers>
-        <div>
+        <div className="pb-[65px] lg:pb-0">
           <Suspense fallback={<div className="h-20 bg-[var(--color-bg-main)]"></div>}>
             <Header />
             {children}
