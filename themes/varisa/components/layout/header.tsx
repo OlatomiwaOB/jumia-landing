@@ -167,7 +167,7 @@ export default function Header() {
           {[
             { label: 'Home', href: '/' },
             { label: 'Shop', href: '/shop' },
-            { label: 'About', href: '#' },
+            { label: 'About', href: '/about' },
             { label: 'Contact Us', href: '/contact' },
           ].map((item) => {
             const className = "relative flex items-center gap-1 px-5 py-4 text-[14px] font-bold text-gray-900 hover:text-accent transition-colors duration-200 group";

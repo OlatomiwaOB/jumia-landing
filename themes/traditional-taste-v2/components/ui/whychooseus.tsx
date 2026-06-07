@@ -24,10 +24,17 @@ export default function WhyChooseUsSection() {
     },
   ];
 
+  const bannerBg = process.env.NEXT_PUBLIC_ACCENT_COLOR
+    ? `#${process.env.NEXT_PUBLIC_ACCENT_COLOR}`
+    : "#F97316";
+
   return (
-    <section className="w-full bg-[var(--color-bg-main)] py-10 md:py-16">
+    <section className="w-full bg-[var(--color-bg-main)] pb-6 md:pb-10 -mt-6 md:-mt-10 relative z-20">
       <div className="max-w-[1640px] mx-auto px-4 md:px-6 lg:px-10">
-        <div className="relative overflow-hidden rounded-[32px] md:rounded-[40px] bg-[#245c3b]">
+        <div
+          className="relative overflow-hidden rounded-[32px] md:rounded-[40px]"
+          style={{ backgroundColor: bannerBg }}
+        >
           {/* Decorative Background */}
           <div className="absolute inset-0 opacity-[0.05]">
             <div
@@ -40,32 +47,32 @@ export default function WhyChooseUsSection() {
             />
           </div>
 
-          {/* Orange Glow */}
-          <div className="absolute -top-20 -right-20 w-72 h-72 bg-[var(--color-primary)] rounded-full blur-[120px] opacity-20" />
+          {/* White Glow instead of primary glow */}
+          <div className="absolute -top-20 -right-20 w-72 h-72 bg-white rounded-full blur-[120px] opacity-30" />
 
-          <div className="relative z-10 grid lg:grid-cols-[1fr_320px] gap-10 items-center p-6 md:p-10 lg:p-14">
+          <div className="relative z-10 grid lg:grid-cols-[1fr_320px] gap-6 items-center p-4 md:p-6 lg:p-8">
             {/* LEFT */}
             <div>
-              <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-5">
+              <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-5 shadow-sm border border-white/20">
                 🚚 Fast Delivery Service
               </span>
 
-              <h2 className="text-white text-3xl md:text-5xl font-bold leading-tight">
+              <h2 className="text-white text-2xl md:text-4xl font-bold leading-tight">
                 More than groceries,
-                <span className="text-[var(--color-primary)]">
+                <span className="text-white opacity-90">
                   {" "}
                   delivered to your door in 1 hour
                 </span>
               </h2>
 
-              <p className="text-white/80 text-lg mt-5 max-w-3xl leading-relaxed">
+              <p className="text-white/90 text-base mt-3 max-w-3xl leading-relaxed">
                 From authentic African dishes to fresh groceries and kitchen
                 essentials, enjoy fast delivery and premium quality without
                 leaving your home.
               </p>
 
               {/* Feature Cards */}
-              <div className="grid md:grid-cols-3 gap-5 mt-10">
+              <div className="grid md:grid-cols-3 gap-5 mt-6">
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
 
@@ -77,22 +84,24 @@ export default function WhyChooseUsSection() {
                         bg-white/10
                         backdrop-blur-md
                         rounded-2xl
-                        p-5
+                        p-4
+                        border border-white/10
 
                         transition-all
                         duration-300
 
-                        hover:bg-white/15
+                        hover:bg-white
                         hover:-translate-y-2
                         hover:shadow-2xl
                       "
                     >
                       <div
                         className="
-                          w-14
-                          h-14
-                          rounded-xl
-                          bg-white/10
+                          w-10
+                          h-10
+                          rounded-lg
+                          bg-white/20
+                          border border-white/20
 
                           flex
                           items-center
@@ -103,19 +112,20 @@ export default function WhyChooseUsSection() {
                           transition-all
                           duration-300
 
-                          group-hover:bg-[var(--color-primary)]
+                          group-hover:bg-transparent
+                          group-hover:border-transparent
                           group-hover:rotate-6
                           group-hover:scale-110
                         "
                       >
-                        <Icon size={28} className="text-white" />
+                        <Icon size={20} className="text-white group-hover:text-[var(--color-primary)]" />
                       </div>
 
-                      <h3 className="text-white font-bold text-lg mb-2">
+                      <h3 className="text-white font-bold text-lg mb-2 group-hover:text-stone-900 transition-colors">
                         {feature.title}
                       </h3>
 
-                      <p className="text-white/70 text-sm leading-relaxed">
+                      <p className="text-white/80 text-sm leading-relaxed group-hover:text-stone-600 transition-colors">
                         {feature.description}
                       </p>
                     </div>
@@ -124,18 +134,19 @@ export default function WhyChooseUsSection() {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4 mt-10">
+              <div className="flex flex-wrap gap-4 mt-6">
                 <button
                   className="
                     group
-                    bg-[var(--color-primary)]
-                    text-white
+                    bg-white
+                    text-[#F97316]
                     font-bold
 
-                    px-8
-                    py-4
+                    px-6
+                    py-3
+                    text-sm
 
-                    rounded-xl
+                    rounded-lg
 
                     flex
                     items-center
@@ -146,8 +157,9 @@ export default function WhyChooseUsSection() {
 
                     hover:scale-105
                     hover:-translate-y-1
-                    hover:shadow-[0_20px_40px_rgba(249,115,22,0.35)]
+                    hover:shadow-[0_20px_40px_rgba(255,255,255,0.25)]
                   "
+                  style={{ color: bannerBg }}
                 >
                   Order Now
                   <ArrowRight
@@ -163,21 +175,21 @@ export default function WhyChooseUsSection() {
                 <button
                   className="
                     border-2
-                    border-white/30
+                    border-white/40
 
                     text-white
                     font-semibold
 
-                    px-8
-                    py-4
+                    px-6
+                    py-3
+                    text-sm
 
-                    rounded-xl
+                    rounded-lg
 
                     transition-all
                     duration-300
 
-                    hover:bg-white
-                    hover:text-[#245c3b]
+                    hover:bg-white/20
                     hover:scale-105
                     hover:-translate-y-1
                   "
@@ -197,8 +209,8 @@ export default function WhyChooseUsSection() {
                   w-full
                   max-w-[320px]
 
-                  h-[260px]
-                  md:h-[320px]
+                  h-[200px]
+                  md:h-[260px]
 
                   rounded-3xl
                   overflow-hidden
