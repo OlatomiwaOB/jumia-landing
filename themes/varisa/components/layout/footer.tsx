@@ -1,6 +1,9 @@
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Plus, Minus } from 'lucide-react';
 
 const navigation = {
   quickLinks: [
@@ -91,19 +94,21 @@ const PaymentIcons = () => {
 };
 
 export default function Footer() {
+  const [isCompanyOpen, setIsCompanyOpen] = useState(false);
+
   return (
     <footer id="footer" className="w-full font-sans">
 
       {/* Main Footer Content */}
       <div className="bg-accent3 text-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-12">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-10 md:pt-16 pb-8 md:pb-12">
 
           {/* Adjusted Max Width for 2-column layout */}
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between gap-y-12 gap-x-10 lg:gap-8">
+          <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between gap-y-8 md:gap-y-12 gap-x-10 lg:gap-8">
 
             {/* Column 1: Brand Info */}
-            <div className="md:w-1/2 flex flex-col items-center text-center md:items-start md:text-left">
-              <Link href="/" className="flex items-center justify-center md:justify-start gap-3 group mb-6">
+            <div className="md:w-1/2 flex flex-col items-start text-left">
+              <Link href="/" className="flex items-center justify-start gap-3 group mb-6">
                 <div className="relative w-12 h-[60px] rounded-xl overflow-hidden shadow-lg border border-white/10 bg-white/5 transition-all duration-300">
                   <Image
                     src="/varisa-logo.jpg"
@@ -118,11 +123,11 @@ export default function Footer() {
                 </div>
               </Link>
 
-              <p className="text-[14px] text-white/80 leading-relaxed mb-8 max-w-sm md:max-w-none">
+              <p className="text-[14px] text-white/80 leading-relaxed mb-6 md:mb-8 max-w-sm md:max-w-none">
                 Delivering authentic, mouth-watering Nigerian cuisine and rich cultural flavors straight to your doorstep across the UK.
               </p>
 
-              <div className="flex justify-center md:justify-start gap-4">
+              <div className="flex justify-start gap-4">
                 {navigation.social.map((item) => (
                   <div key={item.name} className="relative group flex flex-col items-center">
                     <a
@@ -145,14 +150,26 @@ export default function Footer() {
             </div>
 
             {/* Column 2: Quick Links */}
-            <div className="md:w-1/3 flex flex-col items-center text-center md:items-end md:text-right">
-              <h3 className="text-lg font-bold text-white mb-6">Our Company</h3>
-              <ul className="space-y-4">
+            <div className="w-full md:w-1/3 flex flex-col md:items-end md:text-right border-t border-b border-white/10 md:border-none py-2 my-2 md:py-0 md:my-0">
+              {/* Mobile Toggle Button */}
+              <button 
+                onClick={() => setIsCompanyOpen(!isCompanyOpen)}
+                className="w-full flex items-center justify-between md:hidden py-1"
+              >
+                <h3 className="text-lg font-bold text-white">Our Company</h3>
+                {isCompanyOpen ? <Minus className="w-5 h-5 text-white" /> : <Plus className="w-5 h-5 text-white" />}
+              </button>
+              
+              {/* Desktop Title */}
+              <h3 className="hidden md:block text-lg font-bold text-white mb-6">Our Company</h3>
+              
+              {/* Links List */}
+              <ul className={`space-y-4 pt-4 md:pt-0 ${isCompanyOpen ? 'block' : 'hidden'} md:block w-full text-left md:text-right`}>
                 {navigation.quickLinks.map((item) => (
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className="text-[14px] text-white/80 hover:text-accent transition-colors"
+                      className="text-[14px] text-white/80 hover:text-accent transition-colors block"
                     >
                       {item.name}
                     </Link>
@@ -166,15 +183,12 @@ export default function Footer() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center md:items-end gap-8">
+          <div className="mt-0 md:mt-16 pt-2 md:pt-8 border-t-0 md:border-t border-white/10 flex flex-col md:flex-row justify-between items-center md:items-end gap-6 md:gap-8">
 
             {/* Bottom Left */}
-            <div className="flex flex-col items-center md:items-start gap-4">
+            <div className="flex flex-col items-center md:items-start gap-3 md:gap-4 w-full md:w-auto">
               <button className="flex items-center justify-center md:justify-start gap-2 text-[14px] text-white/80 hover:text-white w-fit">
                 <span>🇬🇧</span> United Kingdom (GBP £)
-                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
               </button>
               <p className="text-[14px] text-white/80 text-center md:text-left">
                 &copy; {new Date().getFullYear()} Varisa Catering. All rights reserved.
@@ -182,7 +196,7 @@ export default function Footer() {
             </div>
 
             {/* Bottom Right */}
-            <div className="flex flex-col items-center md:items-end gap-6">
+            <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto mt-2 md:mt-0">
               <PaymentIcons />
               <div className="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-3">
                 {navigation.customerService.map((item) => (
