@@ -26,12 +26,17 @@ export const metadata: Metadata = {
 
 // Lazy loading components
 const AboutPageVarisa = lazy(() => import('../../../../themes/varisa/about'))
+const AboutPageTraditionalTaste = lazy(() => import('../../../../themes/traditional-taste-v2/about'))
 
 const AboutPage = () => {
   const storefront = process?.env?.NEXT_PUBLIC_STORE_FRONT;
 
   if (storefront === 'varisa') {
     return <Suspense fallback={<Loader text='Loading...' />}><AboutPageVarisa /></Suspense>
+  }
+
+  if (storefront === 'traditional-taste-v2') {
+    return <Suspense fallback={<Loader text='Loading...' />}><AboutPageTraditionalTaste /></Suspense>
   }
 
   // Fallback for other themes until their about pages are built

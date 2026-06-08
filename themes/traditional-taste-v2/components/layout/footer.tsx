@@ -26,7 +26,7 @@ const Footer = () => {
 
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'x-source-code': process.env.NEXT_PUBLIC_SOURCE_CODE || 'FORTITUDE',
           'x-client-id': process.env.NEXT_PUBLIC_CLIENT_ID || 'TST03054745785188010772',
@@ -131,33 +131,33 @@ const Footer = () => {
                 Traditional Taste
               </span>
             </div>
-            
+
             <div className="text-[15px] space-y-4 opacity-80 w-full max-w-sm">
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
                 <MapPin className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
-                  <span className="font-semibold block sm:inline">Address: </span> 
+                  <span className="font-semibold block sm:inline">Address: </span>
                   75 9th Ave, New York, NY 10011-7006
                 </p>
               </div>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
                 <Phone className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
-                  <span className="font-semibold block sm:inline">Phone: </span> 
+                  <span className="font-semibold block sm:inline">Phone: </span>
                   (+84) 123 4567 89
                 </p>
               </div>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
                 <Mail className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
-                  <span className="font-semibold block sm:inline">Email: </span> 
+                  <span className="font-semibold block sm:inline">Email: </span>
                   support@traditional-taste.com
                 </p>
               </div>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
                 <Clock className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
-                  <span className="font-semibold block sm:inline">Hours: </span> 
+                  <span className="font-semibold block sm:inline">Hours: </span>
                   Mon-Sat: 9:00am - 5:00pm
                 </p>
               </div>
@@ -218,18 +218,28 @@ const Footer = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="flex items-center gap-2 cursor-pointer hover:opacity-100 transition-opacity font-medium">
-              <Globe className="w-4 h-4" />
-              <span>English (USD $)</span>
-            </div>
 
             {/* Mock Payment Badges */}
-            <div className="flex items-center justify-center gap-2 text-[10px] font-bold tracking-widest text-white/80 flex-wrap">
-              <span className="px-2 py-1 border border-white/20 rounded-md bg-white/10">VISA</span>
-              <span className="px-2 py-1 border border-white/20 rounded-md bg-white/10">MC</span>
-              <span className="px-2 py-1 border border-white/20 rounded-md bg-white/10">DISC</span>
-              <span className="px-2 py-1 border border-white/20 rounded-md bg-white/10">PP</span>
-              <span className="px-2 py-1 border border-white/20 rounded-md bg-white/10">AMEX</span>
+            <div className="flex items-center justify-center gap-2.5 text-[11px] font-bold tracking-wider flex-wrap">
+              {/* AMEX */}
+              <div className="px-2.5 py-1.5 bg-[#2A75B8] text-white border border-[#3B8DD8] rounded-[6px] shadow-sm select-none">
+                AMEX
+              </div>
+              {/* Mastercard */}
+              <div className="px-3 py-1.5 bg-[#3B433E] border border-[#525B56] rounded-[6px] shadow-sm flex items-center justify-center select-none">
+                <div className="flex -space-x-2 items-center">
+                  <div className="w-3.5 h-3.5 rounded-full bg-[#EB001B] z-10"></div>
+                  <div className="w-3.5 h-3.5 rounded-full bg-[#F79E1B] mix-blend-screen"></div>
+                </div>
+              </div>
+              {/* VISA */}
+              <div className="px-3 py-1.5 bg-[#14142B] text-white border border-[#2A2A44] rounded-[6px] shadow-sm italic text-[12px] select-none">
+                VISA
+              </div>
+              {/* PayPal */}
+              <div className="px-2.5 py-1.5 bg-[#003087] text-white border border-[#004BCA] rounded-[6px] shadow-sm italic text-[12px] select-none">
+                <span className="font-bold">Pay</span><span className="font-semibold text-blue-200">Pal</span>
+              </div>
             </div>
           </div>
         </div>

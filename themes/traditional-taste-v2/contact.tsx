@@ -66,11 +66,6 @@ export default function ContactPage() {
 
         {/* Top Header Section */}
         <div className="flex flex-col items-center text-center mb-12">
-          <div className="text-[13px] text-gray-500 mb-6 tracking-wide">
-            <Link href="/" className="font-bold hover:text-[var(--color-primary)] transition-colors">Home</Link>
-            <span className="mx-2 font-medium">•</span>
-            <span className="font-bold text-black">Contact Us</span>
-          </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight leading-tight">
             Contact Us
