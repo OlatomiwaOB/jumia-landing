@@ -10,7 +10,6 @@ export default function LimitedOffer() {
   const [email, setEmail] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [name, setName] = useState('');
   const [isError, setIsError] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -22,22 +21,22 @@ export default function LimitedOffer() {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !name) return;
+    if (!email) return;
 
     setIsSubmitting(true);
     try {
       await axiosInstanceNoAuth.post('/newsletter/subscribe', {
         email: email,
-        name: name,
+        name: 'Subscriber',
         storeCode: storeCode,
-        entityCode: entityCode
+        entityCode: entityCode,
+        merchantCode: process.env.NEXT_PUBLIC_MERCHANT_CODE || ''
       });
       // on success 
       setIsError(false);
       setToastMessage("You're on the list! Thank you for subscribing");
       setShowToast(true);
       setEmail('');
-      setName('');
     } catch (error: any) {
       // on failure
       setIsError(true);
@@ -102,22 +101,8 @@ export default function LimitedOffer() {
             {/* Input Form */}
             <form onSubmit={handleSubscribe} className="flex flex-col gap-4 mt-4 w-full max-w-full relative">
               <div className="flex flex-col sm:flex-row gap-4 w-full">
-                {/* Name Input */}
-                <div className="relative flex-[0.8] group min-w-0">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-accent transition-colors">
-                    <User size={20} />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Your Name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full bg-[#f8fafc] text-[#1a1a1a] placeholder-gray-500 border border-gray-200 rounded-2xl md:rounded-full pl-12 pr-6 py-4 md:py-5 focus:outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all text-base md:text-lg shadow-inner"
-                  />
-                </div>
                 {/* Email Input */}
-                <div className="relative flex-[1.2] group min-w-0">
+                <div className="relative flex-1 group min-w-0">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-accent transition-colors">
                     <Mail size={20} />
                   </div>
