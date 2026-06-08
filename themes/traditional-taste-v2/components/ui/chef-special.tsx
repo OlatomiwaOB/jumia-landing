@@ -2,6 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
+import { getProductHref } from '@/utils/product-route';
 import {
   Star,
   ChevronLeft,
@@ -13,16 +17,75 @@ import {
 
 const gallery = ["/jollof-main.jpg", "/jollof rice.jpg", "/jollof-side-2.jfif"];
 
-export default function FeaturedFoodShowcase() {
+export default function ChefSpecialSection() {
   const [activeImage, setActiveImage] = useState(0);
 
+  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || '';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+
+  const { data: featuredProductsData, isLoading } = useQuery({
+    queryKey: ["testapp-featured", storeCode],
+    queryFn: () => {
+      return axiosInstanceNoAuth.request({
+        method: "GET",
+        url: '/ecommerce/products/list',
+        params: {
+          storeCode: storeCode,
+          entityCode: entityCode,
+          name: '',
+          category: '',
+          tag: '',
+          pageNumber: 1,
+          pageSize: 50
+        }
+      }).then(response => response.data)
+    },
+    refetchInterval: 30000,
+  });
+
+  const featuredProducts = featuredProductsData?.products?.filter((item: any) => item.featured) || [];
+  const hasDynamicProducts = featuredProducts.length > 0;
+
+  const currentGallery = hasDynamicProducts
+    ? featuredProducts.map((p: any) => {
+      let pic = p.picture;
+      if (!pic) {
+        try {
+          const list = typeof p.pictureList === 'string' ? JSON.parse(p.pictureList) : p.pictureList;
+          if (Array.isArray(list) && list.length > 0) pic = list[0];
+        } catch (e) { }
+      }
+      return pic || gallery[0];
+    })
+    : gallery;
+
+  const featuredProduct = hasDynamicProducts ? featuredProducts[activeImage % featuredProducts.length] : null;
+
   const nextImage = () => {
-    setActiveImage((prev) => (prev + 1) % gallery.length);
+    setActiveImage((prev) => (prev + 1) % currentGallery.length);
   };
 
   const prevImage = () => {
-    setActiveImage((prev) => (prev === 0 ? gallery.length - 1 : prev - 1));
+    setActiveImage((prev) => (prev === 0 ? currentGallery.length - 1 : prev - 1));
   };
+
+  React.useEffect(() => {
+    if (currentGallery.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveImage((prev) => (prev + 1) % currentGallery.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [currentGallery.length]);
+
+  if (isLoading) {
+    return (
+      <section className="w-full bg-[var(--color-bg-main)] py-10 md:py-16">
+        <div className="max-w-[1640px] mx-auto px-4 md:px-6 lg:px-10">
+          <div className="bg-[var(--color-bg-secondary)] rounded-[30px] md:rounded-[40px] h-[500px] animate-pulse"></div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full bg-[var(--color-bg-main)] py-10 md:py-16">
@@ -30,7 +93,7 @@ export default function FeaturedFoodShowcase() {
         <div className="bg-[var(--color-bg-secondary)] rounded-[30px] md:rounded-[40px] overflow-hidden shadow-sm">
           <div className="grid lg:grid-cols-2 gap-10">
             {/* LEFT SIDE */}
-            <div className="p-6 md:p-10 lg:p-14 flex flex-col justify-center">
+            <div className="order-2 lg:order-1 p-6 pt-0 md:p-10 lg:p-14 flex flex-col justify-center">
               <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm w-fit mb-5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] animate-pulse"></span>
 
@@ -39,10 +102,8 @@ export default function FeaturedFoodShowcase() {
                 </span>
               </div>
 
-              <h2 className="text-[var(--color-text)] text-3xl md:text-5xl font-bold leading-tight mb-5">
-                Family Feast Combo
-                <br />
-                (Jollof Rice & Chicken)
+              <h2 className="text-[var(--color-text)] text-3xl md:text-5xl font-bold leading-tight mb-5 line-clamp-2">
+                {featuredProduct?.name || "Family Feast Combo (Jollof Rice & Chicken)"}
               </h2>
 
               <div className="flex items-center gap-1 mb-6">
@@ -67,10 +128,8 @@ export default function FeaturedFoodShowcase() {
                 </span>
               </div>
 
-              <p className="text-[var(--color-text)] opacity-75 leading-8 mb-8 text-base md:text-lg">
-                Enjoy a rich serving of smoky Nigerian party jollof rice,
-                perfectly grilled chicken, fresh salad and signature sauce. Made
-                with premium ingredients and delivered hot to your doorstep.
+              <p className="text-[var(--color-text)] opacity-75 leading-8 mb-8 text-base md:text-lg line-clamp-3">
+                {featuredProduct?.description || "Enjoy a rich serving of smoky Nigerian party jollof rice, perfectly grilled chicken, fresh salad and signature sauce. Made with premium ingredients and delivered hot to your doorstep."}
               </p>
 
               <div className="space-y-4 mb-8">
@@ -97,21 +156,27 @@ export default function FeaturedFoodShowcase() {
               <div className="flex flex-wrap items-center gap-4 mb-8">
                 <div>
                   <span className="text-4xl md:text-5xl font-bold text-[var(--color-primary)]">
-                    $24.99
+                    {featuredProduct?.ccy || '$'}{featuredProduct?.salePrice?.toFixed(2) || "24.99"}
                   </span>
 
-                  <span className="ml-3 text-lg line-through opacity-50">
-                    $32.99
-                  </span>
+                  {/* Only show old price if it's greater than sale price */}
+                  {(featuredProduct ? (featuredProduct.oldPrice > featuredProduct.salePrice) : true) && (
+                    <span className="ml-3 text-lg line-through opacity-50">
+                      {featuredProduct?.ccy || '$'}{featuredProduct?.oldPrice?.toFixed(2) || "32.99"}
+                    </span>
+                  )}
                 </div>
 
-                <div className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-full font-bold shadow-sm">
-                  24% OFF
-                </div>
+                {((featuredProduct && featuredProduct.oldPrice > featuredProduct.salePrice) || !featuredProduct) && (
+                  <div className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-full font-bold shadow-sm">
+                    {featuredProduct ? Math.round(((featuredProduct.oldPrice - featuredProduct.salePrice) / featuredProduct.oldPrice) * 100) : 24}% OFF
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-4">
-                <button
+                <Link
+                  href={featuredProduct ? getProductHref(featuredProduct) : '#'}
                   className="
                     group
                     flex items-center gap-2
@@ -125,6 +190,7 @@ export default function FeaturedFoodShowcase() {
                     transition-all
                     duration-300
 
+                    hover:bg-[var(--color-text)]
                     hover:scale-105
                     hover:-translate-y-1
                     hover:shadow-[0_20px_40px_rgba(249,115,22,0.35)]
@@ -137,37 +203,14 @@ export default function FeaturedFoodShowcase() {
                     className="transition-transform group-hover:rotate-12"
                   />
                   Order Now
-                </button>
+                </Link>
 
-                <button
-                  className="
-                    border-2
-                    border-[var(--color-primary)]
-                    text-[var(--color-primary)]
-                    font-bold
-                    px-8
-                    py-4
-                    rounded-xl
 
-                    transition-all
-                    duration-300
-
-                    hover:bg-[var(--color-primary)]
-                    hover:text-white
-                    hover:scale-105
-                    hover:-translate-y-1
-                    hover:shadow-lg
-
-                    active:scale-95
-                  "
-                >
-                  View Menu
-                </button>
               </div>
             </div>
 
             {/* RIGHT SIDE */}
-            <div className="relative flex items-center justify-center p-6 md:p-10">
+            <div className="order-1 lg:order-2 relative flex items-center justify-center p-6 pb-2 md:p-10">
               <div className="relative w-full max-w-[650px] group/slider">
                 {/* MAIN IMAGE */}
                 <div
@@ -182,8 +225,8 @@ export default function FeaturedFoodShowcase() {
                   "
                 >
                   <Image
-                    src={gallery[activeImage]}
-                    alt="Featured Food"
+                    src={currentGallery[activeImage]}
+                    alt={featuredProduct?.name || "Featured Food"}
                     fill
                     priority
                     className="
@@ -277,16 +320,16 @@ export default function FeaturedFoodShowcase() {
                 </button>
 
                 {/* THUMBNAILS */}
-                <div className="flex justify-center gap-4 mt-6">
-                  {gallery.map((image, index) => (
+                <div className="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
+                  {currentGallery.map((image: string, index: number) => (
                     <button
                       key={index}
                       onClick={() => setActiveImage(index)}
                       className={`
                         relative
-                        w-24
-                        h-24
-                        rounded-2xl
+                        w-16 md:w-24
+                        h-16 md:h-24
+                        rounded-xl md:rounded-2xl
                         overflow-hidden
 
                         transition-all
@@ -296,10 +339,9 @@ export default function FeaturedFoodShowcase() {
                         hover:-translate-y-2
                         hover:shadow-2xl
 
-                        ${
-                          activeImage === index
-                            ? "ring-4 ring-[var(--color-primary)] scale-105"
-                            : ""
+                        ${activeImage === index
+                          ? "ring-4 ring-[var(--color-primary)] scale-105"
+                          : ""
                         }
                       `}
                     >

@@ -1,93 +1,57 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import { Calendar, Zap, Truck, ChevronLeft, ChevronRight, Check, CheckCircle2, Eye } from 'lucide-react';
-import { useCart } from '@/store/cart';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard, { Product } from './product-card';
 
-// Mock Data matching the reference image
-const products = [
-  {
-    id: 1,
-    vendor: 'Mama\'s Kitchen',
-    title: 'Premium Pounded Yam & Egusi',
-    price: '$18.99',
-    originalPrice: null,
-    discount: null,
-    image: '/pounded_yam_egusi.jpg',
-    badges: [{ text: 'Highly rated', color: 'bg-[#673AB7] text-white' }, { text: 'Top Choice', color: 'bg-[#F97316] text-white' }],
-    stock: true,
-    offer: null,
-  },
-  {
-    id: 2,
-    vendor: 'Lagos Vibes',
-    title: 'Authentic Party Jollof Rice',
-    price: '$15.50',
-    originalPrice: null,
-    discount: null,
-    image: '/party-jollof.png',
-    badges: [{ text: 'Best Seller', color: 'bg-[#FFEBEE] text-[#D32F2F]' }, { text: 'Spicy', color: 'bg-red-600 text-white' }],
-    stock: true,
-    offer: null,
-  },
-  {
-    id: 3,
-    vendor: 'Suya Spot',
-    title: 'Spicy Nigerian Suya (Beef)',
-    price: '$12.99',
-    originalPrice: null,
-    discount: null,
-    image: '/suya_transparent.png',
-    badges: [{ text: 'Chef\'s Special', color: 'bg-[#FFEB3B] text-black' }],
-    stock: true,
-    offer: { type: 'flash', text: 'Freshly grilled' },
-  },
-  {
-    id: 4,
-    vendor: 'Ibadan Flavors',
-    title: 'Classic Amala & Ewedu',
-    price: '$16.00',
-    originalPrice: '$20.00',
-    discount: '-20%',
-    image: '/amala_ewedu.png',
-    badges: [{ text: 'Deal', color: 'bg-[#FFEB3B] text-black' }, { text: 'Highly rated', color: 'bg-[#673AB7] text-white' }],
-    stock: true,
-    offer: { type: 'flash', text: 'Up to 20% discount' },
-  },
-  {
-    id: 5,
-    vendor: 'Eastern Delights',
-    title: 'Traditional Igbo Abacha (African Salad)',
-    price: '$14.50',
-    originalPrice: null,
-    discount: null,
-    image: '/igbo_abacha.jpg',
-    badges: [{ text: 'Best Buy', color: 'bg-[#FFEBEE] text-[#D32F2F]' }],
-    stock: true,
-    offer: { type: 'shipping', text: 'Free delivery available' },
-  },
-  {
-    id: 6,
-    vendor: 'Mama\'s Kitchen',
-    title: 'Assorted Meat Pepper Soup',
-    price: '$22.99',
-    originalPrice: '$25.99',
-    discount: '-10%',
-    image: '/assorted-meat.jpg',
-    badges: [{ text: 'Hot', color: 'bg-red-600 text-white' }, { text: 'Highly rated', color: 'bg-[#673AB7] text-white' }],
-    stock: true,
-    offer: { type: 'flash', text: 'Weekend Special' },
-  }
-];
-
-// Duplicate products to have 18 items (3 pages of 6) for testing the arrows
-const extendedProducts = [...products, ...products.map(p => ({ ...p, id: p.id + 6 })), ...products.map(p => ({ ...p, id: p.id + 12 }))];
+import { useQuery } from "@tanstack/react-query";
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
+import { useSearchParams } from "next/navigation";
+import { ProductProps } from '@/types';
 
 export default function PriceHitsSection() {
+  const searchParams = useSearchParams();
+  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+
+  const { data: allProductsData, isLoading } = useQuery({
+    queryKey: ["testapp-all-products", storeCode],
+    queryFn: () => {
+      return axiosInstanceNoAuth.request({
+        method: "GET",
+        url: '/ecommerce/products/list',
+        params: {
+          storeCode: storeCode,
+          entityCode: entityCode,
+          name: '',
+          category: '',
+          tag: '',
+          pageNumber: 1,
+          pageSize: 100
+        }
+      }).then(response => response.data)
+    }
+  });
+
+  const endpointProducts = allProductsData?.products || [];
+  const bannerProducts = endpointProducts.filter((p: ProductProps) => p.banner === true);
+  // Fallback to all products if no banner products are set
+  const sourceProducts = bannerProducts.length > 0 ? bannerProducts : endpointProducts;
+
+  const displayProducts: Product[] = sourceProducts.map((p: ProductProps) => ({
+    id: p.id || Math.random(),
+    vendor: p.storeName || 'Restaurant',
+    title: p.name || 'Unknown',
+    price: p.salePrice ? `$${p.salePrice}` : '$0.00',
+    originalPrice: p.oldPrice ? `$${p.oldPrice}` : null,
+    discount: p.discount ? `-${p.discount}%` : null,
+    image: p.picture || '/nigerian-food.png',
+    badges: [],
+    stock: (p.qtyInStore ?? 1) > 0,
+    offer: null
+  }));
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isViewAll, setIsViewAll] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const handleScroll = () => {
@@ -102,9 +66,8 @@ export default function PriceHitsSection() {
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
       const container = scrollContainerRef.current;
-      const firstChild = container.children[0] as HTMLElement;
-      const itemWidth = firstChild ? firstChild.offsetWidth + 16 : container.clientWidth;
-      const scrollAmount = direction === 'left' ? -itemWidth : itemWidth;
+      // Scroll by the full visible width + the gap to snap perfectly to the next set
+      const scrollAmount = direction === 'left' ? -(container.clientWidth + 16) : (container.clientWidth + 16);
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
   };
@@ -151,25 +114,23 @@ export default function PriceHitsSection() {
 
   useEffect(() => {
     let autoPlayInterval: NodeJS.Timeout;
-    
-    if (!isViewAll) {
-      autoPlayInterval = setInterval(() => {
-        if (typeof window !== 'undefined' && window.innerWidth < 768 && scrollContainerRef.current) {
+
+    autoPlayInterval = setInterval(() => {
+      if (typeof window !== 'undefined' && scrollContainerRef.current) {
           const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-          
+
           if (Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 10) {
             scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
           } else {
             scroll('right');
           }
-        }
-      }, 3000);
-    }
+      }
+    }, 3000);
 
     return () => {
       if (autoPlayInterval) clearInterval(autoPlayInterval);
     };
-  }, [isViewAll]);
+  }, []);
 
   return (
     <section className="w-full px-0 md:px-4 lg:px-10 pt-2 pb-8 md:py-8 max-w-[1640px] mx-auto bg-[var(--color-bg-main)]">
@@ -196,51 +157,31 @@ export default function PriceHitsSection() {
                   <div className="bg-[var(--color-primary)] text-white font-bold text-sm md:text-lg px-2 md:px-3 py-1 md:py-1.5 rounded md:rounded-md min-w-[32px] md:min-w-[40px] text-center">{timeLeft.seconds.toString().padStart(2, '0')}</div>
                 </div>
               </div>
-              <button
-                onClick={() => setIsViewAll(!isViewAll)}
-                className="bg-[var(--color-primary)] md:bg-[#1C1917] dark:md:bg-white hover:opacity-90 md:hover:bg-[var(--color-primary)] text-white dark:md:text-[#1C1917] font-bold py-1.5 md:py-2.5 px-6 md:px-8 rounded-md md:rounded-lg transition-all text-[13px] md:text-base mt-1 md:mt-0"
-              >
-                {isViewAll ? 'Show Less' : 'View All'}
-              </button>
             </div>
           </div>
 
           {/* Product Content */}
-          {isViewAll ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-8">
-              {extendedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} isGrid={true} />
-              ))}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-primary)]"></div>
+            </div>
+          ) : displayProducts.length === 0 ? (
+            <div className="py-12 text-center text-[var(--color-text)] opacity-60">
+              No products available right now.
             </div>
           ) : (
             <div className="relative group/carousel">
               <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="flex overflow-hidden gap-4 pb-8 snap-x snap-mandatory scrollbar-hide scroll-smooth"
+                className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory scrollbar-hide scroll-smooth"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {extendedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                {displayProducts.map((product) => (
+                  <div key={product.id} className="w-full sm:w-[calc(50%-8px)] md:w-[calc(25%-12px)] lg:w-[calc(16.666%-13.33px)] shrink-0 snap-start h-[310px] sm:h-[340px] md:h-auto">
+                    <ProductCard product={product} isGrid={true} />
+                  </div>
                 ))}
-              </div>
-
-              {/* Mobile Scroll Controls (Arrows + Line) */}
-              <div className="flex md:hidden items-center justify-center gap-6 mt-2 pb-4">
-                <button onClick={() => scroll('left')} className="p-2 text-gray-400 hover:text-black transition-colors">
-                  <ChevronLeft size={20} />
-                </button>
-
-                <div className="w-16 h-0.5 bg-gray-200 relative rounded-full">
-                  <div
-                    className="absolute top-0 h-full bg-black rounded-full transition-all duration-150"
-                    style={{ width: '33.33%', left: `${scrollProgress * 0.6667}%` }}
-                  ></div>
-                </div>
-
-                <button onClick={() => scroll('right')} className="p-2 text-gray-400 hover:text-black transition-colors">
-                  <ChevronRight size={20} />
-                </button>
               </div>
 
               {/* Desktop Carousel Arrows */}
