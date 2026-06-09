@@ -25,7 +25,7 @@ export function buildGuestOrderPayload(guestInfo: GuestInfo, orderPayload: any):
       ...orderPayload,
       deliveryAddress: {
         ...(orderPayload.deliveryAddress || {}),
-        id: 0
+        // id: orderPayload?.delivery
       },
       customerName: `${guestInfo.firstname} ${guestInfo.lastname}`,
       username: guestInfo.email,

@@ -111,6 +111,8 @@ const CardAlert = ({
 
   console.log(paymentMethod)
 
+  console.log(getValues('selectedAddressId'));
+
   const buildOrderPayload = (bnplData?: any) => {
     const orderItems = cart.map(item => ({
       itemCode: item?.code,
@@ -155,7 +157,7 @@ const CardAlert = ({
       customerName: customer?.fullname,
       username: customer?.username,
       deliveryAddress: {
-        id: getValues('selectedAddressId') || 0,
+        id: getValues('shippingMethod') === 'delivery' ? 0 : getValues('selectedAddressId'),
         street: getValues('street'),
         landmark: getValues('landmark'),
         postCode: getValues('zipCode'),

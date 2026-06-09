@@ -99,7 +99,7 @@ const GuestInfoForm = ({
       shippingAmount = selectedStore?.amount || 0;
       setValue("deliveryOptionGroup", "");
     }
-    
+
     if (lastShippingAmount.current !== shippingAmount) {
       lastShippingAmount.current = shippingAmount;
       onShippingUpdate?.(shippingAmount);
@@ -120,13 +120,15 @@ const GuestInfoForm = ({
   };
 
   const handleStoreSelect = (store: any) => {
-    setValue("pickupStore", store.id);
-    setValue("selectedAddressId", store.id);
-    setValue('country', store.country || 'NG');
+    console.log(store);
+
+    setValue("pickupStore", store?.id);
+    setValue("selectedAddressId", store?.id);
+    setValue('country', store?.country || 'NG');
     setValue('addressType', 'WAREHOUSE');
-    setValue('street', store.address || '');
-    setValue('city', store.city || '');
-    setValue('state', store.state || store.city || '');
+    setValue('street', store?.address || '');
+    setValue('city', store?.city || '');
+    setValue('state', store?.state || store?.city || '');
   };
 
   const handleShippingOptionChange = (optionId: string) => {
@@ -233,7 +235,7 @@ const GuestInfoForm = ({
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth.message as string}</p>}
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Set Account Password *</Label>

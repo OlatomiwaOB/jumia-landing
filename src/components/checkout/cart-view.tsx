@@ -72,7 +72,7 @@ const CartView = ({
       params: {
         // country: customer?.country || 'NG',
         storeCode: storeCode,
-        sourceType: !customer ? 'GUEST' : undefined
+        sourceType: !customer?.ticketID ? 'GUEST' : undefined
       }
     })
   })

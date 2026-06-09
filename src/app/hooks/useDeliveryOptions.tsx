@@ -23,6 +23,7 @@ export interface DeliveryOption {
 
 const useDeliveryOptions = (sourceType?: string | undefined) => {
     const { customer } = useCustomer()
+    // console.log('customer avail', !customer)
     const axiosInstance = !customer?.ticketID ? axiosInstanceNoAuth : axiosCustomer;
     const { data, isLoading, error } = useQuery({
         queryKey: ['delivery-options'],
