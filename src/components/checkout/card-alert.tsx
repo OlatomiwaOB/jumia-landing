@@ -13,6 +13,9 @@ import axiosCustomer from '@/utils/fetch-function-customer'
 import BnplChainSelector from './bnpl-chain-selector'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useGuestCheckoutStore } from '@/store/guestCheckoutStore'
+import { buildGuestOrderPayload } from '@/utils/guest-checkout-helpers'
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth'
 
 interface CardAlertProps {
   modalOpen: boolean;
@@ -22,7 +25,8 @@ interface CardAlertProps {
   networks?: any[];
   wallets?: any[];
   orderTotal: number;
-  totalVat: number
+  totalVat: number;
+  onEmailExists?: () => void;
 }
 
 const CardAlert = ({
@@ -33,7 +37,8 @@ const CardAlert = ({
   networks = [],
   wallets = [],
   orderTotal,
-  totalVat
+  totalVat,
+  onEmailExists
 }: CardAlertProps) => {
   const { cart, clearCart } = useCart()
   const { customer } = useCustomer()
@@ -50,11 +55,13 @@ const CardAlert = ({
   const { mainCcy } = useCart()
   const ccy = mainCcy()
 
-  useEffect(() => {
-    if (!searchParams?.get('storeCode')) {
-      router.push(`?storeCode=STO0715`);
-    }
-  }, [router, searchParams]);
+
+
+  // useEffect(() => {
+  //   if (!searchParams?.get('storeCode')) {
+  //     router.push(`?storeCode=STO0715`);
+  //   }
+  // }, [router, searchParams]);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('checkout');
@@ -132,13 +139,14 @@ const CardAlert = ({
       totalAmount: totalAmount,
       totalDiscount: 0,
       deliveryOption: getValues('shippingMethod'),
+      deliveryOptionGroup: getValues('shippingMethod') === 'delivery' ? (getValues('deliveryOptionGroup') || '') : '',
       paymentMethod: paymentMethod?.toUpperCase(),
       // paymentMethod: 'STRIPE_CARD',
       couponCode: "",
       subtotal: subtotal,
       totalVat: totalVat,
       ccy: checkoutData?.ccy,
-      deliveryFee: 0,
+      deliveryFee: shippingFee,
       geolocation: location ? `${location?.latitude}, ${location?.longitude}` : '',
       deviceId: customer?.deviceID,
       orderStatus: "",
@@ -154,7 +162,7 @@ const CardAlert = ({
         city: getValues('city'),
         state: getValues('state'),
         country: getValues('country'),
-        addressType: getValues('addressType') || 'WAREHOUSE'
+        addressType: getValues('addressType') || 'HOME'
       },
       cartItems: orderItems
     }
@@ -172,9 +180,54 @@ const CardAlert = ({
     return payload
   }
 
+  const isGuestCheckout = !!useGuestCheckoutStore.getState().guestInfo;
+  const { mutate: mutateGuest, isPending: isGuestPending } = useMutation({
+    mutationFn: (data: any) => axiosInstanceNoAuth({
+      url: '/ecommerce/submit-guest-order',
+      method: 'POST',
+      data
+    }),
+    onSuccess: (data) => {
+      if (data?.data?.responseCode === 'E412') {
+        toast?.error('An account with this email already exists. Please sign in to continue.');
+        if (onEmailExists) onEmailExists();
+        setModalOpen(false)
+        return;
+      }
+      if (data?.data?.responseCode !== '000') {
+        toast?.error(data?.data?.responseMessage)
+        return
+      }
+      toast?.success(data?.data?.responseMessage)
+      setModalOpen(false)
+      setShowBnplSelector(false)
+      setBnplPaymentData(null)
+
+      if (paymentMethod === 'card' && data?.data?.paymentLinkUrl) {
+        clearCart()
+        useGuestCheckoutStore.getState().clear()
+        router?.replace(data?.data?.paymentLinkUrl)
+        return
+      }
+    },
+    onError: (error) => {
+      toast.error('Something went wrong!')
+    }
+  })
+
   const onSubmit = () => {
     const payload = buildOrderPayload()
-    mutate(payload)
+    if (isGuestCheckout) {
+      const guestInfo = useGuestCheckoutStore.getState().guestInfo;
+      if (guestInfo) {
+        const guestPayload = buildGuestOrderPayload(guestInfo, payload);
+        mutateGuest(guestPayload);
+      } else {
+        toast.error("Guest info missing");
+      }
+    } else {
+      mutate(payload)
+    }
   }
 
   const onBnplConfirm = (bnplData: any) => {
@@ -197,6 +250,10 @@ const CardAlert = ({
 
   const subtotal = orderTotal - (checkoutData?.shippingFee || 0) - totalVat;
   const shippingFee = checkoutData?.shippingFee || 0;
+
+  console.log('totalAmount', orderTotal);
+  console.log('subtotal', subtotal)
+
 
   // Render BNPL selector for BNPL payment method
   if (paymentMethod === 'bnpl') {
@@ -350,9 +407,9 @@ const CardAlert = ({
           <Button
             className='bg-accent text-white p-2 text-sm rounded-md'
             onClick={onSubmit}
-            disabled={isPending}
+            disabled={isPending || isGuestPending}
           >
-            {isPending ? 'Processing...' : `Pay ${formatPrice(orderTotal, ccy as CurrencyCode)}`}
+            {(isPending || isGuestPending) ? 'Processing...' : `Pay ${formatPrice(orderTotal, ccy as CurrencyCode)}`}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

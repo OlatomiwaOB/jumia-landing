@@ -1,3 +1,5 @@
+import useCustomer from '@/store/customerStore';
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
@@ -19,13 +21,18 @@ export interface DeliveryOption {
     capLimit: number;
 }
 
-const useDeliveryOptions = () => {
+const useDeliveryOptions = (sourceType?: string | undefined) => {
+    const { customer } = useCustomer()
+    const axiosInstance = !customer?.ticketID ? axiosInstanceNoAuth : axiosCustomer;
     const { data, isLoading, error } = useQuery({
         queryKey: ['delivery-options'],
         queryFn: () =>
-            axiosCustomer.request({
+            axiosInstance.request({
                 url: '/delivery/option/all',
                 method: 'GET',
+                params: {
+                    sourceType
+                }
             }),
         staleTime: 5 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
@@ -41,9 +48,9 @@ const useDeliveryOptions = () => {
             let cappedVatAmount = item.deliveryVatAmount || 0;
 
             if (item.capLimit && item.capLimit > 0) {
-                cappedVatAmount = Math.min(cappedVatAmount, item.capLimit) ||  item.capLimit;
+                cappedVatAmount = Math.min(cappedVatAmount, item.capLimit) || item.capLimit;
             }
-            
+
             const price = parseFloat(item.amount + cappedVatAmount) || 0;
             const groupCode = item.groupCode || '';
 

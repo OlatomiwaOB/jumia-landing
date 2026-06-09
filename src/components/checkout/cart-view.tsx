@@ -14,6 +14,7 @@ import { useQuery } from '@tanstack/react-query';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import useCustomer from '@/store/customerStore';
 import Loader from '@/components/ui/loader'
+import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 
 type CartViewProps = {
   handlePaymentSelect: (method: PaymentMethod) => void;
@@ -25,6 +26,7 @@ type CartViewProps = {
   orderTotal: number;
   shippingFee: number;
   totalVat: number;
+  onEmailExists?: () => void;
   // shippingVat: number;
 }
 
@@ -38,6 +40,7 @@ const CartView = ({
   orderTotal,
   shippingFee,
   totalVat,
+  onEmailExists,
   // shippingVat
 
 }: CartViewProps) => {
@@ -51,23 +54,25 @@ const CartView = ({
   const searchParams = useSearchParams();
   const storeCode = searchParams ? searchParams.get('storeCode') || '' : '';
   const [wallets, setLocalWallets] = useState<any[]>([])
+  const axiosInstance = !customer?.ticketID ? axiosInstanceNoAuth : axiosCustomer
 
   // console.log(customer);
 
-  useEffect(() => {
-    if (!searchParams?.get('storeCode')) {
-      router.push(`?storeCode=${customer?.storeCode || 'STO0813'}`);
-    }
-  }, [router, searchParams]);
+  // useEffect(() => {
+  //   if (!searchParams?.get('storeCode')) {
+  //     router.push(`?storeCode=${customer?.storeCode || 'STO0813'}`);
+  //   }
+  // }, [router, searchParams]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['payment-methods'],
-    queryFn: () => axiosCustomer.request({
+    queryFn: () => axiosInstance.request({
       method: 'GET',
       url: '/payment-methods/fetch',
       params: {
         // country: customer?.country || 'NG',
-        // storeCode: customer?.storeCode || storeCode,
+        storeCode: storeCode,
+        sourceType: !customer ? 'GUEST' : undefined
       }
     })
   })
@@ -123,7 +128,7 @@ const CartView = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => setCurrentStep('info')}
+          onClick={() => setCurrentStep('guest-info')}
         >
           <ArrowLeft className="w-4 h-4" />
         </Button>
@@ -242,6 +247,7 @@ const CartView = ({
         wallets={wallets}
         orderTotal={orderTotal}
         totalVat={totalVat}
+        onEmailExists={onEmailExists}
       />
     </>
   );

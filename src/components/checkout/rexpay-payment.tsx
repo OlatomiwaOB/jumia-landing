@@ -15,12 +15,15 @@ import axiosCustomer from '@/utils/fetch-function-customer';
 import useCustomer from '@/store/customerStore';
 import { useLocationStore } from '@/store/locationStore';
 import { UseFormReturn } from 'react-hook-form';
+import { useGuestCheckoutStore } from '@/store/guestCheckoutStore';
+import { buildGuestOrderPayload } from '@/utils/guest-checkout-helpers';
 
 type RexpayPaymentProps = {
     setCurrentStep: (step: CheckoutStep) => void;
     setSelectedPayment: (method: PaymentMethod) => void;
     isCallback?: boolean;
     onSuccess?: () => void;
+    onEmailExists?: () => void;
     form: UseFormReturn<FormData>;
     orderTotal: number;
     totalVat: number;
@@ -62,6 +65,7 @@ const RexpayPayment = ({
     setSelectedPayment,
     isCallback = false,
     onSuccess,
+    onEmailExists,
     form,
     orderTotal,
     totalVat
@@ -193,7 +197,52 @@ const RexpayPayment = ({
         currentDate, total, currency, location, storeCode, totalVat
     ]);
 
-    const { mutate: submitOrder, isPending: isSubmitting } = useMutation({
+    const isGuestCheckout = !!useGuestCheckoutStore.getState().guestInfo;
+    const { mutate: submitGuestOrder, isPending: isSubmittingGuest } = useMutation({
+        mutationFn: (data: any) => axiosCustomer({
+            url: '/ecommerce/submit-guest-order',
+            method: 'POST',
+            data
+        }),
+        onSuccess: (data) => {
+            if (data?.data?.responseCode === 'E412') {
+                toast.error('An account with this email already exists. Please sign in to continue.');
+                hasSubmittedOrder.current = false;
+                if (onEmailExists) onEmailExists();
+                return;
+            }
+            if (data?.data?.responseCode !== '000') {
+                toast.error(data?.data?.responseMessage || 'Failed to save order');
+                setVerificationStatus('failed');
+                hasSubmittedOrder.current = false;
+                return;
+            }
+            toast.success('Order submitted successfully!');
+            clearRexpaySession();
+            clearCart();
+            useGuestCheckoutStore.getState().clearGuestInfo();
+            sessionStorage.removeItem('orderNo');
+            RexpayVerificationManager.reset();
+
+            hasSubmittedOrder.current = true;
+
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                const successOrderNo = data?.data?.orderNo || checkoutData?.orderNo || orderNo;
+                router.push(`/rexpay-success?storeCode=${storeCode}&orderNo=${successOrderNo}&status=success`);
+            }
+        },
+        onError: (error) => {
+            console.error('Submit order error:', error);
+            toast.error('Failed to save order!');
+            setVerificationStatus('failed');
+            hasSubmittedOrder.current = false;
+            RexpayVerificationManager.reset();
+        }
+    });
+
+    const { mutate: submitAuthOrder, isPending: isSubmittingAuth } = useMutation({
         mutationFn: (data: any) => axiosCustomer({
             url: '/ecommerce/submit-order',
             method: 'POST',
@@ -230,6 +279,20 @@ const RexpayPayment = ({
             RexpayVerificationManager.reset();
         }
     });
+
+    const isSubmitting = isGuestCheckout ? isSubmittingGuest : isSubmittingAuth;
+    const submitOrder = (payload: any) => {
+        if (isGuestCheckout) {
+            const guestInfo = useGuestCheckoutStore.getState().guestInfo;
+            if (guestInfo) {
+                submitGuestOrder(buildGuestOrderPayload(guestInfo, payload));
+            } else {
+                toast.error("Guest info missing");
+            }
+        } else {
+            submitAuthOrder(payload);
+        }
+    };
 
     const verifyRexpayPayment = useCallback(async (): Promise<boolean> => {
         const tranId = sessionStorage.getItem('rexpay_tranId');

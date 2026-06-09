@@ -70,10 +70,11 @@ export function SignInForm() {
       }
       localStorage.setItem("token_customer", data.data.ticketID)
       localStorage.setItem("customer_store", JSON.stringify(data.data))
-      setCustomer(data?.data)
+
 
       if (data?.data?.ticketID) {
         if (hasAccess([data?.data.userRole], ["CUSTOMER"])) {
+          setCustomer(data?.data)
           setAuthCredentials(data?.data.ticketID, ['CUSTOMER'])
           if (data?.data?.twoFaSetupRequired === 'Y') {
             push(`/twofa_setup/customer`)
@@ -132,12 +133,12 @@ export function SignInForm() {
       {showOtpVerification ? (
         <div className="min-h-screen flex flex-col lg:flex-row bg-[#F9FAFB]">
           <div className='h-screen hidden lg:flex lg:w-1/2 items-center justify-center p-4'>
-            <div className="bg-gradient-to-b from-[#F9FAFB] to-[#FE7211] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative">
+            <div className="bg-gradient-to-b from-[#F9FAFB] to-[var(--accent)] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative">
               <Image
                 src={logo}
                 alt="Logo"
-                width={600}
-                height={600}
+                width={100}
+                height={100}
                 className="absolute top-0 left-0 p-5 max-w-[250px] h-auto object-contain"
               />
               <Image

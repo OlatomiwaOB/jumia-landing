@@ -150,16 +150,13 @@ export const LoginForm = ({ setIsOpen, onForgotPassword }: LoginProps) => {
                                     <Checkbox id="remember-me" className="border-gray-200 rounded-[4px] w-5 h-5 data-[state=checked]:bg-[#111] data-[state=checked]:border-[#111]" />
                                     <label htmlFor="remember-me" className="text-sm text-gray-500 cursor-pointer">Remember me</label>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        push('/my-account/lost-password');
-                                    }}
+                                <Link
+                                    href={'/forgot-password'}
+                                    target='_blank'
                                     className="text-sm text-gray-500 hover:text-[#111] transition-colors cursor-pointer"
                                 >
                                     Lost your password?
-                                </button>
+                                </Link>
                             </div>
 
                             <div className="flex flex-col gap-3 mt-4">

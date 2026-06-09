@@ -732,6 +732,8 @@ import { Button } from '@/components/ui/button';
 import { CurrencyCode, formatPrice, generateRandomNumber, getCurrentDate, copyToClipboard } from '@/utils/helperfns';
 import { UseFormReturn } from 'react-hook-form';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useGuestCheckoutStore } from '@/store/guestCheckoutStore';
+import { buildGuestOrderPayload } from '@/utils/guest-checkout-helpers';
 import { PinInput } from '@/components/ui/pin-input';
 import {
     Dialog,
@@ -751,6 +753,7 @@ interface WalletPaymentProps {
     orderTotal: number;
     form: UseFormReturn<FormData>;
     onSuccess?: () => void;
+    onEmailExists?: () => void;
     totalVat: number;
 }
 
@@ -775,6 +778,7 @@ const WalletPayment: React.FC<WalletPaymentProps> = ({
     orderTotal,
     form,
     onSuccess,
+    onEmailExists,
     totalVat
 }) => {
     const [processing, setProcessing] = useState(false);
@@ -966,7 +970,78 @@ const WalletPayment: React.FC<WalletPaymentProps> = ({
         submitOrder({ payload, transactionPin });
     }, [cart, customer, form, orderTotal, totalWithFee, transactionFee, ccy, location, currentDate, totalVat, toast, storeCode, orderNo]);
 
-    const { mutate: submitOrder, isPending: isSubmitting } = useMutation({
+    const isGuestCheckout = !!useGuestCheckoutStore.getState().guestInfo;
+    const { mutate: submitGuestOrder, isPending: isSubmittingGuest } = useMutation({
+        mutationFn: ({ payload, transactionPin }: { payload: any; transactionPin: string }) =>
+            axiosCustomer({
+                url: '/ecommerce/submit-guest-order',
+                method: 'POST',
+                data: payload,
+                headers: {
+                    'x-enc-pwd': transactionPin
+                }
+            }),
+        onSuccess: (axiosResponse) => {
+            const data = axiosResponse.data;
+            isSubmittingRef.current = false;
+
+            if (data?.responseCode === 'E412') {
+                toast.error('An account with this email already exists. Please sign in to continue.');
+                setProcessing(false);
+                hasSubmittedOrder.current = false;
+                isSubmittingRef.current = false;
+                if (onEmailExists) onEmailExists();
+                return;
+            }
+
+            if (data?.responseCode === 'E14' && data?.responseMessage === 'Wrong transaction PIN') {
+                toast.error("Wrong transaction PIN! Please try again.");
+                setProcessing(false);
+                setVerificationStatus('payment');
+                hasSubmittedOrder.current = false;
+                isSubmittingRef.current = false;
+                return;
+            }
+
+            if (data?.responseCode !== '000') {
+                toast.error(data?.responseMessage || "Failed to place order!");
+                setVerificationStatus('failed');
+                setProcessing(false);
+                hasSubmittedOrder.current = false;
+                isSubmittingRef.current = false;
+                return;
+            }
+
+            toast.success("Payment successful, your order has been placed successfully!");
+
+            clearCart();
+            useGuestCheckoutStore.getState().clear();
+            sessionStorage.removeItem('orderNo');
+
+            setVerificationStatus('success');
+
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                setTimeout(() => {
+                    setCurrentStep('success');
+                }, 1500);
+            }
+        },
+        onError: (error: any) => {
+            console.error('Submit wallet order error:', error);
+            isSubmittingRef.current = false;
+            const errorMessage = error.response?.data?.responseMessage
+                || error.response?.data?.message
+                || "Failed to save order!";
+
+            toast.error(errorMessage);
+            setVerificationStatus('failed');
+            hasSubmittedOrder.current = false;
+        }
+    });
+
+    const { mutate: submitAuthOrder, isPending: isSubmittingAuth } = useMutation({
         mutationFn: ({ payload, transactionPin }: { payload: any; transactionPin: string }) =>
             axiosCustomer({
                 url: '/ecommerce/submit-order',
@@ -1025,6 +1100,20 @@ const WalletPayment: React.FC<WalletPaymentProps> = ({
             hasSubmittedOrder.current = false;
         }
     });
+
+    const isSubmitting = isGuestCheckout ? isSubmittingGuest : isSubmittingAuth;
+    const submitOrder = ({ payload, transactionPin }: { payload: any; transactionPin: string }) => {
+        if (isGuestCheckout) {
+            const guestInfo = useGuestCheckoutStore.getState().guestInfo;
+            if (guestInfo) {
+                submitGuestOrder({ payload: buildGuestOrderPayload(guestInfo, payload), transactionPin });
+            } else {
+                toast.error("Guest info missing");
+            }
+        } else {
+            submitAuthOrder({ payload, transactionPin });
+        }
+    };
 
     const handlePayment = async () => {
         if (!walletBalance) return;

@@ -16,7 +16,7 @@ import axiosCustomer from '@/utils/fetch-function-customer';
 import useCustomer from '@/store/customerStore'
 
 export type PaymentMethod = 'card' | 'card2' | 'crypto_token' | 'bnpl' | 'bank_transfer' | 'tron' | 'rexpay' | 'solana_pay' | 'wallet' | null;
-export type CheckoutStep = 'cart' | 'payment' | 'processing' | 'success' | 'info' | 'retry';
+export type CheckoutStep = 'cart' | 'payment' | 'processing' | 'success' | 'guest-info' | 'retry';
 export type BNPLStep = 'registration' | 'scoring' | 'approved' | 'rejected'
 
 export interface CreditScoreData {
@@ -51,12 +51,13 @@ const formSchema = z.object({
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms and conditions",
   }),
+  deliveryOptionGroup: z.string().optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;
 
 const CheckoutContent = () => {
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('info');
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>('guest-info');
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(null);
   const [wallets, setWallets] = useState<any | null>(null)
   const [checkoutData, setCheckoutData] = useState<any>(null)
@@ -429,7 +430,7 @@ const CheckoutContent = () => {
   return (
     <div className="min-h-screen p-2 bg-[#f7f7f7]">
       <div className="max-w-6xl mx-auto py-8">
-        {currentStep === 'info' && (
+        {currentStep === 'guest-info' && (
           <BnplManager
             setCurrentStep={setCurrentStep}
             form={form}

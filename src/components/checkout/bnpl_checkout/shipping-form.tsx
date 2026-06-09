@@ -632,9 +632,15 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     if (shippingMethod === 'pickup' && selectedStore) {
       const selectedPickupLocation = pickupStores.find((loc: any) => loc.id === selectedStore);
       shippingAmount = selectedPickupLocation?.amount || 0;
+      setValue("deliveryOptionGroup", "");
     } else if (shippingMethod === 'delivery' && selectedShippingOption) {
-      const selectedOption = deliveryOptions.find((opt: any) => opt.id === selectedShippingOption);
+      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === selectedShippingOption);
       shippingAmount = selectedOption?.price || 0;
+      if (selectedOption?.groupCode) {
+        setValue("deliveryOptionGroup", selectedOption.groupCode);
+      } else {
+        setValue("deliveryOptionGroup", "");
+      }
     }
 
     onShippingUpdate?.(shippingAmount);
@@ -670,6 +676,12 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
 
   const handleShippingOptionChange = (optionId: string) => {
     setValue("shippingOption", optionId);
+    const selectedOption = deliveryOptions?.find((option: any) => option.id === optionId);
+    if (selectedOption?.groupCode) {
+      setValue("deliveryOptionGroup", selectedOption.groupCode);
+    } else {
+      setValue("deliveryOptionGroup", "");
+    }
   };
 
   const handleAddressSelect = (address: any) => {

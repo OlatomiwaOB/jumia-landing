@@ -65,6 +65,9 @@ const Cart = () => {
     const searchParams = useSearchParams();
     const storeCode = searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE;
 
+    console.log('totalAmount', totalAmount);
+
+
     const { data: allProductsData, refetch: refetchProducts } = useQuery({
         queryKey: ["all-products-cart", storeCode],
         queryFn: () => {
@@ -195,11 +198,6 @@ const Cart = () => {
     })
 
     const submitOrder = () => {
-        if (!isUserAuthenticated) {
-            setIsOpen(true)
-            return
-        }
-
         // if (hasMultipleStores) {
         //     toast.error('Multiple stores detected. Please order from one store at a time.')
         //     return;
@@ -231,6 +229,22 @@ const Cart = () => {
             picture: item?.picture,
             vat: item?.vat,
         }))
+
+        if (!isUserAuthenticated) {
+            const guestOrderNo = `CART${rand}`
+            const cartData = {
+                orderNo: guestOrderNo,
+                cartItems: orderItems,
+                subtotal: totalAmount,
+                totalVat: totalVat?.(),
+                shippingFee: 0,
+                totalAmount: totalAmount,
+                ccy: mainCcy?.()
+            };
+            sessionStorage.setItem('checkout', JSON.stringify(cartData))
+            router.push(`/checkout?storeCode=${storeCode || process.env.NEXT_PUBLIC_STORE_CODE}&orderNo=${guestOrderNo}`)
+            return
+        }
 
         const payload = {
             channel: "WEB",
