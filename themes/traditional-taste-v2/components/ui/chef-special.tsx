@@ -15,7 +15,7 @@ import {
   ShoppingBag,
 } from "lucide-react";
 
-const gallery = ["/jollof-main.jpg", "/jollof rice.jpg", "/jollof-side-2.jfif"];
+const gallery: string[] = [];
 
 export default function ChefSpecialSection() {
   const [activeImage, setActiveImage] = useState(0);
@@ -55,9 +55,9 @@ export default function ChefSpecialSection() {
           if (Array.isArray(list) && list.length > 0) pic = list[0];
         } catch (e) { }
       }
-      return pic || gallery[0];
-    })
-    : gallery;
+      return pic;
+    }).filter(Boolean)
+    : [];
 
   const featuredProduct = hasDynamicProducts ? featuredProducts[activeImage % featuredProducts.length] : null;
 
@@ -76,6 +76,10 @@ export default function ChefSpecialSection() {
     }, 3000);
     return () => clearInterval(interval);
   }, [currentGallery.length]);
+
+  if (!isLoading && !hasDynamicProducts) {
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -224,19 +228,21 @@ export default function ChefSpecialSection() {
                     shadow-xl
                   "
                 >
-                  <Image
-                    src={currentGallery[activeImage]}
-                    alt={featuredProduct?.name || "Featured Food"}
-                    fill
-                    priority
-                    className="
-                      object-cover
-                      transition-all
-                      duration-700
-                      ease-out
-                      group-hover/slider:scale-110
-                    "
-                  />
+                  {currentGallery.length > 0 && currentGallery[activeImage] ? (
+                    <Image
+                      src={currentGallery[activeImage]}
+                      alt={featuredProduct?.name || "Featured Food"}
+                      fill
+                      priority
+                      className="
+                        object-cover
+                        transition-all
+                        duration-700
+                        ease-out
+                        group-hover/slider:scale-110
+                      "
+                    />
+                  ) : null}
                 </div>
 
                 {/* LEFT ARROW */}
