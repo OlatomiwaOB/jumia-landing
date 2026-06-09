@@ -124,13 +124,22 @@ export default function Header() {
 
 
           {/* Login / Register */}
-          <div className="hidden lg:flex items-center gap-3 cursor-pointer" onClick={() => setIsLoginModalOpen(true)}>
-            <User size={28} className="hover:text-accent transition-colors duration-200" strokeWidth={2.5} />
+
+          <div className="hidden lg:flex items-center gap-3">
+            <Link href="/customer-login">
+              <User size={28} className="hover:text-accent transition-colors duration-200" strokeWidth={2.5} />
+            </Link>
             <div className="flex flex-col gap-[3px]">
-              <span className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none">Login</span>
-              <span className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none text-white/60">Register</span>
+              <Link href="/customer-login" className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none">
+                Login
+              </Link>
+              <Link href="/customer-onboarding" className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none text-white/60">
+                Register
+              </Link>
             </div>
           </div>
+
+
 
           {/* Divider */}
           <div className="hidden lg:block w-px h-7 bg-white/15" />
@@ -291,15 +300,18 @@ export default function Header() {
 
 
             {/* Utilities */}
+
             <div className="flex flex-col mt-2 mb-6">
-              <button
-                onClick={() => { setMobileMenuOpen(false); setIsLoginModalOpen(true); }}
+              <Link
+                href="/customer-login"
+                onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 py-3 px-5 text-[14px] font-medium text-gray-600 hover:text-accent transition-colors w-full text-left"
               >
                 <User size={20} strokeWidth={1.5} className="text-gray-500" />
                 My account
-              </button>
+              </Link>
             </div>
+
           </nav>
         </div>
 
@@ -312,8 +324,8 @@ export default function Header() {
       >
         {isRTL ? 'LTR' : 'RTL'}
       </button>
-
-      <CustomerLoginModal isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen} />
+      {/* pop-up component */}
+      {/* <CustomerLoginModal isOpen={isLoginModalOpen} setIsOpen={setIsLoginModalOpen} /> */}
     </header>
   );
 }
