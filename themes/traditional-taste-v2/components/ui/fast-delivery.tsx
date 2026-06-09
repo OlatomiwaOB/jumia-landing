@@ -1,9 +1,28 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useProducts } from "@/hooks/useProducts";
 import { Scale, ThumbsUp, UtensilsCrossed, ArrowRight } from "lucide-react";
 
-export default function WhyChooseUsSection() {
+export default function FastDeliverySection() {
+  const searchParams = useSearchParams();
+  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+
+  const { data: productsData } = useProducts(
+    storeCode,
+    entityCode,
+    '',
+    '',
+    'fast-delivery',
+    1,
+    20 // Fetch a few to find one with a picture
+  );
+
+  const productWithImage = productsData?.products?.find((p: any) => p.picture);
+  const imageUrl = productWithImage?.picture || "/jollof rice.jpg"; // Default to a food image if none found
   const features = [
     {
       icon: Scale,
@@ -135,7 +154,8 @@ export default function WhyChooseUsSection() {
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4 mt-6">
-                <button
+                <Link
+                  href="/shop"
                   className="
                     group
                     bg-white
@@ -170,32 +190,9 @@ export default function WhyChooseUsSection() {
                       group-hover:translate-x-1
                     "
                   />
-                </button>
+                </Link>
 
-                <button
-                  className="
-                    border-2
-                    border-white/40
 
-                    text-white
-                    font-semibold
-
-                    px-6
-                    py-3
-                    text-sm
-
-                    rounded-lg
-
-                    transition-all
-                    duration-300
-
-                    hover:bg-white/20
-                    hover:scale-105
-                    hover:-translate-y-1
-                  "
-                >
-                  Browse Menu
-                </button>
               </div>
             </div>
 
@@ -219,8 +216,8 @@ export default function WhyChooseUsSection() {
                 "
               >
                 <Image
-                  src="/delivery-food.jfif"
-                  alt="Food delivery"
+                  src={imageUrl}
+                  alt={productWithImage?.name || "Food delivery"}
                   fill
                   className="
                     object-cover

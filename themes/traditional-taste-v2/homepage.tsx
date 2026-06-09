@@ -2,8 +2,8 @@ import HeroPromoGrid from "./components/ui/hero-promo-grid";
 import QuickCategoryPills from "./components/ui/quick-category-pills";
 import PriceHitsSection from "./components/ui/price-hits-section";
 import CategoryShowcaseSection from "./components/ui/category-showcase-section";
-import FeaturedFoodShowcase from "./components/ui/featued-feasts";
-import WhyChooseUsSection from "./components/ui/whychooseus";
+import ChefSpecialSection from "./components/ui/chef-special";
+import FastDeliverySection from "./components/ui/fast-delivery";
 
 export default function Homepage() {
   return (
@@ -12,8 +12,8 @@ export default function Homepage() {
       <HeroPromoGrid />
       <PriceHitsSection />
       <CategoryShowcaseSection />
-      <FeaturedFoodShowcase />
-      <WhyChooseUsSection />
+      <ChefSpecialSection />
+      <FastDeliverySection />
     </div>
   );
 }
