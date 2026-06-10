@@ -37,7 +37,10 @@ export default function HeroPromoGrid() {
   const p1 = sourceProducts[5] || sourceProducts[0] || {};
   const p2 = sourceProducts[1] || {};
   const p3 = sourceProducts[2] || {};
-  const p4 = sourceProducts[3] || {};
+  // Always search ALL products for Bitterleaf by name
+  const p4 = endpointProducts.find((p: ProductProps) =>
+    p.name?.toLowerCase().includes('bitterleaf')
+  ) || sourceProducts[3] || {};
 
   return (
     <section className="w-full px-4 lg:px-10 pt-0 pb-6 lg:pt-2 lg:pb-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -101,22 +104,31 @@ export default function HeroPromoGrid() {
         </div>
 
         {/* CARD 3: Right (1 col) */}
-        <div className="bg-[#1C1917] rounded-2xl relative overflow-hidden flex flex-col justify-between min-h-[380px] lg:min-h-[550px] p-6 lg:p-8 cursor-pointer group">
+        <div className="bg-[#1C1917] rounded-2xl relative overflow-hidden flex flex-col justify-end min-h-[380px] lg:min-h-[550px] cursor-pointer group">
 
-          <div className="relative w-full flex-1 flex items-center justify-center mt-0 lg:mt-4 mb-4">
-            <div className="relative w-[80%] lg:w-full aspect-square lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg shadow-black/30 ring-2 ring-white/10 transition-all duration-500 md:group-hover:-translate-y-4 md:group-hover:scale-105 md:group-hover:shadow-xl md:group-hover:shadow-[var(--color-primary)]/20">
-              {p4.picture && <Image src={p4.picture} alt={p4.name || "Product"} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 25vw" />}
-            </div>
-          </div>
-          <div className="relative z-10 text-center flex flex-col items-center lg:mt-4">
-            <h3 className="text-white text-[22px] lg:text-[28px] font-bold leading-tight mb-2">
+          {/* Full Cover Image */}
+          {p4.picture && (
+            <Image
+              src={p4.picture}
+              alt={p4.name || "Product"}
+              fill
+              className="object-cover object-center transition-transform duration-700 group-hover:scale-110"
+              sizes="(max-width: 1024px) 100vw, 25vw"
+            />
+          )}
+
+          {/* Dark gradient overlay at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+
+          {/* Text & Button */}
+          <div className="relative z-20 text-center flex flex-col items-center p-6 lg:p-8">
+            <h3 className="text-white text-[22px] lg:text-[28px] font-bold leading-tight mb-3">
               {p4.name && (
                 <>
                   <span className="text-[var(--color-primary)]">{p4.name.split(' ')[0]}</span> {p4.name.split(' ').slice(1).join(' ')}
                 </>
               )}
             </h3>
-
             <Link href="/shop" className="bg-[var(--color-primary)] hover:bg-white hover:text-[#1C1917] text-white font-bold py-2.5 px-8 rounded-lg text-[14px] transition-colors w-max block">
               Shop now
             </Link>

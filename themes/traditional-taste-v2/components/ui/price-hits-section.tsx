@@ -127,7 +127,7 @@ export default function PriceHitsSection() {
           scroll('right');
         }
       }
-    }, 3000);
+    }, 6000);
 
     return () => {
       if (autoPlayInterval) clearInterval(autoPlayInterval);
