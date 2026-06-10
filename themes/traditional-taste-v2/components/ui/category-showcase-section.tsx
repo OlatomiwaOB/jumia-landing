@@ -79,7 +79,7 @@ export default function CategoryShowcaseSection() {
 
         {/* Header */}
         <div className="mb-4 md:mb-6">
-          <h2 className="text-[#1C1917] dark:text-white text-2xl md:text-[32px] font-bold tracking-tight">Food & Restaurant</h2>
+          <h2 className="text-[#1C1917] dark:text-white text-2xl md:text-[32px] font-bold tracking-tight">Home made</h2>
         </div>
 
         {/* Layout Flex */}
