@@ -19,6 +19,7 @@ const gallery: string[] = [];
 
 export default function ChefSpecialSection() {
   const [activeImage, setActiveImage] = useState(0);
+  const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
   const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || '';
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
@@ -44,38 +45,52 @@ export default function ChefSpecialSection() {
   });
 
   const featuredProducts = featuredProductsData?.products?.filter((item: any) => item.featured) || [];
-  const hasDynamicProducts = featuredProducts.length > 0;
 
-  const currentGallery = hasDynamicProducts
-    ? featuredProducts.map((p: any) => {
-      let pic = p.picture;
-      if (!pic) {
-        try {
-          const list = typeof p.pictureList === 'string' ? JSON.parse(p.pictureList) : p.pictureList;
-          if (Array.isArray(list) && list.length > 0) pic = list[0];
-        } catch (e) { }
-      }
-      return pic;
-    }).filter(Boolean)
-    : [];
+  // Only keep featured products that have a real image
+  const productsWithImages = featuredProducts.filter((p: any) => {
+    if (p.picture) return true;
+    try {
+      const list = typeof p.pictureList === 'string' ? JSON.parse(p.pictureList) : p.pictureList;
+      return Array.isArray(list) && list.length > 0;
+    } catch (e) { return false; }
+  });
 
-  const featuredProduct = hasDynamicProducts ? featuredProducts[activeImage % featuredProducts.length] : null;
+  const hasDynamicProducts = productsWithImages.length > 0;
+
+  const currentGallery = productsWithImages.map((p: any) => {
+    let pic = p.picture;
+    if (!pic) {
+      try {
+        const list = typeof p.pictureList === 'string' ? JSON.parse(p.pictureList) : p.pictureList;
+        if (Array.isArray(list) && list.length > 0) pic = list[0];
+      } catch (e) { }
+    }
+    return pic;
+  }).filter(Boolean);
+
+  // Only use images that have actually loaded (not broken)
+  const validGallery = currentGallery.filter((img: string) => !brokenImages.has(img));
+  const validProducts = productsWithImages.filter((_: any, i: number) =>
+    currentGallery[i] && !brokenImages.has(currentGallery[i])
+  );
+
+  const featuredProduct = validProducts.length > 0 ? validProducts[activeImage % validProducts.length] : null;
 
   const nextImage = () => {
-    setActiveImage((prev) => (prev + 1) % currentGallery.length);
+    setActiveImage((prev) => (prev + 1) % validGallery.length);
   };
 
   const prevImage = () => {
-    setActiveImage((prev) => (prev === 0 ? currentGallery.length - 1 : prev - 1));
+    setActiveImage((prev) => (prev === 0 ? validGallery.length - 1 : prev - 1));
   };
 
   React.useEffect(() => {
-    if (currentGallery.length <= 1) return;
+    if (validGallery.length <= 1) return;
     const interval = setInterval(() => {
-      setActiveImage((prev) => (prev + 1) % currentGallery.length);
+      setActiveImage((prev) => (prev + 1) % validGallery.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [currentGallery.length]);
+  }, [validGallery.length]);
 
   if (!isLoading && !hasDynamicProducts) {
     return null;
@@ -228,9 +243,9 @@ export default function ChefSpecialSection() {
                     shadow-xl
                   "
                 >
-                  {currentGallery.length > 0 && currentGallery[activeImage] ? (
+                  {validGallery.length > 0 && validGallery[activeImage] ? (
                     <Image
-                      src={currentGallery[activeImage]}
+                      src={validGallery[activeImage]}
                       alt={featuredProduct?.name || "Featured Food"}
                       fill
                       priority
@@ -327,43 +342,47 @@ export default function ChefSpecialSection() {
 
                 {/* THUMBNAILS */}
                 <div className="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
-                  {currentGallery.map((image: string, index: number) => (
-                    <button
-                      key={index}
-                      onClick={() => setActiveImage(index)}
-                      className={`
-                        relative
-                        w-16 md:w-24
-                        h-16 md:h-24
-                        rounded-xl md:rounded-2xl
-                        overflow-hidden
+                  {currentGallery.map((image: string, index: number) => {
+                    if (brokenImages.has(image)) return null;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setActiveImage(index)}
+                        className={`
+                          relative
+                          w-16 md:w-24
+                          h-16 md:h-24
+                          rounded-xl md:rounded-2xl
+                          overflow-hidden
 
-                        transition-all
-                        duration-500
+                          transition-all
+                          duration-500
 
-                        hover:scale-110
-                        hover:-translate-y-2
-                        hover:shadow-2xl
+                          hover:scale-110
+                          hover:-translate-y-2
+                          hover:shadow-2xl
 
-                        ${activeImage === index
-                          ? "ring-4 ring-[var(--color-primary)] scale-105"
-                          : ""
-                        }
-                      `}
-                    >
-                      <Image
-                        src={image}
-                        alt={`Food ${index}`}
-                        fill
-                        className="
-                          object-cover
-                          transition-transform
-                          duration-700
-                          hover:scale-125
-                        "
-                      />
-                    </button>
-                  ))}
+                          ${activeImage === index
+                            ? "ring-4 ring-[var(--color-primary)] scale-105"
+                            : ""
+                          }
+                        `}
+                      >
+                        <Image
+                          src={image}
+                          alt={`Food ${index}`}
+                          fill
+                          className="
+                            object-cover
+                            transition-transform
+                            duration-700
+                            hover:scale-125
+                          "
+                          onError={() => setBrokenImages(prev => new Set(prev).add(image))}
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>

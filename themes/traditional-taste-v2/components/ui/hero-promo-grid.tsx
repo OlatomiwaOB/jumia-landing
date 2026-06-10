@@ -44,15 +44,24 @@ export default function HeroPromoGrid() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_3.5fr_1fr] gap-3 lg:gap-2">
 
         {/* CARD 1: Left (1 col) */}
-        <div className="bg-[#1C1917] rounded-2xl relative overflow-hidden flex flex-col justify-between min-h-[380px] lg:min-h-[550px] p-6 lg:p-8 cursor-pointer group">
+        <div className="bg-[#1C1917] rounded-2xl relative overflow-hidden flex flex-col justify-end min-h-[380px] lg:min-h-[550px] cursor-pointer group">
 
-          <div className="relative w-full flex-1 flex items-center justify-center lg:-mt-6 mb-1">
-            <div className="relative w-[80%] lg:w-full aspect-square lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg shadow-black/30 ring-2 ring-white/10 transition-all duration-500 md:group-hover:-translate-y-4 md:group-hover:scale-105 md:group-hover:shadow-xl md:group-hover:shadow-[var(--color-primary)]/20">
-              {p1.picture && <Image src={p1.picture} alt={p1.name || "Product"} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 25vw" />}
-            </div>
-          </div>
-          <div className="relative z-10 text-center flex flex-col items-center lg:-mt-10">
+          {/* Full Cover Image */}
+          {p1.picture && (
+            <Image
+              src={p1.picture}
+              alt={p1.name || "Product"}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
+              sizes="(max-width: 1024px) 100vw, 25vw"
+            />
+          )}
 
+          {/* Dark gradient overlay at bottom */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+
+          {/* Text & Button */}
+          <div className="relative z-20 text-center flex flex-col items-center p-6 lg:p-8">
             <h3 className="text-white text-[22px] lg:text-[28px] font-bold leading-tight mb-3">
               {p1.name && (
                 <>

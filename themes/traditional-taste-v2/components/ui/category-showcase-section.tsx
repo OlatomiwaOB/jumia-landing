@@ -58,18 +58,20 @@ export default function CategoryShowcaseSection() {
     return () => clearInterval(interval);
   }, [isHovered, productsData]);
 
-  const displayProducts: Product[] = (productsData?.products || []).map((p: ProductProps) => ({
-    id: p.id || Math.random(),
-    vendor: p.storeName || 'Restaurant',
-    title: p.name || 'Unknown',
-    price: p.salePrice ? `$${p.salePrice}` : '$0.00',
-    originalPrice: p.oldPrice ? `$${p.oldPrice}` : null,
-    discount: p.discount ? `-${p.discount}%` : null,
-    image: p.picture || '/nigerian-food.png',
-    badges: [],
-    stock: (p.qtyInStore ?? 1) > 0,
-    offer: null
-  }));
+  const displayProducts: Product[] = (productsData?.products || [])
+    .filter((p: ProductProps) => !!p.picture)
+    .map((p: ProductProps) => ({
+      id: p.id || Math.random(),
+      vendor: p.storeName || 'Restaurant',
+      title: p.name || 'Unknown',
+      price: p.salePrice ? `$${p.salePrice}` : '$0.00',
+      originalPrice: p.oldPrice ? `$${p.oldPrice}` : null,
+      discount: p.discount ? `-${p.discount}%` : null,
+      image: p.picture,
+      badges: [],
+      stock: (p.qtyInStore ?? 1) > 0,
+      offer: null
+    }));
 
   return (
     <section className="w-full px-0 md:px-4 lg:px-10 py-2 md:py-4 max-w-[1640px] mx-auto bg-[var(--color-bg-main)]">

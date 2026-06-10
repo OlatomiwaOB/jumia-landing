@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ChefHat, Star, Truck, Heart, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function AboutPage() {
-  const accentColor = '#F97316'; 
+  const accentColor = '#F97316';
   const bgColor = '#FAFAF9';
   const hoverColor = '#111827';
 
@@ -84,13 +84,16 @@ export default function AboutPage() {
           </h2>
           <div className="space-y-5 text-gray-600 text-lg">
             <p>
-              Traditional Taste was born out of a simple, undeniable craving: the deep desire for authentic, home-cooked Nigerian meals here in the UK. We realized that many diaspora Africans were working hard but missing the comforting flavors of home.
+              Craving a taste of home? At Traditional Taste, our <span className="font-bold text-[#F97316] bg-orange-50 px-2 py-0.5 rounded-md border border-orange-100">homemade</span> local meals are crafted with love, bringing you the authentic flavours that remind you of family dinners and cherished memories. Every dish is tailored to your unique taste, ensuring a personalised experience with every bite.
             </p>
             <p>
-              What started as a passionate project cooking for friends and family quickly blossomed into a fully-fledged UK-wide delivery service. Today, we dedicate our kitchens to perfecting those classic recipes passed down through generations.
+              We deliver fresh, heartfelt meals across the UK — wherever you are, comfort food is just a click away. With a 5-star rating, you can trust that our meals are not only delicious but also healthy and made with the utmost care.
             </p>
             <p>
-              Whether it's the unmistakable smoky aroma of our <strong className="text-gray-900">Party Jollof Rice</strong>, the rich and hearty comfort of <strong className="text-gray-900">Ogbono Soup</strong>, or the spicy kick of our signature <strong className="text-gray-900">Peppered Meats</strong>, we pour our heart into every single dish we prepare.
+              Try Traditional Taste today and discover why a trial is all it takes to fall in love with food made just for you.
+            </p>
+            <p>
+              Experience the warmth of home-cooked goodness. Order now and let Traditional Taste bring a little piece of home to your doorstep.
             </p>
           </div>
         </div>
@@ -174,10 +177,10 @@ export default function AboutPage() {
               Ready to Taste Home?
             </h2>
             <p className="text-lg md:text-xl text-gray-800 mb-10 max-w-2xl mx-auto">
-              Explore our menu of freshly prepared authentic meals. Place your order today and we'll ship it to you this Wednesday.
+              Explore our menu of freshly prepared authentic meals. Place your order today and we'll ship it to you.
             </p>
-            <Link 
-              href="/shop" 
+            <Link
+              href="/shop"
               className="inline-flex items-center gap-2 font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
               style={{ backgroundColor: '#FFFFFF', color: '#111827' }}
               onMouseEnter={(e) => {

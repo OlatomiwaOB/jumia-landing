@@ -72,14 +72,14 @@ export default function ContactPage() {
           </h1>
 
           <p id="contact-instructions" className="text-[15px] md:text-[16px] text-gray-600 max-w-2xl mx-auto scroll-mt-24">
-            Please use the below form. You can also call customer service on 07834630134.
+            Please use the below form. You can also call customer service on 07721542823.
           </p>
         </div>
 
         {/* Map Section */}
         <div className="w-full h-[250px] md:h-[450px] rounded-[20px] overflow-hidden shadow-sm border border-gray-100 mb-12 md:mb-16 relative group">
           <iframe
-            src="https://maps.google.com/maps?q=19+Pinehurst+Cul+De+Sac,+Botley,+Southampton,+Hampshire+SO32+2SL&t=&z=13&ie=UTF8&iwloc=&output=embed"
+            src="https://maps.google.com/maps?q=87+Barn+Meadow,+Bamber+Bridge,+Preston+PR5+8EA&t=&z=13&ie=UTF8&iwloc=&output=embed"
             width="100%"
             height="100%"
             style={{ border: 0 }}
@@ -92,7 +92,7 @@ export default function ContactPage() {
 
           {/* Get Directions Button Overlay */}
           <a
-            href="https://www.google.com/maps/dir/?api=1&destination=19+Pinehurst+Cul+De+Sac,+Botley,+Southampton,+Hampshire+SO32+2SL"
+            href="https://www.google.com/maps/dir/?api=1&destination=87+Barn+Meadow,+Bamber+Bridge,+Preston+PR5+8EA"
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-4 right-4 md:bottom-6 md:right-6 bg-[var(--color-primary)] text-white font-bold px-4 py-2.5 md:px-6 md:py-3 text-[14px] md:text-[16px] rounded-lg md:rounded-xl shadow-xl hover:opacity-90 flex items-center gap-2 transition-transform hover:scale-105 z-10"
@@ -121,8 +121,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-[16px] font-bold text-gray-900 mb-1">Customer Care</h3>
                   <div className="text-[15px] text-gray-600 space-y-1.5">
-                    <p className="hover:text-[var(--color-primary)] cursor-pointer transition-colors">07834630134</p>
-                    <p className="hover:text-[var(--color-primary)] cursor-pointer transition-colors">TraditionalTaste@gmail.com</p>
+                    <p className="hover:text-[var(--color-primary)] cursor-pointer transition-colors">07721542823</p>
+                    <p className="hover:text-[var(--color-primary)] cursor-pointer transition-colors">Traditionaltasteuk@gmail.com</p>
                   </div>
                 </div>
               </div>
@@ -146,8 +146,8 @@ export default function ContactPage() {
                 <div>
                   <h3 className="text-[16px] font-bold text-gray-900 mb-1">Our Location</h3>
                   <div className="text-[15px] text-gray-600 space-y-1.5">
-                    <p>75 9th Ave,</p>
-                    <p>New York, NY 10011-7006</p>
+                    <p>87 Barn Meadow, Bamber Bridge</p>
+                    <p>Preston PR5 8EA</p>
                   </div>
                 </div>
               </div>

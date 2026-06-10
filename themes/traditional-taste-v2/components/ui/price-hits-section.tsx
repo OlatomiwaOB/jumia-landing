@@ -38,18 +38,20 @@ export default function PriceHitsSection() {
   // Fallback to all products if no banner products are set
   const sourceProducts = bannerProducts.length > 0 ? bannerProducts : endpointProducts;
 
-  const displayProducts: Product[] = sourceProducts.map((p: ProductProps) => ({
-    id: p.id || Math.random(),
-    vendor: p.storeName || 'Restaurant',
-    title: p.name || 'Unknown',
-    price: p.salePrice ? `$${p.salePrice}` : '$0.00',
-    originalPrice: p.oldPrice ? `$${p.oldPrice}` : null,
-    discount: p.discount ? `-${p.discount}%` : null,
-    image: p.picture || '/nigerian-food.png',
-    badges: [],
-    stock: (p.qtyInStore ?? 1) > 0,
-    offer: null
-  }));
+  const displayProducts: Product[] = sourceProducts
+    .filter((p: ProductProps) => !!p.picture)
+    .map((p: ProductProps) => ({
+      id: p.id || Math.random(),
+      vendor: p.storeName || 'Restaurant',
+      title: p.name || 'Unknown',
+      price: p.salePrice ? `$${p.salePrice}` : '$0.00',
+      originalPrice: p.oldPrice ? `$${p.oldPrice}` : null,
+      discount: p.discount ? `-${p.discount}%` : null,
+      image: p.picture,
+      badges: [],
+      stock: (p.qtyInStore ?? 1) > 0,
+      offer: null
+    }));
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
@@ -117,13 +119,13 @@ export default function PriceHitsSection() {
 
     autoPlayInterval = setInterval(() => {
       if (typeof window !== 'undefined' && scrollContainerRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
 
-          if (Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 10) {
-            scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-          } else {
-            scroll('right');
-          }
+        if (Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 10) {
+          scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scroll('right');
+        }
       }
     }, 3000);
 

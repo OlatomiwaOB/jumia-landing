@@ -21,6 +21,21 @@ export default function QuickCategoryPills() {
   const { data: categoriesData, isLoading } = useCategories();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [brokenLogos, setBrokenLogos] = useState<Set<string>>(new Set());
+
+  const getFallbackImage = (categoryName: string) => {
+    const name = categoryName?.toLowerCase() || '';
+    if (name.includes('drink') || name.includes('beverage') || name.includes('water')) return '/maltina-can-pack.png';
+    if (name.includes('meat') || name.includes('beef') || name.includes('goat') || name.includes('chicken') || name.includes('poultry') || name.includes('protein')) return '/naija-goat-meat.jpg';
+    if (name.includes('fish') || name.includes('seafood') || name.includes('prawn')) return '/hake-fish-box.jpg';
+    if (name.includes('soup') || name.includes('stew') || name.includes('sauce')) return '/three-soups-hero.png';
+    if (name.includes('snack') || name.includes('pastry')) return '/grandios-pap.jpg';
+    if (name.includes('rice') || name.includes('jollof') || name.includes('grain')) return '/party-jollof.png';
+    if (name.includes('swallow') || name.includes('fufu') || name.includes('pound') || name.includes('garri') || name.includes('yam')) return '/olu-olu-poundo-yam.jpg';
+    if (name.includes('veg') || name.includes('leaf') || name.includes('fruit')) return '/hands_vegetables.png';
+    if (name.includes('spice') || name.includes('season') || name.includes('pepper') || name.includes('oil')) return '/maggi-cubes.png';
+    return '/nigerian-food.png';
+  };
 
   const categories: Category[] = (categoriesData?.categories || []).filter(
     (cat: Category) => cat.code && cat.name
@@ -40,7 +55,7 @@ export default function QuickCategoryPills() {
       if (el) {
         // Scroll 1 pixel every frame
         el.scrollLeft += 1;
-        
+
         // If we've scrolled halfway through the duplicated content, instantly reset to 0
         if (el.scrollLeft >= el.scrollWidth / 2) {
           el.scrollLeft = 0;
@@ -90,10 +105,16 @@ export default function QuickCategoryPills() {
               {cat.name}
             </span>
             <div className="relative w-10 h-10 lg:w-12 lg:h-12 shrink-0 rounded-full overflow-hidden bg-white shadow-md border-2 border-white pointer-events-none">
-              {cat.logo ? (
-                <Image src={cat.logo} alt={cat.name || ''} fill className="object-cover" />
+              {cat.logo && !brokenLogos.has(cat.logo) ? (
+                <Image 
+                  src={cat.logo} 
+                  alt={cat.name || ''} 
+                  fill 
+                  className="object-cover" 
+                  onError={() => setBrokenLogos(prev => new Set(prev).add(cat.logo as string))}
+                />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-[18px] lg:text-[20px]">🍽</div>
+                <Image src={getFallbackImage(cat.name || '')} alt={cat.name || 'Category'} fill className="object-cover" />
               )}
             </div>
           </Link>
