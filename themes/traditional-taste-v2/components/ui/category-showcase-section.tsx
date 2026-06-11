@@ -125,10 +125,10 @@ export default function CategoryShowcaseSection() {
                 onMouseLeave={() => setIsHovered(false)}
                 onTouchStart={() => setIsHovered(true)}
                 onTouchEnd={() => setIsHovered(false)}
-                className="grid grid-flow-col auto-cols-[calc(50%-8px)] sm:auto-cols-[calc(33.333%-10.66px)] lg:auto-cols-[calc(25%-12px)] gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 pt-2 w-full h-full items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+                className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 pt-2 w-full h-full items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch]"
               >
                 {displayProducts.map((product) => (
-                  <div key={product.id} className="snap-start h-[310px] sm:h-[340px] md:h-auto w-full">
+                  <div key={product.id} className="w-[calc(50%-8px)] sm:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] flex-none h-[310px] sm:h-[340px] md:h-auto transform-gpu will-change-transform">
                     <ProductCard product={product} isGrid={true} />
                   </div>
                 ))}
