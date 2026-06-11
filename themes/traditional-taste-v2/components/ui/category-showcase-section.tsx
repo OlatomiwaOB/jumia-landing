@@ -60,8 +60,8 @@ export default function CategoryShowcaseSection() {
 
   const displayProducts: Product[] = (productsData?.products || [])
     .filter((p: ProductProps) => !!p.picture)
-    .map((p: ProductProps) => ({
-      id: p.id || Math.random(),
+    .map((p: ProductProps, i: number) => ({
+      id: p.id || i,
       vendor: p.storeName || 'Restaurant',
       title: p.name || 'Unknown',
       price: p.salePrice ? `${p.ccy || '£'}${p.salePrice}` : `${p.ccy || '£'}0.00`,
