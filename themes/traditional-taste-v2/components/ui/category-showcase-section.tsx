@@ -7,6 +7,7 @@ import ProductCard, { Product } from './product-card';
 import { useSearchParams } from "next/navigation";
 import { useProducts } from '@/hooks/useProducts';
 import { ProductProps } from '@/types';
+import { formatPrice, CurrencyCode } from '@/utils/helperfns';
 
 export default function CategoryShowcaseSection() {
   const searchParams = useSearchParams();
@@ -64,8 +65,8 @@ export default function CategoryShowcaseSection() {
       id: p.id || i,
       vendor: p.storeName || 'Restaurant',
       title: p.name || 'Unknown',
-      price: p.salePrice ? `${p.ccy || '£'}${p.salePrice}` : `${p.ccy || '£'}0.00`,
-      originalPrice: p.oldPrice ? `${p.ccy || '£'}${p.oldPrice}` : null,
+      price: p.salePrice ? formatPrice(p.salePrice, (p.ccy as CurrencyCode) || 'GBP') : formatPrice(0, (p.ccy as CurrencyCode) || 'GBP'),
+      originalPrice: p.oldPrice ? formatPrice(p.oldPrice, (p.ccy as CurrencyCode) || 'GBP') : null,
       discount: p.discount ? `-${p.discount}%` : null,
       image: p.picture,
       badges: [],
