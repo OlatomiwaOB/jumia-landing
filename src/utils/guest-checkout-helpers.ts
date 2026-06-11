@@ -7,20 +7,22 @@ import { getNationalityName } from "./country-data";
  */
 export function buildGuestOrderPayload(guestInfo: GuestInfo, orderPayload: any): any {
   return {
-    firstname: guestInfo.firstname,
+    userType: "GUEST",
     channel: 'WEB',
-    lastname: guestInfo.lastname,
-    mobileNo: guestInfo.mobileNo,
-    email: guestInfo.email,
-    city: guestInfo.city,
-    countryCode: guestInfo.countryCode,
-    gender: guestInfo.gender || '',
-    dateOfBirth: guestInfo.dateOfBirth || '',
-    password: guestInfo.password,
-    nationality: getNationalityName(guestInfo.nationality),
-    customerType: guestInfo.customerType || 'CUSTOMER',
     deviceId: orderPayload.deviceId || '',
     geolocation: orderPayload.geolocation || '',
+    guestOnboardRequest: {
+      firstname: guestInfo.firstname,
+      lastname: guestInfo.lastname,
+      mobileNo: guestInfo.mobileNo,
+      email: guestInfo.email,
+      dateOfBirth: guestInfo.dateOfBirth || '',
+      password: guestInfo.password,
+      nationality: getNationalityName(guestInfo.nationality),
+      city: guestInfo.city,
+      countryCode: guestInfo.countryCode,
+      gender: guestInfo.gender || ''
+    },
     oinfo: {
       ...orderPayload,
       deliveryAddress: {
