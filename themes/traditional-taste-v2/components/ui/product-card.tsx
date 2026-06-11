@@ -39,11 +39,11 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
       addToCart({
         id: product.id,
         name: product.title,
-        salePrice: parseFloat(product.price.replace('$', '')),
+        salePrice: parseFloat(product.price.replace(/[£$]/g, '')),
         picture: product.image,
         qtyInStore: 100,
         storeCode: 'WEB',
-        ccy: '$'
+        ccy: '£'
       }, quantity);
 
       setQuantity(1);
