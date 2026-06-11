@@ -95,22 +95,9 @@ export default function Header() {
         {/* --- MOBILE LAYOUT (< lg) --- */}
         <div className="flex lg:hidden items-center justify-between w-full h-14 relative">
 
-          {/* Left: Menu & Search */}
-          <div className="flex items-center gap-5">
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`flex flex-col items-start gap-[5px] w-7 h-7 justify-center transition-colors hover:opacity-80 ${isMobileMenuOpen ? 'text-tt-primary' : ''}`}
-            >
-              {isMobileMenuOpen ? (
-                <X size={30} strokeWidth={2.5} />
-              ) : (
-                <>
-                  <span className={`block h-[2.5px] rounded-full w-6 transition-colors ${isDarkMode ? 'bg-gray-300' : 'bg-gray-900'}`}></span>
-                  <span className={`block h-[2.5px] rounded-full w-4 transition-colors ${isDarkMode ? 'bg-gray-300' : 'bg-gray-900'}`}></span>
-                  <span className={`block h-[2.5px] rounded-full w-6 transition-colors ${isDarkMode ? 'bg-gray-300' : 'bg-gray-900'}`}></span>
-                </>
-              )}
-            </button>
+          {/* Left: Menu & Search (Removed to avoid duplicate with bottom nav) */}
+          <div className="flex items-center gap-5 w-7 h-7">
+            {/* Empty space to maintain layout balance */}
           </div>
 
           {/* Center: Logo */}
