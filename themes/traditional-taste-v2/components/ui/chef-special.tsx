@@ -342,7 +342,7 @@ export default function ChefSpecialSection() {
 
                 {/* THUMBNAILS */}
                 <div className="flex flex-wrap justify-center gap-2 md:gap-4 mt-4 md:mt-6">
-                  {currentGallery.map((image: string, index: number) => {
+                  {currentGallery.slice(0, 10).map((image: string, index: number) => {
                     if (brokenImages.has(image)) return null;
                     return (
                       <button
