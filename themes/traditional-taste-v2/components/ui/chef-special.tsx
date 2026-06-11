@@ -175,13 +175,13 @@ export default function ChefSpecialSection() {
               <div className="flex flex-wrap items-center gap-4 mb-8">
                 <div>
                   <span className="text-4xl md:text-5xl font-bold text-[var(--color-primary)]">
-                    {featuredProduct?.ccy || '£'}{featuredProduct?.salePrice?.toFixed(2) || "24.99"}
+                    {featuredProduct?.ccy || '£'}{featuredProduct?.salePrice ? Number(featuredProduct.salePrice).toFixed(2) : "24.99"}
                   </span>
 
                   {/* Only show old price if it's greater than sale price */}
-                  {(featuredProduct ? (featuredProduct.oldPrice > featuredProduct.salePrice) : true) && (
+                  {(featuredProduct ? (Number(featuredProduct.oldPrice) > Number(featuredProduct.salePrice)) : true) && (
                     <span className="ml-3 text-lg line-through opacity-50">
-                      {featuredProduct?.ccy || '£'}{featuredProduct?.oldPrice?.toFixed(2) || "32.99"}
+                      {featuredProduct?.ccy || '£'}{featuredProduct?.oldPrice ? Number(featuredProduct.oldPrice).toFixed(2) : "32.99"}
                     </span>
                   )}
                 </div>

@@ -30,7 +30,9 @@ const currencySymbols: Record<CurrencyCode, string> = {
 export function formatPrice(amount: number, currencyCode: CurrencyCode): string {
   const symbol = currencySymbols[currencyCode] || "₦";
 
-  const roundedAmount = parseFloat(amount.toFixed(2));
+  // Safe fallback if amount is null/undefined
+  const safeAmount = Number(amount) || 0;
+  const roundedAmount = parseFloat(safeAmount.toFixed(2));
 
   const formattedAmount = roundedAmount.toLocaleString(undefined, {
     minimumFractionDigits: 2,
