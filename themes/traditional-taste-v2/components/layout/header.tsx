@@ -27,6 +27,22 @@ export default function Header() {
     (cat: Category) => cat.code && cat.name
   );
 
+  const [brokenLogos, setBrokenLogos] = useState<Set<string>>(new Set());
+
+  const getFallbackImage = (categoryName: string) => {
+    const name = categoryName?.toLowerCase() || '';
+    if (name.includes('drink') || name.includes('beverage') || name.includes('water')) return '/maltina-can-pack.png';
+    if (name.includes('meat') || name.includes('beef') || name.includes('goat') || name.includes('chicken') || name.includes('poultry') || name.includes('protein')) return '/naija-goat-meat.jpg';
+    if (name.includes('fish') || name.includes('seafood') || name.includes('prawn')) return '/hake-fish-box.jpg';
+    if (name.includes('soup') || name.includes('stew') || name.includes('sauce')) return '/three-soups-hero.png';
+    if (name.includes('snack') || name.includes('pastry')) return '/grandios-pap.jpg';
+    if (name.includes('rice') || name.includes('jollof') || name.includes('grain')) return '/party-jollof.png';
+    if (name.includes('swallow') || name.includes('fufu') || name.includes('pound') || name.includes('garri') || name.includes('yam')) return '/olu-olu-poundo-yam.jpg';
+    if (name.includes('veg') || name.includes('leaf') || name.includes('fruit')) return '/hands_vegetables.png';
+    if (name.includes('spice') || name.includes('season') || name.includes('pepper') || name.includes('oil')) return '/maggi-cubes.png';
+    return '/nigerian-food.png';
+  };
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -152,13 +168,24 @@ export default function Header() {
                         className={`flex items-center justify-between px-5 py-3 border-b last:border-b-0 transition-colors group ${isDarkMode ? 'border-gray-800 hover:bg-gray-800' : 'border-gray-50 hover:bg-gray-50'}`}
                       >
                         <div className="flex items-center gap-4">
-                          {item.logo ? (
+                          {item.logo && !brokenLogos.has(item.logo) ? (
                             <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 shadow-sm border border-black/5">
-                              <Image src={item.logo} alt={item.name || ''} fill className="object-cover" />
+                              <Image 
+                                src={item.logo} 
+                                alt={item.name || ''} 
+                                fill 
+                                className="object-cover" 
+                                onError={() => setBrokenLogos(prev => new Set(prev).add(item.logo as string))}
+                              />
                             </div>
                           ) : (
-                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-gray-100 text-[20px]">
-                              🍽
+                            <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 shadow-sm border border-black/5">
+                              <Image 
+                                src={getFallbackImage(item.name || '')} 
+                                alt={item.name || 'Category'} 
+                                fill 
+                                className="object-cover" 
+                              />
                             </div>
                           )}
                           <span className={`text-[14px] font-bold transition-colors group-hover:text-tt-primary ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
