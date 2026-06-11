@@ -22,7 +22,7 @@ export default function FastDeliverySection() {
   );
 
   const productWithImage = productsData?.products?.find((p: any) => p.picture);
-  const imageUrl = productWithImage?.picture || "/jollof rice.jpg"; // Default to a food image if none found
+  const imageUrl = productWithImage?.picture;
   const features = [
     {
       icon: Scale,
@@ -198,7 +198,8 @@ export default function FastDeliverySection() {
 
             {/* RIGHT IMAGE */}
             <div className="flex justify-center lg:justify-end">
-              <div
+              {imageUrl ? (
+                <div
                 className="
                   group
                   relative
@@ -279,6 +280,7 @@ export default function FastDeliverySection() {
                   <p className="text-xs text-gray-600">Happy Customers</p>
                 </div>
               </div>
+            ) : null}
             </div>
           </div>
         </div>

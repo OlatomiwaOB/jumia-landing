@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
 
 const Footer = () => {
@@ -137,21 +138,23 @@ const Footer = () => {
                 <MapPin className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
                   <span className="font-semibold block sm:inline">Address: </span>
-                  75 9th Ave, New York, NY 10011-7006
+                  87 Barn Meadow, Bamber Bridge, Preston
+                  PR5 8EA
+
                 </p>
               </div>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
                 <Phone className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
                   <span className="font-semibold block sm:inline">Phone: </span>
-                  (+84) 123 4567 89
+                  07721542823
                 </p>
               </div>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
                 <Mail className="w-5 h-5 shrink-0 opacity-80" />
                 <p>
                   <span className="font-semibold block sm:inline">Email: </span>
-                  support@traditional-taste.com
+                  Traditionaltasteuk@gmail.com
                 </p>
               </div>
               <div className="flex items-center md:items-start justify-center md:justify-start gap-3">
@@ -160,6 +163,18 @@ const Footer = () => {
                   <span className="font-semibold block sm:inline">Hours: </span>
                   Mon-Sat: 9:00am - 5:00pm
                 </p>
+              </div>
+
+              {/* Food Hygiene Rating Badge */}
+              <div className="mt-8 flex justify-center md:justify-start">
+                <div className="relative w-[200px] h-[100px] rounded-[12px] overflow-hidden border border-white/10 bg-[#1A1A1A] shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+                  <Image
+                    src="/badge.jpeg"
+                    alt="Food Hygiene Rating 5 - Very Good"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
               </div>
             </div>
           </div>
