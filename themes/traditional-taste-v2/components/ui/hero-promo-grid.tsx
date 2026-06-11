@@ -68,7 +68,10 @@ export default function HeroPromoGrid() {
             <h3 className="text-white text-[22px] lg:text-[28px] font-bold leading-tight mb-3">
               {p1.name && (
                 <>
-                  <span className="text-[var(--color-primary)]">{p1.name.split(' ')[0]}</span> {p1.name.split(' ').slice(1).join(' ')}
+                  <span className="text-[var(--color-primary)]">
+                    {p1.name.toLowerCase().startsWith('puff puff') ? p1.name.split(' ').slice(0, 2).join(' ') : p1.name.split(' ')[0]}
+                  </span>{' '}
+                  {p1.name.toLowerCase().startsWith('puff puff') ? p1.name.split(' ').slice(2).join(' ') : p1.name.split(' ').slice(1).join(' ')}
                 </>
               )}
             </h3>
@@ -125,7 +128,10 @@ export default function HeroPromoGrid() {
             <h3 className="text-white text-[22px] lg:text-[28px] font-bold leading-tight mb-3">
               {p4.name && (
                 <>
-                  <span className="text-[var(--color-primary)]">{p4.name.split(' ')[0]}</span> {p4.name.split(' ').slice(1).join(' ')}
+                  <span className="text-[var(--color-primary)]">
+                    {p4.name.toLowerCase().startsWith('puff puff') ? p4.name.split(' ').slice(0, 2).join(' ') : p4.name.split(' ')[0]}
+                  </span>{' '}
+                  {p4.name.toLowerCase().startsWith('puff puff') ? p4.name.split(' ').slice(2).join(' ') : p4.name.split(' ').slice(1).join(' ')}
                 </>
               )}
             </h3>
