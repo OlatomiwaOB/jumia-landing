@@ -64,8 +64,8 @@ export default function CategoryShowcaseSection() {
       id: p.id || Math.random(),
       vendor: p.storeName || 'Restaurant',
       title: p.name || 'Unknown',
-      price: p.salePrice ? `$${p.salePrice}` : '$0.00',
-      originalPrice: p.oldPrice ? `$${p.oldPrice}` : null,
+      price: p.salePrice ? `${p.ccy || '£'}${p.salePrice}` : `${p.ccy || '£'}0.00`,
+      originalPrice: p.oldPrice ? `${p.ccy || '£'}${p.oldPrice}` : null,
       discount: p.discount ? `-${p.discount}%` : null,
       image: p.picture,
       badges: [],
@@ -125,10 +125,10 @@ export default function CategoryShowcaseSection() {
                 onMouseLeave={() => setIsHovered(false)}
                 onTouchStart={() => setIsHovered(true)}
                 onTouchEnd={() => setIsHovered(false)}
-                className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 pt-2 w-full h-full items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch]"
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 pt-2 w-full h-full items-stretch [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch]"
               >
                 {displayProducts.map((product) => (
-                  <div key={product.id} className="w-[calc(50%-8px)] sm:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] flex-none h-[310px] sm:h-[340px] md:h-auto transform-gpu will-change-transform">
+                  <div key={product.id} className="w-full sm:w-[calc(33.333%-10.66px)] lg:w-[calc(25%-12px)] flex-none snap-center h-[310px] sm:h-[340px] md:h-auto transform-gpu will-change-transform">
                     <ProductCard product={product} isGrid={true} />
                   </div>
                 ))}
