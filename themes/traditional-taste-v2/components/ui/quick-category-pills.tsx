@@ -84,43 +84,28 @@ export default function QuickCategoryPills() {
   if (!categories.length) return null;
 
   return (
-    <section className="w-full pt-4 md:pt-6 pb-2 max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-hidden">
-
-      {/* ── ALL SCREENS: Smooth continuous marquee Pills ── */}
+    <section className="w-full py-4 border-b border-gray-300 bg-white max-w-[1600px] mx-auto animate-in fade-in duration-500 overflow-hidden">
+      {/* ── ALL SCREENS: Smooth continuous marquee text ── */}
       <div
         ref={scrollRef}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
         onTouchEnd={() => setIsPaused(false)}
-        className="flex gap-3 overflow-hidden px-4 lg:px-10 pb-4 select-none"
+        className="flex items-center gap-16 overflow-hidden px-4 select-none whitespace-nowrap"
       >
         {extendedCategories.map((cat, index) => (
           <Link
-            key={`pill-${cat.code}-${index}`}
+            key={`ticker-${cat.code}-${index}`}
             href={`/shop/${cat.code}`}
-            className={`flex items-center justify-between px-3 lg:px-4 py-2.5 lg:py-3 min-w-[200px] lg:min-w-[220px] rounded-xl shadow-sm shrink-0 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 duration-200 ${pastelBgs[index % pastelBgs.length]}`}
+            className="flex items-center shrink-0 cursor-pointer hover:opacity-70 transition-opacity duration-200"
           >
-            <span className="font-bold text-[#1C1917] text-[13px] lg:text-[14px] tracking-tight leading-tight mr-3 lg:mr-4 pointer-events-none">
+            <span className="font-extrabold text-[var(--color-text)] text-[14px] md:text-[16px] tracking-wide pointer-events-none uppercase">
               {cat.name}
             </span>
-            <div className="relative w-10 h-10 lg:w-12 lg:h-12 shrink-0 rounded-full overflow-hidden bg-white shadow-md border-2 border-white pointer-events-none">
-              {cat.logo && !brokenLogos.has(cat.logo) ? (
-                <Image 
-                  src={cat.logo} 
-                  alt={cat.name || ''} 
-                  fill 
-                  className="object-cover" 
-                  onError={() => setBrokenLogos(prev => new Set(prev).add(cat.logo as string))}
-                />
-              ) : (
-                <Image src={getFallbackImage(cat.name || '')} alt={cat.name || 'Category'} fill className="object-cover" />
-              )}
-            </div>
           </Link>
         ))}
       </div>
-
     </section>
   );
 }

@@ -150,3 +150,29 @@ export const randomNDigitNumber = (digits = 20) => {
   const max = Math.pow(10, digits) - 1;
   return Math.floor(Math.random() * (max - min + 1) + min).toString();
 };
+
+export function getCustomVariantPrices(productName: string, defaultBasePrice: number) {
+  if (!productName) return { price2L: defaultBasePrice, price4L: defaultBasePrice * 2 };
+  
+  const name = productName.toLowerCase();
+  
+  const customPrices = [
+    { keywords: ['seafood rice'], price2L: 50, price4L: 90 },
+    { keywords: ['seafood okro'], price2L: 70, price4L: 130 },
+    { keywords: ['edikaikong'], price2L: 70, price4L: 130 },
+    { keywords: ['native soup', 'native rice', 'ph.native', 'ph native'], price2L: 70, price4L: 130 },
+    { keywords: ['ayamashe', 'ofada'], price2L: 75, price4L: 140 },
+    { keywords: ['ofeakwu', 'banga'], price2L: 50, price4L: 90 },
+    { keywords: ['ukwa'], price2L: 50, price4L: 90 },
+    { keywords: ['coconut rice'], price2L: 60, price4L: 110 },
+    { keywords: ['pineapple rice'], price2L: 60, price4L: 110 }
+  ];
+
+  for (const rule of customPrices) {
+    if (rule.keywords.some(k => name.includes(k))) {
+      return { price2L: rule.price2L, price4L: rule.price4L };
+    }
+  }
+
+  return { price2L: defaultBasePrice, price4L: defaultBasePrice * 2 };
+}
