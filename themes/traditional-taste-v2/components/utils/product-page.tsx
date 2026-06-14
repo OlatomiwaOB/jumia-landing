@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Clock3,
   Flame,
   Minus,
@@ -20,7 +21,7 @@ import {
   Star,
   Truck,
 } from 'lucide-react';
-import { CurrencyCode, formatPrice } from '@/utils/helperfns';
+import { CurrencyCode, formatPrice, getCustomVariantPrices } from '@/utils/helperfns';
 import { useProductBySlug } from '@/hooks/useProductBySlug';
 import { useCart } from '@/store/cart';
 import {
@@ -29,7 +30,7 @@ import {
   getProductHref,
 } from '@/utils/product-route';
 
-type DetailTab = 'description' | 'details' | 'shipping';
+type DetailTab = 'description' | 'details';
 
 export default function ProductPage() {
   const params = useParams();
@@ -39,11 +40,62 @@ export default function ProductPage() {
   const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
   const { product, products, isLoading } = useProductBySlug(productSlug, storeCode, entityCode);
-  const { addToCart, decrement, increment, singleQuantity } = useCart();
+  const { addToCart, decrement, increment, singleQuantity, openCart } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedVariantId, setSelectedVariantId] = useState<string>('');
 
-  const quantity = singleQuantity(product?.id);
+  const isAbacha = product?.name?.toLowerCase().includes('abacha');
+  const isPlantain = product?.name?.toLowerCase().includes('unripe plantain');
+  const isSoup = product?.category?.toLowerCase() === 'soups' || product?.topCategory?.toLowerCase() === 'soups' || ['efo riro', 'soup', 'nsala', 'fisherman', 'bitter leaf', 'bitterleaf', 'peppered chicken', 'peppered fish', 'peppered gizzard', 'egusi', 'seafood okro', 'afang', 'native rice', 'edikaikong', 'gizzard sauce', 'ayamashe', 'ofada', 'ofeakwu', 'banga', 'ukwa', 'seafood rice', 'coconut rice', 'pineapple rice'].some(v => product?.name?.toLowerCase().includes(v));
+  const hasVariants = isSoup || isAbacha || isPlantain;
+
+  const basePrice = product?.salePrice ?? product?.oldPrice ?? 0;
+  const { price2L, price4L } = getCustomVariantPrices(product?.name || '', basePrice);
+
+  let variants: { id: string; size: string; price: number }[] = [];
+  if (isAbacha) {
+    variants = [
+      { id: '1L', size: '1 litre', price: basePrice }
+    ];
+  } else if (isPlantain) {
+    variants = [
+      { id: '1P', size: '1 pack', price: 40 },
+      { id: '2P', size: '2 packs', price: 75 }
+    ];
+  } else if (isSoup) {
+    variants = [
+      { id: '2L', size: '2 litres', price: price2L },
+      { id: '4L', size: '4 litres', price: price4L }
+    ];
+  }
+
+  const currentVariant = variants.find(v => v.id === selectedVariantId);
+  const currentPrice = currentVariant ? currentVariant.price : basePrice;
+
+  // Local state for quantity before adding to cart
+  const [localQty, setLocalQty] = useState(1);
+
+  // Get cart quantity
+  const currentProductId = hasVariants && currentVariant ? `${product?.id}-${currentVariant.id}` : product?.id;
+
+  const quantity = singleQuantity(currentProductId);
+
+  // Watch for removals from the cart sidebar
+  const prevVariantRef = useRef(selectedVariantId);
+  const prevQuantityRef = useRef(quantity);
+
+  useEffect(() => {
+    if (prevVariantRef.current === selectedVariantId) {
+      if (prevQuantityRef.current > 0 && quantity <= 0) {
+        setSelectedVariantId('');
+        setLocalQty(1);
+      }
+    }
+    prevVariantRef.current = selectedVariantId;
+    prevQuantityRef.current = quantity;
+  }, [quantity, selectedVariantId]);
+
   const gallery = useMemo(() => getProductGallery(product), [product]);
   const relatedProducts = useMemo(() => {
     if (!product) return [];
@@ -61,7 +113,6 @@ export default function ProductPage() {
 
   const cartsCount = product?.id ? 2 + (product.id % 4) : 3;
   const activeImage = gallery[activeImageIndex] || product?.picture || '/placeholder-image.png';
-  const price = product?.salePrice ?? product?.oldPrice ?? 0;
 
   const shippingHighlights = [
     {
@@ -83,8 +134,7 @@ export default function ProductPage() {
 
   const tabLabels: Array<{ id: DetailTab; label: string }> = [
     { id: 'description', label: 'Description' },
-    { id: 'details', label: 'Details' },
-    { id: 'shipping', label: 'Shipping & Returns' },
+    { id: 'details', label: 'Details' }
   ];
 
   useEffect(() => {
@@ -141,15 +191,18 @@ export default function ProductPage() {
     <div className="min-h-screen bg-[var(--color-bg-main)]">
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-10">
 
-        {/* BACK BUTTON */}
-        <button
-          type="button"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-text)] opacity-60 transition-all hover:opacity-100 hover:text-[var(--color-primary)]"
-          onClick={() => router.push('/')}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to home
-        </button>
+        {/* BREADCRUMBS */}
+        <div className="mb-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-text)] opacity-60">
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          <span>Back to</span>
+          <Link href="/" className="transition-all hover:opacity-100 hover:text-[var(--color-primary)]">
+            Home
+          </Link>
+          <span className="opacity-50">/</span>
+          <Link href="/shop" className="transition-all hover:opacity-100 hover:text-[var(--color-primary)]">
+            Shop
+          </Link>
+        </div>
 
         <div className="grid gap-8 lg:gap-12 lg:grid-cols-2">
 
@@ -204,11 +257,10 @@ export default function ProductPage() {
                   <button
                     key={`${product.code || product.name}-${index}`}
                     type="button"
-                    className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${
-                      index === activeImageIndex
-                        ? 'border-[var(--color-primary)] shadow-lg'
-                        : 'border-transparent opacity-70 hover:opacity-100'
-                    }`}
+                    className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${index === activeImageIndex
+                      ? 'border-[var(--color-primary)] shadow-lg'
+                      : 'border-transparent opacity-70 hover:opacity-100'
+                      }`}
                     onClick={() => setActiveImageIndex(index)}
                   >
                     <Image
@@ -243,18 +295,41 @@ export default function ProductPage() {
 
             {/* Product Name */}
             <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-text)] leading-tight">
-              {product.name}
+              {product.name?.replace(/\s*\(\s*2\s*(ltrs?|litres?|lts?|l)?\s*\/\s*4\s*(ltrs?|litres?|lts?|l)\s*\)\s*/gi, '').trim()}
             </h1>
 
-            {/* Price */}
-            <div className="flex flex-wrap items-end gap-3">
-              <span className="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">
-                {formatPrice(price, ((product.ccy as CurrencyCode) || 'NGN'))}
-              </span>
-              {discount > 0 && product.oldPrice && (
-                <span className="text-lg text-[var(--color-text)] opacity-40 line-through">
-                  {formatPrice(product.oldPrice, ((product.ccy as CurrencyCode) || 'NGN'))}
+            {/* Price & Variants Dropdown */}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-end gap-3">
+                <span className="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">
+                  {(isSoup || isPlantain) && !selectedVariantId
+                    ? isPlantain ? `${formatPrice(40, ((product?.ccy as CurrencyCode) || 'NGN'))} - ${formatPrice(75, ((product?.ccy as CurrencyCode) || 'NGN'))}` : `${formatPrice(price2L, ((product?.ccy as CurrencyCode) || 'NGN'))} - ${formatPrice(price4L, ((product?.ccy as CurrencyCode) || 'NGN'))}`
+                    : formatPrice(currentPrice, ((product?.ccy as CurrencyCode) || 'NGN'))}
                 </span>
+                {discount > 0 && product.oldPrice && !isSoup && !isPlantain && (
+                  <span className="text-lg text-[var(--color-text)] opacity-40 line-through">
+                    {formatPrice(product.oldPrice, ((product?.ccy as CurrencyCode) || 'NGN'))}
+                  </span>
+                )}
+              </div>
+
+              {(isSoup || isPlantain) && (
+                <div className="mt-4 flex flex-col gap-2 max-w-[200px]">
+                  <span className="font-bold text-[var(--color-text)]">Size</span>
+                  <div className="relative">
+                    <select
+                      value={selectedVariantId}
+                      onChange={(e) => setSelectedVariantId(e.target.value)}
+                      className="w-full appearance-none text-base border border-[var(--color-text)]/20 rounded-xl p-3 pr-12 outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-transparent cursor-pointer"
+                    >
+                      <option value="">Choose an option</option>
+                      {variants.map(v => (
+                        <option key={v.id} value={v.id}>{v.size}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-text)] opacity-50 pointer-events-none" />
+                  </div>
+                </div>
               )}
             </div>
 
@@ -264,87 +339,74 @@ export default function ProductPage() {
               <p>Shipping calculated at checkout.</p>
             </div>
 
-            {/* Urgency indicators */}
-            <div className="space-y-3 border-y border-[var(--color-text)]/10 py-5">
-              <div className="flex items-center gap-3 text-sm">
-                <Bolt className="h-4 w-4 text-[var(--color-primary)]" />
-                <span className="font-semibold text-[var(--color-primary)]">Selling quickly!</span>
-                <span className="text-[var(--color-text)] opacity-65">
-                  {cartsCount} people have this item in their carts
-                </span>
-              </div>
-              <div
-                className={`flex items-center gap-3 text-sm font-medium ${
-                  (product.qtyInStore ?? 0) > 0 ? 'text-green-600' : 'text-red-500'
-                }`}
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                <span>
-                  {(product.qtyInStore ?? 0) > 0
-                    ? `${product.qtyInStore} in stock`
-                    : 'Currently out of stock'}
-                </span>
-              </div>
-            </div>
-
-            {/* Shipping highlights */}
-            <div className="grid gap-3 sm:grid-cols-3">
-              {shippingHighlights.map((highlight) => {
-                const Icon = highlight.icon;
-                return (
-                  <div
-                    key={highlight.title}
-                    className="rounded-2xl border border-[var(--color-text)]/8 bg-white p-4 transition-all hover:shadow-md hover:-translate-y-1"
-                  >
-                    <Icon className="h-5 w-5 text-[var(--color-primary)]" />
-                    <h3 className="mt-3 text-sm font-bold text-[var(--color-text)]">{highlight.title}</h3>
-                    <p className="mt-1 text-xs leading-5 text-[var(--color-text)] opacity-60">
-                      {highlight.description}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
 
             {/* Add to Cart */}
-            <div className="space-y-4 border-t border-[var(--color-text)]/10 pt-5">
-              {quantity <= 0 ? (
-                <button
-                  type="button"
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-4 font-bold text-white transition-all hover:bg-[var(--color-text)] hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={() => addToCart(product as any)}
-                  disabled={(product.qtyInStore ?? 0) <= 0}
-                >
-                  <ShoppingBag className="h-5 w-5" />
-                  {(product.qtyInStore ?? 0) > 0 ? 'ADD TO CART' : 'OUT OF STOCK'}
-                </button>
-              ) : (
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <div className="flex h-14 items-center justify-between rounded-xl bg-[var(--color-bg-secondary)] px-2 sm:w-48">
-                    <button
-                      type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-lg text-lg text-[var(--color-text)] transition-colors hover:bg-white"
-                      onClick={() => decrement(product as any)}
-                      disabled={quantity <= 1}
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="text-base font-bold text-[var(--color-text)]">{quantity}</span>
-                    <button
-                      type="button"
-                      className="flex h-10 w-10 items-center justify-center rounded-lg text-lg text-[var(--color-text)] transition-colors hover:bg-white"
-                      onClick={() => increment(product as any)}
-                      disabled={quantity >= (product.qtyInStore ?? 0)}
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="flex flex-1 items-center justify-center rounded-xl bg-[var(--color-primary)] px-6 py-4 font-bold text-white">
+            <div className="border-t border-[var(--color-text)]/10 pt-6 mt-4">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                
+                {/* Quantity Selector */}
+                <div className="flex h-14 items-center justify-between rounded-xl bg-[var(--color-bg-secondary)] px-2 sm:w-48">
+                  <button
+                    type="button"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-lg text-[var(--color-text)] transition-colors hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      if (quantity > 0) {
+                        decrement({ id: currentProductId } as any);
+                      } else {
+                        setLocalQty(prev => Math.max(1, prev - 1));
+                      }
+                    }}
+                    disabled={(quantity > 0 ? quantity <= 1 : localQty <= 1) || ((isSoup || isPlantain) && !selectedVariantId)}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </button>
+                  <span className="text-base font-bold text-[var(--color-text)]">
+                    {quantity > 0 ? quantity : localQty}
+                  </span>
+                  <button
+                    type="button"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-lg text-[var(--color-text)] transition-colors hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
+                    onClick={() => {
+                      if (quantity > 0) {
+                        increment({ id: currentProductId } as any);
+                      } else {
+                        setLocalQty(prev => prev + 1);
+                      }
+                    }}
+                    disabled={(product.qtyInStore ?? 0) <= 0 || ((isSoup || isPlantain) && !selectedVariantId) || (quantity > 0 ? quantity >= (product.qtyInStore ?? 0) : localQty >= (product.qtyInStore ?? 0))}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Add to Cart / Success Button */}
+                {quantity <= 0 ? (
+                  <button
+                    type="button"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-4 font-bold text-white transition-all hover:bg-[var(--color-text)] hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => {
+                      addToCart({
+                        ...product,
+                        id: currentProductId,
+                        name: (isSoup || isPlantain) && currentVariant ? `${product.name} - ${currentVariant.size}` : product.name,
+                        salePrice: currentPrice,
+                      } as any, localQty);
+                      openCart();
+                    }}
+                    disabled={(product.qtyInStore ?? 0) <= 0 || ((isSoup || isPlantain) && !selectedVariantId)}
+                  >
+                    <ShoppingBag className="h-5 w-5" />
+                    {(product.qtyInStore ?? 0) > 0 
+                      ? (((isSoup || isPlantain) && !selectedVariantId) ? 'SELECT A SIZE' : 'ADD TO CART') 
+                      : 'OUT OF STOCK'}
+                  </button>
+                ) : (
+                  <div className="flex flex-1 items-center justify-center rounded-xl bg-green-600 px-6 py-4 font-bold text-white">
                     <CheckCircle2 className="h-5 w-5 mr-2" />
                     Added to cart
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Tabs: Description / Details / Shipping */}
@@ -354,11 +416,10 @@ export default function ProductPage() {
                   <button
                     key={tab.id}
                     type="button"
-                    className={`rounded-xl px-5 py-3 text-sm font-bold transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-[var(--color-primary)] text-white shadow-md'
-                        : 'bg-[var(--color-bg-secondary)] text-[var(--color-text)] opacity-70 hover:opacity-100'
-                    }`}
+                    className={`rounded-xl px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.id
+                      ? 'bg-[var(--color-primary)] text-white shadow-md'
+                      : 'bg-[var(--color-bg-secondary)] text-[var(--color-text)] opacity-70 hover:opacity-100'
+                      }`}
                     onClick={() => setActiveTab(tab.id)}
                   >
                     {tab.label}
@@ -407,18 +468,7 @@ export default function ProductPage() {
                   </div>
                 )}
 
-                {activeTab === 'shipping' && (
-                  <div className="space-y-4">
-                    <p>
-                      Orders are prepared quickly and fulfilled through the active store. Delivery
-                      timing may vary based on your location and order volume.
-                    </p>
-                    <p>
-                      If the product isn&apos;t the right fit, return support is available within 30
-                      days for eligible orders, subject to the store&apos;s policy.
-                    </p>
-                  </div>
-                )}
+
               </div>
             </div>
           </div>
@@ -463,11 +513,6 @@ export default function ProductPage() {
                       className="object-cover transition-transform duration-500 group-hover:scale-110"
                       sizes="(max-width: 768px) 50vw, 25vw"
                     />
-                    {relatedProduct.featured && (
-                      <span className="absolute top-3 left-3 bg-[var(--color-primary)] text-white text-xs font-bold px-3 py-1 rounded-full">
-                        Featured
-                      </span>
-                    )}
                   </div>
                   <div className="p-4">
                     <h3 className="font-bold text-[var(--color-text)] text-sm uppercase tracking-wide line-clamp-1">

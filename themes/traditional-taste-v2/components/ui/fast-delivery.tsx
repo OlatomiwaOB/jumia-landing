@@ -50,48 +50,41 @@ export default function FastDeliverySection() {
   return (
     <section className="w-full bg-[var(--color-bg-main)] pb-6 md:pb-10 -mt-6 md:-mt-10 relative z-20">
       <div className="max-w-[1640px] mx-auto px-4 md:px-6 lg:px-10">
-        <div
-          className="relative overflow-hidden rounded-[32px] md:rounded-[40px]"
-          style={{ backgroundColor: bannerBg }}
-        >
+        <div className="relative overflow-hidden rounded-none bg-[var(--color-bg-off-white)]">
+          
           {/* Decorative Background */}
-          <div className="absolute inset-0 opacity-[0.05]">
+          <div className="absolute inset-0 opacity-[0.03]">
             <div
               className="w-full h-full"
               style={{
                 backgroundImage:
-                  "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
+                  "radial-gradient(circle at 2px 2px, var(--color-primary) 1px, transparent 0)",
                 backgroundSize: "35px 35px",
               }}
             />
           </div>
 
-          {/* White Glow instead of primary glow */}
-          <div className="absolute -top-20 -right-20 w-72 h-72 bg-white rounded-full blur-[120px] opacity-30" />
-
-          <div className="relative z-10 grid lg:grid-cols-[1fr_320px] gap-6 items-center p-4 md:p-6 lg:p-8">
-            {/* LEFT */}
+          <div className="relative z-10 p-6 md:p-10 lg:p-12">
             <div>
-              <span className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium mb-5 shadow-sm border border-white/20">
+              <span className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-white px-4 py-2 rounded-full text-sm font-medium mb-6 shadow-sm">
                 🚚 Fast Delivery Service
               </span>
 
-              <h2 className="text-white text-2xl md:text-4xl font-bold leading-tight">
+              <h2 className="text-[var(--color-text)] text-3xl md:text-5xl font-bold leading-tight">
                 More than groceries,
-                <span className="text-white opacity-90">
-                  {" "}
+                <span className="text-[var(--color-primary)] block mt-1">
                   delivered to your door in 1 hour
                 </span>
               </h2>
 
-              <p className="text-white/90 text-base mt-3 max-w-3xl leading-relaxed">
+              <p className="text-[var(--color-text-muted)] text-lg md:text-xl mt-4 max-w-3xl leading-relaxed">
                 From authentic African dishes to fresh groceries and kitchen
                 essentials, enjoy fast delivery and premium quality without
                 leaving your home.
               </p>
 
               {/* Feature Cards */}
-              <div className="grid md:grid-cols-3 gap-5 mt-6">
+              <div className="grid md:grid-cols-3 gap-6 mt-10">
                 {features.map((feature, index) => {
                   const Icon = feature.icon;
 
@@ -100,51 +93,42 @@ export default function FastDeliverySection() {
                       key={index}
                       className="
                         group
-                        bg-white/10
-                        backdrop-blur-md
+                        bg-[var(--color-bg-main)]
                         rounded-2xl
-                        p-4
-                        border border-white/10
-
+                        p-6
+                        border border-[var(--color-border)]
+                        shadow-sm
                         transition-all
                         duration-300
-
-                        hover:bg-white
-                        hover:-translate-y-2
-                        hover:shadow-2xl
+                        hover:-translate-y-1
+                        hover:shadow-lg
+                        hover:border-[var(--color-primary)]
                       "
                     >
                       <div
                         className="
-                          w-10
-                          h-10
-                          rounded-lg
-                          bg-white/20
-                          border border-white/20
-
+                          w-12
+                          h-12
+                          rounded-xl
+                          bg-[var(--color-bg-off-white)]
                           flex
                           items-center
                           justify-center
-
-                          mb-4
-
+                          mb-5
                           transition-all
                           duration-300
-
-                          group-hover:bg-transparent
-                          group-hover:border-transparent
+                          group-hover:bg-[var(--color-primary)]
                           group-hover:rotate-6
-                          group-hover:scale-110
                         "
                       >
-                        <Icon size={20} className="text-white group-hover:text-[var(--color-primary)]" />
+                        <Icon size={24} className="text-[var(--color-primary)] group-hover:text-white transition-colors" />
                       </div>
 
-                      <h3 className="text-white font-bold text-lg mb-2 group-hover:text-stone-900 transition-colors">
+                      <h3 className="text-[var(--color-text)] font-bold text-xl mb-3">
                         {feature.title}
                       </h3>
 
-                      <p className="text-white/80 text-sm leading-relaxed group-hover:text-stone-600 transition-colors">
+                      <p className="text-[var(--color-text-muted)] text-base leading-relaxed">
                         {feature.description}
                       </p>
                     </div>
@@ -153,37 +137,34 @@ export default function FastDeliverySection() {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4 mt-6">
+              <div className="flex flex-wrap gap-4 mt-10">
                 <Link
-                  href="/shop"
+                  href="/about"
                   className="
                     group
-                    bg-white
-                    text-[#F97316]
+                    bg-[var(--color-primary)]
+                    text-white
                     font-bold
-
-                    px-6
-                    py-3
-                    text-sm
-
-                    rounded-lg
-
+                    px-8
+                    py-4
+                    text-base
+                    rounded-xl
                     flex
+                    justify-center
                     items-center
                     gap-2
-
+                    w-full
+                    sm:w-max
                     transition-all
                     duration-300
-
                     hover:scale-105
                     hover:-translate-y-1
-                    hover:shadow-[0_20px_40px_rgba(255,255,255,0.25)]
+                    hover:shadow-lg
                   "
-                  style={{ color: bannerBg }}
                 >
-                  Order Now
+                  Discover Our Story
                   <ArrowRight
-                    size={18}
+                    size={20}
                     className="
                       transition-transform
                       duration-300
@@ -191,96 +172,7 @@ export default function FastDeliverySection() {
                     "
                   />
                 </Link>
-
-
               </div>
-            </div>
-
-            {/* RIGHT IMAGE */}
-            <div className="flex justify-center lg:justify-end">
-              {imageUrl ? (
-                <div
-                className="
-                  group
-                  relative
-
-                  w-full
-                  max-w-[320px]
-
-                  h-[200px]
-                  md:h-[260px]
-
-                  rounded-3xl
-                  overflow-hidden
-
-                  shadow-[0_30px_60px_rgba(0,0,0,0.25)]
-                "
-              >
-                <Image
-                  src={imageUrl}
-                  alt={productWithImage?.name || "Food delivery"}
-                  fill
-                  className="
-                    object-cover
-
-                    transition-all
-                    duration-700
-
-                    group-hover:scale-110
-                  "
-                />
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-
-                {/* Floating Badge */}
-                <div
-                  className="
-                    absolute
-                    bottom-4
-                    left-4
-
-                    bg-white
-
-                    px-4
-                    py-3
-
-                    rounded-xl
-
-                    shadow-lg
-                  "
-                >
-                  <p className="text-sm font-bold text-[#245c3b]">
-                    🚀 Delivery in 60 mins
-                  </p>
-                </div>
-
-                {/* Floating Stats */}
-                <div
-                  className="
-                    absolute
-                    top-4
-                    right-4
-
-                    bg-white/90
-                    backdrop-blur-md
-
-                    px-4
-                    py-2
-
-                    rounded-xl
-
-                    shadow-lg
-                  "
-                >
-                  <span className="font-bold text-[var(--color-primary)]">
-                    10k+
-                  </span>
-
-                  <p className="text-xs text-gray-600">Happy Customers</p>
-                </div>
-              </div>
-            ) : null}
             </div>
           </div>
         </div>

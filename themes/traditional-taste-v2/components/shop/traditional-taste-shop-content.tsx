@@ -6,6 +6,7 @@ import { useProducts } from '@/hooks/useProducts';
 import ProductCard from '../ui/product-card';
 import { Loader2, Search, ChefHat } from 'lucide-react';
 import { ProductProps } from '@/types';
+import { CurrencyCode, formatPrice, getCustomVariantPrices } from '@/utils/helperfns';
 
 export default function TraditionalTasteShopContent() {
   const envColor = process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#F97316';
@@ -13,9 +14,10 @@ export default function TraditionalTasteShopContent() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [showAllergenDetails, setShowAllergenDetails] = useState(false);
 
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
   const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'WEB';
@@ -29,7 +31,7 @@ export default function TraditionalTasteShopContent() {
 
   useEffect(() => {
     if (isPaused || !categories.length) return;
-    
+
     let animationFrameId: number;
 
     const animateScroll = () => {
@@ -66,18 +68,53 @@ export default function TraditionalTasteShopContent() {
   const filteredProducts = rawProducts.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()));
 
   // Map to the Product type expected by ProductCard
-  const products = filteredProducts.map((p, idx) => ({
-    id: p.id || idx,
-    vendor: p.brand || 'Traditional Taste',
-    title: p.name || 'Unknown Item',
-    price: `${p.ccy || '$'}${p.salePrice || 0}`,
-    originalPrice: p.oldPrice && p.oldPrice > (p.salePrice || 0) ? `${p.ccy || '$'}${p.oldPrice}` : null,
-    discount: p.discount ? `${p.discount}% OFF` : null,
-    image: p.picture || '/placeholder-image.png',
-    badges: p.banner ? [{ text: 'Bestseller', color: 'bg-orange-100 text-orange-700' }] : [],
-    stock: (p.qtyInStore || 0) > 0,
-    offer: p.onSale ? { type: 'flash', text: 'Limited time offer' } as const : null
-  }));
+  const products = filteredProducts.map((p, idx) => {
+    const isAbacha = p.name?.toLowerCase().includes('abacha');
+    const isPlantain = p.name?.toLowerCase().includes('unripe plantain');
+    const isSoup = p.category?.toLowerCase() === 'soups' || p.topCategory?.toLowerCase() === 'soups' || ['efo riro', 'soup', 'nsala', 'fisherman', 'bitter leaf', 'bitterleaf', 'peppered chicken', 'peppered fish', 'peppered gizzard', 'egusi', 'seafood okro', 'afang', 'native rice', 'edikaikong', 'gizzard sauce', 'ayamashe', 'ofada', 'ofeakwu', 'banga', 'ukwa', 'seafood rice', 'coconut rice', 'pineapple rice'].some(v => p.name?.toLowerCase().includes(v));
+    const hasVariants = isSoup || isAbacha || isPlantain;
+    
+    // Calculate dynamic prices based on the base price from the endpoint
+    const basePrice = p.salePrice || 0;
+    const currency = p.ccy || '£';
+    const { price2L, price4L } = getCustomVariantPrices(p.name || '', basePrice);
+    
+    let variants;
+    if (isAbacha) {
+      variants = [
+        { id: '1L', size: '1 litre', priceStr: `${currency}${basePrice.toFixed(2)}`, price: basePrice }
+      ];
+    } else if (isPlantain) {
+      variants = [
+        { id: '1P', size: '1 pack', priceStr: `${currency}40.00`, price: 40 },
+        { id: '2P', size: '2 packs', priceStr: `${currency}75.00`, price: 75 }
+      ];
+    } else if (isSoup) {
+      variants = [
+        { id: '2L', size: '2 litres', priceStr: `${currency}${price2L.toFixed(2)}`, price: price2L },
+        { id: '4L', size: '4 litres', priceStr: `${currency}${price4L.toFixed(2)}`, price: price4L }
+      ];
+    }
+
+    // Show the dynamic range (e.g. £50.00 - £100.00) if there's more than one variant
+    const priceString = hasVariants && variants && variants.length > 1 
+      ? isPlantain ? `${currency}40.00 - ${currency}75.00` : `${currency}${price2L.toFixed(2)} - ${currency}${price4L.toFixed(2)}` 
+      : `${currency}${basePrice}`;
+
+    return {
+      id: p.id || idx,
+      vendor: p.brand || 'Traditional Taste',
+      title: p.name || 'Unknown Item',
+      price: priceString,
+      originalPrice: p.oldPrice && p.oldPrice > basePrice ? `${currency}${p.oldPrice}` : null,
+      discount: p.discount ? `${p.discount}% OFF` : null,
+      image: p.picture || '/placeholder-image.png',
+      badges: [],
+      stock: (p.qtyInStore || 0) > 0,
+      offer: null,
+      variants: variants
+    };
+  });
 
   const selectedCategoryName = categories.find((c: any) => c.code === selectedCategory)?.name || selectedCategory;
 
@@ -110,8 +147,64 @@ export default function TraditionalTasteShopContent() {
       {/* ── MAIN CONTENT AREA ── */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-30 pb-24">
 
+        {/* ── ALLERGEN NOTICE (SHORT TICKER + CLICK DETAILS) ── */}
+        <div className="mx-auto max-w-[1400px] mt-8 md:mt-14 mb-4 relative z-20 px-2 md:px-0">
+          <button
+            onClick={() => setShowAllergenDetails(!showAllergenDetails)}
+            className="w-full bg-[#FFFBEB] border md:border border-[#FCD34D] rounded-full shadow-sm overflow-hidden flex items-center h-14 md:h-16 group cursor-pointer transition-all hover:bg-[#FEF3C7] relative"
+          >
+            {/* Static Warning Label on the left */}
+            <div className="absolute left-0 top-0 bottom-0 z-30 bg-[#FFFBEB] group-hover:bg-[#FEF3C7] transition-colors flex items-center px-4 md:px-6 border-r border-[#FCD34D] shadow-[10px_0_15px_-3px_rgba(255,251,235,1)]">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⚠️</span>
+                <span className="text-[#92400E] font-black text-[13px] md:text-[15px] tracking-widest uppercase whitespace-nowrap hidden sm:inline-block">
+                  Allergen Notice
+                </span>
+              </div>
+            </div>
+
+            <style dangerouslySetInnerHTML={{
+              __html: `
+              @keyframes allergen-marquee {
+                0% { transform: translateX(0%); }
+                100% { transform: translateX(-50%); }
+              }
+              .animate-allergen-marquee {
+                animation: allergen-marquee 25s linear infinite;
+                will-change: transform;
+              }
+            `}} />
+
+            {/* Scrolling Content */}
+            <div className="flex whitespace-nowrap animate-allergen-marquee pl-[80px] sm:pl-[220px]">
+              {[1, 2].map((key) => (
+                <div key={key} className="flex items-center text-[#92400E]/90 text-[14px] md:text-[15px] font-medium pr-12">
+                  Our kitchen handles peanuts, gluten, dairy, and other major allergens. <strong className="text-[#92400E] mx-1 underline decoration-2 underline-offset-4">Click here to view full allergen details</strong> before ordering!
+                  <span className="mx-8 text-[#FCD34D] text-lg">•</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Fade effect on the right */}
+            <div className="absolute right-0 top-0 bottom-0 w-12 md:w-20 bg-gradient-to-l from-[#FFFBEB] group-hover:from-[#FEF3C7] to-transparent z-30 pointer-events-none transition-colors" />
+          </button>
+
+          {/* Expandable Details Area */}
+          <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showAllergenDetails ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}`}>
+            <div className="bg-white border border-[#FCD34D] p-5 md:p-6 rounded-2xl shadow-lg max-w-4xl mx-auto">
+              <h4 className="text-[#92400E] font-bold text-lg mb-2">Full Allergen Information</h4>
+              <p className="text-gray-700 text-[14px] md:text-[15px] leading-relaxed mb-3">
+                We take food safety seriously and make every effort to minimize the risk of cross-contact. However, all meals are prepared in a kitchen where common allergens are present, including peanuts, tree nuts, gluten, eggs, milk, soy, fish, shellfish, sesame, mustard, celery, lupin, and sulphites.
+              </p>
+              <p className="text-gray-900 text-[14px] md:text-[15px] leading-relaxed font-semibold">
+                As a result, we cannot guarantee that any item is completely free from allergen traces. If you have any allergies, intolerances, or special dietary requirements, please notify us before placing your order.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* ── CATEGORY PILLS ── */}
-        <div className="mb-10 md:mb-12 mt-14 md:mt-16 relative">
+        <div className="mb-10 md:mb-12 mt-8 md:mt-10 relative">
           <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#FAFAF9] to-transparent z-10 pointer-events-none hidden md:block" />
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#FAFAF9] to-transparent z-10 pointer-events-none hidden md:block" />
 
@@ -122,7 +215,7 @@ export default function TraditionalTasteShopContent() {
               ))}
             </div>
           ) : (
-            <div 
+            <div
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}

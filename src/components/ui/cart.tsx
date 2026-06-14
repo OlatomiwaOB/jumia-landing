@@ -116,12 +116,12 @@ const Cart = () => {
                         storeCode: freshProduct.storeCode,
                         storeName: freshProduct.storeName,
                         qtyInStore: freshProduct.qtyInStore,
-                        salePrice: freshProduct.salePrice,
+                        salePrice: item.salePrice,
                         oldPrice: freshProduct.oldPrice,
                         picture: freshProduct.picture,
                         discount: freshProduct.discount,
                         ccy: freshProduct.ccy,
-                        subTotal: freshProduct.salePrice * item.quantity,
+                        subTotal: item.salePrice * item.quantity,
                         vat: freshProduct.vat
                     };
                 }

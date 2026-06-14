@@ -18,6 +18,7 @@ export interface Product {
   badges: { text: string; color: string }[];
   stock: boolean;
   offer: { type: 'flash' | 'shipping'; text: string } | null;
+  variants?: { id: string; size: string; priceStr: string; price: number }[];
 }
 
 interface ProductCardProps {
@@ -32,14 +33,29 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
   const handleIncrement = () => setQuantity(prev => prev + 1);
   const handleDecrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
 
+  const hasVariants = product.variants && product.variants.length > 0;
+  const [selectedVariantId, setSelectedVariantId] = useState<string>('');
+  const selectedVariant = hasVariants ? product.variants?.find(v => v.id === selectedVariantId) : null;
+
   const handleToggleCart = () => {
-    if (inCart(product.id)) {
-      removeItem(product.id);
+    // If it has variants but none selected, alert or do nothing
+    if (hasVariants && !selectedVariantId) {
+      alert("Please choose a size option.");
+      return;
+    }
+
+    const cartItemId = hasVariants ? `${product.id}-${selectedVariantId}` : product.id;
+    const salePrice = hasVariants && selectedVariant
+      ? selectedVariant.price
+      : parseFloat(product.price.replace(/[^0-9.]/g, ''));
+
+    if (inCart(cartItemId)) {
+      removeItem(cartItemId);
     } else {
       addToCart({
-        id: product.id,
-        name: product.title,
-        salePrice: parseFloat(product.price.replace(/[^0-9.]/g, '')),
+        id: cartItemId as any,
+        name: hasVariants && selectedVariant ? `${product.title} - ${selectedVariant.size}` : product.title,
+        salePrice: salePrice,
         picture: product.image,
         qtyInStore: 100,
         storeCode: 'WEB',
@@ -50,13 +66,18 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
     }
   };
 
-  const isAdded = inCart(product.id);
+  const isAdded = hasVariants
+    ? inCart(`${product.id}-${selectedVariantId}`)
+    : inCart(product.id);
+
+  const displayPrice = selectedVariant ? selectedVariant.priceStr : product.price;
 
   return (
     <div className={`${isGrid ? 'w-full h-full flex-1' : 'w-[calc((100%-16px)/2)] md:w-[calc((100%-48px)/4)] lg:w-[calc((100%-80px)/6)]'} flex-none bg-[var(--color-bg-main)] rounded-2xl p-3 flex flex-col snap-start shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group relative border border-gray-100 hover:border-transparent`}>
+      <Link href={getProductHref({ name: product.title } as any)} className="absolute inset-0 z-10" aria-label={`View ${product.title} details`} />
 
       {/* Image & Badges */}
-      <div className="bg-[var(--color-bg-secondary)] rounded-xl relative aspect-square w-full mb-2 flex items-center justify-center overflow-hidden">
+      <div className="bg-[var(--color-bg-secondary)] rounded-xl relative aspect-square w-full mb-2 flex items-center justify-center overflow-hidden pointer-events-none">
         <div className="absolute top-2 left-2 flex flex-col gap-1.5 z-10 transition-opacity duration-300 group-hover:opacity-0">
           {product.badges.map((badge, idx) => (
             <span key={idx} className={`${badge.color} text-[11px] font-bold px-2 py-0.5 rounded-sm shadow-sm inline-block w-max`}>
@@ -64,10 +85,6 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
             </span>
           ))}
         </div>
-
-        <Link href={getProductHref({ name: product.title } as any)} className="absolute top-3 right-3 w-10 h-10 md:w-11 md:h-11 bg-[var(--color-primary)] text-[var(--color-foreground)] rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-md hover:scale-110 z-20" aria-label="Quick view">
-          <Eye size={22} strokeWidth={2.5} />
-        </Link>
 
         {/* Using placeholder for now */}
         <div className="relative w-full h-full rounded-xl overflow-hidden">
@@ -78,11 +95,11 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
       {/* Details */}
       <div className="flex flex-col flex-1">
         <h3 className="text-[var(--color-text)] text-[13px] font-bold leading-tight mb-1 line-clamp-2">
-          {product.title}
+          {product.title?.replace(/\s*\(\s*2\s*(ltrs?|litres?|lts?|l)?\s*\/\s*4\s*(ltrs?|litres?|lts?|l)\s*\)\s*/gi, '').trim()}
         </h3>
 
         <div className="flex items-center gap-1.5 mb-1">
-          <span className="text-[#F97316] text-base font-bold">{product.price}</span>
+          <span className="text-[#F97316] text-base font-bold">{displayPrice}</span>
           {product.originalPrice && (
             <span className="text-[var(--color-text)] opacity-40 text-xs font-medium line-through">{product.originalPrice}</span>
           )}
@@ -105,18 +122,13 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
         )}
 
         {/* Add to Basket Section */}
-        <div className="mt-auto pt-2 flex flex-col gap-2">
-          <div className="flex items-center justify-between border border-[var(--color-text)] border-opacity-15 rounded-lg p-0.5 h-8">
-            <button onClick={handleDecrement} className="w-7 h-full flex items-center justify-center text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[var(--color-text)] hover:bg-opacity-10 rounded-md text-sm">−</button>
-            <span className="font-bold text-[13px] text-[var(--color-text)]">{quantity}</span>
-            <button onClick={handleIncrement} className="w-7 h-full flex items-center justify-center text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[var(--color-text)] hover:bg-opacity-10 rounded-md text-sm">+</button>
-          </div>
-          <button
-            onClick={handleToggleCart}
-            className={`w-full font-bold py-2 rounded-lg transition-colors text-[12px] flex items-center justify-center gap-1.5 ${isAdded ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#F97316] hover:bg-[#1C1917] text-white'}`}
+        <div className="mt-auto pt-2 flex flex-col gap-2 relative z-20">
+          <Link
+            href={getProductHref({ name: product.title } as any)}
+            className="w-full font-bold py-2 rounded-lg transition-colors text-[12px] flex items-center justify-center gap-1.5 bg-[#F97316] hover:bg-[#1C1917] text-white"
           >
-            {isAdded ? <><Check size={13} /> Added</> : 'Add to basket'}
-          </button>
+            Select Options
+          </Link>
         </div>
       </div>
 
