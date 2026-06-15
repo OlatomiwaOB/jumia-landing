@@ -24,7 +24,7 @@ export default function HeroPromoGrid() {
           category: '',
           tag: '',
           pageNumber: 1,
-          pageSize: 100
+          pageSize: 10
         }
       }).then(response => response.data)
     }
