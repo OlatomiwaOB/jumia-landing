@@ -116,11 +116,11 @@ export default function ChefSpecialSection() {
     <section className="w-full bg-[var(--color-text)] lg:h-[700px] flex flex-col lg:flex-row relative z-20">
       {/* LEFT SIDE */}
       <div className="w-full lg:w-1/2 p-10 md:p-16 lg:p-24 flex flex-col justify-center order-2 lg:order-1">
-        <h2 className="text-white text-4xl md:text-5xl lg:text-[54px] font-serif italic tracking-wide leading-[1.2] mb-6 uppercase drop-shadow-md">
+        <h2 className="text-[var(--color-bg-main)] text-4xl md:text-5xl lg:text-[54px] font-serif italic tracking-wide leading-[1.2] mb-6 uppercase drop-shadow-md">
           {featuredProduct?.name || "Chef's Special"}
         </h2>
 
-        <p className="text-white/90 text-base md:text-lg max-w-lg mb-10 leading-relaxed font-medium">
+        <p className="text-[var(--color-bg-main)]/90 text-base md:text-lg max-w-lg mb-10 leading-relaxed font-medium">
           {featuredProduct?.description || "Experience our meticulously crafted dishes, highlighted by unique characteristics and premium ingredients, making every bite a true delight."}
         </p>
 

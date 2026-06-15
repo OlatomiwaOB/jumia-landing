@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useProductById } from '@/hooks/useProductById';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { CurrencyCode, formatPrice, getCustomVariantPrices } from '@/utils/helperfns';
 import { useProductBySlug } from '@/hooks/useProductBySlug';
+
 import { useCart } from '@/store/cart';
 import {
   getCategoryHref,
@@ -39,7 +41,19 @@ export default function ProductPage() {
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
   const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
-  const { product, products, isLoading } = useProductBySlug(productSlug, storeCode, entityCode);
+  const { product: oldProduct, products, isLoading: isLoadingOld } = useProductBySlug(productSlug, storeCode, entityCode);
+  
+  // Use your new API endpoint to get the live product (passing the numeric ID from the oldProduct)
+  const productId = oldProduct?.id?.toString() || '';
+  const { productData, isLoading: isLoadingLive, error } = useProductById(productId, entityCode);
+  
+  // If the live data exists, use it! Otherwise fallback to the old product or null
+  const product = productData || oldProduct || null;
+  const isLoading = isLoadingOld || isLoadingLive;
+  
+  // Log it to the console so you can see it!
+  console.log("LIVE API RESPONSE:", productData);
+  console.log("LIVE API ERROR:", error);
   const { addToCart, decrement, increment, singleQuantity, openCart } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -343,7 +357,7 @@ export default function ProductPage() {
             {/* Add to Cart */}
             <div className="border-t border-[var(--color-text)]/10 pt-6 mt-4">
               <div className="flex flex-col gap-3 sm:flex-row">
-                
+
                 {/* Quantity Selector */}
                 <div className="flex h-14 items-center justify-between rounded-xl bg-[var(--color-bg-secondary)] px-2 sm:w-48">
                   <button
@@ -396,8 +410,8 @@ export default function ProductPage() {
                     disabled={(product.qtyInStore ?? 0) <= 0 || ((isSoup || isPlantain) && !selectedVariantId)}
                   >
                     <ShoppingBag className="h-5 w-5" />
-                    {(product.qtyInStore ?? 0) > 0 
-                      ? (((isSoup || isPlantain) && !selectedVariantId) ? 'SELECT A SIZE' : 'ADD TO CART') 
+                    {(product.qtyInStore ?? 0) > 0
+                      ? (((isSoup || isPlantain) && !selectedVariantId) ? 'SELECT A SIZE' : 'ADD TO CART')
                       : 'OUT OF STOCK'}
                   </button>
                 ) : (
