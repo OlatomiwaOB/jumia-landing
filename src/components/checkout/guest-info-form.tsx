@@ -10,10 +10,12 @@ import { SearchSelect } from '@/components/ui/search-select';
 import { nationalityOptions, countryOptions } from '@/utils/country-data';
 import { useRouter } from 'next/navigation';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
+import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatPrice } from '@/utils/helperfns';
+import { formatStoreHours } from "@/utils/formatStoreHours";
 import { useCart } from '@/store/cart';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
@@ -36,12 +38,14 @@ const GuestInfoForm = ({
   onShippingUpdate,
   onVatUpdate,
   onSubtotalUpdate,
-  onTotalUpdate
+  onTotalUpdate,
 }: GuestInfoFormProps) => {
   const router = useRouter();
   const { watch, register, formState: { errors }, setValue, trigger } = form;
-  const { mainCcy } = useCart();
+  const { mainCcy, getCartWeight } = useCart();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [selectedZone, setSelectedZone] = useState<string | undefined>(undefined);
 
   const watchShippingMethod = watch("shippingMethod");
   const watchShippingOption = watch("shippingOption");
@@ -50,6 +54,25 @@ const GuestInfoForm = ({
 
   const { deliveryOptions } = useDeliveryOptions('GUEST');
   const addressTypeOptions = useGetLookup('ADDRESS_TYPE');
+
+  // Get unique zones from delivery options
+  const zones = React.useMemo(() => {
+    if (!deliveryOptions?.length) return [];
+    const seen = new Set<string>();
+    return deliveryOptions.filter((opt: any) => {
+      if (!opt.groupCode || seen.has(opt.groupCode)) return false;
+      seen.add(opt.groupCode);
+      return true;
+    });
+  }, [deliveryOptions]);
+
+  // Fetch weight-based delivery options when zone + weight are available
+  const cartWeight = getCartWeight();
+  const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
+    selectedZone,
+    cartWeight,
+    'GUEST'
+  );
 
   const { data: pickupData, isLoading: isLoadingPickup } = useQuery({
     queryKey: ['pickup-locations-guest'],
@@ -83,14 +106,15 @@ const GuestInfoForm = ({
 
   const lastShippingAmount = React.useRef<number | null>(null);
 
-  // Recalculate shipping cost if delivery option or pickup store changes
+  // Recalculate shipping cost if weight-based option or pickup store changes
   useEffect(() => {
     let shippingAmount = 0;
     if (watchShippingMethod === 'delivery' && watchShippingOption) {
-      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === watchShippingOption);
-      shippingAmount = selectedOption?.price || 0;
-      if (selectedOption?.groupCode) {
-        setValue("deliveryOptionGroup", selectedOption.groupCode);
+      // Find the selected weight-based option
+      const selectedWeightOption = weightOptions?.find((opt) => opt.typeCode === watchShippingOption);
+      if (selectedWeightOption) {
+        shippingAmount = selectedWeightOption.finalFee || 0;
+        setValue("deliveryOptionGroup", selectedWeightOption.typeCode);
       } else {
         setValue("deliveryOptionGroup", "");
       }
@@ -104,12 +128,13 @@ const GuestInfoForm = ({
       lastShippingAmount.current = shippingAmount;
       onShippingUpdate?.(shippingAmount);
     }
-  }, [watchShippingMethod, watchShippingOption, watchPickupStore, deliveryOptions, pickupStores, onShippingUpdate]);
+  }, [watchShippingMethod, watchShippingOption, watchPickupStore, weightOptions, pickupStores, onShippingUpdate]);
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     setValue("shippingMethod", method);
     if (method === 'pickup') {
       setValue("shippingOption", undefined);
+      setSelectedZone(undefined);
       setValue("street", "");
       setValue("city", "");
       setValue("state", "");
@@ -131,34 +156,36 @@ const GuestInfoForm = ({
     setValue('state', store?.state || store?.city || '');
   };
 
-  const handleShippingOptionChange = (optionId: string) => {
-    setValue("shippingOption", optionId);
-    const selectedOption = deliveryOptions?.find((option: any) => option.id === optionId);
-    if (selectedOption?.groupCode) {
-      setValue("deliveryOptionGroup", selectedOption.groupCode);
-    } else {
-      setValue("deliveryOptionGroup", "");
-    }
+  const handleZoneSelect = (zoneCode: string) => {
+    setSelectedZone(zoneCode);
+    // Reset the selected option type when zone changes
+    setValue("shippingOption", undefined);
+    setValue("deliveryOptionGroup", "");
+  };
+
+  const handleWeightOptionSelect = (typeCode: string) => {
+    setValue("shippingOption", typeCode);
+    setValue("deliveryOptionGroup", typeCode);
   };
 
   const getSelectedShippingOption = () => {
-    if (watchShippingMethod !== 'delivery' || !watchShippingOption) return null;
-    const selectedOption = deliveryOptions.find((option: any) => option.id === watchShippingOption);
-    if (!selectedOption) return null;
+    if (watchShippingMethod !== 'delivery' || !watchShippingOption || !selectedZone) return null;
+    const selectedWeightOption = weightOptions?.find((opt) => opt.typeCode === watchShippingOption);
+    if (!selectedWeightOption) return null;
 
     return {
-      id: selectedOption.id,
-      name: selectedOption.name,
-      price: selectedOption.price,
-      description: selectedOption.description,
-      icon: selectedOption.icon,
-      estimatedArrival: selectedOption.estimatedArrival,
-      area: selectedOption.area,
-      groupCode: selectedOption.groupCode,
-      estimatedTime: selectedOption.estimatedTime,
-      estimatedTimeType: selectedOption.estimatedTimeType,
-      amount: selectedOption.amount,
-      deliveryVatAmount: selectedOption.deliveryVatAmount
+      id: selectedWeightOption.typeCode,
+      name: selectedWeightOption.typeName,
+      price: selectedWeightOption.finalFee,
+      description: selectedWeightOption.breakdown,
+      icon: selectedWeightOption.typeCode === 'EXPRESS' ? '⚡' : '📦',
+      estimatedArrival: `Est. ${selectedWeightOption.estimatedTime} ${selectedWeightOption.estimatedTimeType}`,
+      area: selectedWeightOption.zoneCode,
+      groupCode: selectedWeightOption.typeCode,
+      estimatedTime: selectedWeightOption.estimatedTime,
+      estimatedTimeType: selectedWeightOption.estimatedTimeType,
+      amount: selectedWeightOption.finalFee,
+      deliveryVatAmount: 0
     };
   };
 
@@ -192,7 +219,7 @@ const GuestInfoForm = ({
               <CardTitle className="text-lg">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input {...register('firstname')} placeholder="John" className={errors.firstname ? "border-destructive" : ""} />
@@ -205,7 +232,7 @@ const GuestInfoForm = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Email *</Label>
                   <Input type="email" {...register('email')} placeholder="john@example.com" className={errors.email ? "border-destructive" : ""} />
@@ -218,8 +245,8 @@ const GuestInfoForm = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <div className="grid gap-4">
+                {/* <div className="space-y-2">
                   <Label>Nationality *</Label>
                   <SearchSelect
                     options={nationalityOptions}
@@ -228,12 +255,12 @@ const GuestInfoForm = ({
                     placeholder="Select nationality"
                   />
                   {errors.nationality && <p className="text-xs text-destructive">{errors.nationality.message as string}</p>}
-                </div>
-                <div className="space-y-2">
+                </div> */}
+                {/* <div className="space-y-2">
                   <Label>Date of Birth *</Label>
                   <Input type="date" {...register('dateOfBirth')} className={errors.dateOfBirth ? "border-destructive" : ""} />
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth.message as string}</p>}
-                </div>
+                </div> */}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -254,8 +281,30 @@ const GuestInfoForm = ({
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
+
                   {errors.password && <p className="text-xs text-destructive">{errors.password.message as string}</p>}
                   <p className="text-xs text-muted-foreground mt-1">We will create an account for you using this password.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Confirm Password *</Label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      {...register('confirmPassword')}
+                      placeholder="••••••••"
+                      className={errors.confirmPassword ? "border-destructive" : ""}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message as string}</p>}
+                  {/* <p className="text-xs text-muted-foreground mt-1">We will create an account for you using this password.</p> */}
                 </div>
               </div>
             </CardContent>
@@ -318,7 +367,7 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>City *</Label>
                       <Input {...register('city', { required: watchShippingMethod === 'delivery' ? 'City is required' : false })} placeholder="City" />
@@ -331,7 +380,7 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Country *</Label>
                       <SearchSelect
@@ -354,54 +403,121 @@ const GuestInfoForm = ({
             {watchShippingMethod === 'delivery' && (
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle className="text-lg">Delivery Method</CardTitle>
+                  <CardTitle className="text-lg">Delivery Zone</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {deliveryOptions.length === 0 ? (
+                  {zones.length === 0 ? (
                     <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                      <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
+                      <p className="text-sm text-muted-foreground mt-2">Loading delivery zones...</p>
                     </div>
                   ) : (
                     <RadioGroup
-                      value={watchShippingOption || ""}
-                      onValueChange={handleShippingOptionChange}
+                      value={selectedZone || ""}
+                      onValueChange={handleZoneSelect}
                       className="space-y-3"
                     >
-                      {deliveryOptions.map((option: any) => (
+                      {zones.map((option: any) => (
                         <div
-                          key={option.id}
-                          className={`border rounded-lg p-4 cursor-pointer transition-all ${watchShippingOption === option.id
+                          key={option.groupCode}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedZone === option.groupCode
                             ? 'border-accent bg-accent/5 shadow-sm'
                             : 'border-gray-200 hover:border-accent/50'
                             }`}
                         >
                           <label
-                            htmlFor={option.id}
-                            className="md:flex items-center gap-4 cursor-pointer w-full"
+                            htmlFor={`zone-${option.groupCode}`}
+                            className="flex items-center gap-4 cursor-pointer w-full"
                           >
                             <RadioGroupItem
-                              value={option.id}
-                              id={option.id}
+                              value={option.groupCode}
+                              id={`zone-${option.groupCode}`}
                               onClick={(e) => e.stopPropagation()}
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
                                 <div className="text-2xl">{option.icon}</div>
-                                <div className="font-semibold cursor-pointer text-checkout-text">{option.name}</div>
+                                <div className="font-semibold cursor-pointer text-checkout-text">{option.name || option.groupCode}</div>
                               </div>
-                              <p className="text-sm text-muted-foreground">{option.description}</p>
-                            </div>
-                            <div className="md:text-right">
-                              <p className="font-semibold text-checkout-text">{formatPrice(option.price, mainCcy() as any)}</p>
+                              <p className="text-sm text-muted-foreground">{option.description || option.area}</p>
                             </div>
                           </label>
                         </div>
                       ))}
                     </RadioGroup>
                   )}
-                  {!watchShippingOption && watchShippingMethod === 'delivery' && (
-                    <p className="text-sm text-destructive mt-2">Please select a delivery option</p>
+                  {!selectedZone && watchShippingMethod === 'delivery' && (
+                    <p className="text-sm text-destructive mt-2">Please select a delivery zone</p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Weight-based Delivery Options (Regular / Express) */}
+            {watchShippingMethod === 'delivery' && selectedZone && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Delivery Speed</CardTitle>
+                  <p className="text-sm text-muted-foreground">Cart weight: {cartWeight.toFixed(1)} kg</p>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingWeightOptions ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+                      <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
+                    </div>
+                  ) : weightOptions.length === 0 ? (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <p>No delivery options available for this zone</p>
+                    </div>
+                  ) : (
+                    <RadioGroup
+                      value={watchShippingOption || ""}
+                      onValueChange={handleWeightOptionSelect}
+                      className="space-y-3"
+                    >
+                      {weightOptions.map((option) => (
+                        <div
+                          key={option.typeCode}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${watchShippingOption === option.typeCode
+                            ? 'border-accent bg-accent/5 shadow-sm'
+                            : 'border-gray-200 hover:border-accent/50'
+                            }`}
+                        >
+                          <label
+                            htmlFor={`weight-opt-${option.typeCode}`}
+                            className="md:flex items-center gap-4 cursor-pointer w-full"
+                          >
+                            <RadioGroupItem
+                              value={option.typeCode}
+                              id={`weight-opt-${option.typeCode}`}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <div className="text-2xl">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
+                                <div className="font-semibold cursor-pointer text-checkout-text">{option.typeName}</div>
+                                {option.typeCode === 'EXPRESS' && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                    Fastest
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Est. {option.estimatedTime} {option.estimatedTimeType}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{option.breakdown}</p>
+                            </div>
+                            <div className="md:text-right mt-2 md:mt-0">
+                              <p className="font-semibold text-checkout-text">{formatPrice(option.finalFee, mainCcy() as any)}</p>
+                            </div>
+                          </label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  )}
+                  {!watchShippingOption && watchShippingMethod === 'delivery' && selectedZone && weightOptions.length > 0 && (
+                    <p className="text-sm text-destructive mt-2">Please select a delivery speed</p>
                   )}
                 </CardContent>
               </Card>
@@ -453,7 +569,7 @@ const GuestInfoForm = ({
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
-                                    {store.hours}
+                                    {formatStoreHours(store.hours)}
                                   </span>
                                 </div>
                                 {store.phone && (
@@ -488,7 +604,7 @@ const GuestInfoForm = ({
           </div>
         </div>
 
-        <div className="lg:pl-8 lg:border-l border-border">
+        <div className="lg:pl-8 lg:border-l border-border lg:h-fit lg:sticky lg:top-20">
           {/* We reuse the CartReview component, but override its internal continue button by hiding it and providing our own */}
           <div className="pointer-events-none opacity-100">
             <CartReview

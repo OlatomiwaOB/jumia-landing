@@ -97,6 +97,7 @@ const navigationGroups: NavGroup[] = [
     items: [
       { name: 'Orders', href: '/operations/orders', requiredPermissions: ['VIEW_ORDERS'] },
       { name: 'Delivery Options', href: '/operations/delivery-options', requiredPermissions: ['MANAGE_DELIVERY_OPTIONS'] },
+      { name: 'Delivery Option Types', href: '/operations/delivery-option-types', requiredPermissions: ['MANAGE_DELIVERY_OPTIONS'] },
       { name: 'Delivery Requests', href: '/operations/delivery-requests', requiredPermissions: ['MANAGE_DELIVERY_REQUESTS'] },
       { name: 'Pickup Locations', href: '/operations/pickup-locations', requiredPermissions: ['MANAGE_PICKUP_LOCATIONS'] },
     ]

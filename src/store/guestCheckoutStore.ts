@@ -10,7 +10,7 @@ export interface GuestInfo {
   city: string;
   countryCode: string;
   password: string;
-  nationality: string;
+  nationality?: string;
   gender?: string;
   dateOfBirth?: string;
   customerType?: string;

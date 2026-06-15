@@ -45,9 +45,15 @@ const guestFormSchema = z.object({
   lastname: z.string().min(2, "Last name is required"),
   email: z.string().email("Valid email is required"),
   mobileNo: z.string().min(6, "Phone number is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  nationality: z.string().min(1, "Nationality is required"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  confirmPassword: z.string().min(8, "Confirm Password must be at least 8 characters"),
+  // nationality: z.string().min(1, "Nationality is required"),
+  // dateOfBirth: z.string().min(1, "Date of birth is required"),
 });
 
 export type GuestFormData = z.infer<typeof guestFormSchema>;
@@ -62,6 +68,7 @@ const GuestCheckoutContent = () => {
   const [shippingFee, setShippingFee] = useState(0);
   const [totalVat, setTotalVat] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const checkoutInitialized = useRef(false);
 
@@ -70,10 +77,10 @@ const GuestCheckoutContent = () => {
   console.log('checkout data', checkoutData);
 
 
-  const latestValues = useRef({ subtotal: 0, shippingFee: 0, totalVat: 0 });
+  const latestValues = useRef({ subtotal: 0, shippingFee: 0, totalVat: 0, deliveryCharge: 0 });
   useEffect(() => {
-    latestValues.current = { subtotal, shippingFee, totalVat };
-  }, [subtotal, shippingFee, totalVat]);
+    latestValues.current = { subtotal, shippingFee, totalVat, deliveryCharge };
+  }, [subtotal, shippingFee, totalVat, deliveryCharge]);
 
   const form = useForm<GuestFormData>({
     resolver: zodResolver(guestFormSchema),
@@ -90,8 +97,8 @@ const GuestCheckoutContent = () => {
       email: "",
       mobileNo: "",
       password: "",
-      nationality: "",
-      dateOfBirth: "",
+      // nationality: "",
+      // dateOfBirth: "",
     },
   });
 
@@ -108,8 +115,9 @@ const GuestCheckoutContent = () => {
     }
   }, [router, searchParams, storeCode]);
 
-  const updateCheckoutWithAllValues = useCallback((subtotalVal: number, shippingVal: number, vatVal: number) => {
-    const totalAmount = subtotalVal + shippingVal + vatVal;
+  const updateCheckoutWithAllValues = useCallback((subtotalVal: number, shippingVal: number, vatVal: number, deliveryChargeVal?: number) => {
+    const dcVal = deliveryChargeVal ?? latestValues.current.deliveryCharge;
+    const totalAmount = subtotalVal + shippingVal + vatVal + dcVal;
 
     const stored = sessionStorage.getItem('checkout');
     const parsedData = stored ? JSON.parse(stored) : {};
@@ -119,6 +127,7 @@ const GuestCheckoutContent = () => {
       subtotal: subtotalVal,
       shippingFee: shippingVal,
       totalVat: vatVal,
+      deliveryCharge: dcVal,
       totalAmount: totalAmount
     };
 
@@ -127,7 +136,7 @@ const GuestCheckoutContent = () => {
 
     if (selectedPayment === 'crypto_token') {
       const cryptoAmount = updatedData.payingAmount || 0;
-      setOrderTotal(cryptoAmount + shippingVal + vatVal);
+      setOrderTotal(cryptoAmount + shippingVal + vatVal + dcVal);
     } else {
       setOrderTotal(totalAmount);
     }
@@ -150,6 +159,17 @@ const GuestCheckoutContent = () => {
     setOrderTotal(newTotal);
   }, [orderTotal]);
 
+  const handleDeliveryChargeUpdate = useCallback((charge: number) => {
+    if (charge === latestValues.current.deliveryCharge) return;
+    setDeliveryCharge(charge);
+    updateCheckoutWithAllValues(
+      latestValues.current.subtotal,
+      latestValues.current.shippingFee,
+      latestValues.current.totalVat,
+      charge
+    );
+  }, [updateCheckoutWithAllValues]);
+
   // Run only once on mount. Using empty deps [] is intentional: getCartTotal is
   // an unstable reference (changes on every render) — putting it in deps caused
   // this effect to re-run constantly, overwriting saved sessionStorage checkout
@@ -167,17 +187,19 @@ const GuestCheckoutContent = () => {
         const subtotalVal = parsedData.subtotal ?? 0;
         const shippingVal = parsedData.shippingFee ?? 0;
         const vatVal = parsedData.totalVat ?? 0;
-        const totalAmount = subtotalVal + shippingVal + vatVal;
+        const dcVal = parsedData.deliveryCharge ?? 0;
+        const totalAmount = subtotalVal + shippingVal + vatVal + dcVal;
 
         // CRITICAL: update the ref synchronously BEFORE setting state.
         // React state updates are async — if a child callback (e.g. onShippingUpdate)
         // fires before the next render, latestValues.current would still be all-zeros,
         // causing updateCheckoutWithAllValues to overwrite sessionStorage with subtotal:0.
-        latestValues.current = { subtotal: subtotalVal, shippingFee: shippingVal, totalVat: vatVal };
+        latestValues.current = { subtotal: subtotalVal, shippingFee: shippingVal, totalVat: vatVal, deliveryCharge: dcVal };
 
         setSubtotal(subtotalVal);
         setShippingFee(shippingVal);
         setTotalVat(vatVal);
+        setDeliveryCharge(dcVal);
         setOrderTotal(totalAmount);
 
         // Restore step and payment method so refresh lands the user back where they were
@@ -198,8 +220,8 @@ const GuestCheckoutContent = () => {
             email: savedGuestInfo.email,
             mobileNo: savedGuestInfo.mobileNo,
             password: savedGuestInfo.password,
-            nationality: savedGuestInfo.nationality,
-            dateOfBirth: savedGuestInfo.dateOfBirth || '',
+            // nationality: savedGuestInfo.nationality,
+            // dateOfBirth: savedGuestInfo.dateOfBirth || '',
             city: savedGuestInfo.city || '',
             country: savedGuestInfo.countryCode || '',
             agreeTerms: true,
@@ -221,12 +243,12 @@ const GuestCheckoutContent = () => {
       totalAmount: subtotalVal,
     };
     // Immediately sync the ref (same reason as the stored-data branch above)
-    latestValues.current = { subtotal: subtotalVal, shippingFee: 0, totalVat: 0 };
+    latestValues.current = { subtotal: subtotalVal, shippingFee: 0, totalVat: 0, deliveryCharge: 0 };
     sessionStorage.setItem('checkout', JSON.stringify(initialCheckoutData));
     setCheckoutData(initialCheckoutData);
     setSubtotal(subtotalVal);
     setOrderTotal(subtotalVal);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -235,12 +257,13 @@ const GuestCheckoutContent = () => {
     const subtotalVal = checkoutData.subtotal ?? getCartTotal();
     const shipping = checkoutData.shippingFee ?? 0;
     const vat = checkoutData.totalVat ?? 0;
+    const dc = checkoutData.deliveryCharge ?? 0;
 
     if (selectedPayment === 'crypto_token') {
       const cryptoAmount = checkoutData.payingAmount ?? 0;
-      setOrderTotal(cryptoAmount + shipping + vat);
+      setOrderTotal(cryptoAmount + shipping + vat + dc);
     } else {
-      setOrderTotal(subtotalVal + shipping + vat);
+      setOrderTotal(subtotalVal + shipping + vat + dc);
     }
   }, [selectedPayment, checkoutData, getCartTotal]);
 
@@ -292,7 +315,7 @@ const GuestCheckoutContent = () => {
         currentStep: step,
         ...(payment !== undefined ? { selectedPayment: payment } : {}),
       }));
-    } catch {}
+    } catch { }
   }, []);
 
   const handlePaymentSelect = (method: PaymentMethod) => {
@@ -331,8 +354,8 @@ const GuestCheckoutContent = () => {
       city: values.city || '',
       countryCode: values.country || '',
       password: values.password,
-      nationality: values.nationality,
-      dateOfBirth: values.dateOfBirth,
+      // nationality: values.nationality,
+      // dateOfBirth: values.dateOfBirth,
     });
 
     setCurrentStep('cart');
@@ -444,6 +467,7 @@ const GuestCheckoutContent = () => {
             orderTotal={orderTotal}
             shippingFee={shippingFee}
             totalVat={totalVat}
+            deliveryCharge={deliveryCharge}
             onEmailExists={() => setShowLoginModal(true)}
           />
         )}

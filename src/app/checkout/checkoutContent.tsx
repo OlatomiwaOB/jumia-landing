@@ -66,12 +66,13 @@ const CheckoutContent = () => {
   const [shippingFee, setShippingFee] = useState(0);
   const [totalVat, setTotalVat] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
+  const [deliveryCharge, setDeliveryCharge] = useState(0);
 
   // Ref to always hold current values, avoiding stale closures in useCallback
-  const latestValues = useRef({ subtotal: 0, shippingFee: 0, totalVat: 0 });
+  const latestValues = useRef({ subtotal: 0, shippingFee: 0, totalVat: 0, deliveryCharge: 0 });
   useEffect(() => {
-    latestValues.current = { subtotal, shippingFee, totalVat };
-  }, [subtotal, shippingFee, totalVat]);
+    latestValues.current = { subtotal, shippingFee, totalVat, deliveryCharge };
+  }, [subtotal, shippingFee, totalVat, deliveryCharge]);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -98,8 +99,9 @@ const CheckoutContent = () => {
   console.log('cartVat', cartVat?.());
 
 
-  const updateCheckoutWithAllValues = useCallback((subtotalVal: number, shippingVal: number, vatVal: number) => {
-    const totalAmount = subtotalVal + shippingVal + vatVal;
+  const updateCheckoutWithAllValues = useCallback((subtotalVal: number, shippingVal: number, vatVal: number, deliveryChargeVal?: number) => {
+    const dcVal = deliveryChargeVal ?? latestValues.current.deliveryCharge;
+    const totalAmount = subtotalVal + shippingVal + vatVal + dcVal;
 
     const stored = sessionStorage.getItem('checkout');
 
@@ -112,6 +114,7 @@ const CheckoutContent = () => {
       subtotal: subtotalVal,
       shippingFee: shippingVal,
       totalVat: vatVal,
+      deliveryCharge: dcVal,
       totalAmount: totalAmount
     };
 
@@ -120,7 +123,7 @@ const CheckoutContent = () => {
 
     if (selectedPayment === 'crypto_token') {
       const cryptoAmount = updatedData.payingAmount || 0;
-      setOrderTotal(cryptoAmount + shippingVal + vatVal);
+      setOrderTotal(cryptoAmount + shippingVal + vatVal + dcVal);
     } else {
       setOrderTotal(totalAmount);
     }
@@ -150,6 +153,17 @@ const CheckoutContent = () => {
     setOrderTotal(newTotal);
   }, [orderTotal]);
 
+  const handleDeliveryChargeUpdate = useCallback((charge: number) => {
+    if (charge === latestValues.current.deliveryCharge) return;
+    setDeliveryCharge(charge);
+    updateCheckoutWithAllValues(
+      latestValues.current.subtotal,
+      latestValues.current.shippingFee,
+      latestValues.current.totalVat,
+      charge
+    );
+  }, [updateCheckoutWithAllValues]);
+
   useEffect(() => {
     const stored = sessionStorage.getItem('checkout');
     if (stored) {
@@ -159,11 +173,13 @@ const CheckoutContent = () => {
       const subtotalVal = parsedData.subtotal ?? getCartTotal();
       const shippingVal = parsedData.shippingFee ?? 0;
       const vatVal = parsedData.totalVat ?? 0;
-      const totalAmount = subtotalVal + shippingVal + vatVal;
+      const dcVal = parsedData.deliveryCharge ?? 0;
+      const totalAmount = subtotalVal + shippingVal + vatVal + dcVal;
 
       setSubtotal(subtotalVal);
       setShippingFee(shippingVal);
       setTotalVat(vatVal);
+      setDeliveryCharge(dcVal);
       setOrderTotal(totalAmount);
     } else {
       const subtotalVal = getCartTotal();
@@ -193,12 +209,13 @@ const CheckoutContent = () => {
     const subtotalVal = checkoutData.subtotal ?? getCartTotal();
     const shipping = checkoutData.shippingFee ?? 0;
     const vat = checkoutData.totalVat ?? 0;
+    const dc = checkoutData.deliveryCharge ?? 0;
 
     if (selectedPayment === 'crypto_token') {
       const cryptoAmount = checkoutData.payingAmount ?? 0;
-      setOrderTotal(cryptoAmount + shipping + vat);
+      setOrderTotal(cryptoAmount + shipping + vat + dc);
     } else {
-      setOrderTotal(subtotalVal + shipping + vat);
+      setOrderTotal(subtotalVal + shipping + vat + dc);
     }
   }, [selectedPayment, checkoutData, getCartTotal]);
 
@@ -438,6 +455,7 @@ const CheckoutContent = () => {
             onVatUpdate={handleVatUpdate}
             onSubtotalUpdate={handleSubtotalUpdate}
             onTotalUpdate={handleTotalUpdate}
+            onDeliveryChargeUpdate={handleDeliveryChargeUpdate}
           />
         )}
         {currentStep === 'cart' && (
@@ -451,6 +469,7 @@ const CheckoutContent = () => {
             orderTotal={orderTotal}
             shippingFee={shippingFee}
             totalVat={totalVat}
+            deliveryCharge={deliveryCharge}
           // shippingVat={shippingVat}
           />
         )}

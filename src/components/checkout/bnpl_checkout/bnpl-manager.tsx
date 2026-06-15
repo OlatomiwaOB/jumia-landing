@@ -91,9 +91,10 @@ interface BnplManagerProps {
   onVatUpdate?: (vat: number) => void;
   onSubtotalUpdate?: (subtotal: number) => void;
   onTotalUpdate?: (total: number) => void;
+  onDeliveryChargeUpdate?: (charge: number) => void;
 }
 
-const BnplManager = ({ setCurrentStep, form, onShippingUpdate, onVatUpdate, onSubtotalUpdate, onTotalUpdate }: BnplManagerProps) => {
+const BnplManager = ({ setCurrentStep, form, onShippingUpdate, onVatUpdate, onSubtotalUpdate, onTotalUpdate, onDeliveryChargeUpdate }: BnplManagerProps) => {
   const { watch } = form;
 
   const watchShippingMethod = watch("shippingMethod");
@@ -153,6 +154,7 @@ const BnplManager = ({ setCurrentStep, form, onShippingUpdate, onVatUpdate, onSu
               onVatUpdate={onVatUpdate}
               onSubtotalUpdate={onSubtotalUpdate}
               onTotalUpdate={onTotalUpdate}
+              onDeliveryChargeUpdate={onDeliveryChargeUpdate}
             />
           </div>
         </div>

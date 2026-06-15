@@ -64,7 +64,7 @@ export function SearchSelect({
             open={open}
             onOpenChange={setOpen}
         >
-            <SelectTrigger disabled={disabled}>
+            <SelectTrigger disabled={disabled} className='w-full'>
                 <SelectValue placeholder={placeholder} />
             </SelectTrigger>
             <SelectContent>
