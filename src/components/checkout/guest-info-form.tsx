@@ -42,6 +42,7 @@ const GuestInfoForm = ({
   const { watch, register, formState: { errors }, setValue, trigger } = form;
   const { mainCcy } = useCart();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const watchShippingMethod = watch("shippingMethod");
   const watchShippingOption = watch("shippingOption");
@@ -192,7 +193,7 @@ const GuestInfoForm = ({
               <CardTitle className="text-lg">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input {...register('firstname')} placeholder="John" className={errors.firstname ? "border-destructive" : ""} />
@@ -205,7 +206,7 @@ const GuestInfoForm = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Email *</Label>
                   <Input type="email" {...register('email')} placeholder="john@example.com" className={errors.email ? "border-destructive" : ""} />
@@ -218,7 +219,7 @@ const GuestInfoForm = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Nationality *</Label>
                   <SearchSelect
@@ -234,7 +235,7 @@ const GuestInfoForm = ({
                   <Input type="date" {...register('dateOfBirth')} className={errors.dateOfBirth ? "border-destructive" : ""} />
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth.message as string}</p>}
                 </div>
-              </div>
+              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -256,6 +257,27 @@ const GuestInfoForm = ({
                   </div>
                   {errors.password && <p className="text-xs text-destructive">{errors.password.message as string}</p>}
                   <p className="text-xs text-muted-foreground mt-1">We will create an account for you using this password.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Confirm Password *</Label>
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      {...register('cPassword')}
+                      placeholder="••••••••"
+                      className={errors.cPassword ? "border-destructive" : ""}
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {errors.cPassword && <p className="text-xs text-destructive">{errors.cPassword.message as string}</p>}
+                  {/* <p className="text-xs text-muted-foreground mt-1">We will create an account for you using this password.</p> */}
                 </div>
               </div>
             </CardContent>
@@ -318,7 +340,7 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>City *</Label>
                       <Input {...register('city', { required: watchShippingMethod === 'delivery' ? 'City is required' : false })} placeholder="City" />
@@ -331,7 +353,7 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Country *</Label>
                       <SearchSelect

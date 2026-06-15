@@ -46,8 +46,9 @@ const guestFormSchema = z.object({
   email: z.string().email("Valid email is required"),
   mobileNo: z.string().min(6, "Phone number is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  nationality: z.string().min(1, "Nationality is required"),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  cPassword: z.string().min(6, "Password must be at least 6 characters"),
+  // nationality: z.string().min(1, "Nationality is required"),
+  // dateOfBirth: z.string().min(1, "Date of birth is required"),
 });
 
 export type GuestFormData = z.infer<typeof guestFormSchema>;
@@ -90,8 +91,8 @@ const GuestCheckoutContent = () => {
       email: "",
       mobileNo: "",
       password: "",
-      nationality: "",
-      dateOfBirth: "",
+      // nationality: "",
+      // dateOfBirth: "",
     },
   });
 
@@ -198,8 +199,8 @@ const GuestCheckoutContent = () => {
             email: savedGuestInfo.email,
             mobileNo: savedGuestInfo.mobileNo,
             password: savedGuestInfo.password,
-            nationality: savedGuestInfo.nationality,
-            dateOfBirth: savedGuestInfo.dateOfBirth || '',
+            // nationality: savedGuestInfo.nationality,
+            // dateOfBirth: savedGuestInfo.dateOfBirth || '',
             city: savedGuestInfo.city || '',
             country: savedGuestInfo.countryCode || '',
             agreeTerms: true,
@@ -226,7 +227,7 @@ const GuestCheckoutContent = () => {
     setCheckoutData(initialCheckoutData);
     setSubtotal(subtotalVal);
     setOrderTotal(subtotalVal);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -292,7 +293,7 @@ const GuestCheckoutContent = () => {
         currentStep: step,
         ...(payment !== undefined ? { selectedPayment: payment } : {}),
       }));
-    } catch {}
+    } catch { }
   }, []);
 
   const handlePaymentSelect = (method: PaymentMethod) => {
@@ -331,8 +332,8 @@ const GuestCheckoutContent = () => {
       city: values.city || '',
       countryCode: values.country || '',
       password: values.password,
-      nationality: values.nationality,
-      dateOfBirth: values.dateOfBirth,
+      // nationality: values.nationality,
+      // dateOfBirth: values.dateOfBirth,
     });
 
     setCurrentStep('cart');
