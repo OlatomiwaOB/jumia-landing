@@ -34,6 +34,7 @@ import {
 
 type DetailTab = 'description' | 'details';
 
+// Small update for PR testing
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
