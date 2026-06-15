@@ -58,7 +58,28 @@ const nextConfig = {
   },
 
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'corestack.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'corestack.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.s3.eu-west-2.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.s3.amazonaws.com',
+        pathname: '/**',
+      },
+    ],
   },
 
   // Production optimizations

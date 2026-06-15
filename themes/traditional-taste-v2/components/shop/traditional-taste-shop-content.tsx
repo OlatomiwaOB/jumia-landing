@@ -14,6 +14,9 @@ export default function TraditionalTasteShopContent() {
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allProducts, setAllProducts] = useState<ProductProps[]>([]);
+  const PAGE_SIZE = 20;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -50,22 +53,44 @@ export default function TraditionalTasteShopContent() {
     return () => cancelAnimationFrame(animationFrameId);
   }, [isPaused, categories.length]);
 
-  // Fetch products (pass empty string for category if 'All' is selected)
+  // Reset to page 1 when category or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setAllProducts([]);
+  }, [selectedCategory, searchQuery]);
+
+  // Fetch products — 20 at a time
   const categoryParam = selectedCategory === 'All' ? '' : selectedCategory;
-  const { data: productsData, isLoading: isLoadingProducts } = useProducts(
+  const { data: productsData, isLoading: isLoadingProducts, isFetching } = useProducts(
     storeCode,
     entityCode,
     categoryParam,
     '',          // name
     'shop-page', // retryProducts
-    1,           // pageNumber
-    200          // pageSize
+    currentPage,
+    PAGE_SIZE
   );
 
   const rawProducts: ProductProps[] = productsData?.products || [];
+  const hasMoreProducts = rawProducts.length === PAGE_SIZE;
 
-  // Local search filter
-  const filteredProducts = rawProducts.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Accumulate products across pages
+  useEffect(() => {
+    if (!isLoadingProducts && rawProducts.length > 0) {
+      if (currentPage === 1) {
+        setAllProducts(rawProducts);
+      } else {
+        setAllProducts(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newOnes = rawProducts.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newOnes];
+        });
+      }
+    }
+  }, [rawProducts, currentPage, isLoadingProducts]);
+
+  // Local search filter — applied on accumulated products
+  const filteredProducts = allProducts.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()));
 
   // Map to the Product type expected by ProductCard
   const products = filteredProducts.map((p, idx) => {
@@ -73,12 +98,12 @@ export default function TraditionalTasteShopContent() {
     const isPlantain = p.name?.toLowerCase().includes('unripe plantain');
     const isSoup = p.category?.toLowerCase() === 'soups' || p.topCategory?.toLowerCase() === 'soups' || ['efo riro', 'soup', 'nsala', 'fisherman', 'bitter leaf', 'bitterleaf', 'peppered chicken', 'peppered fish', 'peppered gizzard', 'egusi', 'seafood okro', 'afang', 'native rice', 'edikaikong', 'gizzard sauce', 'ayamashe', 'ofada', 'ofeakwu', 'banga', 'ukwa', 'seafood rice', 'coconut rice', 'pineapple rice'].some(v => p.name?.toLowerCase().includes(v));
     const hasVariants = isSoup || isAbacha || isPlantain;
-    
+
     // Calculate dynamic prices based on the base price from the endpoint
     const basePrice = p.salePrice || 0;
     const currency = p.ccy || '£';
     const { price2L, price4L } = getCustomVariantPrices(p.name || '', basePrice);
-    
+
     let variants;
     if (isAbacha) {
       variants = [
@@ -97,8 +122,8 @@ export default function TraditionalTasteShopContent() {
     }
 
     // Show the dynamic range (e.g. £50.00 - £100.00) if there's more than one variant
-    const priceString = hasVariants && variants && variants.length > 1 
-      ? isPlantain ? `${currency}40.00 - ${currency}75.00` : `${currency}${price2L.toFixed(2)} - ${currency}${price4L.toFixed(2)}` 
+    const priceString = hasVariants && variants && variants.length > 1
+      ? isPlantain ? `${currency}40.00 - ${currency}75.00` : `${currency}${price2L.toFixed(2)} - ${currency}${price4L.toFixed(2)}`
       : `${currency}${basePrice}`;
 
     return {
@@ -147,59 +172,20 @@ export default function TraditionalTasteShopContent() {
       {/* ── MAIN CONTENT AREA ── */}
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-30 pb-24">
 
-        {/* ── ALLERGEN NOTICE (SHORT TICKER + CLICK DETAILS) ── */}
-        <div className="mx-auto max-w-[1400px] mt-8 md:mt-14 mb-4 relative z-20 px-2 md:px-0">
-          <button
-            onClick={() => setShowAllergenDetails(!showAllergenDetails)}
-            className="w-full bg-[#FFFBEB] border md:border border-[#FCD34D] rounded-full shadow-sm overflow-hidden flex items-center h-14 md:h-16 group cursor-pointer transition-all hover:bg-[#FEF3C7] relative"
-          >
-            {/* Static Warning Label on the left */}
-            <div className="absolute left-0 top-0 bottom-0 z-30 bg-[#FFFBEB] group-hover:bg-[#FEF3C7] transition-colors flex items-center px-4 md:px-6 border-r border-[#FCD34D] shadow-[10px_0_15px_-3px_rgba(255,251,235,1)]">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">⚠️</span>
-                <span className="text-[#92400E] font-black text-[13px] md:text-[15px] tracking-widest uppercase whitespace-nowrap hidden sm:inline-block">
-                  Allergen Notice
-                </span>
-              </div>
-            </div>
+        {/* ── ALLERGEN DISCLAIMER (DIRECT DISPLAY) ── */}
+        <div className="mx-auto max-w-[1400px] mt-12 md:mt-12 mb-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl">
+            <h3 className="text-[#F97316] font-bold text-lg md:text-xl flex items-center gap-2 mb-4">
+              <span>⚠️</span> Allergen Notice
+            </h3>
 
-            <style dangerouslySetInnerHTML={{
-              __html: `
-              @keyframes allergen-marquee {
-                0% { transform: translateX(0%); }
-                100% { transform: translateX(-50%); }
-              }
-              .animate-allergen-marquee {
-                animation: allergen-marquee 25s linear infinite;
-                will-change: transform;
-              }
-            `}} />
+            <p className="text-gray-800 text-[15px] md:text-base leading-relaxed mb-2">
+              We take food safety seriously and make every effort to minimize the risk of cross-contact. However, all meals are prepared in a kitchen where common allergens are present, including peanuts, tree nuts, gluten, eggs, milk, soy, fish, shellfish, sesame, mustard, celery, lupin, and sulphites.
+            </p>
 
-            {/* Scrolling Content */}
-            <div className="flex whitespace-nowrap animate-allergen-marquee pl-[80px] sm:pl-[220px]">
-              {[1, 2].map((key) => (
-                <div key={key} className="flex items-center text-[#92400E]/90 text-[14px] md:text-[15px] font-medium pr-12">
-                  Our kitchen handles peanuts, gluten, dairy, and other major allergens. <strong className="text-[#92400E] mx-1 underline decoration-2 underline-offset-4">Click here to view full allergen details</strong> before ordering!
-                  <span className="mx-8 text-[#FCD34D] text-lg">•</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Fade effect on the right */}
-            <div className="absolute right-0 top-0 bottom-0 w-12 md:w-20 bg-gradient-to-l from-[#FFFBEB] group-hover:from-[#FEF3C7] to-transparent z-30 pointer-events-none transition-colors" />
-          </button>
-
-          {/* Expandable Details Area */}
-          <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showAllergenDetails ? 'max-h-96 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}`}>
-            <div className="bg-white border border-[#FCD34D] p-5 md:p-6 rounded-2xl shadow-lg max-w-4xl mx-auto">
-              <h4 className="text-[#92400E] font-bold text-lg mb-2">Full Allergen Information</h4>
-              <p className="text-gray-700 text-[14px] md:text-[15px] leading-relaxed mb-3">
-                We take food safety seriously and make every effort to minimize the risk of cross-contact. However, all meals are prepared in a kitchen where common allergens are present, including peanuts, tree nuts, gluten, eggs, milk, soy, fish, shellfish, sesame, mustard, celery, lupin, and sulphites.
-              </p>
-              <p className="text-gray-900 text-[14px] md:text-[15px] leading-relaxed font-semibold">
-                As a result, we cannot guarantee that any item is completely free from allergen traces. If you have any allergies, intolerances, or special dietary requirements, please notify us before placing your order.
-              </p>
-            </div>
+            <p className="text-gray-800 text-[15px] md:text-base leading-relaxed">
+              As a result, we cannot guarantee that any item is completely free from allergen traces. If you have any allergies, intolerances, or special dietary requirements, please notify us before placing your order.
+            </p>
           </div>
         </div>
 
@@ -245,16 +231,35 @@ export default function TraditionalTasteShopContent() {
 
         {/* ── PRODUCTS GRID ── */}
         <div className="min-h-[500px]">
-          {isLoadingProducts ? (
+          {(isLoadingProducts || (isFetching && allProducts.length === 0)) ? (
             <div className="flex flex-col items-center justify-center py-20 md:py-32 bg-white/50 rounded-[2rem] md:rounded-[3rem] border border-white/60 shadow-xl shadow-black/[0.02] backdrop-blur-xl">
               <Loader2 className="animate-spin text-[#F97316] mb-4 md:mb-6" size={48} />
               <p className="text-gray-500 font-extrabold text-lg md:text-xl animate-pulse tracking-wide">Cooking up delicious items...</p>
             </div>
           ) : products.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} isGrid={true} />
-              ))}
+            <div>
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6 md:gap-6">
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} isGrid={true} />
+                ))}
+              </div>
+
+              {/* Load More Button */}
+              {hasMoreProducts && (
+                <div className="flex justify-center mt-10 mb-4">
+                  <button
+                    onClick={() => setCurrentPage(prev => prev + 1)}
+                    disabled={isFetching}
+                    className="px-10 py-4 bg-[#F97316] hover:bg-orange-600 disabled:opacity-60 text-white font-bold rounded-full text-[15px] transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-1 flex items-center gap-3"
+                  >
+                    {isFetching ? (
+                      <><Loader2 size={18} className="animate-spin" /> Loading more...</>
+                    ) : (
+                      'Load More Dishes'
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-12 md:p-20 text-center shadow-2xl shadow-black/[0.03] border border-gray-100 max-w-3xl mx-auto my-12 relative overflow-hidden">
