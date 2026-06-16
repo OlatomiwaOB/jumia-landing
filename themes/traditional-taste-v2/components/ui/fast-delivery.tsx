@@ -28,18 +28,18 @@ export default function FastDeliverySection() {
       icon: Scale,
       title: "Quality at Fair Prices",
       description:
-        "Fresh ingredients sourced directly from trusted farmers and suppliers.",
+        "Every dish is prepared fresh with quality ingredients, cooked with care and served the way it should be — just like home."
     },
     {
       icon: ThumbsUp,
       title: "100% Satisfaction",
-      description: "If you're not happy with your order, we'll make it right.",
+      description: "Made with love and served with pride. We are committed to making every meal an experience worth coming back for.",
     },
     {
       icon: UtensilsCrossed,
       title: "Top Food Marketplace",
       description:
-        "Thousands of customers trust us for delicious meals every day.",
+        "Bringing authentic homemade Nigerian flavours to tables across the UK, one satisfied customer at a time.",
     },
   ];
 
@@ -51,7 +51,7 @@ export default function FastDeliverySection() {
     <section className="w-full bg-[var(--color-bg-main)] pb-6 md:pb-10 -mt-6 md:-mt-10 relative z-20">
       <div className="max-w-[1640px] mx-auto px-4 md:px-6 lg:px-10">
         <div className="relative overflow-hidden rounded-none bg-[var(--color-bg-off-white)]">
-          
+
           {/* Decorative Background */}
           <div className="absolute inset-0 opacity-[0.03]">
             <div
@@ -71,15 +71,14 @@ export default function FastDeliverySection() {
               </span>
 
               <h2 className="text-[var(--color-text)] text-3xl md:text-5xl font-bold leading-tight">
-                More than groceries,
+                Homemade dishes,
                 <span className="text-[var(--color-primary)] block mt-1">
-                  delivered to your door in 1 hour
+                  delivered to your door as soon as you order.
                 </span>
               </h2>
 
               <p className="text-[var(--color-text-muted)] text-lg md:text-xl mt-4 max-w-3xl leading-relaxed">
-                From authentic African dishes to fresh groceries and kitchen
-                essentials, enjoy fast delivery and premium quality without
+                Enjoy fast delivery and premium quality without
                 leaving your home.
               </p>
 
