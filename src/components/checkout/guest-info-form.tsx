@@ -219,7 +219,7 @@ const GuestInfoForm = ({
               <CardTitle className="text-lg">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input {...register('firstname')} placeholder="John" className={errors.firstname ? "border-destructive" : ""} />
@@ -245,8 +245,8 @@ const GuestInfoForm = ({
                 </div>
               </div>
 
-              <div className="grid gap-4">
-                {/* <div className="space-y-2">
+              {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label>Nationality *</Label>
                   <SearchSelect
                     options={nationalityOptions}
@@ -256,12 +256,12 @@ const GuestInfoForm = ({
                   />
                   {errors.nationality && <p className="text-xs text-destructive">{errors.nationality.message as string}</p>}
                 </div> */}
-                {/* <div className="space-y-2">
+              {/* <div className="space-y-2">
                   <Label>Date of Birth *</Label>
                   <Input type="date" {...register('dateOfBirth')} className={errors.dateOfBirth ? "border-destructive" : ""} />
                   {errors.dateOfBirth && <p className="text-xs text-destructive">{errors.dateOfBirth.message as string}</p>}
-                </div> */}
-              </div>
+                </div>
+              </div> */}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">

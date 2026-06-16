@@ -16,9 +16,11 @@ export function buildGuestOrderPayload(guestInfo: GuestInfo, orderPayload: any):
       lastname: guestInfo.lastname,
       mobileNo: guestInfo.mobileNo,
       email: guestInfo.email,
+      // dateOfBirth: guestInfo.dateOfBirth || '',
       dateOfBirth: '01-01-2000',
       password: guestInfo.password,
-      nationality: guestInfo.nationality ? getNationalityName(guestInfo.nationality) : '',
+      // nationality: getNationalityName(guestInfo.nationality),
+      nationality: 'British',
       city: guestInfo.city,
       countryCode: guestInfo.countryCode,
       gender: guestInfo.gender || ''

@@ -99,6 +99,8 @@ const GuestCheckoutContent = () => {
       password: "",
       // nationality: "",
       // dateOfBirth: "",
+      // nationality: "",
+      // dateOfBirth: "",
     },
   });
 
@@ -222,6 +224,8 @@ const GuestCheckoutContent = () => {
             password: savedGuestInfo.password,
             // nationality: savedGuestInfo.nationality,
             // dateOfBirth: savedGuestInfo.dateOfBirth || '',
+            // nationality: savedGuestInfo.nationality,
+            // dateOfBirth: savedGuestInfo.dateOfBirth || '',
             city: savedGuestInfo.city || '',
             country: savedGuestInfo.countryCode || '',
             agreeTerms: true,
@@ -248,6 +252,7 @@ const GuestCheckoutContent = () => {
     setCheckoutData(initialCheckoutData);
     setSubtotal(subtotalVal);
     setOrderTotal(subtotalVal);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -316,174 +321,177 @@ const GuestCheckoutContent = () => {
         ...(payment !== undefined ? { selectedPayment: payment } : {}),
       }));
     } catch { }
-  }, []);
+  } catch { }
+}, []);
 
-  const handlePaymentSelect = (method: PaymentMethod) => {
-    setSelectedPayment(method);
-    setCurrentStep('payment');
-    saveStepToSession('payment', method);
-  };
+const handlePaymentSelect = (method: PaymentMethod) => {
+  setSelectedPayment(method);
+  setCurrentStep('payment');
+  saveStepToSession('payment', method);
+};
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied",
-      description: "Address copied to clipboard",
-    });
-  };
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text);
+  toast({
+    title: "Copied",
+    description: "Address copied to clipboard",
+  });
+};
 
-  const handleRexpaySuccess = () => {
-    setCurrentStep('success');
-    setIsRexpayCallback(false);
-    saveStepToSession('success');
-  };
+const handleRexpaySuccess = () => {
+  setCurrentStep('success');
+  setIsRexpayCallback(false);
+  saveStepToSession('success');
+};
 
-  /**
-   * Called when the guest completes the info form and proceeds to payment selection.
-   * Stores guest info in the Zustand store for use by payment components.
-   */
-  const handleGuestInfoComplete = () => {
-    const values = form.getValues();
+/**
+ * Called when the guest completes the info form and proceeds to payment selection.
+ * Stores guest info in the Zustand store for use by payment components.
+ */
+const handleGuestInfoComplete = () => {
+  const values = form.getValues();
 
-    // Store guest personal info in the Zustand store
-    setGuestInfo({
-      firstname: values.firstname,
-      lastname: values.lastname,
-      email: values.email,
-      mobileNo: values.mobileNo,
-      city: values.city || '',
-      countryCode: values.country || '',
-      password: values.password,
-      // nationality: values.nationality,
-      // dateOfBirth: values.dateOfBirth,
-    });
+  // Store guest personal info in the Zustand store
+  setGuestInfo({
+    firstname: values.firstname,
+    lastname: values.lastname,
+    email: values.email,
+    mobileNo: values.mobileNo,
+    city: values.city || '',
+    countryCode: values.country || '',
+    password: values.password,
+    // nationality: values.nationality,
+    // dateOfBirth: values.dateOfBirth,
+    // nationality: values.nationality,
+    // dateOfBirth: values.dateOfBirth,
+  });
 
-    setCurrentStep('cart');
-    saveStepToSession('cart');
-  };
+  setCurrentStep('cart');
+  saveStepToSession('cart');
+};
 
-  const PaymentView = () => {
-    // Cast form to FormData type for compatibility with existing payment components.
-    // The payment components only access the shared fields (shippingMethod, street, city, etc.)
-    const formAsFormData = form as any;
-    const handleEmailExists = () => setShowLoginModal(true);
+const PaymentView = () => {
+  // Cast form to FormData type for compatibility with existing payment components.
+  // The payment components only access the shared fields (shippingMethod, street, city, etc.)
+  const formAsFormData = form as any;
+  const handleEmailExists = () => setShowLoginModal(true);
 
-    if (selectedPayment === 'rexpay') {
-      return (
-        <RexpayPayment
-          setCurrentStep={setCurrentStep}
-          setSelectedPayment={setSelectedPayment}
-          isCallback={isRexpayCallback}
-          onSuccess={handleRexpaySuccess}
-          onEmailExists={handleEmailExists}
-          form={formAsFormData}
-          orderTotal={orderTotal}
-          totalVat={totalVat}
-        />
-      );
-    }
-
-    if (selectedPayment === 'wallet') {
-      return (
-        <WalletPayment
-          setCurrentStep={setCurrentStep}
-          setSelectedPayment={setSelectedPayment}
-          orderTotal={orderTotal}
-          form={formAsFormData}
-          onEmailExists={handleEmailExists}
-          totalVat={totalVat}
-        />
-      );
-    }
-
-    if (selectedPayment === 'card2') {
-      return (
-        <RexpayPayment
-          setCurrentStep={setCurrentStep}
-          setSelectedPayment={setSelectedPayment}
-          isCallback={isRexpayCallback}
-          onSuccess={handleRexpaySuccess}
-          onEmailExists={handleEmailExists}
-          form={formAsFormData}
-          orderTotal={orderTotal}
-          totalVat={totalVat}
-        />
-      );
-    }
-
-    if (selectedPayment == 'bank_transfer') {
-      return (
-        <BankPayment
-          setCurrentStep={setCurrentStep}
-          copyToClipboard={copyToClipboard}
-          orderTotal={orderTotal}
-          totalVat={totalVat}
-        />
-      );
-    }
-
-    return null;
-  };
-
-  const SuccessView = () => (
-    <div className="max-w-md mx-auto text-center space-y-6">
-      <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto">
-        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <h2 className="text-2xl font-bold text-green-600">Order Placed Successfully!</h2>
-      <p className="text-muted-foreground">
-        Thank you for your purchase. An account has been created for you — check your email for login details.
-      </p>
-      <Button onClick={() => router.push('/')} className="w-full bg-accent hover:bg-accent/90 text-white">
-        <ShoppingBag className="w-4 h-4 mr-2" />
-        Continue Shopping
-      </Button>
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen p-2 bg-[#f7f7f7]">
-      <div className="max-w-6xl mx-auto py-8">
-        {currentStep === 'guest-info' && (
-          <GuestInfoForm
-            form={form}
-            onContinue={handleGuestInfoComplete}
-            onShippingUpdate={updateCheckoutData}
-            onVatUpdate={handleVatUpdate}
-            onSubtotalUpdate={handleSubtotalUpdate}
-            onTotalUpdate={handleTotalUpdate}
-          />
-        )}
-        {currentStep === 'cart' && (
-          <CartView
-            handlePaymentSelect={handlePaymentSelect}
-            setCurrentStep={setCurrentStep as (step: CheckoutStep) => void}
-            paymentMethod={selectedPayment}
-            setSelectedPayment={setSelectedPayment}
-            setWallets={setWallets}
-            form={form as any}
-            orderTotal={orderTotal}
-            shippingFee={shippingFee}
-            totalVat={totalVat}
-            deliveryCharge={deliveryCharge}
-            onEmailExists={() => setShowLoginModal(true)}
-          />
-        )}
-
-        {currentStep === 'payment' && <PaymentView />}
-        {currentStep === 'success' && <SuccessView />}
-      </div>
-
-      {/* Email-already-exists login dialog — triggered by E412 from submit-guest-order */}
-      <CustomerLoginModal
-        isOpen={showLoginModal}
-        setIsOpen={setShowLoginModal}
-        onLoginSuccess={() => window.location.reload()}
+  if (selectedPayment === 'rexpay') {
+    return (
+      <RexpayPayment
+        setCurrentStep={setCurrentStep}
+        setSelectedPayment={setSelectedPayment}
+        isCallback={isRexpayCallback}
+        onSuccess={handleRexpaySuccess}
+        onEmailExists={handleEmailExists}
+        form={formAsFormData}
+        orderTotal={orderTotal}
+        totalVat={totalVat}
       />
+    );
+  }
+
+  if (selectedPayment === 'wallet') {
+    return (
+      <WalletPayment
+        setCurrentStep={setCurrentStep}
+        setSelectedPayment={setSelectedPayment}
+        orderTotal={orderTotal}
+        form={formAsFormData}
+        onEmailExists={handleEmailExists}
+        totalVat={totalVat}
+      />
+    );
+  }
+
+  if (selectedPayment === 'card2') {
+    return (
+      <RexpayPayment
+        setCurrentStep={setCurrentStep}
+        setSelectedPayment={setSelectedPayment}
+        isCallback={isRexpayCallback}
+        onSuccess={handleRexpaySuccess}
+        onEmailExists={handleEmailExists}
+        form={formAsFormData}
+        orderTotal={orderTotal}
+        totalVat={totalVat}
+      />
+    );
+  }
+
+  if (selectedPayment == 'bank_transfer') {
+    return (
+      <BankPayment
+        setCurrentStep={setCurrentStep}
+        copyToClipboard={copyToClipboard}
+        orderTotal={orderTotal}
+        totalVat={totalVat}
+      />
+    );
+  }
+
+  return null;
+};
+
+const SuccessView = () => (
+  <div className="max-w-md mx-auto text-center space-y-6">
+    <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto">
+      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
     </div>
-  );
+    <h2 className="text-2xl font-bold text-green-600">Order Placed Successfully!</h2>
+    <p className="text-muted-foreground">
+      Thank you for your purchase. An account has been created for you — check your email for login details.
+    </p>
+    <Button onClick={() => router.push('/')} className="w-full bg-accent hover:bg-accent/90 text-white">
+      <ShoppingBag className="w-4 h-4 mr-2" />
+      Continue Shopping
+    </Button>
+  </div>
+);
+
+return (
+  <div className="min-h-screen p-2 bg-[#f7f7f7]">
+    <div className="max-w-6xl mx-auto py-8">
+      {currentStep === 'guest-info' && (
+        <GuestInfoForm
+          form={form}
+          onContinue={handleGuestInfoComplete}
+          onShippingUpdate={updateCheckoutData}
+          onVatUpdate={handleVatUpdate}
+          onSubtotalUpdate={handleSubtotalUpdate}
+          onTotalUpdate={handleTotalUpdate}
+        />
+      )}
+      {currentStep === 'cart' && (
+        <CartView
+          handlePaymentSelect={handlePaymentSelect}
+          setCurrentStep={setCurrentStep as (step: CheckoutStep) => void}
+          paymentMethod={selectedPayment}
+          setSelectedPayment={setSelectedPayment}
+          setWallets={setWallets}
+          form={form as any}
+          orderTotal={orderTotal}
+          shippingFee={shippingFee}
+          totalVat={totalVat}
+          deliveryCharge={deliveryCharge}
+          onEmailExists={() => setShowLoginModal(true)}
+        />
+      )}
+
+      {currentStep === 'payment' && <PaymentView />}
+      {currentStep === 'success' && <SuccessView />}
+    </div>
+
+    {/* Email-already-exists login dialog — triggered by E412 from submit-guest-order */}
+    <CustomerLoginModal
+      isOpen={showLoginModal}
+      setIsOpen={setShowLoginModal}
+      onLoginSuccess={() => window.location.reload()}
+    />
+  </div>
+);
 };
 
 export default GuestCheckoutContent;

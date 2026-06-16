@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useProductById } from '@/hooks/useProductById';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 import { CurrencyCode, formatPrice, getCustomVariantPrices } from '@/utils/helperfns';
 import { useProductBySlug } from '@/hooks/useProductBySlug';
+
 import { useCart } from '@/store/cart';
 import {
   getCategoryHref,
@@ -32,6 +34,7 @@ import {
 
 type DetailTab = 'description' | 'details';
 
+// Small update for PR testing
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
@@ -39,38 +42,38 @@ export default function ProductPage() {
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
   const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
   const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
-  const { product, products, isLoading } = useProductBySlug(productSlug, storeCode, entityCode);
+  const { product: oldProduct, products, isLoading: isLoadingOld } = useProductBySlug(productSlug, storeCode, entityCode);
+
+  // Use your new API endpoint to get the live product (passing the numeric ID from the oldProduct)
+  const productId = oldProduct?.id?.toString() || '';
+  const { productData, isLoading: isLoadingLive, error } = useProductById(productId, entityCode);
+
+  // If the live data exists, use it! Otherwise fallback to the old product or null
+  const product = productData || oldProduct || null;
+  const isLoading = isLoadingOld || isLoadingLive;
+
+  // Log it to the console so you can see it!
+  console.log("LIVE API RESPONSE:", productData);
+  console.log("LIVE API ERROR:", error);
   const { addToCart, decrement, increment, singleQuantity, openCart } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<string>('');
 
-  const isAbacha = product?.name?.toLowerCase().includes('abacha');
-  const isPlantain = product?.name?.toLowerCase().includes('unripe plantain');
-  const isSoup = product?.category?.toLowerCase() === 'soups' || product?.topCategory?.toLowerCase() === 'soups' || ['efo riro', 'soup', 'nsala', 'fisherman', 'bitter leaf', 'bitterleaf', 'peppered chicken', 'peppered fish', 'peppered gizzard', 'egusi', 'seafood okro', 'afang', 'native rice', 'edikaikong', 'gizzard sauce', 'ayamashe', 'ofada', 'ofeakwu', 'banga', 'ukwa', 'seafood rice', 'coconut rice', 'pineapple rice'].some(v => product?.name?.toLowerCase().includes(v));
-  const hasVariants = isSoup || isAbacha || isPlantain;
+  const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
+  const hasVariants = itemVariants.length > 0;
 
-  const basePrice = product?.salePrice ?? product?.oldPrice ?? 0;
-  const { price2L, price4L } = getCustomVariantPrices(product?.name || '', basePrice);
+  const basePrice = product?.salePrice || 0;
 
-  let variants: { id: string; size: string; price: number }[] = [];
-  if (isAbacha) {
-    variants = [
-      { id: '1L', size: '1 litre', price: basePrice }
-    ];
-  } else if (isPlantain) {
-    variants = [
-      { id: '1P', size: '1 pack', price: 40 },
-      { id: '2P', size: '2 packs', price: 75 }
-    ];
-  } else if (isSoup) {
-    variants = [
-      { id: '2L', size: '2 litres', price: price2L },
-      { id: '4L', size: '4 litres', price: price4L }
-    ];
-  }
+  const variants = itemVariants.map((v: any, index: number) => ({
+    id: v.qty ? v.qty.toString() : index.toString(),
+    qty: v.qty,
+    size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size || `${index + 1}`),
+    price: v.price > 0 ? v.price : basePrice,
+    original: v
+  }));
 
-  const currentVariant = variants.find(v => v.id === selectedVariantId);
+  const currentVariant = variants.find((v: any) => v.id === selectedVariantId);
   const currentPrice = currentVariant ? currentVariant.price : basePrice;
 
   // Local state for quantity before adding to cart
@@ -302,20 +305,22 @@ export default function ProductPage() {
             <div className="space-y-4">
               <div className="flex flex-wrap items-end gap-3">
                 <span className="text-3xl md:text-4xl font-bold text-[var(--color-primary)]">
-                  {(isSoup || isPlantain) && !selectedVariantId
-                    ? isPlantain ? `${formatPrice(40, ((product?.ccy as CurrencyCode) || 'NGN'))} - ${formatPrice(75, ((product?.ccy as CurrencyCode) || 'NGN'))}` : `${formatPrice(price2L, ((product?.ccy as CurrencyCode) || 'NGN'))} - ${formatPrice(price4L, ((product?.ccy as CurrencyCode) || 'NGN'))}`
+                  {hasVariants && !selectedVariantId
+                    ? (variants.length > 1
+                      ? `${formatPrice(Math.min(...variants.map((v: any) => v.price)), ((product?.ccy as CurrencyCode) || 'NGN'))} - ${formatPrice(Math.max(...variants.map((v: any) => v.price)), ((product?.ccy as CurrencyCode) || 'NGN'))}`
+                      : formatPrice(variants[0].price, ((product?.ccy as CurrencyCode) || 'NGN')))
                     : formatPrice(currentPrice, ((product?.ccy as CurrencyCode) || 'NGN'))}
                 </span>
-                {discount > 0 && product.oldPrice && !isSoup && !isPlantain && (
+                {discount > 0 && product.oldPrice && !hasVariants && (
                   <span className="text-lg text-[var(--color-text)] opacity-40 line-through">
                     {formatPrice(product.oldPrice, ((product?.ccy as CurrencyCode) || 'NGN'))}
                   </span>
                 )}
               </div>
 
-              {(isSoup || isPlantain) && (
+              {hasVariants && (
                 <div className="mt-4 flex flex-col gap-2 max-w-[200px]">
-                  <span className="font-bold text-[var(--color-text)]">Size</span>
+                  <span className="font-bold text-[var(--color-text)]">Options</span>
                   <div className="relative">
                     <select
                       value={selectedVariantId}
@@ -323,7 +328,7 @@ export default function ProductPage() {
                       className="w-full appearance-none text-base border border-[var(--color-text)]/20 rounded-xl p-3 pr-12 outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-transparent cursor-pointer"
                     >
                       <option value="">Choose an option</option>
-                      {variants.map(v => (
+                      {variants.map((v: any) => (
                         <option key={v.id} value={v.id}>{v.size}</option>
                       ))}
                     </select>
@@ -343,7 +348,7 @@ export default function ProductPage() {
             {/* Add to Cart */}
             <div className="border-t border-[var(--color-text)]/10 pt-6 mt-4">
               <div className="flex flex-col gap-3 sm:flex-row">
-                
+
                 {/* Quantity Selector */}
                 <div className="flex h-14 items-center justify-between rounded-xl bg-[var(--color-bg-secondary)] px-2 sm:w-48">
                   <button
@@ -356,7 +361,7 @@ export default function ProductPage() {
                         setLocalQty(prev => Math.max(1, prev - 1));
                       }
                     }}
-                    disabled={(quantity > 0 ? quantity <= 1 : localQty <= 1) || ((isSoup || isPlantain) && !selectedVariantId)}
+                    disabled={(quantity > 0 ? quantity <= 1 : localQty <= 1) || (hasVariants && !selectedVariantId)}
                   >
                     <Minus className="h-4 w-4" />
                   </button>
@@ -373,7 +378,7 @@ export default function ProductPage() {
                         setLocalQty(prev => prev + 1);
                       }
                     }}
-                    disabled={(product.qtyInStore ?? 0) <= 0 || ((isSoup || isPlantain) && !selectedVariantId) || (quantity > 0 ? quantity >= (product.qtyInStore ?? 0) : localQty >= (product.qtyInStore ?? 0))}
+                    disabled={(product.qtyInStore ?? 0) <= 0 || (hasVariants && !selectedVariantId) || (quantity > 0 ? quantity >= (product.qtyInStore ?? 0) : localQty >= (product.qtyInStore ?? 0))}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -388,16 +393,16 @@ export default function ProductPage() {
                       addToCart({
                         ...product,
                         id: currentProductId,
-                        name: (isSoup || isPlantain) && currentVariant ? `${product.name} - ${currentVariant.size}` : product.name,
+                        name: hasVariants && currentVariant ? `${product.name} - ${currentVariant.size}` : product.name,
                         salePrice: currentPrice,
                       } as any, localQty);
                       openCart();
                     }}
-                    disabled={(product.qtyInStore ?? 0) <= 0 || ((isSoup || isPlantain) && !selectedVariantId)}
+                    disabled={(product.qtyInStore ?? 0) <= 0 || (hasVariants && !selectedVariantId)}
                   >
                     <ShoppingBag className="h-5 w-5" />
-                    {(product.qtyInStore ?? 0) > 0 
-                      ? (((isSoup || isPlantain) && !selectedVariantId) ? 'SELECT A SIZE' : 'ADD TO CART') 
+                    {(product.qtyInStore ?? 0) > 0
+                      ? ((hasVariants && !selectedVariantId) ? 'SELECT AN OPTION' : 'ADD TO CART')
                       : 'OUT OF STOCK'}
                   </button>
                 ) : (
@@ -520,7 +525,7 @@ export default function ProductPage() {
                     </h3>
                     <p className="mt-2 text-[var(--color-primary)] font-bold">
                       {formatPrice(
-                        relatedProduct.salePrice ?? relatedProduct.oldPrice ?? 0,
+                        relatedProduct.salePrice || 0,
                         (relatedProduct.ccy as CurrencyCode) || 'NGN'
                       )}
                     </p>

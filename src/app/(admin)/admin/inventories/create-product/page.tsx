@@ -536,6 +536,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                           <SelectItem value="Carton">Carton</SelectItem>
                           <SelectItem value="Piece">Piece</SelectItem>
                           <SelectItem value="Bag">Bag</SelectItem>
+                          <SelectItem value="Bowl">Bowl</SelectItem>
                           <SelectItem value="Bottle">Bottle</SelectItem>
                           <SelectItem value="Pack">Pack</SelectItem>
                           <SelectItem value="Crate">Crate</SelectItem>

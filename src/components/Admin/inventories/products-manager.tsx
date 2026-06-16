@@ -854,6 +854,144 @@ const DeleteProductModal = ({
     );
 };
 
+// Add Product Variant Modal
+const AddProductVariantModal = ({
+    isOpen,
+    onClose,
+    product,
+    onSuccess,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    product: Product | null;
+    onSuccess?: () => void;
+}) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        size: "",
+        color: "",
+        qty: "",
+        price: "",
+    });
+
+    const addVariantMutation = useMutation({
+        mutationFn: async (payload: any) => {
+            return await axiosInstance.post('/products/save-item-variant', payload);
+        },
+        onSuccess: (data) => {
+            if (data?.data?.code === '000') {
+                toast.success('Product variant added successfully');
+                if (onSuccess) onSuccess();
+                handleClose();
+            } else {
+                toast.error(data?.data?.desc || 'Failed to add product variant');
+                setIsLoading(false);
+            }
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to add product variant');
+            setIsLoading(false);
+        }
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!product) return;
+        if (!formData.qty || isNaN(Number(formData.qty))) {
+            toast.error('Valid quantity is required');
+            return;
+        }
+
+        setIsLoading(true);
+        addVariantMutation.mutate({
+            id: Number(product.id),
+            itemCode: product.code,
+            size: formData.size,
+            color: formData.color,
+            qty: Number(formData.qty),
+            price: formData.price ? Number(formData.price) : 0
+        });
+    };
+
+    const handleClose = () => {
+        setIsLoading(false);
+        setFormData({ size: "", color: "", qty: "", price: "" });
+        onClose();
+    };
+
+    if (!product) return null;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+            <DialogContent className="sm:max-w-md rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0">
+                <DialogTitle className="sr-only">Add Product Variant</DialogTitle>
+                <div className="px-6 pt-5 pb-2">
+                    <h2 className="text-base font-bold text-dark-gray">Add Product Variant</h2>
+                    <p className="text-xs text-medium-gray mt-0.5">Add a new variant for {product.name}</p>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="bg-white rounded-2xl p-4 space-y-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs text-medium-gray">Size</label>
+                            <Input 
+                                value={formData.size} 
+                                onChange={(e) => setFormData(prev => ({...prev, size: e.target.value}))}
+                                placeholder="Enter size (e.g., XL, 42)" 
+                                className="h-10 text-sm"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs text-medium-gray">Color</label>
+                            <div className="flex gap-2">
+                                <Input 
+                                    type="color"
+                                    value={formData.color || "#000000"} 
+                                    onChange={(e) => setFormData(prev => ({...prev, color: e.target.value}))}
+                                    className="w-12 h-10 p-1 cursor-pointer"
+                                />
+                                <Input 
+                                    type="text"
+                                    value={formData.color} 
+                                    onChange={(e) => setFormData(prev => ({...prev, color: e.target.value}))}
+                                    placeholder="Select or enter color" 
+                                    className="h-10 text-sm flex-1"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs text-medium-gray">Quantity <span className="text-red-500">*</span></label>
+                            <Input 
+                                type="number"
+                                required
+                                value={formData.qty} 
+                                onChange={(e) => setFormData(prev => ({...prev, qty: e.target.value}))}
+                                placeholder="Enter quantity" 
+                                className="h-10 text-sm"
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs text-medium-gray">Price</label>
+                            <Input 
+                                type="number"
+                                value={formData.price} 
+                                onChange={(e) => setFormData(prev => ({...prev, price: e.target.value}))}
+                                placeholder="Enter variant price override (optional)" 
+                                className="h-10 text-sm"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex gap-3 justify-end pt-1">
+                        <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+                        <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
+                            {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</> : <><Plus className="w-4 h-4 mr-2" /> Add Variant</>}
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 interface ProductsManagerProps {
     onCountChange?: (count: number) => void;
 }
@@ -870,6 +1008,8 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [variantProduct, setVariantProduct] = useState<Product | null>(null);
+    const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
     const ITEMS_PER_PAGE = 10;
 
     const { data, isLoading, error, refetch } = useQuery({
@@ -914,6 +1054,11 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
     const handleDelete = (product: Product) => {
         setDeletingProduct(product);
         setIsDeleteModalOpen(true);
+    };
+
+    const handleAddVariant = (product: Product) => {
+        setVariantProduct(product);
+        setIsVariantModalOpen(true);
     };
 
     const handleDeleteSuccess = () => {
@@ -1126,6 +1271,9 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                                                                 <Button size="xs" variant="action" onClick={() => handleDelete(p)} title="Delete" className="text-red-500 hover:text-red-700">
                                                                     <Trash2 className="w-4 h-4" />
                                                                 </Button>
+                                                                <Button size="xs" variant="action" onClick={() => handleAddVariant(p)} title="Add Variant" className="text-blue-500 hover:text-blue-700">
+                                                                    <Plus className="w-4 h-4" />
+                                                                </Button>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -1239,6 +1387,13 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                 isOpen={isDeleteModalOpen}
                 onClose={() => { setIsDeleteModalOpen(false); setDeletingProduct(null); }}
                 product={deletingProduct}
+                onSuccess={handleDeleteSuccess}
+            />
+
+            <AddProductVariantModal
+                isOpen={isVariantModalOpen}
+                onClose={() => { setIsVariantModalOpen(false); setVariantProduct(null); }}
+                product={variantProduct}
                 onSuccess={handleDeleteSuccess}
             />
         </div>
