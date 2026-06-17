@@ -664,7 +664,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, X, Eye, ChevronLeft, ChevronRight, Plus, Upload, Package, Edit, Trash2, Loader2 } from "lucide-react";
+import { Search, X, Eye, ChevronLeft, ChevronRight, Plus, Upload, Package, Edit, Trash2, Loader2, Pencil } from "lucide-react";
+import axiosInstanceNoAuth from "@/utils/fetch-function-auth";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import axiosInstance from "@/utils/fetch-function";
 import { Badge } from "@/components/ui/badge";
@@ -721,6 +722,14 @@ export interface Product {
     weightUnit: string;
     storeCode: string;
     vat: number;
+    itemVariants?: Array<{
+        id: number;
+        itemCode: string;
+        size: string;
+        color: string;
+        qty: number;
+        price: number;
+    }>;
 }
 
 const getDisplayValue = (value: any): string => value?.toString() || 'N/A';
@@ -854,8 +863,8 @@ const DeleteProductModal = ({
     );
 };
 
-// Add Product Variant Modal
-const AddProductVariantModal = ({
+// Product Variant Modal (Tabbed: Add Variant + View Variants)
+const ProductVariantModal = ({
     isOpen,
     onClose,
     product,
@@ -866,7 +875,11 @@ const AddProductVariantModal = ({
     product: Product | null;
     onSuccess?: () => void;
 }) => {
+    const queryClient = useQueryClient();
+    const [activeTab, setActiveTab] = useState<'add' | 'view'>('add');
     const [isLoading, setIsLoading] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editingVariantId, setEditingVariantId] = useState<number>(0);
     const [formData, setFormData] = useState({
         size: "",
         color: "",
@@ -874,22 +887,45 @@ const AddProductVariantModal = ({
         price: "",
     });
 
+    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+
+    // Fetch product variants via getById
+    const { data: productData, isLoading: isLoadingVariants } = useQuery({
+        queryKey: ['product-variants', product?.id],
+        queryFn: async () => {
+            const response = await axiosInstanceNoAuth.request({
+                method: 'GET',
+                url: '/products/getById',
+                params: {
+                    id: product?.id,
+                    entityCode: entityCode,
+                },
+            });
+            return response.data;
+        },
+        enabled: isOpen && !!product?.id,
+    });
+
+    const variants = productData?.productDto?.itemVariants || productData?.data?.itemVariants || [];
+
     const addVariantMutation = useMutation({
         mutationFn: async (payload: any) => {
             return await axiosInstance.post('/products/save-item-variant', payload);
         },
         onSuccess: (data) => {
             if (data?.data?.code === '000') {
-                toast.success('Product variant added successfully');
+                toast.success(isEditMode ? 'Product variant updated successfully' : 'Product variant added successfully');
+                queryClient.invalidateQueries({ queryKey: ['product-variants', product?.id] });
                 if (onSuccess) onSuccess();
-                handleClose();
+                resetForm();
+                setActiveTab('view');
             } else {
-                toast.error(data?.data?.desc || 'Failed to add product variant');
+                toast.error(data?.data?.desc || 'Failed to save product variant');
                 setIsLoading(false);
             }
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to add product variant');
+            toast.error(error.response?.data?.message || 'Failed to save product variant');
             setIsLoading(false);
         }
     });
@@ -904,7 +940,7 @@ const AddProductVariantModal = ({
 
         setIsLoading(true);
         addVariantMutation.mutate({
-            id: Number(product.id),
+            id: isEditMode ? editingVariantId : 0,
             itemCode: product.code,
             size: formData.size,
             color: formData.color,
@@ -913,9 +949,28 @@ const AddProductVariantModal = ({
         });
     };
 
-    const handleClose = () => {
+    const handleEditVariant = (variant: any) => {
+        setIsEditMode(true);
+        setEditingVariantId(variant.id);
+        setFormData({
+            size: variant.size || "",
+            color: variant.color || "",
+            qty: variant.qty?.toString() || "",
+            price: variant.price?.toString() || "",
+        });
+        setActiveTab('add');
+    };
+
+    const resetForm = () => {
         setIsLoading(false);
+        setIsEditMode(false);
+        setEditingVariantId(0);
         setFormData({ size: "", color: "", qty: "", price: "" });
+    };
+
+    const handleClose = () => {
+        resetForm();
+        setActiveTab('add');
         onClose();
     };
 
@@ -923,70 +978,186 @@ const AddProductVariantModal = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
-            <DialogContent className="sm:max-w-md rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0">
-                <DialogTitle className="sr-only">Add Product Variant</DialogTitle>
+            <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0"
+                style={{ scrollbarWidth: 'none' }}>
+                <DialogTitle className="sr-only">Product Variants</DialogTitle>
                 <div className="px-6 pt-5 pb-2">
-                    <h2 className="text-base font-bold text-dark-gray">Add Product Variant</h2>
-                    <p className="text-xs text-medium-gray mt-0.5">Add a new variant for {product.name}</p>
+                    <h2 className="text-base font-bold text-dark-gray">Product Variants</h2>
+                    <p className="text-xs text-medium-gray mt-0.5">Manage variants for {product.name}</p>
                 </div>
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div className="bg-white rounded-2xl p-4 space-y-4">
-                        <div className="space-y-1.5">
-                            <label className="text-xs text-medium-gray">Size</label>
-                            <Input 
-                                value={formData.size} 
-                                onChange={(e) => setFormData(prev => ({...prev, size: e.target.value}))}
-                                placeholder="Enter size (e.g., XL, 42)" 
-                                className="h-10 text-sm"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs text-medium-gray">Color</label>
-                            <div className="flex gap-2">
-                                <Input 
-                                    type="color"
-                                    value={formData.color || "#000000"} 
-                                    onChange={(e) => setFormData(prev => ({...prev, color: e.target.value}))}
-                                    className="w-12 h-10 p-1 cursor-pointer"
+
+                {/* Tab Buttons */}
+                <div className="px-6 flex gap-2 mb-2">
+                    <button
+                        type="button"
+                        onClick={() => { setActiveTab('add'); if (!isEditMode) resetForm(); }}
+                        className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'add'
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white text-medium-gray hover:text-dark-gray'
+                            }`}
+                    >
+                        {isEditMode ? 'Edit Variant' : 'Add Variant'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('view')}
+                        className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'view'
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white text-medium-gray hover:text-dark-gray'
+                            }`}
+                    >
+                        View Variants {variants.length > 0 && <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]">({variants.length})</span>}
+                    </button>
+                </div>
+
+                {/* Add/Edit Variant Tab */}
+                {activeTab === 'add' && (
+                    <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
+                        {isEditMode && (
+                            <div className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-2">
+                                <p className="text-xs text-orange-700"><span className="font-semibold">Editing variant</span> — modify and save to update.</p>
+                                <button type="button" onClick={resetForm} className="text-xs text-orange-600 hover:text-orange-800 font-semibold underline">
+                                    Cancel Edit
+                                </button>
+                            </div>
+                        )}
+                        <div className="bg-white rounded-2xl p-4 space-y-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-medium-gray">Size</label>
+                                <Input
+                                    value={formData.size}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, size: e.target.value }))}
+                                    placeholder="Enter size (e.g., XL, 42)"
+                                    className="h-10 text-sm"
                                 />
-                                <Input 
-                                    type="text"
-                                    value={formData.color} 
-                                    onChange={(e) => setFormData(prev => ({...prev, color: e.target.value}))}
-                                    placeholder="Select or enter color" 
-                                    className="h-10 text-sm flex-1"
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-medium-gray">Color</label>
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="color"
+                                        value={formData.color || "#000000"}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                                        className="w-12 h-10 p-1 cursor-pointer"
+                                    />
+                                    <Input
+                                        type="text"
+                                        value={formData.color}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, color: e.target.value }))}
+                                        placeholder="Select or enter color"
+                                        className="h-10 text-sm flex-1"
+                                    />
+                                </div>
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-medium-gray">Quantity <span className="text-red-500">*</span></label>
+                                <Input
+                                    type="number"
+                                    required
+                                    value={formData.qty}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, qty: e.target.value }))}
+                                    placeholder="Enter quantity"
+                                    className="h-10 text-sm"
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-xs text-medium-gray">Price</label>
+                                <Input
+                                    type="number"
+                                    value={formData.price}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                                    placeholder="Enter variant price override (optional)"
+                                    className="h-10 text-sm"
                                 />
                             </div>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs text-medium-gray">Quantity <span className="text-red-500">*</span></label>
-                            <Input 
-                                type="number"
-                                required
-                                value={formData.qty} 
-                                onChange={(e) => setFormData(prev => ({...prev, qty: e.target.value}))}
-                                placeholder="Enter quantity" 
-                                className="h-10 text-sm"
-                            />
+                        <div className="flex gap-3 justify-end pt-1">
+                            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+                            <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
+                                {isLoading
+                                    ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</>
+                                    : isEditMode
+                                        ? <><Pencil className="w-4 h-4 mr-2" /> Update Variant</>
+                                        : <><Plus className="w-4 h-4 mr-2" /> Add Variant</>
+                                }
+                            </Button>
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs text-medium-gray">Price</label>
-                            <Input 
-                                type="number"
-                                value={formData.price} 
-                                onChange={(e) => setFormData(prev => ({...prev, price: e.target.value}))}
-                                placeholder="Enter variant price override (optional)" 
-                                className="h-10 text-sm"
-                            />
-                        </div>
+                    </form>
+                )}
+
+                {/* View Variants Tab */}
+                {activeTab === 'view' && (
+                    <div className="px-6 pb-6">
+                        {isLoadingVariants ? (
+                            <div className="bg-white rounded-2xl p-8 flex items-center justify-center">
+                                <div className="text-center">
+                                    <Loader2 className="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2" />
+                                    <p className="text-xs text-medium-gray">Loading variants...</p>
+                                </div>
+                            </div>
+                        ) : variants.length === 0 ? (
+                            <div className="bg-white rounded-2xl p-8 flex items-center justify-center">
+                                <div className="text-center">
+                                    <Package className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-sm text-medium-gray font-medium">No variants yet</p>
+                                    <p className="text-xs text-medium-gray mt-1">Add your first variant using the &quot;Add Variant&quot; tab.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl overflow-hidden">
+                                <table className="w-full text-xs">
+                                    <thead>
+                                        <tr className="border-b border-gray-100">
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Size</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Color</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Qty</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Price</th>
+                                            <th className="text-right px-4 py-3 text-medium-gray font-semibold">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {variants.map((variant: any, index: number) => (
+                                            <tr key={variant.id || index} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-4 py-3 font-medium text-dark-gray">
+                                                    {variant.size || 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {variant.color ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <div
+                                                                className="w-5 h-5 rounded-full border border-gray-200 shrink-0"
+                                                                style={{ backgroundColor: variant.color }}
+                                                            />
+                                                            <span className="text-dark-gray">{variant.color}</span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-medium-gray">N/A</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray">
+                                                    {variant.qty != null ? variant.qty : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray">
+                                                    {variant.price != null ? variant.price : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleEditVariant(variant)}
+                                                        className="inline-flex items-center gap-1 text-orange-500 hover:text-orange-700 font-semibold transition-colors"
+                                                    >
+                                                        <Pencil className="w-3.5 h-3.5" />
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
-                    <div className="flex gap-3 justify-end pt-1">
-                        <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>Cancel</Button>
-                        <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
-                            {isLoading ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</> : <><Plus className="w-4 h-4 mr-2" /> Add Variant</>}
-                        </Button>
-                    </div>
-                </form>
+                )}
             </DialogContent>
         </Dialog>
     );
@@ -1390,7 +1561,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                 onSuccess={handleDeleteSuccess}
             />
 
-            <AddProductVariantModal
+            <ProductVariantModal
                 isOpen={isVariantModalOpen}
                 onClose={() => { setIsVariantModalOpen(false); setVariantProduct(null); }}
                 product={variantProduct}

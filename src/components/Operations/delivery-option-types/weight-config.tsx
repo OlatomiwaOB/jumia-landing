@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Settings } from 'lucide-react';
+import { Loader2, Settings, Package, Pencil, Plus } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axiosOperations from '@/utils/fetch-function-op-auth';
 import { toast } from 'sonner';
@@ -21,16 +21,19 @@ interface OptionType {
     status: string;
 }
 
-interface DeliveryOption {
+interface WeightConfig {
     id: number;
-    area: string;
-    groupCode: string;
+    zoneCode: string;
+    typeCode: string;
+    typeName: string | null;
+    multiplier: number | null;
+    baseFee: number;
+    ratePerKg: number;
+    minWeightKg: number;
+    maxWeightKg: number;
     estimatedTime: number;
     estimatedTimeType: string;
-    deliveryVatRate: number;
-    deliveryVatAmount: number;
-    capLimit: number;
-    amount: number;
+    status: string;
 }
 
 interface WeightConfigFormData {
@@ -53,61 +56,43 @@ interface WeightConfigModalProps {
     onSuccess: () => void;
 }
 
+const defaultFormData: WeightConfigFormData = {
+    id: 0,
+    zoneCode: '',
+    typeCode: '',
+    baseFee: 0,
+    ratePerKg: 0,
+    minWeightKg: 0,
+    maxWeightKg: 0,
+    estimatedTime: 0,
+    estimatedTimeType: '',
+    status: 'Active'
+};
+
 export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOpenChange, optionType, onSuccess }) => {
     const queryClient = useQueryClient();
     const estimatedTimeTypeOptions: SelectOption[] = useGetLookup('ESTIMATED_TIME_TYPE');
-    const [hasExistingConfig, setHasExistingConfig] = useState(false);
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const areaOptions = useGetLookup('AREAS');
+
+    const [activeTab, setActiveTab] = useState<'add' | 'view'>('add');
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [renderKey, setRenderKey] = useState(0);
 
-    const zoneSelectRef = useRef<HTMLButtonElement>(null);
-    const statusSelectRef = useRef<HTMLButtonElement>(null);
-    const timeTypeSelectRef = useRef<HTMLButtonElement>(null);
+    const [formData, setFormData] = useState<WeightConfigFormData>({ ...defaultFormData });
 
-    const [formData, setFormData] = useState<WeightConfigFormData>({
-        id: 0,
-        zoneCode: '',
-        typeCode: '',
-        baseFee: 0,
-        ratePerKg: 0,
-        minWeightKg: 0,
-        maxWeightKg: 0,
-        estimatedTime: 0,
-        estimatedTimeType: '',
-        status: 'Active'
-    });
-
+    // Reset state when modal opens/closes or option type changes
     useEffect(() => {
         if (open && optionType) {
-            setIsInitialLoad(true);
-            setFormData({
-                id: 0,
-                zoneCode: '',
-                typeCode: optionType.typeCode,
-                baseFee: 0,
-                ratePerKg: 0,
-                minWeightKg: 0,
-                maxWeightKg: 0,
-                estimatedTime: 0,
-                estimatedTimeType: '',
-                status: 'Active'
-            });
-            setHasExistingConfig(false);
+            resetForm();
+            setActiveTab('add');
             setRenderKey(prev => prev + 1);
         }
     }, [open, optionType]);
 
-    const { data: deliveryOptionsData } = useQuery({
-        queryKey: ['delivery-options-for-zones'],
-        queryFn: () => axiosOperations.request({
-            url: '/delivery/option/all',
-            method: 'GET'
-        }),
-        enabled: open
-    });
-
-    const { data: configData, isLoading: isLoadingConfigData, refetch: refetchConfig } = useQuery({
-        queryKey: ['weight-config', optionType?.typeCode],
+    // Fetch ALL configs (not filtered by typeCode — API returns all)
+    const { data: configData, isLoading: isLoadingConfigs, refetch: refetchConfigs } = useQuery({
+        queryKey: ['weight-config-all'],
         queryFn: async () => {
             const response = await axiosOperations.request({
                 url: `/delivery-by-weight/config/all`,
@@ -121,95 +106,17 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
     useEffect(() => {
         if (open && optionType?.typeCode) {
             const timer = setTimeout(() => {
-                refetchConfig();
+                refetchConfigs();
             }, 100);
             return () => clearTimeout(timer);
         }
-    }, [open, optionType?.typeCode, refetchConfig]);
+    }, [open, optionType?.typeCode, refetchConfigs]);
 
-    const deliveryOptions: DeliveryOption[] = deliveryOptionsData?.data?.deliveryOptions || [];
-    const uniqueZones: string[] = Array.from(new Set(deliveryOptions.map((o: any) => o.groupCode?.trim())));
-
-    useEffect(() => {
-        if (configData?.data && optionType && isInitialLoad && deliveryOptions.length > 0) {
-            const configs = configData.data.configs;
-            const responseCode = configData.data.responseCode || configData.data.code;
-
-            if (responseCode === 'E20' || configData.data.desc === 'No record found: ' || !configs || configs.length === 0) {
-                setHasExistingConfig(false);
-                setFormData(prev => ({
-                    ...prev,
-                    id: 0,
-                    typeCode: optionType.typeCode
-                }));
-                setIsInitialLoad(false);
-                setRenderKey(prev => prev + 1);
-                return;
-            }
-
-            if (configs && Array.isArray(configs)) {
-                const existingConfig = configs.find((c: any) =>
-                    c.typeCode?.toUpperCase() === optionType.typeCode?.toUpperCase()
-                );
-
-                if (existingConfig) {
-                    setHasExistingConfig(true);
-                    const matchingDeliveryOption = deliveryOptions.find(
-                        (opt) => opt.groupCode?.trim().toUpperCase() === existingConfig.zoneCode?.trim().toUpperCase()
-                    );
-
-                    const timeTypeValue = existingConfig.estimatedTimeType?.toUpperCase() ||
-                        matchingDeliveryOption?.estimatedTimeType?.toUpperCase() || '';
-
-                    setFormData({
-                        id: existingConfig.id || 0,
-                        zoneCode: existingConfig.zoneCode?.trim() || '',
-                        typeCode: existingConfig.typeCode || optionType.typeCode,
-                        baseFee: existingConfig.baseFee || 0,
-                        ratePerKg: existingConfig.ratePerKg || 0,
-                        minWeightKg: existingConfig.minWeightKg || 0,
-                        maxWeightKg: existingConfig.maxWeightKg || 0,
-                        estimatedTime: existingConfig.estimatedTime || matchingDeliveryOption?.estimatedTime || 0,
-                        estimatedTimeType: timeTypeValue,
-                        status: existingConfig.status || 'Active'
-                    });
-                    setRenderKey(prev => prev + 1);
-                } else {
-                    setHasExistingConfig(false);
-                    setFormData(prev => ({
-                        ...prev,
-                        id: 0,
-                        typeCode: optionType.typeCode
-                    }));
-                }
-            }
-            setIsInitialLoad(false);
-        }
-    }, [configData, optionType, deliveryOptions, isInitialLoad]);
-
-    const handleZoneChange = (zoneCode: string) => {
-        const selectedDeliveryOption = deliveryOptions.find(
-            (opt) => opt.groupCode?.trim() === zoneCode?.trim()
-        );
-
-        if (selectedDeliveryOption) {
-            const timeTypeValue = selectedDeliveryOption.estimatedTimeType?.toUpperCase() || '';
-
-            setFormData(prev => ({
-                ...prev,
-                zoneCode: zoneCode,
-                baseFee: selectedDeliveryOption.amount || 0,
-                estimatedTime: selectedDeliveryOption.estimatedTime || 0,
-                estimatedTimeType: timeTypeValue
-            }));
-            setRenderKey(prev => prev + 1);
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                zoneCode: zoneCode
-            }));
-        }
-    };
+    // Extract configs for this option type
+    const allConfigs: WeightConfig[] = configData?.data?.configs || [];
+    // const typeConfigs = allConfigs.filter(
+    //     (c: WeightConfig) => c.typeCode?.toUpperCase() === optionType?.typeCode?.toUpperCase()
+    // );
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -222,6 +129,10 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
 
     const handleSelectChange = (name: string, value: string) => {
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleZoneChange = (zoneCode: string) => {
+        setFormData(prev => ({ ...prev, zoneCode }));
     };
 
     const saveConfigMutation = useMutation({
@@ -238,17 +149,21 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
         onSuccess: (data) => {
             console.log('Save response:', data);
             if (data?.data?.code === '000' || data?.data?.responseCode === '000') {
-                toast.success(hasExistingConfig ? 'Weight config updated successfully' : 'Weight config created successfully');
-                queryClient.invalidateQueries({ queryKey: ['weight-config'] });
+                toast.success(isEditMode ? 'Weight config updated successfully' : 'Weight config created successfully');
+                queryClient.invalidateQueries({ queryKey: ['weight-config-all'] });
+                refetchConfigs();
                 onSuccess();
-                onOpenChange(false);
+                resetForm();
+                setActiveTab('view');
             } else {
                 toast.error(data?.data?.desc || data?.data?.responseMessage || 'Failed to save weight config');
+                setIsLoading(false);
             }
         },
         onError: (error: any) => {
             console.error('Save error:', error);
             toast.error(error.response?.data?.message || error.response?.data?.desc || 'Failed to save weight config');
+            setIsLoading(false);
         }
     });
 
@@ -267,11 +182,8 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
             toast.error('Base fee must be greater than 0');
             return;
         }
-        if (formData.ratePerKg <= 0) {
-            toast.error('Rate per kg must be greater than 0');
-            return;
-        }
 
+        setIsLoading(true);
         const saveData = {
             ...formData,
             typeCode: optionType.typeCode,
@@ -280,6 +192,39 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
         };
 
         saveConfigMutation.mutate(saveData);
+    };
+
+    const handleEditConfig = (config: WeightConfig) => {
+        setIsEditMode(true);
+        setFormData({
+            id: config.id || 0,
+            zoneCode: config.zoneCode?.trim() || '',
+            typeCode: config.typeCode || optionType?.typeCode || '',
+            baseFee: config.baseFee || 0,
+            ratePerKg: config.ratePerKg || 0,
+            minWeightKg: config.minWeightKg || 0,
+            maxWeightKg: config.maxWeightKg || 0,
+            estimatedTime: config.estimatedTime || 0,
+            estimatedTimeType: config.estimatedTimeType || '',
+            status: config.status || 'Active'
+        });
+        setRenderKey(prev => prev + 1);
+        setActiveTab('add');
+    };
+
+    const resetForm = () => {
+        setIsLoading(false);
+        setIsEditMode(false);
+        setFormData({
+            ...defaultFormData,
+            typeCode: optionType?.typeCode || ''
+        });
+    };
+
+    const handleClose = () => {
+        resetForm();
+        setActiveTab('add');
+        onOpenChange(false);
     };
 
     const getSelectDisplayValue = (options: SelectOption[], value: string | null): string => {
@@ -294,197 +239,275 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
     if (!optionType) return null;
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0">
-                <DialogTitle className="sr-only">
-                    {hasExistingConfig ? 'Edit Weight Configuration' : 'Create Weight Configuration'}
-                </DialogTitle>
+        <Dialog open={open} onOpenChange={handleClose}>
+            <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0"
+                style={{ scrollbarWidth: 'none' }}>
+                <DialogTitle className="sr-only">Weight Configuration</DialogTitle>
 
-                <div className="px-6 pt-5 pb-4" key={renderKey}>
-                    <div className="flex items-center gap-3 mb-4">
-                        <div>
-                            <h2 className="text-base font-semibold text-dark-gray">
-                                {hasExistingConfig ? 'Edit Weight Configuration' : 'Create Weight Configuration'}
-                            </h2>
-                            <p className="text-xs text-medium-gray mt-0.5">
-                                For type: <span className="font-medium">{optionType.typeName}</span> ({optionType.typeCode}) - Multiplier: {optionType.multiplier}x
-                            </p>
-                        </div>
-                    </div>
+                <div className="px-6 pt-5 pb-2">
+                    <h2 className="text-base font-bold text-dark-gray">Weight Configuration</h2>
+                    <p className="text-xs text-medium-gray mt-0.5">
+                        Manage configs for <span className="font-medium">{optionType.typeName}</span> ({optionType.typeCode}) — Multiplier: {optionType.multiplier}x
+                    </p>
+                </div>
 
-                    {isLoadingConfigData && isInitialLoad ? (
-                        <div className="bg-white rounded-2xl p-8 flex items-center justify-center">
-                            <div className="text-center">
-                                <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
-                                <p className="text-sm text-medium-gray">Loading existing configuration...</p>
+                {/* Tab Buttons */}
+                <div className="px-6 flex gap-2 mb-2">
+                    <button
+                        type="button"
+                        onClick={() => { setActiveTab('add'); if (!isEditMode) resetForm(); }}
+                        className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'add'
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white text-medium-gray hover:text-dark-gray'
+                            }`}
+                    >
+                        {isEditMode ? 'Edit Config' : 'Add Config'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('view')}
+                        className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'view'
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-white text-medium-gray hover:text-dark-gray'
+                            }`}
+                    >
+                        View Configs {allConfigs.length > 0 && <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]">({allConfigs.length})</span>}
+                    </button>
+                </div>
+
+                {/* Add/Edit Config Tab */}
+                {activeTab === 'add' && (
+                    <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4" key={`form-${renderKey}`}>
+                        {isEditMode && (
+                            <div className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-2">
+                                <p className="text-xs text-orange-700"><span className="font-semibold">Editing config</span> — modify and save to update.</p>
+                                <button type="button" onClick={resetForm} className="text-xs text-orange-600 hover:text-orange-800 font-semibold underline">
+                                    Cancel Edit
+                                </button>
                             </div>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} key={`form-${renderKey}`}>
-                            <div className="bg-white rounded-2xl p-6 space-y-4">
-                                {hasExistingConfig && (
-                                    <div className='text-xs text-dark-gray bg-faded-accent/5 p-2 rounded-lg'>
-                                        <span className="font-semibold">Existing configuration found</span> - Editing will update the current configuration.
-                                    </div>
-                                )}
+                        )}
+                        <div className="bg-white rounded-2xl p-4 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label>Zone <span className="text-red-500">*</span></Label>
+                                    <Select
+                                        key={`zone-${formData.zoneCode}-${renderKey}`}
+                                        value={formData.zoneCode || undefined}
+                                        onValueChange={handleZoneChange}
+                                    >
+                                        <SelectTrigger className='w-full'>
+                                            <SelectValue placeholder="Select zone">
+                                                {formData.zoneCode || "Select zone"}
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {areaOptions?.map((area: any) => (
+                                                <SelectItem key={area.id} value={area.id}>{area.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label>Zone <span className="text-red-500">*</span></Label>
-                                        <Select
-                                            key={`zone-${formData.zoneCode}-${renderKey}`}
-                                            value={formData.zoneCode || undefined}
-                                            onValueChange={handleZoneChange}
-                                        >
-                                            <SelectTrigger ref={zoneSelectRef}>
-                                                <SelectValue placeholder="Select zone">
-                                                    {formData.zoneCode || "Select zone"}
-                                                </SelectValue>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {uniqueZones.map((zone: string) => (
-                                                    <SelectItem key={zone} value={zone}>{zone}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Status</Label>
+                                    <Select
+                                        key={`status-${formData.status}-${renderKey}`}
+                                        value={formData.status || undefined}
+                                        onValueChange={(value) => handleSelectChange('status', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select status">
+                                                {formData.status || "Select status"}
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Active">Active</SelectItem>
+                                            <SelectItem value="Inactive">Inactive</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Status</Label>
-                                        <Select
-                                            key={`status-${formData.status}-${renderKey}`}
-                                            value={formData.status || undefined}
-                                            onValueChange={(value) => handleSelectChange('status', value)}
-                                        >
-                                            <SelectTrigger ref={statusSelectRef}>
-                                                <SelectValue placeholder="Select status">
-                                                    {formData.status || "Select status"}
-                                                </SelectValue>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="Active">Active</SelectItem>
-                                                <SelectItem value="Inactive">Inactive</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Base Fee (₦) <span className="text-red-500">*</span></Label>
+                                    <Input
+                                        name="baseFee"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.baseFee || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., 500"
+                                        required
+                                    />
+                                </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Base Fee (₦) <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            name="baseFee"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            value={formData.baseFee || ""}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., 500"
-                                            required
-                                        />
-                                        {formData.zoneCode && (
-                                            <p className="text-xs text-medium-gray">
-                                                Auto-populated from delivery option amount
-                                            </p>
-                                        )}
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Rate Per Kg (ccy) </Label>
+                                    <Input
+                                        name="ratePerKg"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.ratePerKg || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., 200"
+                                    />
+                                </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Rate Per Kg (₦) <span className="text-red-500">*</span></Label>
-                                        <Input
-                                            name="ratePerKg"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            value={formData.ratePerKg || ""}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., 200"
-                                            required
-                                        />
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Min Weight (kg)</Label>
+                                    <Input
+                                        name="minWeightKg"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.minWeightKg || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., 0"
+                                    />
+                                </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Min Weight (kg)</Label>
-                                        <Input
-                                            name="minWeightKg"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            value={formData.minWeightKg || ""}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., 0"
-                                        />
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Max Weight (kg)</Label>
+                                    <Input
+                                        name="maxWeightKg"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={formData.maxWeightKg || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., 100"
+                                    />
+                                </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Max Weight (kg)</Label>
-                                        <Input
-                                            name="maxWeightKg"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            value={formData.maxWeightKg || ""}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., 100"
-                                        />
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Estimated Time</Label>
+                                    <Input
+                                        name="estimatedTime"
+                                        type="number"
+                                        min="1"
+                                        value={formData.estimatedTime || ""}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g., 1"
+                                    />
+                                </div>
 
-                                    <div className="space-y-1.5">
-                                        <Label>Estimated Time</Label>
-                                        <Input
-                                            name="estimatedTime"
-                                            type="number"
-                                            min="1"
-                                            value={formData.estimatedTime || ""}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g., 1"
-                                        />
-                                        {formData.zoneCode && (
-                                            <p className="text-xs text-medium-gray">
-                                                Auto-populated from delivery option
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label>Time Type</Label>
-                                        <Select
-                                            key={`timetype-${formData.estimatedTimeType}-${renderKey}`}
-                                            value={formData.estimatedTimeType || undefined}
-                                            onValueChange={(value) => handleSelectChange('estimatedTimeType', value)}
-                                        >
-                                            <SelectTrigger ref={timeTypeSelectRef}>
-                                                <SelectValue placeholder="Select time type">
-                                                    {getSelectDisplayValue(estimatedTimeTypeOptions, formData.estimatedTimeType) || "Select time type"}
-                                                </SelectValue>
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {estimatedTimeTypeOptions.map((option) => (
-                                                    <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                <div className="space-y-1.5">
+                                    <Label>Time Type</Label>
+                                    <Select
+                                        key={`timetype-${formData.estimatedTimeType}-${renderKey}`}
+                                        value={formData.estimatedTimeType || undefined}
+                                        onValueChange={(value) => handleSelectChange('estimatedTimeType', value)}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select time type">
+                                                {getSelectDisplayValue(estimatedTimeTypeOptions, formData.estimatedTimeType) || "Select time type"}
+                                            </SelectValue>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {estimatedTimeTypeOptions.map((option) => (
+                                                <SelectItem key={option.id} value={option.id}>{option.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
+                        </div>
+                        <div className="flex gap-3 justify-end pt-1">
+                            <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>Cancel</Button>
+                            <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
+                                {isLoading
+                                    ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</>
+                                    : isEditMode
+                                        ? <><Pencil className="w-4 h-4 mr-2" /> Update Config</>
+                                        : <><Plus className="w-4 h-4 mr-2" /> Save Config</>
+                                }
+                            </Button>
+                        </div>
+                    </form>
+                )}
 
-                            <div className="flex gap-3 pt-6 justify-end">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => onOpenChange(false)}
-                                    disabled={saveConfigMutation.isPending}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={saveConfigMutation.isPending}>
-                                    {saveConfigMutation.isPending ? (
-                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</>
-                                    ) : (hasExistingConfig ? 'Update Config' : 'Save Config')}
-                                </Button>
+                {/* View Configs Tab */}
+                {activeTab === 'view' && (
+                    <div className="px-6 pb-6">
+                        {isLoadingConfigs ? (
+                            <div className="bg-white rounded-2xl p-8 flex items-center justify-center">
+                                <div className="text-center">
+                                    <Loader2 className="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2" />
+                                    <p className="text-xs text-medium-gray">Loading configurations...</p>
+                                </div>
                             </div>
-                        </form>
-                    )}
-                </div>
+                        ) : allConfigs.length === 0 ? (
+                            <div className="bg-white rounded-2xl p-8 flex items-center justify-center">
+                                <div className="text-center">
+                                    <Package className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-sm text-medium-gray font-medium">No configurations yet</p>
+                                    <p className="text-xs text-medium-gray mt-1">Add your first config using the &quot;Add Config&quot; tab.</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-white rounded-2xl overflow-hidden">
+                                <table className="w-full text-xs">
+                                    <thead>
+                                        <tr className="border-b border-gray-100">
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Zone</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Base Fee</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Rate/Kg</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Weight Range</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Est. Time</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Status</th>
+                                            <th className="text-right px-4 py-3 text-medium-gray font-semibold">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {allConfigs.map((config: WeightConfig, index: number) => (
+                                            <tr key={config.id || index} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-4 py-3 font-medium text-dark-gray">
+                                                    {config.zoneCode || 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray">
+                                                    {config.baseFee != null ? config.baseFee.toFixed(2) : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray">
+                                                    {config.ratePerKg != null ? config.ratePerKg.toFixed(2) : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray">
+                                                    {config.minWeightKg != null && config.maxWeightKg != null
+                                                        ? `${config.minWeightKg}–${config.maxWeightKg} kg`
+                                                        : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray">
+                                                    {config.estimatedTime
+                                                        ? `${config.estimatedTime} ${config.estimatedTimeType || ''}`
+                                                        : 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${config.status?.toUpperCase() === 'ACTIVE'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : 'bg-red-100 text-red-700'
+                                                        }`}>
+                                                        {config.status || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleEditConfig(config)}
+                                                        className="inline-flex items-center gap-1 text-orange-500 hover:text-orange-700 font-semibold transition-colors"
+                                                    >
+                                                        <Pencil className="w-3.5 h-3.5" />
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
             </DialogContent>
-        </Dialog >
+        </Dialog>
     );
 };

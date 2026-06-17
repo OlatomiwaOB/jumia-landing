@@ -9,7 +9,6 @@ import { ArrowLeft, Truck, MapPin, Eye, EyeOff } from 'lucide-react';
 import { SearchSelect } from '@/components/ui/search-select';
 import { nationalityOptions, countryOptions } from '@/utils/country-data';
 import { useRouter } from 'next/navigation';
-import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
 import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -52,19 +51,8 @@ const GuestInfoForm = ({
   const watchPickupStore = watch("pickupStore");
   const watchSelectedAddressId = watch("selectedAddressId");
 
-  const { deliveryOptions } = useDeliveryOptions('GUEST');
   const addressTypeOptions = useGetLookup('ADDRESS_TYPE');
-
-  // Get unique zones from delivery options
-  const zones = React.useMemo(() => {
-    if (!deliveryOptions?.length) return [];
-    const seen = new Set<string>();
-    return deliveryOptions.filter((opt: any) => {
-      if (!opt.groupCode || seen.has(opt.groupCode)) return false;
-      seen.add(opt.groupCode);
-      return true;
-    });
-  }, [deliveryOptions]);
+  const areaOptions = useGetLookup('AREAS');
 
   // Fetch weight-based delivery options when zone + weight are available
   const cartWeight = getCartWeight();
@@ -289,7 +277,7 @@ const GuestInfoForm = ({
                   <Label>Confirm Password *</Label>
                   <div className="relative">
                     <Input
-                      type={showPassword ? "text" : "password"}
+                      type={showConfirmPassword ? "text" : "password"}
                       {...register('confirmPassword')}
                       placeholder="••••••••"
                       className={errors.confirmPassword ? "border-destructive" : ""}
@@ -395,60 +383,28 @@ const GuestInfoForm = ({
                       <Label>Zip/Postal Code</Label>
                       <Input {...register('zipCode')} placeholder="Zip Code" />
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {watchShippingMethod === 'delivery' && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Delivery Zone</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {zones.length === 0 ? (
-                    <div className="text-center py-4">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                      <p className="text-sm text-muted-foreground mt-2">Loading delivery zones...</p>
+                    <div className="space-y-2">
+                      <Label>Area *</Label>
+                      <Select
+                        value={selectedZone || undefined}
+                        onValueChange={handleZoneSelect}
+                      >
+                        <SelectTrigger className={`w-full ${!selectedZone && watchShippingMethod === 'delivery' ? "border-destructive" : ""}`}>
+                          <SelectValue placeholder="Select area" />
+                        </SelectTrigger>
+                        <SelectContent className="w-full">
+                          {areaOptions?.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!selectedZone && watchShippingMethod === 'delivery' && (
+                        <p className="text-xs text-destructive">Please select an area</p>
+                      )}
                     </div>
-                  ) : (
-                    <RadioGroup
-                      value={selectedZone || ""}
-                      onValueChange={handleZoneSelect}
-                      className="space-y-3"
-                    >
-                      {zones.map((option: any) => (
-                        <div
-                          key={option.groupCode}
-                          className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedZone === option.groupCode
-                            ? 'border-accent bg-accent/5 shadow-sm'
-                            : 'border-gray-200 hover:border-accent/50'
-                            }`}
-                        >
-                          <label
-                            htmlFor={`zone-${option.groupCode}`}
-                            className="flex items-center gap-4 cursor-pointer w-full"
-                          >
-                            <RadioGroupItem
-                              value={option.groupCode}
-                              id={`zone-${option.groupCode}`}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <div className="text-2xl">{option.icon}</div>
-                                <div className="font-semibold cursor-pointer text-checkout-text">{option.name || option.groupCode}</div>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{option.description || option.area}</p>
-                            </div>
-                          </label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  )}
-                  {!selectedZone && watchShippingMethod === 'delivery' && (
-                    <p className="text-sm text-destructive mt-2">Please select a delivery zone</p>
-                  )}
+                  </div>
                 </CardContent>
               </Card>
             )}

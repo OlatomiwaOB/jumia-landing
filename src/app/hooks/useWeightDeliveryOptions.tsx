@@ -33,7 +33,7 @@ export interface WeightDeliveryOptionsResponse {
  * @param sourceType - Optional source type for guest vs authenticated
  */
 const useWeightDeliveryOptions = (
-  zoneCode: string | undefined,
+  zoneCode: string | undefined = 'Camden',
   totalWeightKg: number,
   sourceType?: string
 ) => {
@@ -51,12 +51,13 @@ const useWeightDeliveryOptions = (
           totalWeightKg,
         },
       }),
-    // enabled: !!zoneCode && totalWeightKg > 0,
+    enabled: !!zoneCode && totalWeightKg > 0,
     staleTime: 2 * 60 * 1000,
     gcTime: 5 * 60 * 1000,
   });
 
-  const options: WeightDeliveryOption[] = data?.data?.options || [];
+  const filteredOptions = data?.data?.options?.filter((option: WeightDeliveryOption) => option?.responseCode === '000');
+  const options: WeightDeliveryOption[] = filteredOptions || [];
 
   return { options, isLoading, error, refetch };
 };

@@ -525,7 +525,7 @@
 // };
 
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Truck, MapPin, ArrowLeft, Clock, Plus, Store, Edit } from "lucide-react";
 import { toast } from "sonner";
@@ -582,7 +582,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
   const selectedStore = watch("pickupStore");
 
   // Get unique zones from delivery options
-  const zones = React.useMemo(() => {
+  const zones = useMemo(() => {
     if (!deliveryOptions?.length) return [];
     const seen = new Set<string>();
     return deliveryOptions.filter((opt: any) => {

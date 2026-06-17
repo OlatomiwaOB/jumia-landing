@@ -19,6 +19,7 @@ export interface MenuItem {
   storeCode: string
   vat?: string | null;
   weight?: number;
+  weightUnit?: string;
   //   bg?: string;
   //   color?: string;
 }

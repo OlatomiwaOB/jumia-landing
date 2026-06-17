@@ -52,8 +52,9 @@ const guestFormSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
     .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string().min(8, "Confirm Password must be at least 8 characters"),
-  // nationality: z.string().min(1, "Nationality is required"),
-  // dateOfBirth: z.string().min(1, "Date of birth is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 export type GuestFormData = z.infer<typeof guestFormSchema>;
@@ -321,8 +322,7 @@ const GuestCheckoutContent = () => {
         ...(payment !== undefined ? { selectedPayment: payment } : {}),
       }));
     } catch { }
-  } catch { }
-}, []);
+  }, []);
 
 const handlePaymentSelect = (method: PaymentMethod) => {
   setSelectedPayment(method);

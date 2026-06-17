@@ -70,6 +70,7 @@ export default function ProductPage() {
     qty: v.qty,
     size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size || `${index + 1}`),
     price: v.price > 0 ? v.price : basePrice,
+    weight: parseFloat(v.size) || product?.weight || 1,
     original: v
   }));
 
@@ -329,7 +330,7 @@ export default function ProductPage() {
                     >
                       <option value="">Choose an option</option>
                       {variants.map((v: any) => (
-                        <option key={v.id} value={v.id}>{v.size}</option>
+                        <option key={v.id} value={v.id}>{v.size} {product?.unit}</option>
                       ))}
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-text)] opacity-50 pointer-events-none" />
@@ -390,11 +391,16 @@ export default function ProductPage() {
                     type="button"
                     className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-4 font-bold text-white transition-all hover:bg-[var(--color-text)] hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => {
+                      const itemWeight = hasVariants && currentVariant
+                        ? currentVariant.weight
+                        : (product.weight || 1);
                       addToCart({
                         ...product,
                         id: currentProductId,
                         name: hasVariants && currentVariant ? `${product.name} - ${currentVariant.size}` : product.name,
                         salePrice: currentPrice,
+                        weight: itemWeight,
+                        weightUnit: product.weightUnit || undefined,
                       } as any, localQty);
                       openCart();
                     }}

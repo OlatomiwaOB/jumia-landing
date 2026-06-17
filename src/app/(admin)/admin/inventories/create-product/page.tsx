@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Scale } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useFileUpload } from "@/app/hooks/useUpload";
 import { useProductMutation } from "@/components/Admin/inventories/shared-hooks.tsx/useProductMutation";
@@ -52,6 +52,7 @@ interface ProductFormData {
   onSale: boolean;
   discount: number;
   vatEligible: boolean;
+  variantEnabled?: boolean;
   weight: string;
   weightUnit: string;
 }
@@ -253,7 +254,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         discount: product?.discount || 0,
         vatEligible: product?.vat > 0 || false,
         weight: product?.weight?.toString() || "",
-        weightUnit: product?.weightUnit || ""
+        weightUnit: product?.weightUnit || "",
+        variantEnabled: !!product?.itemVariants?.length ? true : false,
       };
       reset(productObj);
       initialDataLoadedRef.current = true;
@@ -304,7 +306,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         discount: values?.onSale ? values?.discount : 0,
         vatRate: values?.vatEligible ? 7.5 : 0,
         weight: values.weight ? parseFloat(values.weight) : null,
-        weightUnit: values.weightUnit || null
+        weightUnit: values.weightUnit || null,
+        variantEnabled: values?.variantEnabled || false
       };
       await saveProduct(payload);
     } catch (error) {
@@ -619,6 +622,19 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                         icon={<VatIcon className="w-5 h-5 text-[#DCD5D0]" />}
                         title="VAT Eligible"
                         description="Enable if this product is subject to 7.5% VAT"
+                      />
+                    )}
+                  />
+
+                  <Controller
+                    name="variantEnabled" control={control}
+                    render={({ field }) => (
+                      <ToggleCard
+                        isActive={!!field.value}
+                        onToggle={(checked) => field.onChange(checked)}
+                        icon={<Scale className="w-5 h-5 text-[#DCD5D0]" />}
+                        title="Variant Enabled"
+                        description="Enable if this product has different variants"
                       />
                     )}
                   />
