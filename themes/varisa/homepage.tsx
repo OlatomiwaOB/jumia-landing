@@ -8,15 +8,13 @@ import { useSearchParams } from "next/navigation";
 import { useCategories } from '@/hooks/useCategories';
 import Loader from '@/components/ui/loader';
 
-import PromotionalCards from './components/ui/promotional-cards';
-import CategoryList from '@/components/ui/category-list';
-import BestSellers from './components/ui/best-sellers';
+import HeroSplash from './components/ui/hero-splash';
 import FeaturedProductsSlider from './components/ui/featured-products';
 import Testimonials from './components/ui/testimonials';
 import TopDeals from './components/ui/top-deals';
 
-import LimitedOffer from './components/ui/limited-offer';
-import FeaturesSection from './components/ui/features-section';
+import FaqSection from './components/ui/faq-section';
+import WhyChooseUs from './components/ui/why-choose-us';
 
 export default function HomePage() {
   const [allProducts, setAllProducts] = useState<ProductProps[]>([]);
@@ -100,17 +98,11 @@ export default function HomePage() {
 
   return (
     <div className="w-full">
-      {/* Promotional Cards Grid */}
-      <PromotionalCards />
+      {/* Cinematic Hero Splash */}
+      <HeroSplash products={allProducts} />
 
-      {/* Categories List Section */}
-      <CategoryList categories={categories} />
-
-      {/* Best Sellers Section */}
-      <BestSellers products={allProducts} />
-
-      {/* Featured Products Slider (Added after Best Sellers) */}
-      <FeaturedProductsSlider featuredProducts={featuredDeals} />
+      {/* Featured Categories Slider (Replaced Featured Products) */}
+      <FeaturedProductsSlider categories={categories} />
 
       {/* Customer Testimonials Section */}
       <Testimonials />
@@ -118,11 +110,11 @@ export default function HomePage() {
       {/* Top Deals Of The Day Section */}
       <TopDeals products={featuredDeals} />
 
-      {/* Limited Time Offer / Newsletter Section */}
-      <LimitedOffer />
+      {/* FAQ Section */}
+      <FaqSection />
 
-      {/* Features Section (placed here to appear right before the footer) */}
-      <FeaturesSection />
+      {/* Why Choose Us Section */}
+      <WhyChooseUs />
     </div>
   )
 }
