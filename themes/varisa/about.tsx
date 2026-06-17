@@ -6,12 +6,20 @@ import Link from 'next/link';
 import { ChefHat, Star, Truck, Heart, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function AboutPage() {
-  const envColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
-  const accentColor = envColor ? (envColor.startsWith('#') ? envColor : `#${envColor}`) : '#22C55E'; 
-  const bgColor = envColor ? (envColor.startsWith('#') ? envColor : `#${envColor}`) : '#FCFBF8';
-  
-  const envHoverColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
-  const hoverColor = envHoverColor ? (envHoverColor.startsWith('#') ? envHoverColor : `#${envHoverColor}`) : '#111827';
+  const envBgColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+  const bgColor = envBgColor ? (envBgColor.startsWith('#') ? envBgColor : `#${envBgColor}`) : '#FCFBF8';
+
+  const envAccentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
+  const accentColor = envAccentColor ? (envAccentColor.startsWith('#') ? envAccentColor : `#${envAccentColor}`) : '#A0522D';
+
+  const envAccentColor2 = process.env.NEXT_PUBLIC_ACCENT_COLOR_2;
+  const accentColor2 = envAccentColor2 ? (envAccentColor2.startsWith('#') ? envAccentColor2 : `#${envAccentColor2}`) : '#967BB6';
+
+  const envAccentColor3 = process.env.NEXT_PUBLIC_ACCENT_COLOR_3;
+  const accentColor3 = envAccentColor3 ? (envAccentColor3.startsWith('#') ? envAccentColor3 : `#${envAccentColor3}`) : '#2F3E33';
+
+  // Hover color can default to primary accent
+  const hoverColor = accentColor;
 
   return (
     <div className="min-h-screen font-sans pb-20" style={{ backgroundColor: bgColor }}>
@@ -57,7 +65,7 @@ export default function AboutPage() {
               <Truck size={32} />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">UK-Wide Delivery</h3>
-            <p className="text-gray-600 text-sm">We carefully package and ship our meals every Wednesday to reach you perfectly fresh.</p>
+            <p className="text-gray-600 text-sm">We carefully package and ship our meals weekly, so they arrive at your door perfectly fresh.</p>
           </div>
 
         </div>
@@ -125,7 +133,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Uncompromising Quality</h3>
-                <p className="text-gray-600">From the freshest produce to premium meats, we source only the highest quality ingredients. We prepare our food in pristine, hygienic environments.</p>
+                <p className="text-gray-600">From the freshest produce to premium meats, we source only the highest quality ingredients, prepared in pristine, hygienic environments.</p>
               </div>
             </div>
 
@@ -135,7 +143,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Made with Love</h3>
-                <p className="text-gray-600">Cooking Nigerian food takes time, patience, and love. We don't mass-produce; we cook every batch with the same care we would for our own families.</p>
+                <p className="text-gray-600">Cooking Nigeria food takes time, patience, and love. We don't mass-produce — every batch is cooked with the same care we would give our own familie.</p>
               </div>
             </div>
 
@@ -145,7 +153,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Reliability</h3>
-                <p className="text-gray-600">You can count on us. With our strict Wednesday shipping schedule, you know exactly when your meals will arrive, securely packaged and ready to enjoy.</p>
+                <p className="text-gray-600">You can count on us. We ship on a regular schedule so your meals always arrive securely packaged and ready to enjoy.</p>
               </div>
             </div>
 
@@ -168,19 +176,19 @@ export default function AboutPage() {
 
       {/* 6. Call to Action */}
       <section className="py-16 px-6">
-        <div className="max-w-5xl mx-auto rounded-3xl p-12 md:p-16 text-center shadow-2xl relative overflow-hidden" style={{ backgroundColor: accentColor }}>
+        <div className="max-w-5xl mx-auto rounded-3xl p-12 md:p-16 text-center shadow-2xl relative overflow-hidden" style={{ backgroundColor: accentColor3 }}>
           {/* Background pattern overlay */}
           <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-transparent"></div>
 
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
-              Ready to Taste Home?
+            <h2 className="text-3xl md:text-5xl font-serif font-black text-white mb-6 tracking-tight">
+              Bring the Warmth of Home to Your Table
             </h2>
-            <p className="text-lg md:text-xl text-gray-800 mb-10 max-w-2xl mx-auto">
-              Explore our menu of freshly prepared authentic meals. Place your order today.
+            <p className="text-lg md:text-xl text-gray-200 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+              Explore our menu of freshly prepared authentic meals and place your pre-order today.
             </p>
-            <Link 
-              href="/shop" 
+            <Link
+              href="/shop"
               className="inline-flex items-center gap-2 font-bold text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1"
               style={{ backgroundColor: '#FFFFFF', color: '#111827' }}
               onMouseEnter={(e) => {

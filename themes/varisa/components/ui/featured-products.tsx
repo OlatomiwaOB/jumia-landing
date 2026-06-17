@@ -104,7 +104,7 @@ export default function FeaturedProductsSlider({ categories = [] }: FeaturedProd
       {/* Scrolling Container */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+        className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-0 sm:gap-6 px-0 sm:px-8 py-4 -mx-4 sm:mx-0"
         style={{ scrollBehavior: 'smooth' }}
       >
         <style dangerouslySetInnerHTML={{ __html: `.hide-scrollbar::-webkit-scrollbar { display: none; }` }} />
@@ -112,11 +112,15 @@ export default function FeaturedProductsSlider({ categories = [] }: FeaturedProd
         {categories.map((category, index) => (
           <div
             key={category.id || index}
-            className="w-full sm:w-[400px] lg:w-[450px] flex-shrink-0 snap-center"
+            className="w-full sm:w-[400px] lg:w-[450px] flex-shrink-0 snap-center px-4 sm:px-0"
           >
-            <div className="flex flex-col sm:flex-row w-full h-full items-center">
+            <div 
+              className="w-full rounded-2xl overflow-hidden shadow-sm border border-black/5"
+              style={{ backgroundColor: '#1a2e1a' }}
+            >
+              <div className="flex flex-col sm:flex-row w-full h-full items-center">
               {/* Image Box */}
-              <div className="w-full sm:w-1/2 h-[220px] sm:h-[160px] relative">
+              <div className="w-full sm:w-1/2 h-[180px] sm:h-[160px] relative">
                 <div className="w-full h-full relative">
                   <Image
                     src={category.logo || '/product-placeholder-borderless.svg'}
@@ -156,6 +160,7 @@ export default function FeaturedProductsSlider({ categories = [] }: FeaturedProd
               </div>
             </div>
           </div>
+        </div>
         ))}
       </div>
     </div>
