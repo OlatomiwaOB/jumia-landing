@@ -525,7 +525,7 @@
 // };
 
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Truck, MapPin, ArrowLeft, Clock, Plus, Store, Edit } from "lucide-react";
 import { toast } from "sonner";
@@ -535,7 +535,6 @@ import useCustomer from "@/store/customerStore";
 import { useCart } from "@/store/cart";
 import { useLocationStore } from "@/store/locationStore";
 import { formatPrice } from "@/utils/helperfns";
-import { formatStoreHours } from "@/utils/formatStoreHours";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetDeliveryAddress } from "@/app/hooks/useGetDeliveryAddress";
@@ -544,7 +543,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import useGetLookup from "@/app/hooks/useGetLookup";
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
-import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
 import { UseFormReturn } from "react-hook-form";
@@ -574,31 +572,11 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
   const { deliveryAddress } = useGetDeliveryAddress();
 
   const { deliveryOptions, isLoading: isLoadingDeliveryOptions } = useDeliveryOptions();
-  const [selectedZone, setSelectedZone] = useState<string | undefined>(undefined);
 
   const shippingMethod = watch("shippingMethod");
   const selectedShippingOption = watch("shippingOption");
   const selectedAddressId = watch("selectedAddressId");
   const selectedStore = watch("pickupStore");
-
-  // Get unique zones from delivery options
-  const zones = useMemo(() => {
-    if (!deliveryOptions?.length) return [];
-    const seen = new Set<string>();
-    return deliveryOptions.filter((opt: any) => {
-      if (!opt.groupCode || seen.has(opt.groupCode)) return false;
-      seen.add(opt.groupCode);
-      return true;
-    });
-  }, [deliveryOptions]);
-
-  const { getCartWeight } = useCart();
-  const cartWeight = getCartWeight();
-  const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
-    selectedZone,
-    cartWeight,
-    'AUTH'
-  );
 
   const { data: pickupData, isLoading: isLoadingPickup, error: pickupError } = useQuery({
     queryKey: ['pickup-locations'],
@@ -656,17 +634,17 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       shippingAmount = selectedPickupLocation?.amount || 0;
       setValue("deliveryOptionGroup", "");
     } else if (shippingMethod === 'delivery' && selectedShippingOption) {
-      const selectedWeightOption = weightOptions?.find((opt) => opt.typeCode === selectedShippingOption);
-      if (selectedWeightOption) {
-        shippingAmount = selectedWeightOption.finalFee || 0;
-        setValue("deliveryOptionGroup", selectedWeightOption.typeCode);
+      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === selectedShippingOption);
+      shippingAmount = selectedOption?.price || 0;
+      if (selectedOption?.groupCode) {
+        setValue("deliveryOptionGroup", selectedOption.groupCode);
       } else {
         setValue("deliveryOptionGroup", "");
       }
     }
 
     onShippingUpdate?.(shippingAmount);
-  }, [shippingMethod, selectedShippingOption, selectedStore, pickupStores, weightOptions]);
+  }, [shippingMethod, selectedShippingOption, selectedStore]);
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     if (method === 'delivery') {
@@ -681,7 +659,6 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       setValue("addressType", "");
     } else if (method === 'pickup') {
       setValue("shippingOption", undefined);
-      setSelectedZone(undefined);
       setValue("selectedAddressId", undefined);
       setValue("street", "");
       setValue("landmark", "");
@@ -697,15 +674,14 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     // console.log(`Switched to ${method} mode, cleared all related fields`);
   };
 
-  const handleZoneSelect = (zoneCode: string) => {
-    setSelectedZone(zoneCode);
-    setValue("shippingOption", undefined);
-    setValue("deliveryOptionGroup", "");
-  };
-
-  const handleWeightOptionSelect = (typeCode: string) => {
-    setValue("shippingOption", typeCode);
-    setValue("deliveryOptionGroup", typeCode);
+  const handleShippingOptionChange = (optionId: string) => {
+    setValue("shippingOption", optionId);
+    const selectedOption = deliveryOptions?.find((option: any) => option.id === optionId);
+    if (selectedOption?.groupCode) {
+      setValue("deliveryOptionGroup", selectedOption.groupCode);
+    } else {
+      setValue("deliveryOptionGroup", "");
+    }
   };
 
   const handleAddressSelect = (address: any) => {
@@ -924,127 +900,72 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
 
                 <Card className="mb-6">
                   <CardHeader>
-                    <CardTitle className="text-lg">Delivery Zone</CardTitle>
+                    <CardTitle className="text-lg">Shipping Method</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {zones.length === 0 ? (
+                    {deliveryOptions.length === 0 ? (
                       <div className="text-center py-8">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                        <p className="text-sm text-muted-foreground mt-2">Loading delivery zones...</p>
+                        <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
                       </div>
                     ) : (
                       <>
                         <RadioGroup
-                          value={selectedZone || ""}
-                          onValueChange={handleZoneSelect}
+                          value={selectedShippingOption || ""}
+                          onValueChange={handleShippingOptionChange}
                           className="space-y-3"
                         >
-                          {zones.map((option: any) => (
+                          {deliveryOptions.map((option: any) => (
                             <div
-                              key={option.groupCode}
-                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedZone === option.groupCode
+                              key={option.id}
+                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedShippingOption === option.id
                                 ? 'border-accent bg-accent/5 shadow-sm'
                                 : 'border-gray-200 hover:border-accent/50'
                                 }`}
                             >
                               <label
-                                htmlFor={`zone-${option.groupCode}`}
-                                className="md:flex items-center gap-4 cursor-pointer w-full"
+                                htmlFor={option.id}
+                                className="md:flex items-center gap-4 cursor-pointer"
                               >
                                 <RadioGroupItem
-                                  value={option.groupCode}
-                                  id={`zone-${option.groupCode}`}
+                                  value={option.id}
+                                  id={option.id}
                                   onClick={(e) => e.stopPropagation()}
                                 />
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2">
                                     <div className="text-2xl">{option.icon}</div>
-                                    <div className="font-semibold cursor-pointer text-checkout-text">{option.name || option.groupCode}</div>
+                                    <div className="font-semibold cursor-pointer text-checkout-text">{option.name}</div>
                                   </div>
-                                  <p className="text-sm text-muted-foreground">{option.description || option.area}</p>
+                                  <p className="text-sm text-muted-foreground">{option.description}</p>
+                                  <div className="md:flex justify-between mb-2">
+                                    <p className="text-xs text-accent mt-1">
+                                      {option.estimatedArrival}
+                                    </p>
+                                    {option.deliveryVatRate > 0 && (
+                                      <>
+                                        <span>•</span>
+                                        <p className="text-xs text-accent mt-1 truncate">
+                                          Incl. {formatPrice(option.deliveryVatAmount, mainCcy() as any)} VAT
+                                        </p>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="md:text-right">
+                                  <p className="font-semibold text-checkout-text">{formatPrice(option.price, mainCcy() as any)}</p>
                                 </div>
                               </label>
                             </div>
                           ))}
                         </RadioGroup>
-                        {!selectedZone && (
-                          <p className="text-sm text-destructive mt-2">Please select a delivery zone</p>
+                        {!selectedShippingOption && (
+                          <p className="text-sm text-muted-foreground mt-2">Please select a delivery option</p>
                         )}
                       </>
                     )}
                   </CardContent>
                 </Card>
-
-                {selectedZone && (
-                  <Card className="mb-6">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Delivery Speed</CardTitle>
-                      <p className="text-sm text-muted-foreground">Cart weight: {cartWeight.toFixed(1)} kg</p>
-                    </CardHeader>
-                    <CardContent>
-                      {isLoadingWeightOptions ? (
-                        <div className="text-center py-8">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                          <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
-                        </div>
-                      ) : weightOptions.length === 0 ? (
-                        <div className="text-center py-4 text-muted-foreground">
-                          <p>No delivery options available for this zone</p>
-                        </div>
-                      ) : (
-                        <>
-                          <RadioGroup
-                            value={selectedShippingOption || ""}
-                            onValueChange={handleWeightOptionSelect}
-                            className="space-y-3"
-                          >
-                            {weightOptions.map((option) => (
-                              <div
-                                key={option.typeCode}
-                                className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedShippingOption === option.typeCode
-                                  ? 'border-accent bg-accent/5 shadow-sm'
-                                  : 'border-gray-200 hover:border-accent/50'
-                                  }`}
-                              >
-                                <label
-                                  htmlFor={`weight-opt-${option.typeCode}`}
-                                  className="md:flex items-center gap-4 cursor-pointer w-full"
-                                >
-                                  <RadioGroupItem
-                                    value={option.typeCode}
-                                    id={`weight-opt-${option.typeCode}`}
-                                    onClick={(e) => e.stopPropagation()}
-                                  />
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <div className="text-2xl">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
-                                      <div className="font-semibold cursor-pointer text-checkout-text">{option.typeName}</div>
-                                      {option.typeCode === 'EXPRESS' && (
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                          Fastest
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mt-1">
-                                      Est. {option.estimatedTime} {option.estimatedTimeType}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground mt-0.5">{option.breakdown}</p>
-                                  </div>
-                                  <div className="md:text-right mt-2 md:mt-0">
-                                    <p className="font-semibold text-checkout-text">{formatPrice(option.finalFee, mainCcy() as any)}</p>
-                                  </div>
-                                </label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                          {!selectedShippingOption && weightOptions.length > 0 && (
-                            <p className="text-sm text-destructive mt-2">Please select a delivery speed</p>
-                          )}
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
               </>
             )}
 
@@ -1108,7 +1029,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                                   </span>
                                   <span className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
-                                    {formatStoreHours(store.hours)}
+                                    {store.hours}
                                   </span>
                                 </div>
                                 {store.phone && (

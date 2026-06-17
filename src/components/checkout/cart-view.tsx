@@ -26,7 +26,6 @@ type CartViewProps = {
   orderTotal: number;
   shippingFee: number;
   totalVat: number;
-  deliveryCharge?: number;
   onEmailExists?: () => void;
   // shippingVat: number;
 }
@@ -41,7 +40,6 @@ const CartView = ({
   orderTotal,
   shippingFee,
   totalVat,
-  deliveryCharge = 0,
   onEmailExists,
   // shippingVat
 
@@ -143,7 +141,7 @@ const CartView = ({
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span>{formatPrice(orderTotal - shippingFee - totalVat - deliveryCharge, ccy as CurrencyCode)}</span>
+            <span>{formatPrice(orderTotal - shippingFee - totalVat, ccy as CurrencyCode)}</span>
           </div>
           {totalVat > 0 && (
             <div className="flex justify-between">
@@ -155,12 +153,6 @@ const CartView = ({
             <span>Shipping:</span>
             <span>{formatPrice(shippingFee, ccy as CurrencyCode)}</span>
           </div>
-          {deliveryCharge > 0 && (
-            <div className="flex justify-between">
-              <span>Delivery Charge:</span>
-              <span>{formatPrice(deliveryCharge, ccy as CurrencyCode)}</span>
-            </div>
-          )}
           <div className="flex justify-between font-semibold border-t pt-2">
             <span>Total:</span>
             <span>{formatPrice(orderTotal, ccy as CurrencyCode)}</span>

@@ -156,6 +156,7 @@ const CardAlert = ({
       storeCode: storeCode,
       customerName: customer?.fullname,
       username: customer?.username,
+      weightFeeRequest: null,
       deliveryAddress: {
         id: getValues('shippingMethod') === 'delivery' ? 0 : getValues('selectedAddressId'),
         street: getValues('street'),
