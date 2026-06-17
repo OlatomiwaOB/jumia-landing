@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Lock, Tag, Eye, ShieldCheck, ArrowLeft } from "lucide-react";
 import { CartItem, useCart } from "@/store/cart";
-import { formatPrice } from "@/utils/helperfns";
+import { formatPrice, CurrencyCode } from "@/utils/helperfns";
 import { CheckoutStep } from "@/app/checkout/checkoutContent";
 import { UseFormReturn } from "react-hook-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -93,7 +93,6 @@ export const CartReview = ({
   const [selectedProduct, setSelectedProduct] = useState<CartItem | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isViewAllModalOpen, setIsViewAllModalOpen] = useState(false);
-  const [hasUserMadeSelection, setHasUserMadeSelection] = useState(false);
 
 
   const { getValues, watch } = form;
@@ -592,6 +591,8 @@ export const CartReview = ({
         </div>
       )}
 
+
+
       <div className="space-y-3 mb-6 p-4 bg-checkout-bg-subtle rounded-lg">
         <div className="flex justify-between text-checkout-text-muted">
           <span>Subtotal</span>
@@ -613,6 +614,8 @@ export const CartReview = ({
             }
           </span>
         </div>
+
+
 
         <div className="flex justify-between text-checkout-text-muted">
           <span>Total Discount</span>

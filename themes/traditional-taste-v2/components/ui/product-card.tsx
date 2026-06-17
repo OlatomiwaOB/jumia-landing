@@ -19,6 +19,7 @@ export interface Product {
   stock: boolean;
   offer: { type: 'flash' | 'shipping'; text: string } | null;
   variants?: { id: string; size: string; priceStr: string; price: number }[];
+  qtyInStore?: number;
 }
 
 interface ProductCardProps {
@@ -105,10 +106,14 @@ export default function ProductCard({ product, isGrid = false }: ProductCardProp
           )}
         </div>
 
-        <div className="flex items-center gap-1 mb-2">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
-          <span className="text-green-600 text-[11px] font-semibold">In stock</span>
-        </div>
+        {
+          product?.qtyInStore! > 0 && (
+            <div className="flex items-center gap-1 mb-2">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500"></span>
+              <span className="text-green-600 text-[11px] font-semibold">In stock</span>
+            </div>
+          )
+        }
 
         {product.offer && (
           <div className="flex items-center gap-1 mb-2">

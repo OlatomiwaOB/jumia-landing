@@ -46,9 +46,12 @@ const guestFormSchema = z.object({
   email: z.string().email("Valid email is required"),
   mobileNo: z.string().min(6, "Phone number is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  cPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Confirm Password must be at least 6 characters"),
   // nationality: z.string().min(1, "Nationality is required"),
   // dateOfBirth: z.string().min(1, "Date of birth is required"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 export type GuestFormData = z.infer<typeof guestFormSchema>;

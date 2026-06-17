@@ -18,6 +18,8 @@ export interface MenuItem {
   qtyInStore: number
   storeCode: string
   vat?: string | null;
+  weight?: number;
+  weightUnit?: string;
   //   bg?: string;
   //   color?: string;
 }
@@ -44,6 +46,7 @@ interface CartStore {
   removeItem: (id: number | undefined) => void;
   clearCart: () => void;
   getCartTotal: () => number;
+  getCartWeight: () => number;
   totalItems: number;
   mainCcy: () => string | undefined;
   usdTotal: () => number;
@@ -156,6 +159,14 @@ export const useCart = create<CartStore>()(
       getCartTotal: () => {
         const { cart } = get();
         return cart.reduce((total, item) => total + item.subTotal, 0);
+      },
+      // Calculate total cart weight in kg (falls back to quantity if weight is not set)
+      getCartWeight: () => {
+        const { cart } = get();
+        return cart.reduce((total, item) => {
+          const itemWeight = item.weight && item.weight > 0 ? item.weight : 1;
+          return total + (itemWeight * item.quantity);
+        }, 0);
       },
       usdTotal: () => {
         const { cart } = get();
