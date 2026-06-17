@@ -154,6 +154,11 @@ const GuestInfoForm = ({
   const handleWeightOptionSelect = (typeCode: string) => {
     setValue("shippingOption", typeCode);
     setValue("deliveryOptionGroup", typeCode);
+    // Persist the full option so buildGuestOrderPayload can read zoneCode, typeCode, totalWeightKg
+    const selectedOpt = weightOptions?.find((opt) => opt.typeCode === typeCode);
+    if (selectedOpt) {
+      sessionStorage.setItem('selectedWeightOption', JSON.stringify(selectedOpt));
+    }
   };
 
   const getSelectedShippingOption = () => {
