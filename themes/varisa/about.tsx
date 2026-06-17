@@ -177,7 +177,7 @@ export default function AboutPage() {
               Ready to Taste Home?
             </h2>
             <p className="text-lg md:text-xl text-gray-800 mb-10 max-w-2xl mx-auto">
-              Explore our menu of freshly prepared authentic meals. Place your order today and we'll ship it to you this Wednesday.
+              Explore our menu of freshly prepared authentic meals. Place your order today.
             </p>
             <Link 
               href="/shop" 

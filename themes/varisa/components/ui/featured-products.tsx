@@ -2,128 +2,162 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { ProductProps } from '@/types';
-import { getProductHref } from '@/utils/product-route';
+import { useRef, useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Category } from '@/types';
 
 interface FeaturedProductsSliderProps {
-  featuredProducts?: ProductProps[];
+  categories?: Category[];
 }
 
-export default function FeaturedProductsSlider({ featuredProducts: dynamicProducts = [] }: FeaturedProductsSliderProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isRTL, setIsRTL] = useState(false);
+export default function FeaturedProductsSlider({ categories = [] }: FeaturedProductsSliderProps) {
+  const envBgColor = process.env.NEXT_PUBLIC_ACCENT_COLOR_3;
+  const bgColor = envBgColor ? (envBgColor.startsWith('#') ? envBgColor : `#${envBgColor}`) : '#2F3E33';
 
-  const decodedProductUrl = (url: string) => decodeURIComponent(url);
-  // Track RTL changes
+  const envTextColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+  const textColor = envTextColor ? (envTextColor.startsWith('#') ? envTextColor : `#${envTextColor}`) : '#FFFDF5';
+
+  const envAccentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
+  const accentColor = envAccentColor ? (envAccentColor.startsWith('#') ? envAccentColor : `#${envAccentColor}`) : '#A0522D';
+
+  const envAccentColor2 = process.env.NEXT_PUBLIC_ACCENT_COLOR_2;
+  const accentColor2 = envAccentColor2 ? (envAccentColor2.startsWith('#') ? envAccentColor2 : `#${envAccentColor2}`) : '#967BB6';
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
   useEffect(() => {
-    const html = document.documentElement;
-    setIsRTL(html.dir === 'rtl');
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'dir') {
-          setIsRTL(html.dir === 'rtl');
+    let interval: NodeJS.Timeout;
+    if (isHovered && scrollRef.current) {
+      interval = setInterval(() => {
+        if (scrollRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+          if (scrollLeft + clientWidth >= scrollWidth - 10) {
+            scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            scrollRef.current.scrollBy({ left: 450, behavior: 'smooth' });
+          }
         }
-      });
-    });
-
-    observer.observe(html, { attributes: true });
-    return () => observer.disconnect();
-  }, []);
-
-  // Auto-rotate every 10 seconds
-  useEffect(() => {
-    if (dynamicProducts.length === 0) return;
-    const maxIndex = dynamicProducts.length - 1;
-    const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
-    }, 10000); // 10 seconds
-
+      }, 2500);
+    }
     return () => clearInterval(interval);
-  }, [dynamicProducts.length]);
+  }, [isHovered]);
 
-  if (dynamicProducts.length === 0) {
+  if (!categories || categories.length === 0) {
     return null;
   }
 
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -450, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 450, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="w-full bg-accent-foreground relative">
-      <section className="w-full px-4 md:px-6 pt-16 pb-12 max-w-[1600px] mx-auto overflow-hidden relative">
-
-        {/* Decorative Background Elements behind the cards */}
-        <div className="absolute top-10 right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-96 h-96 bg-black/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Slider Container */}
-        <div
-          className="flex transition-transform duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
-          style={{ transform: `translateX(${(isRTL ? 1 : -1) * (dynamicProducts.length - 1 - activeIndex) * 100}%)` }}
-        >
-          {[...dynamicProducts].reverse().map((product, index) => {
-            const isActive = dynamicProducts.length - 1 - index === activeIndex;
-
-            return (
-              <div
-                key={product.id || index}
-                className={`flex flex-col sm:flex-row bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shrink-0 w-full h-auto sm:h-[500px] relative transition-opacity duration-1000 ${isActive ? 'opacity-100' : 'opacity-40'}`}
-              >
-                {/* Left Content */}
-                <div className="w-full sm:w-[55%] p-8 sm:p-16 lg:p-20 flex flex-col justify-center items-start z-10 bg-white relative">
-
-                  {/* Premium Badge */}
-                  <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-orange-50 text-orange-600 font-extrabold text-[11px] uppercase tracking-widest shadow-sm mb-6 border border-orange-100 mt-12 sm:mt-0">
-                    <Sparkles size={14} className="animate-pulse" />
-                    <span>Featured Product</span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-[36px] sm:text-[46px] lg:text-[56px] font-black text-[#111] leading-[1.05] tracking-tight mb-4">
-                    {product.name}
-                  </h3>
-
-                  {/* Price Tag */}
-                  <div className="text-3xl lg:text-4xl font-black text-accent mb-6 flex items-baseline gap-1">
-                    <span className="text-xl lg:text-2xl font-bold">{product.ccy === 'GBP' ? '£' : product.ccy === 'USD' ? '$' : '₦'}</span>
-                    {product.salePrice || product.costPrice || 0}
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-gray-500 text-[16px] lg:text-[18px] mb-10 font-medium leading-relaxed max-w-lg">
-                    {product.description || 'Discover our freshly prepared item, rich in flavor and perfect for any occasion.'}
-                  </p>
-
-                  {/* Button */}
-                  <Link href={getProductHref(product)}>
-      <button className="group flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-full font-extrabold text-[16px] hover:bg-accent/90 transition-all shadow-lg hover:shadow-2xl hover:-translate-y-1 duration-300">
-        Buy Now
-        <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+    <div
+      className="w-full py-4 sm:py-8 relative group overflow-hidden"
+      style={{ backgroundColor: bgColor }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Navigation Arrows */}
+      <button
+        onClick={scrollLeft}
+        className="hidden sm:flex absolute left-2 sm:left-8 lg:left-12 top-[calc(50%-90px)] sm:top-[calc(50%-100px)] z-10 w-8 sm:w-10 h-[180px] sm:h-[200px] bg-black/20 hover:bg-black/40 border border-white/10 items-center justify-center transition-all duration-300 shadow-none"
+        style={{ color: textColor }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = textColor;
+          e.currentTarget.style.color = bgColor;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '';
+          e.currentTarget.style.color = textColor;
+        }}
+        aria-label="Scroll left"
+      >
+        <ChevronLeft size={32} strokeWidth={3} />
       </button>
-    </Link>
-  </div>
 
-  {/* Right Image */ }
-  <div className="w-full sm:w-[45%] relative h-[300px] sm:h-full flex-shrink-0 bg-gray-50 group">
-    <div className={`absolute inset-0 sm:rounded-l-[200px] overflow-hidden transform origin-right transition-transform duration-[10000ms] ease-linear ${isActive ? 'scale-110' : 'scale-100'} shadow-[-15px_0_40px_rgba(0,0,0,0.06)]`}>
-      <Image
-        src={product.picture || (product.pictureList && product.pictureList.length > 0 ? product.pictureList[0] : '/placeholder.png')}
-        alt={product.name || 'Product'}
-        fill
-        className="object-cover"
-        sizes="(max-width: 768px) 100vw, 50vw"
-        priority={isActive}
-      />
-      {/* Subtle aesthetic gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-transparent opacity-60 mix-blend-overlay" />
+      <button
+        onClick={scrollRight}
+        className="hidden sm:flex absolute right-2 sm:right-8 lg:right-12 top-[calc(50%-90px)] sm:top-[calc(50%-100px)] z-10 w-8 sm:w-10 h-[180px] sm:h-[200px] bg-black/20 hover:bg-black/40 border border-white/10 items-center justify-center transition-all duration-300 shadow-none"
+        style={{ color: textColor }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = textColor;
+          e.currentTarget.style.color = bgColor;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '';
+          e.currentTarget.style.color = textColor;
+        }}
+        aria-label="Scroll right"
+      >
+        <ChevronRight size={32} strokeWidth={3} />
+      </button>
+
+      {/* Scrolling Container */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar"
+        style={{ scrollBehavior: 'smooth' }}
+      >
+        <style dangerouslySetInnerHTML={{ __html: `.hide-scrollbar::-webkit-scrollbar { display: none; }` }} />
+
+        {categories.map((category, index) => (
+          <div
+            key={category.id || index}
+            className="w-full sm:w-[400px] lg:w-[450px] flex-shrink-0 snap-center"
+          >
+            <div className="flex flex-col sm:flex-row w-full h-full items-center">
+              {/* Image Box */}
+              <div className="w-full sm:w-1/2 h-[220px] sm:h-[160px] relative">
+                <div className="w-full h-full relative">
+                  <Image
+                    src={category.logo || '/product-placeholder-borderless.svg'}
+                    alt={category.name || 'Category'}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, 250px"
+                  />
+                </div>
+              </div>
+
+              {/* Text Box */}
+              <div className="w-full sm:w-1/2 p-4 sm:p-6 lg:p-8 flex flex-col justify-center">
+                <h3
+                  className="text-[16px] sm:text-[16px] font-serif tracking-wide uppercase mb-3"
+                  style={{ color: textColor }}
+                >
+                  {category.name}
+                </h3>
+
+                <p
+                  className="text-[13px] sm:text-[12px] leading-relaxed mb-6 line-clamp-3 font-light"
+                  style={{ color: textColor, opacity: 0.7 }}
+                >
+                  {category.description || `Enjoy more of our African meals like ${category.name?.toLowerCase() || 'items'} curated just for you.`}
+                </p>
+
+                <div className="mt-auto">
+                  <Link
+                    href={`/shop?category=${category.code}`}
+                    className="inline-block font-bold text-[13px] lg:text-[12px] hover:opacity-80 transition-opacity border-b-2 pb-0.5"
+                    style={{ color: accentColor, borderColor: accentColor }}
+                  >
+                    View Shop
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-              </div >
-            );
-})}
-        </div >
-
-      </section >
-    </div >
   );
 }

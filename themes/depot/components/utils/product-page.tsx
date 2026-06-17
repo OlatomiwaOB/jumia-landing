@@ -28,7 +28,7 @@ import { ProductImageLightbox } from './product-image-lightbox';
 import { RecentPurchaseToast } from './recent-purchase-toast';
 import { ProductCard } from './products-card';
 
-type DetailTab = 'description' | 'details' | 'shipping';
+type DetailTab = 'description' | 'details';
 
 const imageZoomCursor =
   'url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2732%27 height=%2732%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2714.5%27 fill=%27white%27 stroke=%27black%27 stroke-width=%271.5%27/%3E%3Cpath d=%27M16 10v12M10 16h12%27 stroke=%27black%27 stroke-width=%272%27 stroke-linecap=%27round%27/%3E%3C/svg%3E") 16 16, zoom-in';
@@ -69,28 +69,9 @@ export default function DepotThemeProductPage() {
   const activeImage = gallery[activeImageIndex] || product?.picture || '/placeholder-image.png';
   const price = product?.salePrice ?? product?.oldPrice ?? 0;
 
-  const shippingHighlights = [
-    {
-      description: 'Fast dispatch on qualifying orders placed today.',
-      icon: Truck,
-      title: 'Fast delivery',
-    },
-    {
-      description: 'Straightforward return support within 30 days.',
-      icon: RotateCcw,
-      title: 'Easy returns',
-    },
-    {
-      description: 'Protected checkout and trusted store fulfillment.',
-      icon: ShieldCheck,
-      title: 'Secure checkout',
-    },
-  ];
-
   const tabLabels: Array<{ id: DetailTab; label: string }> = [
     { id: 'description', label: 'Description' },
     { id: 'details', label: 'Featured' },
-    { id: 'shipping', label: 'Shipping & Returns' },
   ];
 
   useEffect(() => {
@@ -152,14 +133,24 @@ export default function DepotThemeProductPage() {
     <>
       <div className="min-h-screen bg-white">
         <div className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
-          <button
-            type="button"
-            className="mb-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-black/55 transition-colors hover:text-accent"
-            onClick={() => router.push('/')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to home
-          </button>
+          <div className="mb-6 flex items-center gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-black/55 transition-colors hover:text-accent"
+              onClick={() => router.push('/')}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to home
+            </button>
+            <span className="text-xs font-semibold uppercase tracking-[0.3em] text-black/30">/</span>
+            <button
+              type="button"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-black/55 transition-colors hover:text-accent"
+              onClick={() => router.push('/shop')}
+            >
+              Shop
+            </button>
+          </div>
 
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)]">
             <div className="space-y-4">
@@ -265,46 +256,7 @@ export default function DepotThemeProductPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 border-y border-black/8 py-6">
-                <div className="flex flex-wrap items-center gap-3 text-sm">
-                  <Bolt className="h-4 w-4 text-accent" />
-                  <span className="font-semibold text-accent">Selling quickly!</span>
-                  <span className="text-black/65">
-                    {cartsCount} people have this item in their carts
-                  </span>
-                </div>
 
-                <div
-                  className={`flex items-center gap-3 text-sm font-medium ${(product.qtyInStore ?? 0) > 0 ? 'text-green-600' : 'text-red-500'
-                    }`}
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  <span>
-                    {(product.qtyInStore ?? 0) > 0
-                      ? `${product.qtyInStore} in stock`
-                      : 'Currently out of stock'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {shippingHighlights.map((highlight) => {
-                  const Icon = highlight.icon;
-
-                  return (
-                    <div
-                      key={highlight.title}
-                      className="rounded-[1.75rem] border border-black/8 bg-white p-5"
-                    >
-                      <Icon className="h-5 w-5 text-accent" />
-                      <h2 className="mt-4 text-lg font-semibold text-black">{highlight.title}</h2>
-                      <p className="mt-2 text-sm leading-6 text-black/60">
-                        {highlight.description}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
 
               <div className="space-y-4 border-t border-black/8 pt-6">
                 {quantity <= 0 ? (
@@ -418,16 +370,7 @@ export default function DepotThemeProductPage() {
                     </div>
                   )}
 
-                  {activeTab === 'shipping' && (
-                    <div className="space-y-4">
-                      <p>
-                        Orders are prepared quickly and fulfilled through the active store. Delivery timing may vary based on your location and order volume.
-                      </p>
-                      <p>
-                        If the product isn&apos;t the right fit, return support is available within 30 days for eligible orders, subject to the store&apos;s policy.
-                      </p>
-                    </div>
-                  )}
+
                 </div>
               </div>
             </div>
