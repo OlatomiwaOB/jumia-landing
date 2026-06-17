@@ -115,7 +115,7 @@ const BnplManager = ({ setCurrentStep, form, onShippingUpdate, onVatUpdate, onSu
     return {
       id: selectedOption.id,
       name: selectedOption.name,
-      price: selectedOption.price,
+      price: selectedOption.amount,
       description: selectedOption.description,
       icon: selectedOption.icon,
       estimatedArrival: selectedOption.estimatedArrival,

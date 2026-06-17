@@ -21,6 +21,7 @@ export interface DeliveryOption {
     capLimit: number;
 }
 
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE
 const useDeliveryOptions = (sourceType?: string | undefined) => {
     const { customer } = useCustomer()
     // console.log('customer avail', !customer)
@@ -32,7 +33,8 @@ const useDeliveryOptions = (sourceType?: string | undefined) => {
                 url: '/delivery/option/all',
                 method: 'GET',
                 params: {
-                    sourceType
+                    sourceType,
+                    storeCode
                 }
             }),
         staleTime: 5 * 60 * 1000,
@@ -49,7 +51,7 @@ const useDeliveryOptions = (sourceType?: string | undefined) => {
             let cappedVatAmount = item.deliveryVatAmount || 0;
 
             if (item.capLimit && item.capLimit > 0) {
-                cappedVatAmount = Math.min(cappedVatAmount, item.capLimit) || item.capLimit;
+                cappedVatAmount = Math.min(cappedVatAmount, item.capLimit);
             }
 
             const price = parseFloat(item.amount + cappedVatAmount) || 0;

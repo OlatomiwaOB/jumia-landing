@@ -635,7 +635,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       setValue("deliveryOptionGroup", "");
     } else if (shippingMethod === 'delivery' && selectedShippingOption) {
       const selectedOption = deliveryOptions?.find((opt: any) => opt.id === selectedShippingOption);
-      shippingAmount = selectedOption?.price || 0;
+      shippingAmount = selectedOption?.amount || 0;
       if (selectedOption?.groupCode) {
         setValue("deliveryOptionGroup", selectedOption.groupCode);
       } else {
@@ -925,35 +925,57 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                             >
                               <label
                                 htmlFor={option.id}
-                                className="md:flex items-center gap-4 cursor-pointer"
+                                className="flex items-start gap-4 cursor-pointer"
                               >
                                 <RadioGroupItem
                                   value={option.id}
                                   id={option.id}
                                   onClick={(e) => e.stopPropagation()}
+                                  className="mt-1 shrink-0"
                                 />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <div className="text-2xl">{option.icon}</div>
-                                    <div className="font-semibold cursor-pointer text-checkout-text">{option.name}</div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      {option.icon && <div className="text-xl shrink-0">{option.icon}</div>}
+                                      <span className="font-semibold cursor-pointer text-checkout-text">
+                                        {option.groupCode ? `Delivery (${option.groupCode})` : option.name || "Delivery Option"}
+                                      </span>
+                                    </div>
+                                    <p className="font-semibold text-checkout-text shrink-0 mt-0.5 text-right">{formatPrice(option.amount ?? option.price, mainCcy() as any)}</p>
                                   </div>
-                                  <p className="text-sm text-muted-foreground">{option.description}</p>
-                                  <div className="md:flex justify-between mb-2">
-                                    <p className="text-xs text-accent mt-1">
-                                      {option.estimatedArrival}
-                                    </p>
-                                    {option.deliveryVatRate > 0 && (
-                                      <>
-                                        <span>•</span>
-                                        <p className="text-xs text-accent mt-1 truncate">
-                                          Incl. {formatPrice(option.deliveryVatAmount, mainCcy() as any)} VAT
-                                        </p>
-                                      </>
+                                  
+                                  <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
+                                    {(option.estimatedTime && option.estimatedTimeType) ? (
+                                      <span className="flex items-center gap-1.5">
+                                        <Clock className="w-4 h-4 shrink-0" />
+                                        <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
+                                      </span>
+                                    ) : (
+                                      option.estimatedArrival && (
+                                        <span className="flex items-center gap-1.5">
+                                          <Clock className="w-4 h-4 shrink-0" />
+                                          <span className="truncate">Est. Delivery: {option.estimatedArrival}</span>
+                                        </span>
+                                      )
+                                    )}
+                                    {option.area && (
+                                      <span className="flex items-start gap-1.5">
+                                        <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <span className="line-clamp-2" title={option.area}>Covers: {option.area.split(',').join(', ')}</span>
+                                      </span>
+                                    )}
+                                    {option.description && (
+                                      <p className="text-sm text-muted-foreground">{option.description}</p>
+                                    )}
+                                    {(option.deliveryVatAmount ?? 0) > 0 && (
+                                      <p className={`text-xs max-w-fit px-2 rounded-full border-1 mt-1 ${selectedShippingOption === option.id
+                                          ? 'border-faded-accent text-faded-accent italic'
+                                          : 'text-dark-gray border-gray-200'
+                                        }`}>
+                                        Incl. {formatPrice(option.deliveryVatAmount, mainCcy() as any)} VAT
+                                      </p>
                                     )}
                                   </div>
-                                </div>
-                                <div className="md:text-right">
-                                  <p className="font-semibold text-checkout-text">{formatPrice(option.price, mainCcy() as any)}</p>
                                 </div>
                               </label>
                             </div>

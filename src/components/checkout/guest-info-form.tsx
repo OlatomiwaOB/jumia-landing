@@ -88,7 +88,7 @@ const GuestInfoForm = ({
     let shippingAmount = 0;
     if (watchShippingMethod === 'delivery' && watchShippingOption) {
       const selectedOption = deliveryOptions?.find((opt: any) => opt.id === watchShippingOption);
-      shippingAmount = selectedOption?.price || 0;
+      shippingAmount = selectedOption?.amount || 0;
       if (selectedOption?.groupCode) {
         setValue("deliveryOptionGroup", selectedOption.groupCode);
       } else {
@@ -149,7 +149,7 @@ const GuestInfoForm = ({
     return {
       id: selectedOption.id,
       name: selectedOption.name,
-      price: selectedOption.price,
+      price: selectedOption.amount,
       description: selectedOption.description,
       icon: selectedOption.icon,
       estimatedArrival: selectedOption.estimatedArrival,
@@ -192,7 +192,7 @@ const GuestInfoForm = ({
               <CardTitle className="text-lg">Personal Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-1 grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label>First Name *</Label>
                   <Input {...register('firstname')} placeholder="John" className={errors.firstname ? "border-destructive" : ""} />
@@ -205,7 +205,7 @@ const GuestInfoForm = ({
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-1 grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 grid-cols-1 gap-4">
                 <div className="space-y-2">
                   <Label>Email *</Label>
                   <Input type="email" {...register('email')} placeholder="john@example.com" className={errors.email ? "border-destructive" : ""} />
@@ -339,7 +339,7 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>City *</Label>
                       <Input {...register('city', { required: watchShippingMethod === 'delivery' ? 'City is required' : false })} placeholder="City" />
@@ -352,7 +352,7 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Country *</Label>
                       <SearchSelect
@@ -399,22 +399,41 @@ const GuestInfoForm = ({
                         >
                           <label
                             htmlFor={option.id}
-                            className="md:flex items-center gap-4 cursor-pointer w-full"
+                            className="flex items-start gap-3 md:gap-4 cursor-pointer w-full"
                           >
-                            <RadioGroupItem
-                              value={option.id}
-                              id={option.id}
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <div className="text-2xl">{option.icon}</div>
-                                <div className="font-semibold cursor-pointer text-checkout-text">{option.name}</div>
-                              </div>
-                              <p className="text-sm text-muted-foreground">{option.description}</p>
+                            <div className="mt-0.5 shrink-0">
+                              <RadioGroupItem
+                                value={option.id}
+                                id={option.id}
+                                onClick={(e) => e.stopPropagation()}
+                              />
                             </div>
-                            <div className="md:text-right">
-                              <p className="font-semibold text-checkout-text">{formatPrice(option.price, mainCcy() as any)}</p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {option.icon && <div className="text-xl shrink-0">{option.icon}</div>}
+                                  <div className="font-semibold cursor-pointer text-checkout-text">
+                                    {option.groupCode ? `Delivery (${option.groupCode})` : option.name || "Delivery Option"}
+                                  </div>
+                                </div>
+                                <div className="font-semibold text-checkout-text shrink-0 text-right mt-0.5">
+                                  {formatPrice(option.amount, mainCcy() as any)}
+                                </div>
+                              </div>
+                              <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
+                                {option.estimatedTime && option.estimatedTimeType && (
+                                  <span className="flex items-center gap-1.5">
+                                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                                    <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
+                                  </span>
+                                )}
+                                {option.area && (
+                                  <span className="flex items-start gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                    <span className="line-clamp-2" title={option.area}>Covers: {option.area.split(',').join(', ')}</span>
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </label>
                         </div>

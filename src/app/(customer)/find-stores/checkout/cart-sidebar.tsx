@@ -88,13 +88,13 @@ export const CartSidebar = ({
     const pickupAmount = selectedPickupLocation?.amount || 0;
 
     const shipping = shippingMethod === 'delivery' && selectedShippingOption
-        ? selectedShippingOption.price
+        ? selectedShippingOption.amount
         : shippingMethod === 'pickup' && selectedStore ? pickupAmount : 0;
 
     const shippingVat = shippingMethod === 'delivery' && selectedShippingOption
         ? selectedShippingOption.deliveryVatAmount || 0 : 0;
 
-    const total = subtotal + shipping + totalVat;
+    const total = subtotal + shipping + totalVat + shippingVat;
     const totalVatWithShippingVat = totalVat + shippingVat
 
 
