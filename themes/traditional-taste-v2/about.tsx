@@ -54,7 +54,7 @@ export default function AboutPage() {
               <Truck size={32} />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">UK-Wide Delivery</h3>
-            <p className="text-gray-600 text-sm">We carefully package and ship our meals every Wednesday to reach you perfectly fresh.</p>
+            <p className="text-gray-600 text-sm">From our kitchen to your door, wherever you are in the UK. Every order is carefully packaged to arrive fresh and full of flavour.</p>
           </div>
 
         </div>
@@ -114,8 +114,8 @@ export default function AboutPage() {
                 <CheckCircle2 size={28} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Authenticity</h3>
-                <p className="text-gray-600">No shortcuts. We use authentic spices, traditional cooking methods, and real ingredients to ensure every bite tastes exactly like home.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Authenticity</h3>
+                <p className="text-gray-600 text-sm">No imitations, no shortcuts. Just genuine Nigerian flavours made the right way, the way your mother or grandmother would have made it.</p>
               </div>
             </div>
 
@@ -124,8 +124,8 @@ export default function AboutPage() {
                 <ShieldCheck size={28} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Uncompromising Quality</h3>
-                <p className="text-gray-600">From the freshest produce to premium meats, we source only the highest quality ingredients. We prepare our food in pristine, hygienic environments.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Uncompromising Quality</h3>
+                <p className="text-gray-600 text-sm">Every dish starts with fresh, carefully selected ingredients prepared in a clean, hygienic kitchen. We never compromise on what goes into your food.</p>
               </div>
             </div>
 
@@ -134,8 +134,8 @@ export default function AboutPage() {
                 <Heart size={28} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Made with Love</h3>
-                <p className="text-gray-600">Cooking Nigerian food takes time, patience, and love. We don't mass-produce; we cook every batch with the same care we would for our own families.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Made with Love</h3>
+                <p className="text-gray-600 text-sm">We cook every meal as if it is going to someone we love. Because to us, that is exactly what it is.</p>
               </div>
             </div>
 
@@ -144,8 +144,8 @@ export default function AboutPage() {
                 <Truck size={28} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Reliability</h3>
-                <p className="text-gray-600">You can count on us. With our strict Wednesday shipping schedule, you know exactly when your meals will arrive, securely packaged and ready to enjoy.</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Reliability</h3>
+                <p className="text-gray-600 text-sm"> We take every order seriously. Your meals are securely packaged with care so they reach you in perfect condition, every single time.</p>
               </div>
             </div>
 

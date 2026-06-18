@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Funnel_Display } from "next/font/google";
+import { Funnel_Display, Manrope } from "next/font/google";
 import "./globals.css";
 import Providers from "./Provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -15,6 +15,13 @@ const funnelDisplay = Funnel_Display({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-funnel-display",
+  display: "swap",
+});
+
+const manropeFont = Manrope({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-manrope",
   display: "swap",
 });
 
@@ -92,7 +99,7 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="en" className={funnelDisplay.variable}>
+    <html lang="en" className={manropeFont.variable}>
       <head>
         <meta name="google-site-verification" content="3mJ66FK4ohtkK2BWhKbmiHPwRx4DP6fIXyAJwHi5wPo" />
         <link rel="icon" href={storefront.favicon} type="image/x-icon" />
@@ -107,7 +114,7 @@ export default async function RootLayout({
             }
             
             body {
-              font-family: var(--font-funnel-display), sans-serif;
+              font-family: var(--font-manrope), sans-serif;
             }
           `}
         </style>

@@ -111,7 +111,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
             shippingAmount = loc?.amount || 0;
         } else if (shippingMethod === 'delivery' && selectedShippingOption) {
             const opt = deliveryOptions.find((o: any) => o.id === selectedShippingOption);
-            shippingAmount = opt?.price || 0;
+            shippingAmount = opt?.amount || 0;
         }
         onShippingUpdate?.(shippingAmount);
     }, [shippingMethod, selectedShippingOption, selectedStore]);
@@ -321,29 +321,43 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                                                     </div>
 
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center justify-between gap-3">
-                                                            <p className="text-sm font-semibold text-dark-gray">{option.name}</p>
-                                                            <p className="text-sm font-semibold text-dark-gray shrink-0">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                {option.icon && <div className="text-xl shrink-0">{option.icon}</div>}
+                                                                <p className="text-sm font-semibold text-dark-gray">
+                                                                    {option.groupCode ? `Delivery (${option.groupCode})` : option.name || "Delivery Option"}
+                                                                </p>
+                                                            </div>
+                                                            <p className="text-sm font-semibold text-dark-gray shrink-0 text-right mt-0.5">
                                                                 {formatPrice(option.price ?? option.amount, mainCcy() as any)}
                                                             </p>
                                                         </div>
 
-                                                        {option.description && (
-                                                            <p className="text-xs text-medium-gray max-w-xs font-medium mt-0.5">
-                                                                {option.description}
-                                                            </p>
-                                                        )}
-
-                                                        <div className="md:flex md:gap-2">
-                                                            <p className={`text-xs max-w-fit px-2 rounded-full border-1 mt-1 ${selectedShippingOption === option.id
-                                                                    ? 'border-faded-accent text-faded-accent italic'
-                                                                    : 'text-dark-gray border-gray-200'
-                                                                }`}>
-                                                                {option.estimatedArrival
-                                                                    ?? `${option.estimatedTime} ${option.estimatedTimeType?.toLowerCase() ?? ''}`}
-                                                            </p>
+                                                        <div className="text-xs text-medium-gray flex flex-col gap-1 mt-1">
+                                                            {(option.estimatedTime && option.estimatedTimeType) ? (
+                                                                <span className="flex items-center gap-1.5">
+                                                                    <Clock className="w-3.5 h-3.5 shrink-0" />
+                                                                    <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
+                                                                </span>
+                                                            ) : (
+                                                                option.estimatedArrival && (
+                                                                    <span className="flex items-center gap-1.5">
+                                                                        <Clock className="w-3.5 h-3.5 shrink-0" />
+                                                                        <span className="truncate">Est. Delivery: {option.estimatedArrival}</span>
+                                                                    </span>
+                                                                )
+                                                            )}
+                                                            {option.area && (
+                                                                <span className="flex items-start gap-1.5">
+                                                                    <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                                                    <span className="line-clamp-2" title={option.area}>Covers: {option.area.split(',').join(', ')}</span>
+                                                                </span>
+                                                            )}
+                                                            {option.description && (
+                                                                <p className="font-medium">{option.description}</p>
+                                                            )}
                                                             {(option.deliveryVatAmount ?? 0) > 0 && (
-                                                                <p className={`text-xs max-w-fit px-2 rounded-full border-1 mt-1 ${selectedShippingOption === option.id
+                                                                <p className={`max-w-fit px-2 rounded-full border-1 mt-1 ${selectedShippingOption === option.id
                                                                         ? 'border-faded-accent text-faded-accent italic'
                                                                         : 'text-dark-gray border-gray-200'
                                                                     }`}>

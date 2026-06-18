@@ -1,57 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, MapPin, Mail, Clock, Globe } from "lucide-react";
 
 const Footer = () => {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState("");
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setStatus('loading');
-    try {
-      const endpoint = `${process.env.NEXT_PUBLIC_REACT_APP_API_URL}/newsletter/subscribe`;
-      const payload = {
-        email,
-        name: "Subscriber",
-        storeCode: process.env.NEXT_PUBLIC_STORE_CODE || '',
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
-        merchantCode: process.env.NEXT_PUBLIC_MERCHANT_CODE || ''
-      };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-source-code': process.env.NEXT_PUBLIC_SOURCE_CODE || 'FORTITUDE',
-          'x-client-id': process.env.NEXT_PUBLIC_CLIENT_ID || 'TST03054745785188010772',
-          'x-client-secret': process.env.NEXT_PUBLIC_CLIENT_SECRET || 'TST03722175625334233555707073458615741827171811840881'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        setStatus('success');
-        setMessage("Thank you for subscribing!");
-        setEmail("");
-      } else {
-        const errData = await response.json().catch(() => ({}));
-        console.error("Subscription Error:", errData);
-        setStatus('error');
-        setMessage(`Failed: ${errData.message || 'Please try again.'}`);
-      }
-    } catch (err) {
-      console.error("Network Error:", err);
-      setStatus('error');
-      setMessage("An error occurred. Please try again later.");
-    }
-  };
 
   // Sourcing variables from the theme .env
   const accentBg = process.env.NEXT_PUBLIC_ACCENT_COLOR
@@ -74,49 +29,8 @@ const Footer = () => {
       className="w-full font-sans pt-12 pb-8 border-t border-white/10"
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
-        {/* Top Section: Newsletter Banner */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left gap-6 pb-10 border-b border-white/10">
-          <div className="max-w-md w-full flex flex-col items-center md:items-start">
-            <h3 className="text-sm font-semibold tracking-wider uppercase opacity-70">
-              Join our newsletter
-            </h3>
-            <p className="text-2xl md:text-3xl font-bold mt-1 tracking-tight">
-              Get all latest information on events, sales and offers.
-            </p>
-          </div>
-          <form
-            className="w-full md:w-auto flex flex-col items-center sm:items-start"
-            onSubmit={handleSubscribe}
-          >
-            <div className="flex flex-col sm:flex-row gap-3 w-full items-center">
-              <input
-                type="email"
-                placeholder="Your email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full md:w-80 px-4 py-3 rounded-md bg-white/10 backdrop-blur-sm border border-white/20 focus:outline-none focus:ring-2 transition-all text-white placeholder-white/50 text-center sm:text-left"
-                style={{ "--tw-ring-color": accentBg } as React.CSSProperties}
-              />
-              <button
-                type="submit"
-                disabled={status === 'loading'}
-                className="w-full sm:w-auto px-8 py-3 rounded-md font-bold transition-opacity hover:opacity-90 whitespace-nowrap shadow-sm disabled:opacity-50"
-                style={{ backgroundColor: accentBg, color: "#FFFFFF" }}
-              >
-                {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
-              </button>
-            </div>
-            {message && (
-              <p className={`mt-3 text-sm font-medium ${status === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                {message}
-              </p>
-            )}
-          </form>
-        </div>
-
-        {/* Middle Section: Links & Store Info Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 py-14 border-b border-white/5">
+        {/* Top Section: Links & Store Info Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-14 border-b border-white/10">
           
           {/* Column 1: Brand & Badge */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left gap-6">

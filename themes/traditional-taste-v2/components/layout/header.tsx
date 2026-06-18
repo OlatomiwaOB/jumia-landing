@@ -134,58 +134,8 @@ export default function Header() {
         {/* --- DESKTOP LAYOUT (>= lg) --- */}
         <div className="hidden lg:flex items-center justify-between w-full gap-6">
 
-          {/* Left: Menu + Logo */}
+          {/* Left: Logo */}
           <div className="flex items-center gap-8">
-            <div className="relative" ref={desktopMenuRef}>
-              <button
-                onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
-                className="bg-tt-primary text-white px-5 py-2.5 rounded-lg flex items-center gap-2 font-bold text-sm shadow-md hover:bg-orange-600 transition-colors"
-              >
-                {isDesktopMenuOpen ? <X size={20} strokeWidth={2.5} /> : <Menu size={20} strokeWidth={2.5} />}
-                <span>Menu</span>
-              </button>
-
-              {isDesktopMenuOpen && (
-                <div className={`absolute top-full left-0 mt-3 w-72 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border overflow-hidden z-50 transition-colors duration-300 animate-in fade-in slide-in-from-left-8 ${isDarkMode ? 'bg-[#1C1917] border-gray-800' : 'bg-white border-gray-100'}`}>
-                  <div className="flex flex-col py-2 max-h-[60vh] overflow-y-auto">
-                    {categories.map((item, idx) => (
-                      <Link
-                        href={`/shop/${item.code}`}
-                        key={idx}
-                        className={`flex items-center justify-between px-5 py-3 border-b last:border-b-0 transition-colors group ${isDarkMode ? 'border-gray-800 hover:bg-gray-800' : 'border-gray-50 hover:bg-gray-50'}`}
-                      >
-                        <div className="flex items-center gap-4">
-                          {item.logo && !brokenLogos.has(item.logo) ? (
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 shadow-sm border border-black/5">
-                              <Image 
-                                src={item.logo} 
-                                alt={item.name || ''} 
-                                fill 
-                                className="object-cover" 
-                                onError={() => setBrokenLogos(prev => new Set(prev).add(item.logo as string))}
-                              />
-                            </div>
-                          ) : (
-                            <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 shadow-sm border border-black/5">
-                              <Image 
-                                src={getFallbackImage(item.name || '')} 
-                                alt={item.name || 'Category'} 
-                                fill 
-                                className="object-cover" 
-                              />
-                            </div>
-                          )}
-                          <span className={`text-[14px] font-bold transition-colors group-hover:text-tt-primary ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                            {item.name}
-                          </span>
-                        </div>
-                        <ChevronRight size={16} className={`transition-transform group-hover:translate-x-1 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
 
             <Link href="/" className="flex items-center gap-3 group">
               <div className="relative h-16 w-16 md:h-20 md:w-20 flex-shrink-0 rounded-full overflow-hidden shadow-md transition-transform duration-300 group-hover:scale-105">

@@ -29,6 +29,13 @@ export interface ProductProps {
   storeLocationCity?: string | null;
   imageClass?: string;
   vat?: string | null;
+  itemVariants?: {
+    id: number,
+    size: string,
+    qty: number,
+    color: number,
+    price: number
+  }[] | null
 }
 
 export interface Category {

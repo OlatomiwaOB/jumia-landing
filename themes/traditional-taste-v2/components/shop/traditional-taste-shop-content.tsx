@@ -6,7 +6,7 @@ import { useProducts } from '@/hooks/useProducts';
 import ProductCard from '../ui/product-card';
 import { Loader2, Search, ChefHat } from 'lucide-react';
 import { ProductProps } from '@/types';
-import { CurrencyCode, formatPrice, getCustomVariantPrices } from '@/utils/helperfns';
+import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 
 export default function TraditionalTasteShopContent() {
   const envColor = process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#F97316';
@@ -94,50 +94,21 @@ export default function TraditionalTasteShopContent() {
 
   // Map to the Product type expected by ProductCard
   const products = filteredProducts.map((p, idx) => {
-    const isAbacha = p.name?.toLowerCase().includes('abacha');
-    const isPlantain = p.name?.toLowerCase().includes('unripe plantain');
-    const isSoup = p.category?.toLowerCase() === 'soups' || p.topCategory?.toLowerCase() === 'soups' || ['efo riro', 'soup', 'nsala', 'fisherman', 'bitter leaf', 'bitterleaf', 'peppered chicken', 'peppered fish', 'peppered gizzard', 'egusi', 'seafood okro', 'afang', 'native rice', 'edikaikong', 'gizzard sauce', 'ayamashe', 'ofada', 'ofeakwu', 'banga', 'ukwa', 'seafood rice', 'coconut rice', 'pineapple rice'].some(v => p.name?.toLowerCase().includes(v));
-    const hasVariants = isSoup || isAbacha || isPlantain;
-
-    // Calculate dynamic prices based on the base price from the endpoint
     const basePrice = p.salePrice || 0;
     const currency = p.ccy || '£';
-    const { price2L, price4L } = getCustomVariantPrices(p.name || '', basePrice);
-
-    let variants;
-    if (isAbacha) {
-      variants = [
-        { id: '1L', size: '1 litre', priceStr: `${currency}${basePrice.toFixed(2)}`, price: basePrice }
-      ];
-    } else if (isPlantain) {
-      variants = [
-        { id: '1P', size: '1 pack', priceStr: `${currency}40.00`, price: 40 },
-        { id: '2P', size: '2 packs', priceStr: `${currency}75.00`, price: 75 }
-      ];
-    } else if (isSoup) {
-      variants = [
-        { id: '2L', size: '2 litres', priceStr: `${currency}${price2L.toFixed(2)}`, price: price2L },
-        { id: '4L', size: '4 litres', priceStr: `${currency}${price4L.toFixed(2)}`, price: price4L }
-      ];
-    }
-
-    // Show the dynamic range (e.g. £50.00 - £100.00) if there's more than one variant
-    const priceString = hasVariants && variants && variants.length > 1
-      ? isPlantain ? `${currency}40.00 - ${currency}75.00` : `${currency}${price2L.toFixed(2)} - ${currency}${price4L.toFixed(2)}`
-      : `${currency}${basePrice}`;
+    const priceString = `${currency}${basePrice.toFixed(2)}`;
 
     return {
       id: p.id || idx,
       vendor: p.brand || 'Traditional Taste',
       title: p.name || 'Unknown Item',
       price: priceString,
-      originalPrice: p.oldPrice && p.oldPrice > basePrice ? `${currency}${p.oldPrice}` : null,
+      originalPrice: p.oldPrice && p.oldPrice > basePrice ? `${currency}${p.oldPrice.toFixed(2)}` : null,
       discount: p.discount ? `${p.discount}% OFF` : null,
       image: p.picture || '/placeholder-image.png',
       badges: [],
       stock: (p.qtyInStore || 0) > 0,
       offer: null,
-      variants: variants
     };
   });
 

@@ -14,6 +14,7 @@ import useGetLookup from "@/app/hooks/useGetLookup";
 import { SelectOption } from '@/types';
 import { usePermission } from '@/hooks/usePermission';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
+import { StoreCombobox } from '@/components/shared/StoreCombobox';
 
 interface DeliveryOptionFormData {
     id: number;
@@ -24,6 +25,7 @@ interface DeliveryOptionFormData {
     deliveryVatRate: number;
     capLimit: number;
     amount: number;
+    storeCode: string;
 }
 
 const FormSection = ({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) => (
@@ -64,7 +66,7 @@ export default function CreateDeliveryOptionPage() {
 
     const [formData, setFormData] = useState<DeliveryOptionFormData>({
         id: 0, area: '', groupCode: '', estimatedTime: 0,
-        estimatedTimeType: '', deliveryVatRate: 0, capLimit: 0, amount: 0
+        estimatedTimeType: '', deliveryVatRate: 0, capLimit: 0, amount: 0, storeCode: ''
     });
 
     useEffect(() => {
@@ -102,7 +104,8 @@ export default function CreateDeliveryOptionPage() {
                     estimatedTimeType: typeInfo?.id || option.estimatedTimeType || '',
                     deliveryVatRate: option.deliveryVatRate || 0,
                     capLimit: option.capLimit || 0,
-                    amount: option.amount || 0
+                    amount: option.amount || 0,
+                    storeCode: option.storeCode || ''
                 });
                 setIsFormInitialized(true);
             }
@@ -148,6 +151,7 @@ export default function CreateDeliveryOptionPage() {
         e.preventDefault();
         if (!formData.area.trim()) { toast.error('Area is required'); return; }
         if (!formData.groupCode.trim()) { toast.error('Group code is required'); return; }
+        if (!formData.storeCode.trim()) { toast.error('Store code is required'); return; }
         if (formData.estimatedTime <= 0) { toast.error('Estimated time must be greater than 0'); return; }
         if (!formData.estimatedTimeType) { toast.error('Estimated time type is required'); return; }
         if (formData.amount <= 0) { toast.error('Amount must be greater than 0'); return; }
@@ -190,6 +194,14 @@ export default function CreateDeliveryOptionPage() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className='bg-white px-6 py-4 rounded-2xl'>
                             <FormSection title="Delivery Option Details" subtitle="Configure delivery option details.">
+                                <FormField label="Store Code" required>
+                                    <StoreCombobox
+                                        onChange={(value) => handleSelectChange('storeCode', value)}
+                                        axiosInstance={axiosOperations}
+                                        value={formData.storeCode}
+                                    />
+                                </FormField>
+
                                 <FormField label="Group Code" required>
                                     <Input name="groupCode" value={formData.groupCode} onChange={handleInputChange} placeholder="e.g., Island, Mainland, Express" required />
                                 </FormField>
