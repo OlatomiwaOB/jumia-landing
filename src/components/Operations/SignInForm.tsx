@@ -175,7 +175,6 @@ export function SignInForm() {
   const isFormValid = username.trim() !== "" && password.trim() !== ""
 
   return (
-  return (
     <DynamicAuthLayout
       title={step === "credentials" ? "Operations admin." : "Two-Factor Authentication"}
       subtitle={step === "credentials" ? "Welcome back, sign in to access your account." : "Enter the 6-digit verification code from your authenticator app."}
