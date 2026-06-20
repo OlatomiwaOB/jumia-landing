@@ -14,8 +14,6 @@ import LocationDetails from "./onboarding/location-details"
 import BusinessDocuments from "./onboarding/business-documents"
 import axiosInstanceNoAuth from "@/utils/fetch-function-auth"
 import Link from "next/link"
-import SignUpBanner from "@/components/images/auth-banner.png"
-// import logo from "@/components/images/direct-logo.png"
 import { SuccessTag, CheckIcon } from "../icons/icons"
 import { Loader2 } from "lucide-react"
 import { useLocationStore } from "@/store/locationStore"
@@ -348,27 +346,45 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row bg-[#F9FAFB]">
-      <div className='hidden lg:block lg:w-1/2 h-screen sticky top-0 p-4'>
-        <div className="bg-gradient-to-b from-[#F9FAFB] to-[var(--accent)] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative">
-          <Image
-            src={logo}
-            alt="Logo"
-            width={100}
-            height={100}
-            className="absolute top-0 left-0 p-5 max-w-[250px] h-auto object-contain"
-          />
-          <Image
-            src={SignUpBanner}
-            alt="POS System Illustration"
-            width={600}
-            height={600}
-            className="max-w-full max-h-full object-contain"
-          />
+    <div className="flex flex-col lg:flex-row bg-white">
+      {/* Left Side: Creative Brand-Agnostic Graphic */}
+      <div className="hidden lg:flex lg:w-1/2 h-screen sticky top-0 relative overflow-hidden bg-[#1A1D23]">
+        {/* Abstract shapes using the accent color */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-20 blur-3xl bg-[var(--accent)] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-30 blur-3xl bg-[var(--accent)] pointer-events-none" />
+        
+        {/* Subtle grid pattern overlay */}
+        <div 
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+          }}
+        />
+
+        <div className="relative z-10 p-10 flex flex-col h-full justify-between w-full">
+          <div>
+            <Image
+              src={logo}
+              alt="Logo"
+              width={150}
+              height={50}
+              className="max-w-[200px] h-auto object-contain filter drop-shadow-md"
+            />
+          </div>
+          
+          <div className="max-w-md">
+            <h2 className="text-4xl font-light text-white mb-4 leading-tight">
+              Start your journey with <span className="font-semibold text-[var(--accent)]">confidence.</span>
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Set up your business profile and unlock powerful tools.
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 min-h-screen flex flex-col">
+      <div className="w-full lg:w-1/2 min-h-screen flex flex-col bg-white">
         <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-8">
           {
             onboardStep === 'success'
@@ -438,7 +454,7 @@ export function SignUpForm() {
                 <div className="space-y-4">
                   <h2 className="text-center text-md font-normal text-dark-gray">{getStepTitle()}</h2>
 
-                  <div className="bg-white p-5 rounded-lg">
+                  <div className="pt-2">
                     {renderStep()}
 
                     <div className="flex justify-between mt-10">
@@ -464,6 +480,7 @@ export function SignUpForm() {
                         <Button
                           type="submit"
                           onClick={handleSubmit(onSubmit)}
+                          className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium rounded-lg"
                           disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
                         >
                           {isPending ? (
@@ -476,7 +493,6 @@ export function SignUpForm() {
                           )}
                         </Button>
                       )}
-                    </div>
                   </div>
                 </div>
 
@@ -490,7 +506,7 @@ export function SignUpForm() {
                   <span className="text-sm font-normal text-medium-gray">Already registered? </span>
                   <Link
                     href="/admin-login"
-                    className="text-sm text-faded-accent hover:text-accent/70"
+                    className="text-sm font-semibold text-[var(--accent)] hover:underline"
                   >
                     Sign in
                   </Link>

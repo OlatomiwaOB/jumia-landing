@@ -1,15 +1,12 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react';
-import { Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import useUser from '@/store/userStore';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import SidebarMobile from './sidebar-mobile';
 import Image from 'next/image';
 import NotificationsModal from './notification-modal';
-import { usePage } from '@/hooks/metadata-context';
 import { MessageIcon, NotificationIcon, TransactionIconFilled } from '@/components/icons/icons';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/utils/fetch-function';
@@ -17,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import UpdateSubscriptionModal from './dashboard/update-subscription-plan';
 import { logout } from '@/utils/auth-utils';
 import { toast } from 'sonner';
+import { HeaderBase } from '@/components/common/header-base';
 
 interface Notification {
   id: number;
@@ -45,11 +43,9 @@ const getTierColor = (tierCode: string): string => {
 };
 
 export const DashboardHeader = () => {
-  const { title, description } = usePage();
   const { user } = useUser();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const notifBtnRef = useRef<HTMLButtonElement>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -58,25 +54,13 @@ export const DashboardHeader = () => {
     queryKey: ['notifications-header'],
     queryFn: async () => {
       const response = await axiosInstance.get('/notification/fetch', {
-        params: {
-          status: ''
-        }
+        params: { status: '' }
       });
       return response.data;
     },
     refetchInterval: 60000,
     refetchIntervalInBackground: true,
   });
-
-  const notificationInfo = notificationsData?.notificationInfo as Notification[]
-  // useEffect(() => {
-  //   if (notificationsData) {
-  //     const unreadNotifications = notificationsData.filter(
-  //       notification => notification.status === 'UNREAD'
-  //     );
-  //     setUnreadCount(unreadNotifications.length);
-  //   }
-  // }, [notificationsData]);
 
   const handleNotificationsOpen = () => {
     setIsNotificationsOpen(true);
@@ -100,108 +84,75 @@ export const DashboardHeader = () => {
     router.push('/admin-profile')
   };
 
-
-  console.log('notificationData', notificationsData);
-
-
-  return (
+  const headerActions = (
     <>
-      <header className="bg-white px-2 lg:px-4 py-3 w-full min-h-20">
-        <div className="flex items-center justify-between px-2">
-          <div className='flex gap-3 items-center'>
-            <div>
-              <h1 className="text-md lg:text-lg font-medium text-dark-gray">
-                {title}
-              </h1>
-              {description && (
-                <p className='text-xs lg:text-sm font-normal text-medium-gray'>{description}</p>
-              )}
+      <div className="hidden md:flex items-center gap-2">
+        {user?.userRole === 'BUSINESS_MANAGER' && (
+          <div
+            className="cursor-pointer relative px-3 py-1.5 rounded-full hover:bg-gray-100 flex items-center gap-2 transition-colors mr-2"
+            onClick={handleUpdateSubscription}
+          >
+            <TransactionIconFilled className="text-gray-500 w-5 h-5" />
+            <div className="hidden lg:flex items-center gap-1.5 pr-1">
+              <span className={`text-xs font-semibold capitalize ${getTierColor(user?.subscriptionTierCode || '')}`}>
+                {user?.subscriptionTierCode?.toLowerCase() || 'N/A'}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-gray-400"></span>
+              <span className="text-xs font-medium text-gray-500 capitalize">
+                {user?.subscriptionType?.toLowerCase() || 'N/A'}
+              </span>
             </div>
           </div>
+        )}
 
-          <div className='flex items-center gap-4 lg:gap-6'>
-            <div className="hidden md:flex items-center gap-4">
-              {user?.userRole === 'BUSINESS_MANAGER' && (
-                <div
-                  className="cursor-pointer relative bg-[#F5F5F5] p-3 rounded-full flex items-center gap-2"
-                  onClick={handleUpdateSubscription}
-                >
-                  <TransactionIconFilled className="text-muted-foreground w-6 h-6" />
-                  <div className="hidden lg:flex items-center gap-1.5 pr-1">
-                    <span className={`text-xs font-semibold capitalize ${getTierColor(user?.subscriptionTierCode || '')}`}>
-                      {user?.subscriptionTierCode?.toLowerCase() || 'N/A'}
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-medium-gray"></span>
-                    <span className="text-xs font-medium text-medium-gray capitalize">
-                      {user?.subscriptionType?.toLowerCase() || 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              )}
+        <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
+          <MessageIcon className="w-5 h-5" />
+        </button>
 
-              <div className="cursor-pointer relative bg-[#F5F5F5] p-3 rounded-full">
-                <MessageIcon className="text-muted-foreground w-6 h-6" />
+        <button
+          ref={notifBtnRef}
+          className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+          onClick={handleNotificationsOpen}
+        >
+          <NotificationIcon className="w-5 h-5" />
+          {(notificationsData?.unreadMessages === '99+' || Number(notificationsData?.unreadMessages) > 0) && (
+            <span className="absolute top-1 right-1 bg-red-500 text-white rounded-full min-w-[18px] h-[18px] text-[10px] font-semibold flex items-center justify-center px-1">
+              {notificationsData?.unreadMessages}
+            </span>
+          )}
+        </button>
+      </div>
+
+      <div className="hidden md:flex items-center pl-4 border-l border-gray-200">
+        <DropdownMenu>
+          <DropdownMenuTrigger onClick={handleGoToProfile} asChild>
+            <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-full hover:bg-gray-100">
+              <Avatar className="w-8 h-8 ring-2 ring-white shadow-sm">
+                <AvatarImage src={`https://fortitude-anl.s3.eu-west-1.amazonaws.com${user?.photoLinks}`} />
+                <AvatarFallback>
+                  <Image
+                    src={'/images/no-profile-img.jpg'}
+                    alt={''}
+                    fill
+                    className="object-cover"
+                    sizes="32px"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/no-profile-img.jpg'; }}
+                  />
+                </AvatarFallback>
+              </Avatar>
+
+              <div className="flex flex-col items-start pr-2">
+                <span className="text-sm font-medium text-gray-900 leading-none">
+                  {user?.businessName || user?.fullname || 'Admin'}
+                </span>
+                <span className="text-xs text-gray-500 mt-1 leading-none">
+                  {user?.userRole?.replace('_', ' ')?.toLowerCase() || 'Administrator'}
+                </span>
               </div>
-
-              <button
-                ref={notifBtnRef}
-                className="cursor-pointer relative bg-[#F5F5F5] p-3 rounded-full border-none outline-none"
-                onClick={handleNotificationsOpen}
-              >
-                <NotificationIcon className="text-muted-foreground w-6 h-6" />
-                {(notificationsData?.unreadMessages === '99+' || Number(notificationsData?.unreadMessages) > 0) && (
-                  <span className="absolute top-1 right-1 bg-red-500 text-white rounded-full min-w-[18px] h-[18px] text-[10px] font-semibold flex items-center justify-center px-1">
-                    {notificationsData?.unreadMessages}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2 lg:gap-6">
-              <div className="flex items-center gap-4 bg-black rounded-3xl">
-                <DropdownMenu>
-                  <DropdownMenuTrigger onClick={handleGoToProfile} asChild className="py-6 pl-1 pr-10">
-                    <Button variant="ghost" className="flex items-center relative w-auto h-6 lg:h-9 rounded-full">
-                      <Avatar className="w-8 h-8 lg:w-10 lg:h-10">
-                        <AvatarImage src={`https://fortitude-anl.s3.eu-west-1.amazonaws.com${user?.photoLinks}`} />
-                        <AvatarFallback>
-                          <Image
-                            src={'/images/no-profile-img.jpg'}
-                            alt={''}
-                            fill
-                            className="object-cover"
-                            sizes="64px"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/no-profile-img.jpg'; }}
-                          />
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="text-white">
-                        <span className="text-sm font-medium">
-                          {user?.businessName || user?.fullname}
-                        </span>
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            <div className='flex lg:hidden gap-3 items-center'>
-              <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" className='text-gray-500 hover:bg-gray-100'>
-                    <Menu className='w-6 h-6' />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side='left'>
-                  <SidebarMobile onNavItemClick={() => setIsMobileSidebarOpen(false)} />
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
-      </header>
+            </Button>
+          </DropdownMenuTrigger>
+        </DropdownMenu>
+      </div>
 
       <NotificationsModal
         isOpen={isNotificationsOpen}
@@ -216,5 +167,14 @@ export const DashboardHeader = () => {
         onUpdateSuccess={handleSubscriptionUpdateSuccess}
       />
     </>
+  );
+
+  return (
+    <HeaderBase
+      actions={headerActions}
+      mobileSidebarOpen={isMobileSidebarOpen}
+      setMobileSidebarOpen={setIsMobileSidebarOpen}
+      mobileSidebar={<SidebarMobile onNavItemClick={() => setIsMobileSidebarOpen(false)} />}
+    />
   );
 };

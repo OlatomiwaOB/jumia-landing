@@ -1178,14 +1178,14 @@ export default function OrderHistory(): React.ReactElement {
     setIsViewRatingOpen(true);
   };
 
-  if (!orders.length && !isLoading)
+  if (!orders.length && !isLoading) {
     return (
-      <Card>
-        <CardHeader className='border-b-1 border-[#EEEEEE] py-3'>
+      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
+        <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-dark-gray text-md font-semibold">
+            <h2 className="text-dark-gray text-lg font-semibold">
               Recent Orders
-            </CardTitle>
+            </h2>
             <Link href='/admin/orders'>
               <Button
                 variant="ghost"
@@ -1196,24 +1196,25 @@ export default function OrderHistory(): React.ReactElement {
               </Button>
             </Link>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="pt-1">
+        <div className="pt-1">
           <div className="flex justify-center items-center h-40">
             <p className="text-medium-gray text-sm">No recent orders found</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
+  }
 
   return (
     <>
-      <Card>
-        <CardHeader className='border-b-1 border-[#EEEEEE] py-3'>
+      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
+        <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-dark-gray text-md font-semibold">
+            <h2 className="text-dark-gray text-lg font-semibold">
               Recent Orders
-            </CardTitle>
+            </h2>
             <Link href='/admin/orders'>
               <Button
                 variant="ghost"
@@ -1224,9 +1225,9 @@ export default function OrderHistory(): React.ReactElement {
               </Button>
             </Link>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="pt-1">
+        <div className="pt-1">
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
               <p className="text-sm text-gray-400">Loading orders…</p>
@@ -1260,8 +1261,8 @@ export default function OrderHistory(): React.ReactElement {
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <OrderDetailsModal
         order={selectedOrder as OrderDetail | null}

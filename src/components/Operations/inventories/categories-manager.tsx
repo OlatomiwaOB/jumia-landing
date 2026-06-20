@@ -895,7 +895,7 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
                                   tooltipMessage="No permission" onClick={() => handleEdit(c)} size="xs" variant="action">
                                   <EditIcon className="w-4 h-4" />
                                 </PermissionButton>
-                                <Button size="xs" variant="action" onClick={() => handleDelete(c)} title="Delete" className="text-red-500 hover:text-red-700">
+                                <Button disabled size="xs" variant="action" onClick={() => handleDelete(c)} title="Delete" className="text-red-500 hover:text-red-700">
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </div>

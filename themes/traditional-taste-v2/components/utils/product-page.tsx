@@ -34,6 +34,7 @@ import {
 
 type DetailTab = 'description' | 'details';
 
+
 // Small update for PR testing
 export default function ProductPage() {
   const params = useParams();
@@ -41,7 +42,7 @@ export default function ProductPage() {
   const searchParams = useSearchParams();
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
   const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
   const { product: oldProduct, products, isLoading: isLoadingOld } = useProductBySlug(productSlug, storeCode, entityCode);
 
   // Use your new API endpoint to get the live product (passing the numeric ID from the oldProduct)
@@ -58,7 +59,7 @@ export default function ProductPage() {
   const { addToCart, decrement, increment, singleQuantity, openCart } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedVariantId, setSelectedVariantId] = useState<string>('');
+  const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
 
   const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
   const hasVariants = itemVariants.length > 0;
@@ -66,16 +67,26 @@ export default function ProductPage() {
   const basePrice = product?.salePrice || 0;
 
   const variants = itemVariants.map((v: any, index: number) => ({
-    id: v.qty ? v.qty.toString() : index.toString(),
+    id: parseInt(v.id),
     qty: v.qty,
-    size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size || `${index + 1}`),
+    size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
     weight: parseFloat(v.size) || product?.weight || 1,
     original: v
   }));
 
+  console.log(variants, 'variants');
+
+
+
+
+  console.log('selected variant id', selectedVariantId);
+
+
   const currentVariant = variants.find((v: any) => v.id === selectedVariantId);
   const currentPrice = currentVariant ? currentVariant.price : basePrice;
+  console.log('current variant', currentVariant)
+  console.log('current variant size', parseFloat(currentVariant?.size));
 
   // Local state for quantity before adding to cart
   const [localQty, setLocalQty] = useState(1);
@@ -92,7 +103,7 @@ export default function ProductPage() {
   useEffect(() => {
     if (prevVariantRef.current === selectedVariantId) {
       if (prevQuantityRef.current > 0 && quantity <= 0) {
-        setSelectedVariantId('');
+        setSelectedVariantId(0);
         setLocalQty(1);
       }
     }
@@ -325,7 +336,7 @@ export default function ProductPage() {
                   <div className="relative">
                     <select
                       value={selectedVariantId}
-                      onChange={(e) => setSelectedVariantId(e.target.value)}
+                      onChange={(e) => setSelectedVariantId(Number(e.target.value))}
                       className="w-full appearance-none text-base border border-[var(--color-text)]/20 rounded-xl p-3 pr-12 outline-none focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-transparent cursor-pointer"
                     >
                       <option value="">Choose an option</option>
@@ -400,16 +411,15 @@ export default function ProductPage() {
                         name: hasVariants && currentVariant ? `${product.name} - ${currentVariant.size}` : product.name,
                         salePrice: currentPrice,
                         weight: itemWeight,
-                        weightUnit: product.weightUnit || undefined,
+                        // weightUnit: product.weightUnit || undefined,
+                        variantId: selectedVariantId || 0
                       } as any, localQty);
                       openCart();
                     }}
-                    disabled={(product.qtyInStore ?? 0) <= 0 || (hasVariants && !selectedVariantId)}
+                  // disabled={(hasVariants && !selectedVariantId)}
                   >
                     <ShoppingBag className="h-5 w-5" />
-                    {(product.qtyInStore ?? 0) > 0
-                      ? ((hasVariants && !selectedVariantId) ? 'SELECT AN OPTION' : 'ADD TO CART')
-                      : 'OUT OF STOCK'}
+                    {((hasVariants && !selectedVariantId) ? 'SELECT AN OPTION' : 'ADD TO CART')}
                   </button>
                 ) : (
                   <div className="flex flex-1 items-center justify-center rounded-xl bg-green-600 px-6 py-4 font-bold text-white">

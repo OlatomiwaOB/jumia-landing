@@ -1,13 +1,12 @@
-'use client';
+'use client'
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { usePermission } from '@/hooks/usePermissionBusiness';
-import useUser from '@/store/userStore';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { logout } from '@/utils/auth-utils';
 import { Button } from '@/components/ui/button';
@@ -45,10 +44,6 @@ interface NavGroup {
   href?: string;
   items: NavItem[];
   requiredPermissions?: string[];
-}
-
-interface SidebarMobileProps {
-  onNavItemClick?: () => void;
 }
 
 const navigationGroups: NavGroup[] = [
@@ -136,6 +131,7 @@ const isPathMatchingItem = (pathname: string, itemHref: string): boolean => {
 
 const isGroupActive = (group: NavGroup, pathname: string, accessibleItems: NavItem[]): boolean => {
   if (group.items.length === 0 && isPathMatchingItem(pathname, '/admin/dashboard')) return pathname === '/admin/dashboard';
+  if (group.href && isPathMatchingItem(pathname, group.href)) return true;
   return accessibleItems.some(item => isPathMatchingItem(pathname, item.href));
 };
 
@@ -148,7 +144,7 @@ interface SidebarGroupProps {
 }
 
 const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions, onNavItemClick }: SidebarGroupProps) => {
-  const accessibleItems = useMemo(() => {
+  const accessibleItems = React.useMemo(() => {
     return group.items.filter(item => {
       if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
         return true;
@@ -169,22 +165,28 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions, onNavI
     return null;
   }
 
-  if (!hasItems && group.items.length === 0) {
-    const isActive = isPathMatchingItem(pathname, '/admin/dashboard');
+  if (!hasItems && (group.href || group.items.length === 0)) {
+    const isActive = group.href ? isPathMatchingItem(pathname, group.href) : isPathMatchingItem(pathname, '/admin/dashboard');
+    const href = group.href || '/admin/dashboard';
     const IconComponent = isActive && group.activeIcon ? group.activeIcon : group.icon;
 
     return (
-      <div className="relative">
+      <div className="relative mb-1">
+        {isActive && (
+          <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[--accent] rounded-r-full" />
+        )}
         <Link
-          href="/admin/dashboard"
+          href={href}
           onClick={onNavItemClick}
           className={cn(
-            'flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-[11px]',
-            isActive && 'bg-white text-faded-accent font-medium'
+            'flex items-center px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group',
+            isActive 
+              ? 'bg-[--accent]/10 text-[--accent] font-medium' 
+              : 'text-white/70 hover:text-white hover:bg-white/10'
           )}
         >
-          <IconComponent className="w-4 h-4 flex-shrink-0" />
-          <span className="font-medium truncate">{group.name}</span>
+          <IconComponent className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-[--accent]" : "text-white/70 group-hover:text-white")} />
+          <span className="ml-3 truncate">{group.name}</span>
         </Link>
       </div>
     );
@@ -193,28 +195,30 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions, onNavI
   const IconComponent = hasActiveChild && group.activeIcon ? group.activeIcon : group.icon;
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-1">
       <CollapsibleTrigger className="w-full">
         <div className={cn(
-          'flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs w-full',
-          hasActiveChild && 'bg-white text-faded-accent'
+          'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group',
+          hasActiveChild 
+            ? 'text-white' 
+            : 'text-white/70 hover:text-white hover:bg-white/10'
         )}>
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <IconComponent className="w-4 h-4 flex-shrink-0" />
-            <span className="font-medium truncate text-[11px]">{group.name}</span>
+          <div className="flex items-center min-w-0 flex-1">
+            <IconComponent className={cn("w-5 h-5 flex-shrink-0", hasActiveChild ? "text-[--accent]" : "text-white/70 group-hover:text-white")} />
+            <span className={cn("ml-3 font-medium truncate", hasActiveChild && "text-white")}>{group.name}</span>
           </div>
           <ArrowIcon
             className={cn(
-              "w-3 h-3 rotate-270 flex-shrink-0 text-sidebar-text transition-transform duration-200",
-              isOpen && "rotate-360 text-faded-accent"
+              "w-3 h-3 rotate-270 flex-shrink-0 text-white/50 transition-transform duration-200",
+              isOpen && "rotate-360 text-white"
             )}
           />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-        <div className="relative">
-          <div className="absolute left-[18px] top-2 bottom-2 w-0.5 bg-[#EA813C]" />
-          <ul className="py-1.5 pr-4 space-y-0.5">
+        <div className="relative mt-1">
+          <div className="absolute left-[22px] top-0 bottom-0 w-px bg-gray-800" />
+          <ul className="py-1 pr-3 space-y-1">
             {accessibleItems.map((item) => {
               const isActive = isPathMatchingItem(pathname, item.href);
 
@@ -224,8 +228,10 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions, onNavI
                     href={item.href}
                     onClick={onNavItemClick}
                     className={cn(
-                      'flex items-center px-3 py-2.5 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-[11px] ml-6',
-                      isActive && 'bg-[#EA813C] text-white font-medium'
+                      'flex items-center px-3 py-2 rounded-lg text-sm transition-all duration-200 ml-[34px]',
+                      isActive 
+                        ? 'bg-[--accent] text-white font-medium shadow-sm' 
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
                     )}
                   >
                     <span className="truncate">{item.name}</span>
@@ -240,14 +246,17 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions, onNavI
   );
 };
 
+interface SidebarMobileProps {
+  onNavItemClick?: () => void;
+}
+
 const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
   const pathname = usePathname();
   const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL_WHITE_FULL;
-  const { user } = useUser();
   const { hasAnyPermission, userPermissions } = usePermission();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const accessibleGroups = useMemo(() => {
+  const accessibleGroups = React.useMemo(() => {
     return navigationGroups.filter(group => {
       if (group.requiredPermissions && group.requiredPermissions.length > 0) {
         const hasGroupAccess = hasAnyPermission(group.requiredPermissions);
@@ -267,54 +276,31 @@ const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
     });
   }, [userPermissions, hasAnyPermission]);
 
-  const handleLogoutClick = () => {
-    setIsLogoutModalOpen(true);
-  };
-
-  const handleConfirmLogout = () => {
-    setIsLogoutModalOpen(false);
-    logout();
-  };
-
-  const handleCancelLogout = () => {
-    setIsLogoutModalOpen(false);
-  };
-
-  const handleNavItemClick = () => {
-    onNavItemClick?.();
-  };
+  const handleLogoutClick = () => setIsLogoutModalOpen(true);
+  const handleConfirmLogout = () => { setIsLogoutModalOpen(false); logout(); };
+  const handleCancelLogout = () => setIsLogoutModalOpen(false);
+  const handleNavItemClick = () => onNavItemClick?.();
 
   return (
     <>
-      <div
-        className="w-full h-full flex flex-col"
-        style={{
-          background: `
-            radial-gradient(ellipse at 75% 70%, rgba(255,160,60,0.45) 0%, transparent 55%),
-            linear-gradient(180deg, #F56B08 0%, #D4580A 40%, #AE4F12 70%, #A83E00 100%)
-          `,
-        }}
-      >
-        <div className="py-4 px-2 border-b-2 border-[#EA813C]">
-          <div className="flex items-center justify-start">
-            <Link href="/admin/dashboard" className="block">
-              <Image
-                src={logoUrl || 'logo.png'}
-                alt='logo'
-                width={110}
-                height={30}
-                className='w-full max-w-[120px] h-auto object-contain'
-                priority
-              />
-            </Link>
-          </div>
+      <div className="w-full h-full flex flex-col bg-[var(--sidebar-accent)] text-white relative">
+        <div className="py-5 px-4 h-[72px] flex items-center shrink-0 border-b border-gray-800">
+          <Link href="/admin/dashboard" className="block relative w-[110px] h-[30px]" onClick={handleNavItemClick}>
+            <Image
+              src={logoUrl || 'logo.png'}
+              alt='logo'
+              fill
+              className='object-contain object-left'
+              priority
+            />
+          </Link>
         </div>
 
         <nav
-          className="flex-1 py-3 px-1.5 overflow-y-auto w-full"
+          className="flex-1 py-4 px-3 overflow-y-auto w-full"
           style={{
-            scrollbarWidth: 'none',
-            scrollbarColor: 'transparent',
+            scrollbarWidth: 'thin',
+            scrollbarColor: '#4B5563 transparent',
           }}
         >
           <ul className="space-y-0.5 px-0.5">
@@ -332,12 +318,14 @@ const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
           </ul>
         </nav>
 
-        <div
-          onClick={handleLogoutClick}
-          className="flex items-center gap-2 text-white px-3 py-2.5 rounded-lg border border-[#BA6D3F] mx-3 mb-3 cursor-pointer hover:bg-white/10 transition-colors"
-        >
-          <Logout2Icon className="text-white/70 w-3.5 h-3.5" />
-          <span className="text-[11px] font-bold">Logout</span>
+        <div className="p-4 border-t border-gray-800 shrink-0">
+          <button
+            onClick={handleLogoutClick}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg border border-gray-700/50 hover:bg-gray-800 hover:text-white hover:border-gray-600 transition-colors"
+          >
+            <Logout2Icon className="text-gray-400 w-4 h-4 shrink-0" />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
         </div>
       </div>
 
@@ -350,18 +338,8 @@ const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-row justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={handleCancelLogout}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmLogout}
-            >
-              Log Out
-            </Button>
+            <Button variant="outline" onClick={handleCancelLogout}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmLogout}>Log Out</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

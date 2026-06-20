@@ -18,9 +18,13 @@ const AdminDashboard = () => {
   return (
     <>
       <WalletOverview />
-      <div className='grid grid-cols-1 lg:grid-cols-2 px-2 gap-4 lg:gap-6 mt-10'>
-        <TransactionHistory />
-        <OrderHistory />
+      <div className='grid grid-cols-1 xl:grid-cols-5 px-2 gap-4 xl:gap-6 mt-10'>
+        <div className="xl:col-span-3">
+          <TransactionHistory />
+        </div>
+        <div className="xl:col-span-2">
+          <OrderHistory />
+        </div>
       </div>
     </>
   )

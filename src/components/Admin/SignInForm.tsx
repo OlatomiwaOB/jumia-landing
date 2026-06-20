@@ -12,9 +12,9 @@ import useUser from "@/store/userStore"
 import { hasAccess, setAuthCredentials } from "@/utils/auth-utils"
 import axiosInstanceNoAuth from "@/utils/fetch-function-auth"
 import { Eye, EyeOff, Loader2 } from "lucide-react"
-import loginBanner from "@/components/images/auth-banner.png"
 import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
+import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
 
 const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
 const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
@@ -99,136 +99,98 @@ export function SignInForm() {
   const isFormValid = username.trim() !== "" && password.trim() !== ""
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#F9FAFB]">
-      <div className='h-screen hidden lg:flex lg:w-1/2 items-center justify-center p-4'>
-        <div className={`bg-gradient-to-b from-[#F9FAFB] to-[var(--accent)] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative`}>
-          <Image
-            src={logo}
-            alt="Logo"
-            width={100}
-            height={100}
-            className="absolute top-0 left-0 p-5 max-w-[250px] h-auto object-contain"
-          />
-          <Image
-            src={loginBanner}
-            alt="POS System Illustration"
-            width={600}
-            height={600}
-            className="max-w-full max-h-full object-contain"
+    <DynamicAuthLayout
+      title="Business Admin"
+      subtitle="Welcome back, please sign in to your account."
+      leftPanelTitle={<>Manage your business with <span className="font-semibold text-[var(--accent)]">confidence.</span></>}
+      leftPanelSubtitle="Secure, efficient, and tailored to your brand's needs."
+      footerNode={
+        <>
+          <span className="text-sm text-medium-gray">Don&apos;t have an account? </span>
+          <Link
+            href="/business-onboarding"
+            className="text-sm font-semibold text-[var(--accent)] hover:underline"
+          >
+            Sign up
+          </Link>
+        </>
+      }
+    >
+      <form className="space-y-6" onSubmit={onSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            type="text"
+            placeholder="Enter username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
           />
         </div>
-      </div>
 
-      <div className="flex-1 flex items-center justify-center py-6 sm:px-6 lg:px-12">
-        <div className="w-full max-w-md space-y-6">
-          <div className="space-y-1 text-center">
-            <h1 className="text-xl sm:text-2xl font-medium text-dark-gray">Business admin.</h1>
-            <p className="text-medium-gray text-sm leading-relaxed">
-              Welcome back, sign in to access your account.
-            </p>
-          </div>
-
-          <div className="bg-white p-5 rounded-lg">
-            <form className="space-y-4" onSubmit={onSubmit}>
-              <div className="space-y-2">
-                <Label htmlFor="username">
-                  Username
-                </Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-gray-700 focus:outline-none"
-                    onClick={togglePasswordVisibility}
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="remember-me"
-                      checked={rememberMe}
-                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    />
-                    <label
-                      htmlFor="remember-me"
-                      className="text-sm text-medium-gray cursor-pointer select-none"
-                    >
-                      Remember me
-                    </label>
-                  </div>
-
-                  <Button
-                    type="button"
-                    onClick={() => router.push('/forgot-password')}
-                    variant="link"
-                    className="text-sm"
-                  >
-                    Forgot your password?
-                  </Button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                size='lg'
-                className="mt-10 w-full"
-                disabled={!isFormValid || isPending}
-              >
-                {isPending ? (
-                  <>
-                    Signing in...
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </Button>
-            </form>
-          </div>
-
-          <div className="text-center">
-            <span className="text-sm text-medium-gray">Don&apos;t have an account? </span>
-            <Link
-              href="/business-onboarding"
-              className="text-sm font-semibold text-text hover:text-accent/70"
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Enter password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground cursor-pointer hover:text-gray-700 focus:outline-none"
+              onClick={togglePasswordVisibility}
             >
-              Sign up
-            </Link>
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="remember-me"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+              />
+              <label
+                htmlFor="remember-me"
+                className="text-sm text-medium-gray cursor-pointer select-none"
+              >
+                Remember me
+              </label>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => router.push('/forgot-password')}
+              variant="link"
+              className="text-sm"
+            >
+              Forgot your password?
+            </Button>
           </div>
         </div>
 
-        <div className="fixed bottom-4 text-center w-full text-xs text-[#9E9E9E]">
-          © {currentYear} {clientName}. All Right Reserved
-        </div>
-      </div>
-    </div>
+        <Button
+          type="submit"
+          size="lg"
+          className="mt-8 w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium h-12 rounded-lg"
+          disabled={!isFormValid || isPending}
+        >
+          {isPending ? (
+            <>
+              Signing in...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            </>
+          ) : (
+            "Sign In"
+          )}
+        </Button>
+      </form>
+    </DynamicAuthLayout>
   )
 }

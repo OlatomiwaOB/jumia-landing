@@ -468,10 +468,6 @@
 //         </div>
 //       </div>
 
-//       <div className="hidden lg:flex w-1/2">
-//         {/* <HeroSlider /> */}
-//       </div>
-
 //       <AlertDialog open={!!openId} onOpenChange={(open) => { if (!open) setOpenId(null); }}>
 //         <AlertDialogContent className="rounded-2xl max-w-sm">
 //           <AlertDialogHeader>
@@ -600,17 +596,14 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
     <>
       <Card
         className={cn(
-          'relative overflow-hidden border border-border rounded-2xl transition-all duration-300 cursor-pointer group w-full',
-          'hover:shadow-lg hover:-translate-y-1',
-          'bg-cover bg-center bg-no-repeat',
+          'relative overflow-hidden border-0 rounded-2xl transition-colors duration-300 cursor-pointer group w-full',
+          'bg-[var(--sidebar-accent)] shadow-sm',
           className
         )}
-        style={{
-          backgroundImage: 'url("/images/wallet-bg.png")',
-          backgroundColor: 'var(--accent)'
-        }}
       >
-        <CardContent className="px-3 py-2 relative z-10">
+        {/* Decorative subtle background pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 100% 100%, #ffffff 0%, transparent 50%), radial-gradient(circle at 0% 0%, #ffffff 0%, transparent 30%)' }}></div>
+        <CardContent className="px-5 py-6 relative z-10">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
               <div className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center mr-3 overflow-hidden bg-white">
@@ -631,7 +624,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
 
             <button
               onClick={toggleAmountVisibility}
-              className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-[#F6712D]"
+              className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-black/10"
             >
               {showAmount ? <Eye size={16} className='font-bold' /> : <EyeOff size={16} className='font-bold' />}
             </button>
@@ -836,15 +829,10 @@ const CryptoCard: React.FC<CryptoCardProps> = ({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden border border-border rounded-2xl transition-all duration-300 cursor-pointer group w-full',
-        'hover:shadow-lg hover:-translate-y-1',
-        'bg-cover bg-center bg-no-repeat',
+        'relative overflow-hidden border-0 rounded-xl transition-colors duration-300 cursor-pointer group w-full',
+        'bg-[var(--sidebar-accent)]',
         className
       )}
-      style={{
-        backgroundImage: 'url("/images/wallet-bg.png")',
-        backgroundColor: '#F56B08'
-      }}
     >
       <CardContent className="px-3 py-2 relative z-10">
         <div className="flex items-center justify-between space-y-1">
@@ -865,7 +853,7 @@ const CryptoCard: React.FC<CryptoCardProps> = ({
           </div>
           <button
             onClick={toggleAmountVisibility}
-            className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-[#F6712D]"
+            className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-white/10"
           >
             {showAmount ? <Eye size={16} className='font-bold' /> : <EyeOff size={16} className='font-bold' />}
           </button>
@@ -944,8 +932,8 @@ export const WalletOverview = () => {
 
   return (
     <>
-      <div className="flex gap-6 px-2">
-        <div className="w-full lg:w-1/2 space-y-6">
+      <div className="w-full px-2">
+        <div className="w-full space-y-6">
           <Tabs defaultValue="fiat" className="w-full">
             <TabsList className="grid grid-cols-2">
               <TabsTrigger value="fiat">Fiat Currencies</TabsTrigger>
@@ -1001,11 +989,11 @@ export const WalletOverview = () => {
             </TabsContent>
           </Tabs>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex flex-row justify-between items-center gap-4 py-2">
             {quickMenuData.map((item, index) => (
               <div
                 key={index}
-                className='bg-white rounded-2xl p-4 flex justify-center items-center hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer'
+                className='flex flex-col justify-center items-center text-dark-gray hover:text-[var(--accent)] transition-colors duration-300 cursor-pointer w-full border border-gray-200 bg-white shadow-sm rounded-xl py-4 hover:border-[var(--accent)] hover:shadow-md'
                 onClick={() => {
                   if (item.title === 'Send Money') {
                     setSendMoneyPreselectedAccount(null);
@@ -1015,21 +1003,11 @@ export const WalletOverview = () => {
                   }
                 }}
               >
-                <div className="text-center space-y-2">
-                  <div className="flex justify-center">
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-medium-gray truncate">{item.title}</p>
-                  </div>
-                </div>
+                <item.icon className="w-5 h-5 mb-2" />
+                <p className="text-sm font-semibold">{item.title}</p>
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="hidden lg:flex w-1/2">
-          {/* <HeroSlider /> */} {''}
         </div>
 
         <AlertDialog open={!!openId} onOpenChange={(open) => { if (!open) setOpenId(null); }}>
@@ -1064,7 +1042,7 @@ export const WalletOverview = () => {
           }, index: number) => (
             <div
               key={index}
-              className='bg-white rounded-2xl p-4'
+              className='py-4'
             >
               <div className="space-y-2">
                 <p className="text-xs text-medium-gray truncate">

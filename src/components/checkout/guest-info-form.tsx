@@ -10,6 +10,7 @@ import { SearchSelect } from '@/components/ui/search-select';
 import { nationalityOptions, countryOptions } from '@/utils/country-data';
 import { useRouter } from 'next/navigation';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
+import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -40,7 +41,8 @@ const GuestInfoForm = ({
 }: GuestInfoFormProps) => {
   const router = useRouter();
   const { watch, register, formState: { errors }, setValue, trigger } = form;
-  const { mainCcy } = useCart();
+  const { mainCcy, getCartWeight } = useCart();
+  const cartWeight = getCartWeight();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const watchShippingMethod = watch("shippingMethod");
@@ -48,8 +50,18 @@ const GuestInfoForm = ({
   const watchPickupStore = watch("pickupStore");
   const watchSelectedAddressId = watch("selectedAddressId");
 
-  const { deliveryOptions } = useDeliveryOptions('GUEST');
+
+
+  const [selectedZone, setSelectedZone] = useState<string>('');
+  // const cartWeight = Object.values(cart).reduce((total: any, item: any) => total + (item.quantity || 1), 0);
+
+  const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
+    selectedZone,
+    cartWeight
+  );
+
   const addressTypeOptions = useGetLookup('ADDRESS_TYPE');
+  const areaOptions = useGetLookup('AREAS');
 
   const { data: pickupData, isLoading: isLoadingPickup } = useQuery({
     queryKey: ['pickup-locations-guest'],
@@ -87,10 +99,10 @@ const GuestInfoForm = ({
   useEffect(() => {
     let shippingAmount = 0;
     if (watchShippingMethod === 'delivery' && watchShippingOption) {
-      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === watchShippingOption);
-      shippingAmount = selectedOption?.amount || 0;
-      if (selectedOption?.groupCode) {
-        setValue("deliveryOptionGroup", selectedOption.groupCode);
+      const selectedOption = weightOptions?.find((opt: any) => opt.typeCode === watchShippingOption);
+      shippingAmount = selectedOption?.finalFee || 0;
+      if (selectedZone) {
+        setValue("deliveryOptionGroup", selectedOption?.typeCode);
       } else {
         setValue("deliveryOptionGroup", "");
       }
@@ -104,7 +116,7 @@ const GuestInfoForm = ({
       lastShippingAmount.current = shippingAmount;
       onShippingUpdate?.(shippingAmount);
     }
-  }, [watchShippingMethod, watchShippingOption, watchPickupStore, deliveryOptions, pickupStores, onShippingUpdate]);
+  }, [watchShippingMethod, watchShippingOption, watchPickupStore, weightOptions, pickupStores, onShippingUpdate, selectedZone, setValue]);
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     setValue("shippingMethod", method);
@@ -131,7 +143,6 @@ const GuestInfoForm = ({
     setValue('state', store?.state || store?.city || '');
   };
 
-<<<<<<< HEAD
   const handleZoneSelect = (zoneCode: string) => {
     setSelectedZone(zoneCode);
     // Reset the selected option type when zone changes
@@ -146,36 +157,28 @@ const GuestInfoForm = ({
     const selectedOpt = weightOptions?.find((opt) => opt.typeCode === typeCode);
     if (selectedOpt) {
       sessionStorage.setItem('selectedWeightOption', JSON.stringify(selectedOpt));
-=======
-  const handleShippingOptionChange = (optionId: string) => {
-    setValue("shippingOption", optionId);
-    const selectedOption = deliveryOptions?.find((option: any) => option.id === optionId);
-    if (selectedOption?.groupCode) {
-      setValue("deliveryOptionGroup", selectedOption.groupCode);
-    } else {
-      setValue("deliveryOptionGroup", "");
->>>>>>> 0c6ccb5e8c025b4e369194c474b7e430900e03c4
     }
   };
 
   const getSelectedShippingOption = () => {
-    if (watchShippingMethod !== 'delivery' || !watchShippingOption) return null;
-    const selectedOption = deliveryOptions.find((option: any) => option.id === watchShippingOption);
-    if (!selectedOption) return null;
+    if (watchShippingMethod !== 'delivery' || !watchShippingOption || !selectedZone) return null;
+    const selectedWeightOpt = weightOptions?.find((opt) => opt.typeCode === watchShippingOption);
+    const selectedZoneOpt = areaOptions.find((opt) => opt.id === selectedZone);
+    if (!selectedWeightOpt) return null;
 
     return {
-      id: selectedOption.id,
-      name: selectedOption.name,
-      price: selectedOption.amount,
-      description: selectedOption.description,
-      icon: selectedOption.icon,
-      estimatedArrival: selectedOption.estimatedArrival,
-      area: selectedOption.area,
-      groupCode: selectedOption.groupCode,
-      estimatedTime: selectedOption.estimatedTime,
-      estimatedTimeType: selectedOption.estimatedTimeType,
-      amount: selectedOption.amount,
-      deliveryVatAmount: selectedOption.deliveryVatAmount
+      id: watchShippingOption,
+      name: `${selectedZoneOpt?.name || selectedZone} - ${selectedWeightOpt.typeName}`,
+      price: selectedWeightOpt.finalFee,
+      description: selectedWeightOpt.breakdown,
+      icon: selectedWeightOpt.typeCode === 'EXPRESS' ? '⚡' : '📦',
+      estimatedArrival: `${selectedWeightOpt.estimatedTime} ${selectedWeightOpt.estimatedTimeType}`,
+      area: selectedZoneOpt?.description || '',
+      groupCode: selectedZone,
+      estimatedTime: selectedWeightOpt.estimatedTime,
+      estimatedTimeType: selectedWeightOpt.estimatedTimeType,
+      amount: selectedWeightOpt.finalFee,
+      deliveryVatAmount: 0
     };
   };
 
@@ -293,7 +296,7 @@ const GuestInfoForm = ({
                     </button>
                   </div>
                   {errors.confirmPassword && <p className="text-xs text-destructive">{errors.confirmPassword.message as string}</p>}
-                  <p className="text-xs text-muted-foreground mt-1">We will create an account for you using this password.</p>
+                  {/* <p className="text-xs text-muted-foreground mt-1">We will create an account for you using this password.</p> */}
                 </div>
               </div>
             </CardContent>
@@ -385,80 +388,101 @@ const GuestInfoForm = ({
                       <Input {...register('zipCode')} placeholder="Zip Code" />
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label>Area (Zone) *</Label>
+                      <Select
+                        value={selectedZone || ""}
+                        onValueChange={(value) => handleZoneSelect(value)}
+                      >
+                        <SelectTrigger className={`w-full ${!selectedZone && watchShippingMethod === 'delivery' ? "border-destructive" : ""}`}>
+                          <SelectValue placeholder="Select your area" />
+                        </SelectTrigger>
+                        <SelectContent className="w-full">
+                          {areaOptions.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!selectedZone && watchShippingMethod === 'delivery' && (
+                        <p className="text-xs text-destructive">Please select an area</p>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
 
-            {watchShippingMethod === 'delivery' && (
+
+
+            {/* Weight-based Delivery Options (Regular / Express) */}
+            {watchShippingMethod === 'delivery' && selectedZone && (
               <Card className="mb-6">
                 <CardHeader>
-                  <CardTitle className="text-lg">Delivery Method</CardTitle>
+                  <CardTitle className="text-lg">Delivery Options</CardTitle>
+                  {/* <p className="text-sm text-muted-foreground">Cart weight: {cartWeight.toFixed(1)} kg</p> */}
                 </CardHeader>
                 <CardContent>
-                  {deliveryOptions.length === 0 ? (
+                  {isLoadingWeightOptions ? (
                     <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
                       <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
                     </div>
+                  ) : weightOptions.length === 0 ? (
+                    <div className="text-center py-4 text-muted-foreground">
+                      <p>No delivery options available for this zone</p>
+                    </div>
                   ) : (
                     <RadioGroup
                       value={watchShippingOption || ""}
-                      onValueChange={handleShippingOptionChange}
+                      onValueChange={handleWeightOptionSelect}
                       className="space-y-3"
                     >
-                      {deliveryOptions.map((option: any) => (
+                      {weightOptions.map((option) => (
                         <div
-                          key={option.id}
-                          className={`border rounded-lg p-4 cursor-pointer transition-all ${watchShippingOption === option.id
+                          key={option.typeCode}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${watchShippingOption === option.typeCode
                             ? 'border-accent bg-accent/5 shadow-sm'
                             : 'border-gray-200 hover:border-accent/50'
                             }`}
                         >
                           <label
-                            htmlFor={option.id}
-                            className="flex items-start gap-3 md:gap-4 cursor-pointer w-full"
+                            htmlFor={`weight-opt-${option.typeCode}`}
+                            className="md:flex items-center gap-4 cursor-pointer w-full"
                           >
-                            <div className="mt-0.5 shrink-0">
-                              <RadioGroupItem
-                                value={option.id}
-                                id={option.id}
-                                onClick={(e) => e.stopPropagation()}
-                              />
+                            <RadioGroupItem
+                              value={option.typeCode}
+                              id={`weight-opt-${option.typeCode}`}
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <div className="text-2xl">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
+                                <div className="font-semibold cursor-pointer text-checkout-text">{option.typeName}</div>
+                                {option.typeCode === 'EXPRESS' && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                    Fastest
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Est. {option.estimatedTime} {option.estimatedTimeType}
+                              </p>
+                              {/* <p className="text-xs text-muted-foreground mt-0.5">{option.breakdown}</p> */}
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex justify-between items-start gap-2">
-                                <div className="flex items-center gap-2 mb-1">
-                                  {option.icon && <div className="text-xl shrink-0">{option.icon}</div>}
-                                  <div className="font-semibold cursor-pointer text-checkout-text">
-                                    {option.groupCode ? `Delivery (${option.groupCode})` : option.name || "Delivery Option"}
-                                  </div>
-                                </div>
-                                <div className="font-semibold text-checkout-text shrink-0 text-right mt-0.5">
-                                  {formatPrice(option.amount, mainCcy() as any)}
-                                </div>
-                              </div>
-                              <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
-                                {option.estimatedTime && option.estimatedTimeType && (
-                                  <span className="flex items-center gap-1.5">
-                                    <Clock className="w-3.5 h-3.5 shrink-0" />
-                                    <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
-                                  </span>
-                                )}
-                                {option.area && (
-                                  <span className="flex items-start gap-1.5">
-                                    <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                    <span className="line-clamp-2" title={option.area}>Covers: {option.area.split(',').join(', ')}</span>
-                                  </span>
-                                )}
-                              </div>
+                            <div className="md:text-right mt-2 md:mt-0">
+                              <p className="font-semibold text-checkout-text">{formatPrice(option.finalFee, mainCcy() as any)}</p>
                             </div>
                           </label>
                         </div>
                       ))}
                     </RadioGroup>
                   )}
-                  {!watchShippingOption && watchShippingMethod === 'delivery' && (
-                    <p className="text-sm text-destructive mt-2">Please select a delivery option</p>
+                  {!watchShippingOption && watchShippingMethod === 'delivery' && selectedZone && weightOptions.length > 0 && (
+                    <p className="text-sm text-destructive mt-2">Please select a delivery speed</p>
                   )}
                 </CardContent>
               </Card>

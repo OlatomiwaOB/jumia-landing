@@ -525,7 +525,7 @@
 // };
 
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Truck, MapPin, ArrowLeft, Clock, Plus, Store, Edit } from "lucide-react";
 import { toast } from "sonner";
@@ -542,7 +542,9 @@ import AddDeliveryAddress from "../add-delivery-address";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import useGetLookup from "@/app/hooks/useGetLookup";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
+import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
 import { UseFormReturn } from "react-hook-form";
@@ -555,7 +557,7 @@ interface ShippingFormProps {
 
 export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: ShippingFormProps) => {
   const { customer } = useCustomer();
-  const { cart, getCartTotal, mainCcy } = useCart();
+  const { cart, getCartTotal, mainCcy, getCartWeight } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { location } = useLocationStore();
   const { back } = useRouter();
@@ -571,12 +573,20 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
   const addressTypeOptions = useGetLookup('ADDRESS_TYPE');
   const { deliveryAddress } = useGetDeliveryAddress();
 
-  const { deliveryOptions, isLoading: isLoadingDeliveryOptions } = useDeliveryOptions();
+  const areaOptions = useGetLookup('AREAS');
 
   const shippingMethod = watch("shippingMethod");
   const selectedShippingOption = watch("shippingOption");
   const selectedAddressId = watch("selectedAddressId");
   const selectedStore = watch("pickupStore");
+
+  const [selectedZone, setSelectedZone] = useState<string>('');
+  const cartWeight = getCartWeight();
+
+  const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
+    selectedZone,
+    cartWeight,
+  );
 
   const { data: pickupData, isLoading: isLoadingPickup, error: pickupError } = useQuery({
     queryKey: ['pickup-locations'],
@@ -634,17 +644,17 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       shippingAmount = selectedPickupLocation?.amount || 0;
       setValue("deliveryOptionGroup", "");
     } else if (shippingMethod === 'delivery' && selectedShippingOption) {
-      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === selectedShippingOption);
-      shippingAmount = selectedOption?.amount || 0;
-      if (selectedOption?.groupCode) {
-        setValue("deliveryOptionGroup", selectedOption.groupCode);
+      const selectedOption = weightOptions?.find((opt: any) => opt.typeCode === selectedShippingOption);
+      shippingAmount = selectedOption?.finalFee || 0;
+      if (selectedZone) {
+        setValue("deliveryOptionGroup", selectedOption?.typeCode);
       } else {
         setValue("deliveryOptionGroup", "");
       }
     }
 
     onShippingUpdate?.(shippingAmount);
-  }, [shippingMethod, selectedShippingOption, selectedStore]);
+  }, [shippingMethod, selectedShippingOption, selectedStore, weightOptions, selectedZone, setValue, onShippingUpdate]);
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     if (method === 'delivery') {
@@ -674,13 +684,18 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     // console.log(`Switched to ${method} mode, cleared all related fields`);
   };
 
-  const handleShippingOptionChange = (optionId: string) => {
-    setValue("shippingOption", optionId);
-    const selectedOption = deliveryOptions?.find((option: any) => option.id === optionId);
-    if (selectedOption?.groupCode) {
-      setValue("deliveryOptionGroup", selectedOption.groupCode);
-    } else {
-      setValue("deliveryOptionGroup", "");
+  const handleZoneSelect = (zoneCode: string) => {
+    setSelectedZone(zoneCode);
+    setValue("shippingOption", undefined);
+    setValue("deliveryOptionGroup", "");
+  };
+
+  const handleWeightOptionSelect = (typeCode: string) => {
+    setValue("shippingOption", typeCode);
+    setValue("deliveryOptionGroup", typeCode);
+    const selectedOpt = weightOptions?.find((opt) => opt.typeCode === typeCode);
+    if (selectedOpt) {
+      sessionStorage.setItem('selectedWeightOption', JSON.stringify(selectedOpt));
     }
   };
 
@@ -900,94 +915,98 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
 
                 <Card className="mb-6">
                   <CardHeader>
-                    <CardTitle className="text-lg">Shipping Method</CardTitle>
+                    <CardTitle className="text-lg">Delivery Area</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {deliveryOptions.length === 0 ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                        <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
-                      </div>
-                    ) : (
-                      <>
-                        <RadioGroup
-                          value={selectedShippingOption || ""}
-                          onValueChange={handleShippingOptionChange}
-                          className="space-y-3"
-                        >
-                          {deliveryOptions.map((option: any) => (
+                    <div className="space-y-2">
+                      <Select
+                        value={selectedZone || ""}
+                        onValueChange={(value) => handleZoneSelect(value)}
+                      >
+                        <SelectTrigger className={`w-full ${!selectedZone && shippingMethod === 'delivery' ? "border-red-400" : ""}`}>
+                          <SelectValue placeholder="Select your area" />
+                        </SelectTrigger>
+                        <SelectContent className="w-full">
+                          {areaOptions.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!selectedZone && (
+                        <p className="text-sm text-red-400 mt-2">Please select a delivery area</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {selectedZone && (
+                  <Card className="mb-6">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="text-lg">Delivery Information</CardTitle>
+                      {/* <p className="text-sm text-muted-foreground font-medium">Weight: {cartWeight.toFixed(1)}</p> */}
+                    </CardHeader>
+                    <CardContent>
+                      {isLoadingWeightOptions ? (
+                        <div className="text-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+                          <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
+                        </div>
+                      ) : weightOptions.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <p>No delivery options available for this zone</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {weightOptions.map((option: any) => (
                             <div
-                              key={option.id}
-                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedShippingOption === option.id
+                              key={option.typeCode}
+                              onClick={() => handleWeightOptionSelect(option.typeCode)}
+                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedShippingOption === option.typeCode
                                 ? 'border-accent bg-accent/5 shadow-sm'
                                 : 'border-gray-200 hover:border-accent/50'
                                 }`}
                             >
-                              <label
-                                htmlFor={option.id}
-                                className="flex items-start gap-4 cursor-pointer"
-                              >
-                                <RadioGroupItem
-                                  value={option.id}
-                                  id={option.id}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="mt-1 shrink-0"
-                                />
+                              <div className="flex items-start gap-4 cursor-pointer">
+                                <div className={`mt-1 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedShippingOption === option.typeCode ? 'border-accent' : 'border-gray-300'}`}>
+                                  {selectedShippingOption === option.typeCode && <div className="w-2 h-2 rounded-full bg-accent" />}
+                                </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex items-center gap-2 mb-1">
-                                      {option.icon && <div className="text-xl shrink-0">{option.icon}</div>}
+                                      <div className="text-xl shrink-0">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
                                       <span className="font-semibold cursor-pointer text-checkout-text">
-                                        {option.groupCode ? `Delivery (${option.groupCode})` : option.name || "Delivery Option"}
+                                        {option.typeName}
                                       </span>
-                                    </div>
-                                    <p className="font-semibold text-checkout-text shrink-0 mt-0.5 text-right">{formatPrice(option.amount ?? option.price, mainCcy() as any)}</p>
-                                  </div>
-                                  
-                                  <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
-                                    {(option.estimatedTime && option.estimatedTimeType) ? (
-                                      <span className="flex items-center gap-1.5">
-                                        <Clock className="w-4 h-4 shrink-0" />
-                                        <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
-                                      </span>
-                                    ) : (
-                                      option.estimatedArrival && (
-                                        <span className="flex items-center gap-1.5">
-                                          <Clock className="w-4 h-4 shrink-0" />
-                                          <span className="truncate">Est. Delivery: {option.estimatedArrival}</span>
+                                      {option.typeCode === 'EXPRESS' && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                          Fastest
                                         </span>
-                                      )
-                                    )}
-                                    {option.area && (
-                                      <span className="flex items-start gap-1.5">
-                                        <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                                        <span className="line-clamp-2" title={option.area}>Covers: {option.area.split(',').join(', ')}</span>
-                                      </span>
-                                    )}
-                                    {option.description && (
-                                      <p className="text-sm text-muted-foreground">{option.description}</p>
-                                    )}
-                                    {(option.deliveryVatAmount ?? 0) > 0 && (
-                                      <p className={`text-xs max-w-fit px-2 rounded-full border-1 mt-1 ${selectedShippingOption === option.id
-                                          ? 'border-faded-accent text-faded-accent italic'
-                                          : 'text-dark-gray border-gray-200'
-                                        }`}>
-                                        Incl. {formatPrice(option.deliveryVatAmount, mainCcy() as any)} VAT
-                                      </p>
-                                    )}
+                                      )}
+                                    </div>
+                                    <p className="font-semibold text-checkout-text shrink-0 mt-0.5 text-right">{formatPrice(option.finalFee, mainCcy() as any)}</p>
+                                  </div>
+
+                                  <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
+                                    <span className="flex items-center gap-1.5">
+                                      <Clock className="w-4 h-4 shrink-0" />
+                                      <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
+                                    </span>
+                                    {/* <p className="text-sm text-muted-foreground">{option.breakdown}</p> */}
                                   </div>
                                 </div>
-                              </label>
+                              </div>
                             </div>
                           ))}
-                        </RadioGroup>
-                        {!selectedShippingOption && (
-                          <p className="text-sm text-muted-foreground mt-2">Please select a delivery option</p>
-                        )}
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                        </div>
+                      )}
+                      {!selectedShippingOption && weightOptions.length > 0 && (
+                        <p className="text-sm text-muted-foreground mt-2">Please select a delivery speed</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
               </>
             )}
 

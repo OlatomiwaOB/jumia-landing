@@ -34,7 +34,7 @@ export interface WeightDeliveryOptionsResponse {
  */
 const useWeightDeliveryOptions = (
   zoneCode: string | undefined = 'Camden',
-  totalWeightKg: number,
+  totalWeightKg: number = 1,
   sourceType?: string
 ) => {
   const { customer } = useCustomer();

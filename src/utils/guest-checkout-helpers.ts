@@ -41,17 +41,7 @@ export function buildGuestOrderPayload(guestInfo: GuestInfo, orderPayload: any):
         // id: orderPayload?.delivery
       },
       customerName: `${guestInfo.firstname} ${guestInfo.lastname}`,
-      username: guestInfo.email,
-<<<<<<< HEAD
-      weightFeeRequest: {
-        zoneCode: selectedWeightOption?.zoneCode || orderPayload.weightFeeRequest?.zoneCode || "",
-        typeCode: selectedWeightOption?.typeCode || orderPayload.weightFeeRequest?.typeCode || orderPayload.deliveryOptionGroup || "",
-        totalWeightKg: selectedWeightOption?.totalWeightKg ?? orderPayload.weightFeeRequest?.totalWeightKg ?? 0,
-        weightUnit: "ltr"
-      }
-=======
-      weightFeeRequest: null,
->>>>>>> 0c6ccb5e8c025b4e369194c474b7e430900e03c4
+      username: guestInfo.email
     }
   };
 }

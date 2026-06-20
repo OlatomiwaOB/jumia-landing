@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MapPin, Clock, Plus, Search, Phone, } from 'lucide-react';
 import { toast } from 'sonner';
 import { CheckoutStep, FormData } from '@/app/checkout/checkoutContent';
@@ -10,12 +10,15 @@ import { useRouter } from 'next/navigation';
 import { useGetDeliveryAddress } from '@/app/hooks/useGetDeliveryAddress';
 import AddDeliveryAddress from '@/components/checkout/add-delivery-address';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
+import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { useQuery } from '@tanstack/react-query';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import { UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { ArrowIcon, CheckIcon, EditIcon } from '@/components/icons/icons';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import useGetLookup from '@/app/hooks/useGetLookup';
 
 interface ShippingFormProps {
     setCurrentStep: (currentStep: CheckoutStep) => void;
@@ -34,13 +37,21 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
 
     const { setValue, watch, getValues } = form;
 
-    const { deliveryOptions, isLoading: isLoadingDeliveryOptions } = useDeliveryOptions();
+    const areaOptions = useGetLookup('AREAS');
     const { deliveryAddress } = useGetDeliveryAddress();
 
     const shippingMethod = watch('shippingMethod');
     const selectedShippingOption = watch('shippingOption');
     const selectedAddressId = watch('selectedAddressId');
     const selectedStore = watch('pickupStore');
+
+    const [selectedZone, setSelectedZone] = useState<string>('');
+    const cartWeight = Object.values(cart).reduce((total: any, item: any) => total + (item.quantity || 1), 0);
+
+    const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
+        selectedZone,
+        cartWeight
+    );
 
     const { data: pickupData, isLoading: isLoadingPickup, error: pickupError } = useQuery({
         queryKey: ['pickup-locations'],
@@ -78,15 +89,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
         );
     });
 
-    const filteredDeliveryOptions = deliveryOptions.filter((o: any) => {
-        const q = deliverySearch.toLowerCase();
-        if (!q) return true;
-        return (
-            o.name?.toLowerCase().includes(q) ||
-            o.area?.toLowerCase().includes(q) ||
-            o.groupCode?.toLowerCase().includes(q)
-        );
-    });
+
 
     useEffect(() => {
         setValue('shippingMethod', undefined);
@@ -110,11 +113,11 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
             const loc = activePickupLocations.find((l: any) => l.id === selectedStore);
             shippingAmount = loc?.amount || 0;
         } else if (shippingMethod === 'delivery' && selectedShippingOption) {
-            const opt = deliveryOptions.find((o: any) => o.id === selectedShippingOption);
-            shippingAmount = opt?.amount || 0;
+            const opt = weightOptions?.find((o: any) => o.typeCode === selectedShippingOption);
+            shippingAmount = opt?.finalFee || 0;
         }
         onShippingUpdate?.(shippingAmount);
-    }, [shippingMethod, selectedShippingOption, selectedStore]);
+    }, [shippingMethod, selectedShippingOption, selectedStore, weightOptions, onShippingUpdate]);
 
     const handleShippingMethodChange = (method: 'delivery' | 'pickup') => {
         if (method === 'delivery') {
@@ -140,6 +143,21 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
             setValue('fullName', '');
         }
         setValue('shippingMethod', method);
+    };
+
+    const handleZoneSelect = (zoneCode: string) => {
+        setSelectedZone(zoneCode);
+        setValue('shippingOption', undefined);
+        setValue('deliveryOptionGroup', undefined);
+    };
+
+    const handleWeightOptionSelect = (typeCode: string) => {
+        setValue('shippingOption', typeCode);
+        setValue('deliveryOptionGroup', typeCode);
+        const selectedOpt = weightOptions?.find((opt) => opt.typeCode === typeCode);
+        if (selectedOpt) {
+            sessionStorage.setItem('selectedWeightOption', JSON.stringify(selectedOpt));
+        }
     };
 
     const handleAddressSelect = (address: any) => {
@@ -278,101 +296,98 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                             )}
                         </div>
 
-                        <div className="bg-white rounded-2xl p-5">
-                            <h3 className="text-sm font-semibold text-dark-gray mb-4">Shipping Method</h3>
+                        <div className="bg-white rounded-2xl p-5 mb-4">
+                            <h3 className="text-sm font-semibold text-dark-gray mb-4">Delivery Area</h3>
+                            <div className="space-y-2">
+                                <Select
+                                    value={selectedZone || ""}
+                                    onValueChange={(value) => handleZoneSelect(value)}
+                                >
+                                    <SelectTrigger className={`w-full py-6 rounded-xl border-gray-200 bg-white shadow-sm focus:ring-[#d8480b] focus:border-[#d8480b] ${!selectedZone && shippingMethod === 'delivery' ? "border-red-400" : ""}`}>
+                                        <SelectValue placeholder="Select your area" />
+                                    </SelectTrigger>
+                                    <SelectContent className="w-full">
+                                        {areaOptions.map((option) => (
+                                            <SelectItem key={option.id} value={option.id}>
+                                                {option.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {!selectedZone && (
+                                    <p className="text-sm text-red-400 mt-2">Please select a delivery area</p>
+                                )}
+                            </div>
+                        </div>
 
-                            {isLoadingDeliveryOptions ? (
-                                <div className="flex items-center justify-center py-8">
-                                    <div className="w-6 h-6 rounded-full border-2 border-[#d8480b] border-t-transparent animate-spin" />
+                        {selectedZone && (
+                            <div className="bg-white rounded-2xl p-5">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-sm font-semibold text-dark-gray">Delivery Speed</h3>
+                                    <p className="text-xs text-medium-gray">Weight: {cartWeight.toFixed(1)} kg</p>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="relative mb-4">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-medium-gray" />
-                                        <Input
-                                            type="text"
-                                            value={deliverySearch}
-                                            onChange={(e) => setDeliverySearch(e.target.value)}
-                                            placeholder="Search by area or zone..."
-                                            className="w-full pl-9 pr-4 py-2.5 text-sm text-dark-gray placeholder:text-medium-gray"
-                                        />
-                                    </div>
 
-                                    {filteredDeliveryOptions.length === 0 ? (
-                                        <p className="text-sm text-medium-gray font-light text-center py-6">
-                                            {deliverySearch ? 'No delivery options match your search' : 'No delivery options available'}
-                                        </p>
-                                    ) : (
-                                        <div className="space-y-2">
-                                            {filteredDeliveryOptions.map((option: any) => (
-                                                <div
-                                                    key={option.id}
-                                                    onClick={() => setValue('shippingOption', option.id)}
-                                                    className={`flex items-start gap-3 p-4 rounded-2xl cursor-pointer transition-all border-2 ${selectedShippingOption === option.id
-                                                            ? 'border-faded-accent bg-faded-accent/10'
-                                                            : 'border-gray-100 hover:border-gray-200'
-                                                        }`}
-                                                >
-                                                    <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedShippingOption === option.id ? 'border-[#d8480b]' : 'border-gray-300'
-                                                        }`}>
-                                                        {selectedShippingOption === option.id && (
-                                                            <div className="w-1.5 h-1.5 rounded-full bg-faded-accent" />
-                                                        )}
+                                {isLoadingWeightOptions ? (
+                                    <div className="flex items-center justify-center py-8">
+                                        <div className="w-6 h-6 rounded-full border-2 border-[#d8480b] border-t-transparent animate-spin" />
+                                    </div>
+                                ) : weightOptions.length === 0 ? (
+                                    <p className="text-sm text-medium-gray font-light text-center py-6">
+                                        No delivery options available for this zone
+                                    </p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {weightOptions.map((option: any) => (
+                                            <div
+                                                key={option.typeCode}
+                                                onClick={() => handleWeightOptionSelect(option.typeCode)}
+                                                className={`flex items-start gap-3 p-4 rounded-2xl cursor-pointer transition-all border-2 ${selectedShippingOption === option.typeCode
+                                                    ? 'border-faded-accent bg-faded-accent/10'
+                                                    : 'border-gray-100 hover:border-gray-200'
+                                                    }`}
+                                            >
+                                                <div className={`mt-0.5 w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selectedShippingOption === option.typeCode ? 'border-[#d8480b]' : 'border-gray-300'
+                                                    }`}>
+                                                    {selectedShippingOption === option.typeCode && (
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-faded-accent" />
+                                                    )}
+                                                </div>
+
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <div className="text-xl shrink-0">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
+                                                            <p className="text-sm font-semibold text-dark-gray">
+                                                                {option.typeName}
+                                                            </p>
+                                                            {option.typeCode === 'EXPRESS' && (
+                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                                                    Fastest
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-sm font-semibold text-dark-gray shrink-0 text-right mt-0.5">
+                                                            {formatPrice(option.finalFee, mainCcy() as any)}
+                                                        </p>
                                                     </div>
 
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                {option.icon && <div className="text-xl shrink-0">{option.icon}</div>}
-                                                                <p className="text-sm font-semibold text-dark-gray">
-                                                                    {option.groupCode ? `Delivery (${option.groupCode})` : option.name || "Delivery Option"}
-                                                                </p>
-                                                            </div>
-                                                            <p className="text-sm font-semibold text-dark-gray shrink-0 text-right mt-0.5">
-                                                                {formatPrice(option.price ?? option.amount, mainCcy() as any)}
-                                                            </p>
-                                                        </div>
-
-                                                        <div className="text-xs text-medium-gray flex flex-col gap-1 mt-1">
-                                                            {(option.estimatedTime && option.estimatedTimeType) ? (
-                                                                <span className="flex items-center gap-1.5">
-                                                                    <Clock className="w-3.5 h-3.5 shrink-0" />
-                                                                    <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
-                                                                </span>
-                                                            ) : (
-                                                                option.estimatedArrival && (
-                                                                    <span className="flex items-center gap-1.5">
-                                                                        <Clock className="w-3.5 h-3.5 shrink-0" />
-                                                                        <span className="truncate">Est. Delivery: {option.estimatedArrival}</span>
-                                                                    </span>
-                                                                )
-                                                            )}
-                                                            {option.area && (
-                                                                <span className="flex items-start gap-1.5">
-                                                                    <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                                                    <span className="line-clamp-2" title={option.area}>Covers: {option.area.split(',').join(', ')}</span>
-                                                                </span>
-                                                            )}
-                                                            {option.description && (
-                                                                <p className="font-medium">{option.description}</p>
-                                                            )}
-                                                            {(option.deliveryVatAmount ?? 0) > 0 && (
-                                                                <p className={`max-w-fit px-2 rounded-full border-1 mt-1 ${selectedShippingOption === option.id
-                                                                        ? 'border-faded-accent text-faded-accent italic'
-                                                                        : 'text-dark-gray border-gray-200'
-                                                                    }`}>
-                                                                    Incl. {formatPrice(option.deliveryVatAmount, mainCcy() as any)} VAT
-                                                                </p>
-                                                            )}
-                                                        </div>
+                                                    <div className="text-xs text-medium-gray flex flex-col gap-1 mt-1">
+                                                        <span className="flex items-center gap-1.5">
+                                                            <Clock className="w-3.5 h-3.5 shrink-0" />
+                                                            <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
+                                                        </span>
+                                                        <p className="font-medium mt-1">{option.breakdown}</p>
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {!selectedShippingOption && weightOptions.length > 0 && (
+                                    <p className="text-sm text-red-400 mt-2">Please select a delivery speed</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 

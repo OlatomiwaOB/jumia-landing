@@ -1,19 +1,17 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react';
-import { Menu } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import useCustomer from '@/store/customerStore';
 import { Button } from '../ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import SidebarMobile from './sidebar-mobile';
 import Image from 'next/image';
 import NotificationsModal from './notification-modal';
-import { usePage } from '@/hooks/metadata-context';
 import { MessageIcon, NotificationIcon } from '@/components/icons/icons';
 import { useQuery } from '@tanstack/react-query';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import { useRouter } from 'next/navigation';
+import { HeaderBase } from '@/components/common/header-base';
 
 interface Notification {
   id: number;
@@ -29,7 +27,6 @@ interface Notification {
 }
 
 export const DashboardHeader = () => {
-  const { title, description } = usePage();
   const { customer } = useCustomer();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -41,9 +38,7 @@ export const DashboardHeader = () => {
     queryKey: ['notifications-header'],
     queryFn: async () => {
       const response = await axiosCustomer.get('/notification/fetch', {
-        params: {
-          status: ''
-        }
+        params: { status: '' }
       });
       return response.data.notificationInfo as Notification[];
     },
@@ -69,79 +64,52 @@ export const DashboardHeader = () => {
     router.push('/settings')
   }
 
-  return (
+  const headerActions = (
     <>
-      <header className="bg-white px-2 lg:px-4 py-3 w-full min-h-20">
-        <div className="flex items-center justify-between px-2">
-          <div className='flex gap-3 items-center'>
-            <div>
-              <h1 className="text-md lg:text-lg font-medium text-dark-gray">
-                {title}
-              </h1>
-              {description && (
-                <p className='text-xs lg:text-sm font-normal text-medium-gray'>{description}</p>
-              )}
-            </div>
-          </div>
+      <div className="hidden md:flex items-center gap-2">
+        <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
+          <MessageIcon className="w-5 h-5" />
+        </button>
 
-          <div className='flex items-center gap-4 lg:gap-6'>
-            <div className="hidden md:flex items-center gap-4">
-              <div className="cursor-pointer relative bg-[#F5F5F5] p-3 rounded-full " >
-                <MessageIcon className="text-muted-foreground w-6 h-6" />
-                {/* <span className="absolute top-2.5 right-2.5 bg-faded-accent rounded-full w-2 h-2 flex items-center justify-center"></span> */}
+        <button 
+          ref={notifBtnRef}
+          onClick={handleNotificationsOpen}
+          className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600"
+        >
+          <NotificationIcon className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute top-2.5 right-2.5 bg-[#EA813C] rounded-full w-2 h-2"></span>
+          )}
+        </button>
+      </div>
+
+      <div className="hidden md:flex items-center pl-4 border-l border-gray-200">
+        <DropdownMenu>
+          <DropdownMenuTrigger onClick={handleGoToSettings} asChild>
+            <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-full hover:bg-gray-100">
+              <Avatar className="w-8 h-8 ring-2 ring-white shadow-sm">
+                <AvatarImage src={`${customer?.photoLink}`} />
+                <AvatarFallback>
+                  <Image
+                    src={'/images/no-profile-img.jpg'}
+                    alt={''}
+                    fill className="object-cover" sizes="32px"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/no-profile-img.jpg'; }}
+                  />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col items-start pr-2">
+                <span className="text-sm font-medium text-gray-900 leading-none">
+                  {customer?.firstname || 'User'}
+                </span>
+                <span className="text-xs text-gray-500 mt-1 leading-none">
+                  Customer
+                </span>
               </div>
-
-              <div className="cursor-pointer relative bg-[#F5F5F5] p-3 rounded-full" onClick={handleNotificationsOpen}>
-                <NotificationIcon className="text-muted-foreground w-6 h-6" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-2.5 right-3.5 bg-faded-accent rounded-full w-2 h-2 flex items-center justify-center"></span>
-                )}
-              </div>
-            </div>
-
-            <div className="hidden md:flex items-center gap-2 lg:gap-6">
-              <div className="flex items-center gap-4 bg-black rounded-3xl">
-                <DropdownMenu>
-                  <DropdownMenuTrigger onClick={handleGoToSettings} asChild className="py-6 pl-1 pr-10">
-                    <Button variant="ghost" className="flex items-centerrelative w-auto h-6 lg:h-9 rounded-full">
-                      <Avatar className="w-8 h-8 lg:w-10 lg:h-10 ">
-                        <AvatarImage src={`${customer?.photoLink}`} />
-                        <AvatarFallback>
-                          <Image
-                            src={'/images/no-profile-img.jpg'}
-                            alt={''}
-                            fill className="object-cover" sizes="64px"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/images/no-profile-img.jpg'; }}
-                          />
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="text-white">
-                        <span className="text-sm font-medium">
-                          {customer?.firstname}
-                        </span>
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                </DropdownMenu>
-              </div>
-            </div>
-
-            <div className='flex lg:hidden gap-3 items-center'>
-              <Sheet open={isMobileSidebarOpen} onOpenChange={setIsMobileSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" className='text-gray-500 hover:bg-gray-100'>
-                    <Menu className='w-6 h-6' />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side='left'>
-                  <SidebarMobile onNavItemClick={() => setIsMobileSidebarOpen(false)} />
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        </div>
-      </header>
+            </Button>
+          </DropdownMenuTrigger>
+        </DropdownMenu>
+      </div>
 
       <NotificationsModal
         isOpen={isNotificationsOpen}
@@ -150,5 +118,14 @@ export const DashboardHeader = () => {
         onNotificationRead={refetch}
       />
     </>
+  );
+
+  return (
+    <HeaderBase
+      actions={headerActions}
+      mobileSidebarOpen={isMobileSidebarOpen}
+      setMobileSidebarOpen={setIsMobileSidebarOpen}
+      mobileSidebar={<SidebarMobile onNavItemClick={() => setIsMobileSidebarOpen(false)} />}
+    />
   );
 };
