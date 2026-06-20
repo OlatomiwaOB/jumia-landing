@@ -17,6 +17,7 @@ import Link from "next/link"
 import { SuccessTag, CheckIcon } from "../icons/icons"
 import { Loader2 } from "lucide-react"
 import { useLocationStore } from "@/store/locationStore"
+import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
 
 export interface FormData {
   businessName: string
@@ -346,178 +347,134 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row bg-white">
-      {/* Left Side: Creative Brand-Agnostic Graphic */}
-      <div className="hidden lg:flex lg:w-1/2 h-screen sticky top-0 relative overflow-hidden bg-[#1A1D23]">
-        {/* Abstract shapes using the accent color */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full opacity-20 blur-3xl bg-[var(--accent)] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-30 blur-3xl bg-[var(--accent)] pointer-events-none" />
-        
-        {/* Subtle grid pattern overlay */}
-        <div 
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: `linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)`,
-            backgroundSize: '40px 40px'
-          }}
-        />
-
-        <div className="relative z-10 p-10 flex flex-col h-full justify-between w-full">
-          <div>
-            <Image
-              src={logo}
-              alt="Logo"
-              width={150}
-              height={50}
-              className="max-w-[200px] h-auto object-contain filter drop-shadow-md"
-            />
+    <DynamicAuthLayout
+      title={onboardStep === 'success' ? "" : "Business Onboarding"}
+      subtitle={onboardStep === 'success' ? "" : "Welcome, complete your business registration to get started."}
+      leftPanelTitle={<>Start your journey with <span className="font-semibold text-[var(--accent)]">confidence.</span></>}
+      leftPanelSubtitle="Set up your business profile and unlock powerful tools."
+      footerNode={
+        onboardStep !== 'success' && (
+          <>
+            <span className="text-sm font-normal text-medium-gray">Already registered? </span>
+            <Link
+              href="/admin-login"
+              className="text-sm font-semibold text-[var(--accent)] hover:underline"
+            >
+              Sign in
+            </Link>
+          </>
+        )
+      }
+    >
+      {onboardStep === 'success' ? (
+        <div className="flex flex-col w-full space-y-4 p-5 bg-white rounded-lg justify-self-center mt-20">
+          <div className="flex items-center justify-center">
+            <SuccessTag />
           </div>
-          
-          <div className="max-w-md">
-            <h2 className="text-4xl font-light text-white mb-4 leading-tight">
-              Start your journey with <span className="font-semibold text-[var(--accent)]">confidence.</span>
-            </h2>
-            <p className="text-gray-400 text-lg">
-              Set up your business profile and unlock powerful tools.
+          <div className="text-lg text-center sm:text-xl font-medium text-dark-gray">Success!</div>
+          <div className="text-center text-medium-gray text-center text-xs leading-relaxed">
+            Welcome aboard, {getValues('firstname')}! You have created your business account successfully.
+            Please login to view dashboard.
+          </div>
+
+          <Button
+            size='lg'
+            onClick={handleLogin}
+          >
+            Back to Login
+          </Button>
+        </div>
+      ) : (
+        <div className="w-full space-y-6">
+          <div className="flex items-center justify-center mb-3 relative">
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((step, index) => (
+                <div key={step} className="flex items-center">
+                  <div
+                    className={`relative z-10 transition-all duration-200 ${step < currentStep
+                      ? "text-white"
+                      : step === currentStep
+                        ? "text-faded-accent"
+                        : "text-gray-300"
+                      }`}
+                  >
+                    {step < currentStep ? (
+                      <div className="w-4.5 h-4.5 rounded-full bg-faded-accent flex items-center justify-center">
+                        <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />
+                      </div>
+                    ) : (
+                      <>
+                        <div className={`w-4.5 h-4.5 rounded-full border-2 ${step === currentStep ? "border-faded-accent" : "border-gray-300"
+                          }`} />
+                        <div className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${step === currentStep ? "bg-faded-accent" : "bg-gray-300"
+                          }`} />
+                      </>
+                    )}
+                  </div>
+                  {index < 4 && (
+                    <div
+                      className={`w-16 h-0.5 transition-colors duration-200 ${step < currentStep ? "bg-faded-accent" : "bg-gray-200"
+                        }`}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-center text-md font-normal text-dark-gray">{getStepTitle()}</h2>
+
+            <div className="pt-2">
+              {renderStep()}
+
+              <div className="flex justify-between mt-10">
+                <Button
+                  type="button"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  variant="ghost"
+                  className="border-2 border-input"
+                >
+                  <span>Previous</span>
+                </Button>
+
+                {currentStep < totalSteps ? (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    disabled={!isStepComplete()}
+                  >
+                    <span>Next</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    onClick={handleSubmit(onSubmit)}
+                    className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium rounded-lg"
+                    disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
+                  >
+                    {isPending ? (
+                      <>
+                        Submitting...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      </>
+                    ) : (
+                      "Complete Registration"
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-medium-gray font-medium text-xs leading-relaxed p-3 bg-faded-accent/5 rounded-lg">
+              <span className="font-semibold">NB:</span> To ensure security and compliance, new business accounts undergo a verification process. Account access will be granted promptly upon approval.
             </p>
           </div>
         </div>
-      </div>
-
-      <div className="w-full lg:w-1/2 min-h-screen flex flex-col bg-white">
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-8">
-          {
-            onboardStep === 'success'
-              ?
-              <div className="flex flex-col w-full max-w-md space-y-4 p-5 bg-white rounded-lg justify-self-center mt-20">
-                <div className="flex items-center justify-center">
-                  <SuccessTag />
-                </div>
-                <div className="text-lg text-center sm:text-xl font-medium text-dark-gray">Success!</div>
-                <div className="text-center text-medium-gray text-center text-xs leading-relaxed">
-                  Welcome aboard, {getValues('firstname')}! You have created your business account successfully.
-                  Please login to view dashboard.
-                </div>
-
-                <Button
-                  size='lg'
-                  onClick={handleLogin}
-                >
-                  Back to Login
-                </Button>
-              </div>
-              :
-              <div className="w-full max-w-md space-y-6 mx-auto">
-                <div className="space-y-1 text-center">
-                  <h1 className="text-lg sm:text-xl font-medium text-dark-gray">Business Onboarding</h1>
-                  <p className="text-medium-gray text-xs leading-relaxed">
-                    Welcome, complete your business registration to get started.
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-center mb-3 relative">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((step, index) => (
-                      <div key={step} className="flex items-center">
-                        <div
-                          className={`relative z-10 transition-all duration-200 ${step < currentStep
-                            ? "text-white"
-                            : step === currentStep
-                              ? "text-faded-accent"
-                              : "text-gray-300"
-                            }`}
-                        >
-                          {step < currentStep ? (
-                            <div className="w-4.5 h-4.5 rounded-full bg-faded-accent flex items-center justify-center">
-                              <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />
-                            </div>
-                          ) : (
-                            <>
-                              <div className={`w-4.5 h-4.5 rounded-full border-2 ${step === currentStep ? "border-faded-accent" : "border-gray-300"
-                                }`} />
-                              <div className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${step === currentStep ? "bg-faded-accent" : "bg-gray-300"
-                                }`} />
-                            </>
-                          )}
-                        </div>
-                        {index < 4 && (
-                          <div
-                            className={`w-16 h-0.5 transition-colors duration-200 ${step < currentStep ? "bg-faded-accent" : "bg-gray-200"
-                              }`}
-                          />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h2 className="text-center text-md font-normal text-dark-gray">{getStepTitle()}</h2>
-
-                  <div className="pt-2">
-                    {renderStep()}
-
-                    <div className="flex justify-between mt-10">
-                      <Button
-                        type="button"
-                        onClick={prevStep}
-                        disabled={currentStep === 1}
-                        variant="ghost"
-                        className="border-2 border-input"
-                      >
-                        <span>Previous</span>
-                      </Button>
-
-                      {currentStep < totalSteps ? (
-                        <Button
-                          type="button"
-                          onClick={nextStep}
-                          disabled={!isStepComplete()}
-                        >
-                          <span>Next</span>
-                        </Button>
-                      ) : (
-                        <Button
-                          type="submit"
-                          onClick={handleSubmit(onSubmit)}
-                          className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium rounded-lg"
-                          disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
-                        >
-                          {isPending ? (
-                            <>
-                              Submitting...
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            </>
-                          ) : (
-                            "Complete Registration"
-                          )}
-                        </Button>
-                      )}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-medium-gray font-medium text-xs leading-relaxed p-3 bg-faded-accent/5 rounded-lg">
-                    <span className="font-semibold">NB:</span> To ensure security and compliance, new business accounts undergo a verification process. Account access will be granted promptly upon approval.
-                  </p>
-                </div>
-
-                <div className="text-center">
-                  <span className="text-sm font-normal text-medium-gray">Already registered? </span>
-                  <Link
-                    href="/admin-login"
-                    className="text-sm font-semibold text-[var(--accent)] hover:underline"
-                  >
-                    Sign in
-                  </Link>
-                </div>
-              </div>
-          }
-        </div>
-        <div className="text-center w-full text-xs text-[#9E9E9E] py-4 mt-auto">
-          © {currentYear} {clientName}. All Right Reserved
-        </div>
-      </div>
-    </div>
+      )}
+    </DynamicAuthLayout>
   )
 }

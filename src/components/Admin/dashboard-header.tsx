@@ -87,7 +87,7 @@ export const DashboardHeader = () => {
   const headerActions = (
     <>
       <div className="hidden md:flex items-center gap-2">
-        {user?.userRole === 'BUSINESS_MANAGER' && (
+        {/* {user?.userRole === 'BUSINESS_MANAGER' && (
           <div
             className="cursor-pointer relative px-3 py-1.5 rounded-full hover:bg-gray-100 flex items-center gap-2 transition-colors mr-2"
             onClick={handleUpdateSubscription}
@@ -103,7 +103,7 @@ export const DashboardHeader = () => {
               </span>
             </div>
           </div>
-        )}
+        )} */}
 
         <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
           <MessageIcon className="w-5 h-5" />
