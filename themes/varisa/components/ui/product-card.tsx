@@ -23,22 +23,22 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
 
   return (
     <div className="bg-white rounded-[12px] md:rounded-[20px] p-3 pb-4 md:p-5 md:pb-6 flex flex-col h-full shadow-sm hover:shadow-xl transition-shadow duration-300 relative group border border-gray-50">
-      
+
       {/* Full Card Click Overlay */}
       <Link href={getProductHref(product)} className="absolute inset-0 z-0 rounded-[12px] md:rounded-[20px]" aria-label={product.name}></Link>
 
       {/* Badges */}
       <div className="absolute top-2 left-2 md:top-4 md:left-4 z-10 flex flex-col gap-1.5 md:gap-2 pointer-events-none">
-        {isDiscounted && !isOutOfStock && (
+        {isDiscounted && (
           <span className="bg-[#E74C3C] text-white text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] md:rounded-[6px]">
-            -{product.discount || '10%'}
+            {product.discount}
           </span>
         )}
-        {isOutOfStock && (
+        {/* {isOutOfStock && (
           <span className="bg-gray-500 text-white text-[9px] md:text-[11px] font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded-[4px] md:rounded-[6px]">
             Out of stock
           </span>
-        )}
+        )} */}
       </div>
 
       {/* Image Container */}
@@ -61,7 +61,7 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
         </h3>
 
         {/* Stars */}
-        <div className="flex items-center gap-0.5 mb-2 md:mb-3 scale-75 md:scale-100">
+        {/* <div className="flex items-center gap-0.5 mb-2 md:mb-3 scale-75 md:scale-100">
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
@@ -69,7 +69,7 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
               className={`${i < rating ? 'text-[#F39C12] fill-[#F39C12]' : 'text-gray-200 fill-gray-200'}`}
             />
           ))}
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-center gap-1 md:gap-2 mb-3 md:mb-6 mt-auto">
           <span className={`font-black text-[13px] md:text-[16px] ${isDiscounted ? 'text-[#E74C3C]' : 'text-gray-900'}`}>
@@ -90,7 +90,7 @@ export default function VarisaProductCard({ product }: VarisaProductCardProps) {
             : 'bg-white border-gray-200 text-gray-900 hover:bg-accent3 hover:text-white hover:border-accent3'
             }`}
         >
-          {isOutOfStock ? 'Out of Stock' : 'Select Options'}
+          {'Select Options'}
         </Link>
       </div>
     </div>

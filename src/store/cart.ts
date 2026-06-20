@@ -14,12 +14,13 @@ export interface MenuItem {
   code?: string;
   ccy?: string;
   usdPrice?: number,
-  dicount?: string
+  dicount?: number
   qtyInStore: number
   storeCode: string
   vat?: string | null;
   weight?: number;
   weightUnit?: string;
+  variantId?: any
   //   bg?: string;
   //   color?: string;
 }
@@ -28,7 +29,7 @@ export interface CartItem extends MenuItem {
   quantity: number;
   subTotal: number;
   oldPrice?: number;
-  discount?: string
+  discount?: number,
   qtyInStore: number
   // vat?: number | null | undefined | string
 }

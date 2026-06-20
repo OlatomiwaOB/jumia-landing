@@ -10,7 +10,7 @@ import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 
 export default function TraditionalTasteShopContent() {
   const envColor = process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#F97316';
-  const bgColor = '#FAFAF9'; // Traditional Taste background
+  const bgColor = process.env.NEXT_PUBLIC_ACCENT_COLOR // Traditional Taste background
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');

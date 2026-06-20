@@ -71,7 +71,8 @@ export default function ShopPage() {
     <div className="min-h-screen font-sans" style={{ backgroundColor: bgColor }}>
       {/* ── TOP PROMO MARQUEE ── */}
       <div className="w-full bg-gray-900 text-gray-200 py-2.5 overflow-hidden relative z-40 text-[11.5px] md:text-[13px] font-semibold tracking-wide border-b border-white/10 shadow-sm">
-        <style dangerouslySetInnerHTML={{ __html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           @keyframes scroll-marquee {
             0% { transform: translateX(0%); }
             100% { transform: translateX(-50%); }

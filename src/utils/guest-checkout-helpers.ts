@@ -6,6 +6,14 @@ import { getNationalityName } from "./country-data";
  * The backend expects personal info at the top level and order data nested in `oinfo`.
  */
 export function buildGuestOrderPayload(guestInfo: GuestInfo, orderPayload: any): any {
+  // Read the selected weight delivery option that was persisted by the shipping form.
+  // This object is the raw item from the /delivery-by-weight/options-summary response.
+  let selectedWeightOption: any = null;
+  try {
+    const stored = sessionStorage.getItem('selectedWeightOption');
+    if (stored) selectedWeightOption = JSON.parse(stored);
+  } catch { /* ignore */ }
+
   return {
     userType: "GUEST",
     channel: 'WEB',
@@ -33,8 +41,7 @@ export function buildGuestOrderPayload(guestInfo: GuestInfo, orderPayload: any):
         // id: orderPayload?.delivery
       },
       customerName: `${guestInfo.firstname} ${guestInfo.lastname}`,
-      username: guestInfo.email,
-      weightFeeRequest: null,
+      username: guestInfo.email
     }
   };
 }

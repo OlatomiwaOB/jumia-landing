@@ -101,30 +101,36 @@ const BnplManager = ({ setCurrentStep, form, onShippingUpdate, onVatUpdate, onSu
   const watchPickupStore = watch("pickupStore");
   const watchSelectedAddressId = watch("selectedAddressId");
 
-  const { deliveryOptions } = useDeliveryOptions(); // Changed variable name
+
 
   const getSelectedShippingOption = () => {
     if (watchShippingMethod !== 'delivery' || !watchShippingOption) {
       return null;
     }
 
-    const selectedOption = deliveryOptions.find((option: any) => option.id === watchShippingOption);
+    let selectedOption: any = null;
+    try {
+      const stored = sessionStorage.getItem('selectedWeightOption');
+      if (stored) {
+        selectedOption = JSON.parse(stored);
+      }
+    } catch { /* ignore */ }
 
-    if (!selectedOption) return null;
+    if (!selectedOption || selectedOption.typeCode !== watchShippingOption) return null;
 
     return {
-      id: selectedOption.id,
-      name: selectedOption.name,
-      price: selectedOption.amount,
-      description: selectedOption.description,
-      icon: selectedOption.icon,
-      estimatedArrival: selectedOption.estimatedArrival,
-      area: selectedOption.area,
-      groupCode: selectedOption.groupCode,
+      id: selectedOption.typeCode,
+      name: selectedOption.typeName,
+      price: selectedOption.finalFee,
+      description: selectedOption.breakdown,
+      icon: '',
+      estimatedArrival: `${selectedOption.estimatedTime} ${selectedOption.estimatedTimeType}`,
+      area: selectedOption.area || '',
+      groupCode: selectedOption.zoneCode || '',
       estimatedTime: selectedOption.estimatedTime,
       estimatedTimeType: selectedOption.estimatedTimeType,
-      amount: selectedOption.amount,
-      deliveryVatAmount: selectedOption.deliveryVatAmount
+      amount: selectedOption.finalFee,
+      deliveryVatAmount: 0
     };
   };
 

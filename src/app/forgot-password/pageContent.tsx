@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import PinInput from '@/components/ui/pin-input'
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
+import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
 
 type ForgotPasswordFormData = {
   username: string
@@ -211,24 +212,37 @@ export default function ForgotPasswordContent() {
     otp.length === 4
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center px-4 pb-24">
-      {/* Breadcrumb */}
-      <div className="w-full max-w-[560px] pt-12 mb-12">
-        <nav className="flex items-center gap-2 text-[12px] font-medium tracking-wide">
-          <Link
-            href="/"
-            className="text-muted-foreground/50 hover:text-foreground transition-colors uppercase tracking-[0.08em]"
-          >
-            Home
-          </Link>
-          <span className="text-muted-foreground/30">/</span>
-          <span className="text-foreground uppercase tracking-[0.08em]">
-            {step === 'initiate' ? 'Forgot Password' : 'Reset Password'}
-          </span>
-        </nav>
-      </div>
-
-      {/* Main card */}
+    <DynamicAuthLayout
+      title={
+        step === 'initiate' ? (
+          <>
+            Recover your<br />
+            <span className="text-[var(--accent)]">account access</span>
+          </>
+        ) : (
+          <>
+            Create a new<br />
+            <span className="text-[var(--accent)]">password</span>
+          </>
+        )
+      }
+      subtitle={
+        step === 'initiate'
+          ? "Enter your username or email and we'll send a one-time code to your registered address."
+          : `A 4-digit code was sent to the email linked to ${username ? `"${username}"` : 'your account'}.`
+      }
+      leftPanelSubtitle="Get back into your account quickly and securely."
+      footerNode={
+        step === 'initiate' && (
+          <p className="text-center text-[13px] text-muted-foreground">
+            Remembered it?{' '}
+            <Link href="/customer-login" className="text-foreground font-semibold hover:text-[var(--accent)] transition-colors underline underline-offset-4">
+              Sign in
+            </Link>
+          </p>
+        )
+      }
+    >
       <div className="w-full max-w-[560px]">
         {/* Step indicator */}
         <div className="flex items-center gap-0 mb-12">
@@ -237,7 +251,7 @@ export default function ForgotPasswordContent() {
             <div className="flex items-center gap-3">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${step === 'initiate'
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-[var(--accent)] text-white'
                   : 'bg-foreground text-background'
                   }`}
               >
@@ -251,7 +265,7 @@ export default function ForgotPasswordContent() {
               </span>
             </div>
             {step === 'initiate' && (
-              <div className="h-0.5 w-16 bg-accent rounded-full ml-0" />
+              <div className="h-0.5 w-16 bg-[var(--accent)] rounded-full ml-0" />
             )}
           </div>
 
@@ -269,7 +283,7 @@ export default function ForgotPasswordContent() {
               </span>
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold transition-all ${step === 'reset'
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-[var(--accent)] text-white'
                   : 'border-2 border-border text-muted-foreground/30'
                   }`}
               >
@@ -277,31 +291,9 @@ export default function ForgotPasswordContent() {
               </div>
             </div>
             {step === 'reset' && (
-              <div className="h-0.5 w-16 bg-accent rounded-full ml-auto" />
+              <div className="h-0.5 w-16 bg-[var(--accent)] rounded-full ml-auto" />
             )}
           </div>
-        </div>
-
-        {/* Heading */}
-        <div className="mb-10">
-          <h1 className="text-[36px] font-bold text-foreground leading-tight tracking-tight">
-            {step === 'initiate' ? (
-              <>
-                Recover your<br />
-                <span className="text-accent">account access</span>
-              </>
-            ) : (
-              <>
-                Create a new<br />
-                <span className="text-accent">password</span>
-              </>
-            )}
-          </h1>
-          <p className="mt-3 text-[14px] text-muted-foreground leading-relaxed max-w-[400px]">
-            {step === 'initiate'
-              ? 'Enter your username or email and we\'ll send a one-time code to your registered address.'
-              : `A 4-digit code was sent to the email linked to ${username ? `"${username}"` : 'your account'}.`}
-          </p>
         </div>
 
         {/* ── STEP 1: Initiate ── */}
@@ -332,18 +324,11 @@ export default function ForgotPasswordContent() {
             <button
               type="submit"
               disabled={initiateMutation.isPending}
-              className="group flex items-center justify-between w-full bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-4 rounded-xl font-semibold text-[14px] tracking-wide transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="group flex items-center justify-between w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-6 py-4 rounded-xl font-semibold text-[14px] tracking-wide transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <span>{initiateMutation.isPending ? 'Sending code…' : 'Send one-time code'}</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </button>
-
-            {/* <p className="text-center text-[13px] text-muted-foreground">
-              Remembered it?{' '}
-              <Link href="/login" className="text-foreground font-semibold hover:text-accent transition-colors underline underline-offset-4">
-                Sign in
-              </Link>
-            </p> */}
           </form>
         )}
 
@@ -361,7 +346,7 @@ export default function ForgotPasswordContent() {
                 onChange={setOtp}
                 type="text"
                 className="flex gap-3"
-                inputClassName="w-14 h-14 text-xl font-bold bg-transparent border-2 border-border rounded-xl text-center text-foreground focus:border-accent focus:outline-none focus:ring-0 transition-colors"
+                inputClassName="w-14 h-14 text-xl font-bold bg-transparent border-2 border-border rounded-xl text-center text-foreground focus:border-[var(--accent)] focus:outline-none focus:ring-0 transition-colors"
                 autoFocus
               />
             </div>
@@ -403,7 +388,7 @@ export default function ForgotPasswordContent() {
               <button
                 type="submit"
                 disabled={resetPasswordMutation.isPending || !canSubmit}
-                className="group flex flex-1 items-center justify-between bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-4 rounded-xl font-semibold text-[14px] tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="group flex flex-1 items-center justify-between bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white px-6 py-4 rounded-xl font-semibold text-[14px] tracking-wide transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span>{resetPasswordMutation.isPending ? 'Updating password…' : 'Update password'}</span>
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -412,6 +397,6 @@ export default function ForgotPasswordContent() {
           </form>
         )}
       </div>
-    </div>
+    </DynamicAuthLayout>
   )
 }

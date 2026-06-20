@@ -90,7 +90,9 @@ const CheckoutContent = () => {
   const router = useRouter();
   const storeCode = searchParams.get('storeCode') || ''
   const { toast } = useToast();
-  const { getCartTotal, totalVat: cartVat } = useCart();
+  const { getCartTotal, totalVat: cartVat, cart } = useCart();
+
+  console.log('cart data', cart)
   const { customer } = useCustomer();
 
   console.log(checkoutData);

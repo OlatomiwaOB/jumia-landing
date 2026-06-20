@@ -15,10 +15,10 @@ import { formatDateToDDMMYYYY } from "@/utils/helperfns"
 import axiosCustomer from "@/utils/fetch-function-no-auth"
 import Link from "next/link"
 import { OtpVerification } from "./otp-verification"
-import SignUpBanner from "@/components/images/auth-banner.png"
 import { SuccessTag, CheckIcon } from "../icons/icons"
 import { Loader2 } from "lucide-react"
 import { useLocationStore } from "@/store/locationStore"
+import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
 
 export interface FormData {
   firstname: string
@@ -305,164 +305,130 @@ export function SignUpForm() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row bg-[#F9FAFB]">
-      <div className='hidden lg:block lg:w-1/2 h-screen sticky top-0 p-4'>
-        <div className="bg-gradient-to-b from-[#F9FAFB] to-[var(--accent)] shadow-0 rounded-2xl w-full h-full flex items-center justify-center relative">
-          <Image
-            src={logo}
-            alt="Logo"
-            width={100}
-            height={100}
-            className="absolute top-0 left-0 p-5 max-w-[250px] h-auto object-contain"
-          />
-          <Image
-            src={SignUpBanner}
-            alt="POS System Illustration"
-            width={600}
-            height={600}
-            className="max-w-full max-h-full object-contain"
-          />
+    <DynamicAuthLayout
+      title={onboardStep === 'register' ? "Customer Onboarding" : undefined}
+      subtitle={onboardStep === 'register' ? "Welcome, complete your user registration to get started." : undefined}
+      leftPanelSubtitle="Manage your funds securely and efficiently."
+      footerNode={
+        onboardStep === 'register' && (
+          <>
+            <span className="text-sm font-normal text-medium-gray">Already have an account? {''}</span>
+            <Link
+              href="/customer-login"
+              className="text-sm font-semibold text-[var(--accent)] hover:underline"
+            >
+              Sign in
+            </Link>
+          </>
+        )
+      }
+    >
+      {onboardStep === 'otp' ? (
+        <OtpVerification
+          onBack={handleBackToRegistration}
+          email={getValues('email')}
+          onSuccess={() => setTimeout(() => { setOnBoardStep('success') }, 3000)}
+        />
+      ) : onboardStep === 'success' ? (
+        <div className="flex flex-col w-full max-w-md space-y-4 p-5 bg-white rounded-lg justify-self-center mt-20">
+          <div className="flex items-center justify-center">
+            <SuccessTag />
+          </div>
+          <div className="text-lg text-center sm:text-xl font-medium text-dark-gray">Success!</div>
+          <div className="text-center text-medium-gray text-xs leading-relaxed">
+            Welcome aboard, {getValues('firstname')}! You have created an account successfully.
+            Please login to view dashboard.
+          </div>
+          <Button size="lg" onClick={handleLogin}>
+            Back to Login
+          </Button>
         </div>
-      </div>
-
-      <div className="w-full lg:w-1/2 min-h-screen flex flex-col">
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-8">
-          {
-            onboardStep === 'otp'
-              ?
-              <OtpVerification
-                onBack={handleBackToRegistration}
-                email={getValues('email')}
-                onSuccess={() => setTimeout(() => { setOnBoardStep('success') }, 3000)}
-              />
-              :
-              onboardStep === 'success'
-                ?
-                <>
-                  <div className="flex flex-col w-full max-w-md space-y-4 p-5 bg-white rounded-lg justify-self-center mt-20">
-                    <div className="flex items-center justify-center">
-                      <SuccessTag />
-                    </div>
-                    <div className="text-lg text-center sm:text-xl font-medium text-dark-gray">Success!</div>
-                    <div className="text-center text-medium-gray text-center text-xs leading-relaxed">
-                      Welcome aboard, {getValues('firstname')}! You have created an account successfully.
-                      Please login to view dashboard.
-                    </div>
-
-                    <Button
-                      size='lg'
-                      onClick={handleLogin}
-                    >
-                      Back to Login
-                    </Button>
-                  </div>
-                </>
-                :
-                <div className="w-full max-w-md space-y-6 w-full  mx-auto ">
-                  <div className="space-y-1 text-center">
-                    <h1 className="text-lg sm:text-xl font-medium text-dark-gray">Customer Onboarding</h1>
-                    <p className="text-medium-gray text-xs leading-relaxed">
-                      Welcome, complete your user registration to get started.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-center mb-3 relative">
-                    <div className="flex items-center">
-                      {[1, 2, 3, 4].map((step, index) => (
-                        <div key={step} className="flex items-center">
-                          <div
-                            className={`relative z-10 transition-all duration-200 ${step < currentStep
-                              ? "text-white"
-                              : step === currentStep
-                                ? "text-faded-accent"
-                                : "text-gray-300"
-                              }`}
-                          >
-                            {step < currentStep ? (
-                              <div className="w-4.5 h-4.5 rounded-full bg-faded-accent flex items-center justify-center">
-                                <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />
-                              </div>
-                            ) : (
-                              <>
-                                <div className={`w-4.5 h-4.5 rounded-full border-2 ${step === currentStep ? "border-faded-accent" : "border-gray-300"
-                                  }`} />
-                                <div className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${step === currentStep ? "bg-faded-accent" : "bg-gray-300"
-                                  }`} />
-                              </>
-                            )}
-                          </div>
-                          {index < 3 && (
-                            <div
-                              className={`w-24 h-0.5 transition-colors duration-200 ${step < currentStep ? "bg-faded-accent" : "bg-gray-200"
-                                }`}
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h2 className="text-center text-md font-normal text-dark-gray">{getStepTitle()}</h2>
-
-                    <div className="bg-white p-5 rounded-lg">
-                      {renderStep()}
-
-                      <div className="flex justify-between mt-10">
-                        <Button
-                          type="button"
-                          onClick={prevStep}
-                          disabled={currentStep === 1}
-                          variant="ghost"
-                          className="border-2 border-input"
-                        >
-                          <span>Previous</span>
-                        </Button>
-
-                        {currentStep < totalSteps ? (
-                          <Button
-                            type="button"
-                            onClick={nextStep}
-                            disabled={!isStepComplete()}
-                          >
-                            <span>Next</span>
-                          </Button>
-                        ) : (
-                          <Button
-                            type="submit"
-                            onClick={handleSubmit(onSubmit)}
-                            disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
-                          >
-                            {isPending ? (
-                              <>
-                                Submitting...
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              </>
-                            ) : (
-                              "Complete Registration"
-                            )}
-                          </Button>
-                        )}
+      ) : (
+        <div className="w-full max-w-md space-y-6 mx-auto">
+          <div className="flex items-center justify-center mb-3 relative">
+            <div className="flex items-center">
+              {[1, 2, 3, 4].map((step, index) => (
+                <div key={step} className="flex items-center">
+                  <div
+                    className={`relative z-10 transition-all duration-200 ${
+                      step < currentStep
+                        ? "text-white"
+                        : step === currentStep
+                        ? "text-faded-accent"
+                        : "text-gray-300"
+                    }`}
+                  >
+                    {step < currentStep ? (
+                      <div className="w-4.5 h-4.5 rounded-full bg-faded-accent flex items-center justify-center">
+                        <CheckIcon className="w-3 h-3 text-white" strokeWidth={3} />
                       </div>
-                    </div>
+                    ) : (
+                      <>
+                        <div
+                          className={`w-4.5 h-4.5 rounded-full border-2 ${
+                            step === currentStep ? "border-faded-accent" : "border-gray-300"
+                          }`}
+                        />
+                        <div
+                          className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${
+                            step === currentStep ? "bg-faded-accent" : "bg-gray-300"
+                          }`}
+                        />
+                      </>
+                    )}
                   </div>
-
-                  <div className="text-center">
-                    <span className="text-sm font-normal text-medium-gray">Already have an account? {''}</span>
-                    <Link
-                      href="/customer-login"
-                      className="text-sm text-faded-accent hover:text-accent/70"
-                    >
-                      Sign in
-                    </Link>
-                  </div>
+                  {index < 3 && (
+                    <div
+                      className={`w-24 h-0.5 transition-colors duration-200 ${
+                        step < currentStep ? "bg-faded-accent" : "bg-gray-200"
+                      }`}
+                    />
+                  )}
                 </div>
-          }
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h2 className="text-center text-md font-normal text-dark-gray">{getStepTitle()}</h2>
+            <div className="pt-2">
+              {renderStep()}
+              <div className="flex justify-between mt-10">
+                <Button
+                  type="button"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  variant="ghost"
+                  className="border-2 border-input"
+                >
+                  <span>Previous</span>
+                </Button>
+                {currentStep < totalSteps ? (
+                  <Button type="button" onClick={nextStep} disabled={!isStepComplete()}>
+                    <span>Next</span>
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    onClick={handleSubmit(onSubmit)}
+                    className="bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium rounded-lg"
+                    disabled={!isStepComplete() || isPending || !watchedValues.agreeToTerms}
+                  >
+                    {isPending ? (
+                      <>
+                        Submitting...
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      </>
+                    ) : (
+                      "Complete Registration"
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="text-center w-full text-xs text-[#9E9E9E] py-4 mt-auto">
-          © {currentYear} {clientName}. All Right Reserved
-        </div>
-      </div>
-    </div>
+      )}
+    </DynamicAuthLayout>
   )
 }

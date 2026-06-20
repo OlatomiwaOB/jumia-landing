@@ -4,10 +4,10 @@ import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { SidebarBase } from '@/components/common/sidebar-base';
+import { useSidebar } from '@/components/common/sidebar-context';
 import { usePermission } from '@/hooks/usePermission';
-import useOperations from '@/store/operationsStore';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { logout } from '@/utils/auth-utils-operations';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,6 @@ import {
   HomeIconFilled2,
   OrderIcon,
   OrderIconFilled2,
-  Logout2Icon,
   ArrowIcon,
   TransactionIcon,
   TransactionIconFilled,
@@ -134,13 +133,6 @@ const navigationGroups: NavGroup[] = [
   },
 ];
 
-interface SidebarGroupProps {
-  group: NavGroup;
-  pathname: string;
-  hasGroupAccess: boolean;
-  userPermissions: string[];
-}
-
 const isPathMatchingItem = (pathname: string, itemHref: string): boolean => {
   if (pathname === itemHref) return true;
   if (pathname.startsWith(itemHref + '/')) return true;
@@ -152,7 +144,15 @@ const isGroupActive = (group: NavGroup, pathname: string, accessibleItems: NavIt
   return accessibleItems.some(item => isPathMatchingItem(pathname, item.href));
 };
 
+interface SidebarGroupProps {
+  group: NavGroup;
+  pathname: string;
+  hasGroupAccess: boolean;
+  userPermissions: string[];
+}
+
 const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: SidebarGroupProps) => {
+  const { collapsed } = useSidebar();
   const accessibleItems = useMemo(() => {
     return group.items.filter(item => {
       if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
@@ -179,16 +179,23 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
     const IconComponent = isActive && group.activeIcon ? group.activeIcon : group.icon;
 
     return (
-      <div className="relative">
+      <div className="relative mb-1">
+        {isActive && (
+          <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[#EA813C] rounded-r-full" />
+        )}
         <Link
           href="/operations/dashboard"
+          title={collapsed ? group.name : undefined}
           className={cn(
-            'flex items-center gap-2.5 px-4 py-3 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-[12px]',
-            isActive && 'bg-white text-faded-accent font-medium'
+            'flex items-center px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group',
+            isActive
+              ? 'bg-[--accent]/10 text-[--accent] font-medium'
+              : 'text-white/70 hover:text-white hover:bg-white/10',
+            collapsed && 'justify-center px-0'
           )}
         >
-          <IconComponent className="w-5 h-5 flex-shrink-0" />
-          <span className="font-medium truncate">{group.name}</span>
+          <IconComponent className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-[--accent]" : "text-white/70 group-hover:text-white")} />
+          {!collapsed && <span className="ml-3 truncate">{group.name}</span>}
         </Link>
       </div>
     );
@@ -196,29 +203,52 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
 
   const IconComponent = hasActiveChild && group.activeIcon ? group.activeIcon : group.icon;
 
+  if (collapsed) {
+    return (
+      <div className="relative mb-1">
+        {hasActiveChild && (
+          <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[--accent] rounded-r-full" />
+        )}
+        <div
+          title={group.name}
+          className={cn(
+            'flex items-center justify-center py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer',
+            hasActiveChild
+              ? 'bg-[--accent]/10 text-[--accent]'
+              : 'text-white/70 hover:text-white hover:bg-white/10'
+          )}
+        >
+          <IconComponent className={cn("w-5 h-5 flex-shrink-0", hasActiveChild ? "text-[--accent]" : "")} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mb-1">
       <CollapsibleTrigger className="w-full">
         <div className={cn(
-          'flex items-center justify-between gap-2 px-4 py-3 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs w-full',
-          hasActiveChild && 'bg-white text-faded-accent'
+          'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group',
+          hasActiveChild
+            ? 'text-white'
+            : 'text-white/70 hover:text-white hover:bg-white/10'
         )}>
-          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <IconComponent className="w-5 h-5 flex-shrink-0" />
-            <span className="font-medium truncate">{group.name}</span>
+          <div className="flex items-center min-w-0 flex-1">
+            <IconComponent className={cn("w-5 h-5 flex-shrink-0", hasActiveChild ? "text-[--accent]" : "text-white/70 group-hover:text-white")} />
+            <span className={cn("ml-3 font-medium truncate", hasActiveChild && "text-white")}>{group.name}</span>
           </div>
           <ArrowIcon
             className={cn(
-              "w-3 h-3 rotate-270 flex-shrink-0 text-sidebar-text transition-transform duration-200",
-              isOpen && "rotate-360 text-faded-accent"
+              "w-3 h-3 rotate-270 flex-shrink-0 text-white/50 transition-transform duration-200",
+              isOpen && "rotate-360 text-white"
             )}
           />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
-        <div className="relative">
-          <div className="absolute left-[20px] top-2 bottom-2 w-0.5 bg-[#EA813C]" />
-          <ul className="py-2 pr-6 space-y-1">
+        <div className="relative mt-1">
+          <div className="absolute left-[22px] top-0 bottom-0 w-px bg-gray-800" />
+          <ul className="py-1 pr-3 space-y-1">
             {accessibleItems.map((item) => {
               const isActive = isPathMatchingItem(pathname, item.href);
 
@@ -227,8 +257,10 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2.5 px-4 py-3 rounded-lg text-sidebar-text hover:text-white hover:bg-white/10 transition-all duration-200 text-xs ml-7',
-                      isActive && 'bg-[#EA813C] text-white font-medium'
+                      'flex items-center px-3 py-2 rounded-lg text-sm transition-all duration-200 ml-[34px]',
+                      isActive
+                        ? 'bg-[#EA813C] text-white font-medium shadow-sm'
+                        : 'text-white/70 hover:text-white hover:bg-white/10'
                     )}
                   >
                     <span className="truncate">{item.name}</span>
@@ -246,12 +278,8 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
 export const DashboardSidebar = () => {
   const pathname = usePathname();
   const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL_WHITE_FULL;
-  const { operations } = useOperations();
   const { hasAnyPermission, userPermissions } = usePermission();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-
-  console.log('operations', operations);
-
 
   const accessibleGroups = useMemo(() => {
     return navigationGroups.filter(group => {
@@ -273,72 +301,26 @@ export const DashboardSidebar = () => {
     });
   }, [userPermissions, hasAnyPermission]);
 
-  const handleLogoutClick = () => {
-    setIsLogoutModalOpen(true);
-  };
-
-  const handleConfirmLogout = () => {
-    setIsLogoutModalOpen(false);
-    logout();
-  };
-
-  const handleCancelLogout = () => {
-    setIsLogoutModalOpen(false);
-  };
-
   return (
     <>
-      <div
-        className="w-full h-full flex flex-col bg-accent"
-
-      // style={{
-      //   background: `
-      //     radial-gradient(ellipse at 75% 70%, rgba(255,160,60,0.45) 0%, transparent 55%),
-      //     linear-gradient(180deg, #F56B08 0%, #D4580A 40%, #AE4F12 70%, #A83E00 100%)
-      //   `,
-      // }}
+      <SidebarBase
+        logoUrl={logoUrl || 'logo.png'}
+        logoHref="/operations/dashboard"
+        onLogoutClick={() => setIsLogoutModalOpen(true)}
       >
-        <div className="py-6 px-3 border-b-2 border-[#EA813C]">
-          <div className="flex items-center justify-start">
-            <Link href="/operations/dashboard" className="block h-[70px] w-[120px] relative">
-              <Image
-                src={logoUrl || 'logo.png'}
-                alt='logo'
-                fill
-                className='object-fill'
-                priority />
-            </Link>
-          </div>
-        </div>
-
-        <nav
-          className="flex-1 py-4 px-2 overflow-y-auto w-full"
-          style={{
-            scrollbarWidth: 'none',
-            scrollbarColor: 'transparent',
-          }}>
-          <ul className="space-y-0.5 px-1">
-            {accessibleGroups.map((group) => (
-              <li key={group.name}>
-                <SidebarGroup
-                  group={group}
-                  pathname={pathname}
-                  hasGroupAccess={true}
-                  userPermissions={userPermissions}
-                />
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div
-          onClick={handleLogoutClick}
-          className="flex items-center gap-2.5 text-white px-4 py-3 rounded-lg border border-[#BA6D3F] mx-4 mb-4 cursor-pointer hover:bg-white/10 transition-colors"
-        >
-          <Logout2Icon className="text-white/70 w-4 h-4" />
-          <span className="text-xs font-bold">Logout</span>
-        </div>
-      </div>
+        <ul className="space-y-0.5">
+          {accessibleGroups.map((group) => (
+            <li key={group.name}>
+              <SidebarGroup
+                group={group}
+                pathname={pathname}
+                hasGroupAccess={true}
+                userPermissions={userPermissions}
+              />
+            </li>
+          ))}
+        </ul>
+      </SidebarBase>
 
       <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
@@ -349,16 +331,10 @@ export const DashboardSidebar = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex flex-row justify-end gap-2 mt-4">
-            <Button
-              variant="outline"
-              onClick={handleCancelLogout}
-            >
+            <Button variant="outline" onClick={() => setIsLogoutModalOpen(false)}>
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmLogout}
-            >
+            <Button variant="destructive" onClick={() => { setIsLogoutModalOpen(false); logout(); }}>
               Log Out
             </Button>
           </DialogFooter>
@@ -367,3 +343,5 @@ export const DashboardSidebar = () => {
     </>
   );
 };
+
+export default DashboardSidebar;

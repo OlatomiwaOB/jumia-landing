@@ -90,15 +90,11 @@ const Cart = () => {
 
     const [enhancedCart, setEnhancedCart] = useState<CartItemWithStore[]>([]);
 
-    const itemsExceedingStock = enhancedCart.filter(item => {
-        const currentQuantity = singleQuantity(item.id);
-        return currentQuantity > (item.qtyInStore ?? 0);
-    });
+    const itemsExceedingStock: any[] = [];
+    const hasItemsExceedingStock = false;
 
-    const hasItemsExceedingStock = itemsExceedingStock.length > 0;
-
-    const outOfStockItems = enhancedCart.filter(item => (item.qtyInStore ?? 0) <= 0);
-    const hasOutOfStockItems = outOfStockItems.length > 0;
+    const outOfStockItems: any[] = [];
+    const hasOutOfStockItems = false;
     const isCartEmpty = enhancedCart.length === 0;
 
     useEffect(() => {
@@ -202,16 +198,6 @@ const Cart = () => {
         //     toast.error('Multiple stores detected. Please order from one store at a time.')
         //     return;
         // }
-
-        if (hasOutOfStockItems) {
-            toast.error('Cannot checkout with out-of-stock items')
-            return
-        }
-
-        if (hasItemsExceedingStock) {
-            toast.error('Some items exceed available stock. Please reduce quantities.')
-            return;
-        }
 
         const storeCodes = new Set(enhancedCart.map(item => item.storeCode));
         // if (storeCodes.size > 1) {
@@ -319,10 +305,10 @@ const Cart = () => {
 
                     <div className="border-t border-gray-100 mt-2">
                         {enhancedCart.map((item, index) => {
-                            const isOutOfStock = (item.qtyInStore ?? 0) <= 0;
                             const currentQuantity = singleQuantity(item.id);
-                            const exceedsStock = currentQuantity > (item.qtyInStore ?? 0);
-                            const overQuantity = currentQuantity - (item.qtyInStore ?? 0);
+                            const isOutOfStock = false;
+                            const exceedsStock = false;
+                            const overQuantity = 0;
 
                             return (
                                 <div
@@ -365,22 +351,19 @@ const Cart = () => {
                                     <div className='p-4 flex items-center gap-3'>
                                         <div className='flex flex-col items-center gap-2'>
                                             <button
-                                                onClick={() => !isOutOfStock && !exceedsStock && increment(item)}
-                                                disabled={isOutOfStock || exceedsStock || currentQuantity >= (item.qtyInStore ?? 0)}
-                                                className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${isOutOfStock || exceedsStock || currentQuantity >= (item.qtyInStore ?? 0)
-                                                    ? 'bg-gray-200 cursor-not-allowed opacity-50'
-                                                    : 'bg-[#f3f4f6]'
-                                                    }`}
+                                                onClick={() => increment(item)}
+                                                disabled={false}
+                                                className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 bg-[#f3f4f6]`}
                                             >
                                                 <Plus size={12} />
                                             </button>
-                                            <span className={`text-sm font-medium ${(isOutOfStock || exceedsStock) ? 'text-gray-500' : ''}`}>
+                                            <span className={`text-sm font-medium`}>
                                                 {currentQuantity}
                                             </span>
                                             <button
-                                                onClick={() => !isOutOfStock && !exceedsStock && decrement(item)}
-                                                disabled={isOutOfStock || exceedsStock || currentQuantity <= 1}
-                                                className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${isOutOfStock || exceedsStock || currentQuantity <= 1
+                                                onClick={() => decrement(item)}
+                                                disabled={currentQuantity <= 1}
+                                                className={`w-6 h-6 rounded-sm border border-gray-300 flex items-center justify-center hover:bg-gray-100 ${currentQuantity <= 1
                                                     ? 'bg-gray-200 cursor-not-allowed opacity-50'
                                                     : 'bg-[#f3f4f6]'
                                                     }`}

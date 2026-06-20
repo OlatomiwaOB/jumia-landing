@@ -658,12 +658,12 @@ export default function TransactionHistory(): React.ReactElement {
 
   if (!transactions.length && !isLoading)
     return (
-      <Card>
-        <CardHeader className='border-b-1 border-[#EEEEEE] py-3'>
+      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
+        <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-dark-gray text-md font-semibold">
+            <h2 className="text-dark-gray text-lg font-semibold">
               Recent Transactions
-            </CardTitle>
+            </h2>
             <div className="flex items-center gap-2">
               <Link href='/admin/transactions'>
                 <Button
@@ -676,24 +676,24 @@ export default function TransactionHistory(): React.ReactElement {
               </Link>
             </div>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="pt-1">
+        <div className="pt-1">
           <div className="flex justify-center items-center h-40">
             <p className="text-medium-gray text-sm">No recent transactions found</p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
 
   return (
     <>
-      <Card>
-        <CardHeader className='border-b-1 border-[#EEEEEE] py-3'>
+      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
+        <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
           <div className="flex items-center justify-between">
-            <CardTitle className="text-dark-gray text-md font-semibold">
+            <h2 className="text-dark-gray text-lg font-semibold">
               Recent Transactions
-            </CardTitle>
+            </h2>
             <div className="flex items-center gap-2">
               <Link href='/admin/transactions'>
                 <Button
@@ -706,9 +706,9 @@ export default function TransactionHistory(): React.ReactElement {
               </Link>
             </div>
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="pt-1">
+        <div className="pt-1">
           {isLoading ? (
             <div className="flex justify-center items-center h-40">
               <p className="text-sm text-gray-400">Loading transactions…</p>
@@ -717,19 +717,22 @@ export default function TransactionHistory(): React.ReactElement {
             <div className="flex justify-center items-center h-40">
               <p className="text-sm text-red-400">Error loading transactions</p>
             </div>
+          ) : !transactions.length ? (
+            <div className="flex justify-center items-center h-40">
+              <p className="text-medium-gray text-sm">No recent transactions found</p>
+            </div>
           ) : (
             <>
-              <div className="divide-y divide-gray-100">
-                {paginated.map((t, idx) => (
+              <div>
+                {paginated.map((txn, idx) => (
                   <TransactionRow
-                    key={t.tranRefNo + idx}
-                    transaction={t}
+                    key={idx}
+                    transaction={txn}
                     onClick={handleRowClick}
                     isLast={idx === paginated.length - 1}
                   />
                 ))}
               </div>
-
               {totalPages > 1 && (
                 <Pagination
                   currentPage={currentPage}
@@ -741,8 +744,8 @@ export default function TransactionHistory(): React.ReactElement {
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <TransactionDetailsModal
         transaction={selectedTransaction}

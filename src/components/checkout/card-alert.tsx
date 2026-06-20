@@ -114,16 +114,25 @@ const CardAlert = ({
   console.log(getValues('selectedAddressId'));
 
   const buildOrderPayload = (bnplData?: any) => {
+    let selectedWeightOption: any = null;
+    try {
+      const stored = sessionStorage.getItem('selectedWeightOption');
+      if (stored) selectedWeightOption = JSON.parse(stored);
+    } catch { /* ignore */ }
+
     const orderItems = cart.map(item => ({
       itemCode: item?.code,
       itemName: item?.name,
       price: item?.salePrice,
       quantity: item?.quantity,
       amount: item?.subTotal,
-      discount: 0,
+      discount: item?.discount || 0,
       picture: item?.picture,
       storeCode: item?.storeCode,
       vat: (item as any).vat || 0,
+      itemWeight: item?.weight || 1,
+      itemWeightUnit: item?.weightUnit || 'ltr',
+      variantId: item?.variantId,
     }))
 
     const totalAmount = orderTotal;
@@ -136,12 +145,16 @@ const CardAlert = ({
 
     const payload = {
       channel: "WEB",
+      userType: 'USER',
       cartId: checkoutData?.orderNo,
       orderDate: currentDate,
       totalAmount: totalAmount,
-      totalDiscount: 0,
+      totalDiscount: cart?.reduce((sum, item) => sum + (item?.discount || 0), 0),
       deliveryOption: getValues('shippingMethod'),
       deliveryOptionGroup: getValues('shippingMethod') === 'delivery' ? (getValues('deliveryOptionGroup') || '') : '',
+      zoneCode: selectedWeightOption?.zoneCode || "",
+      totalWeight: selectedWeightOption?.totalWeightKg || 0,
+      weightUnit: "ltr",
       paymentMethod: paymentMethod?.toUpperCase(),
       // paymentMethod: 'STRIPE_CARD',
       couponCode: "",

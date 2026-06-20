@@ -28,7 +28,7 @@ export default function VarisaThemeProductPage() {
   const searchParams = useSearchParams();
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
   const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
   const { product: oldProduct, products, isLoading: isLoadingOld } = useProductBySlug(productSlug, storeCode, entityCode);
 
   const productId = oldProduct?.id?.toString() || '';
@@ -41,16 +41,16 @@ export default function VarisaThemeProductPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
-  const [selectedVariantId, setSelectedVariantId] = useState<string>('');
-  
+  const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
+
   const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
   const hasVariants = itemVariants.length > 0;
   const basePrice = product?.salePrice ?? product?.oldPrice ?? 0;
 
   const variants = itemVariants.map((v: any, index: number) => ({
-    id: v.qty ? v.qty.toString() : index.toString(),
+    id: parseInt(v.id),
     qty: v.qty,
-    size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size || `${index + 1}`),
+    size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
     weight: parseFloat(v.size) || product?.weight || 1,
     original: v
@@ -68,7 +68,7 @@ export default function VarisaThemeProductPage() {
   useEffect(() => {
     if (prevVariantRef.current === selectedVariantId) {
       if (prevQuantityRef.current > 0 && quantity <= 0) {
-        setSelectedVariantId('');
+        setSelectedVariantId(0);
       }
     }
     prevVariantRef.current = selectedVariantId;
@@ -76,12 +76,12 @@ export default function VarisaThemeProductPage() {
   }, [quantity, selectedVariantId]);
 
   const gallery = useMemo(() => getProductGallery(product), [product]);
-  
+
   const discount =
     product?.salePrice && product.oldPrice && product.oldPrice > product.salePrice
       ? Math.ceil(((product.oldPrice - product.salePrice) / product.oldPrice) * 100)
       : 0;
-  
+
   const activeImage = gallery[activeImageIndex] || product?.picture || '/placeholder-image.png';
 
   const productToCart = useMemo(() => {
@@ -162,10 +162,10 @@ export default function VarisaThemeProductPage() {
           </div>
 
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-start">
-            
+
             {/* Left: Image Gallery */}
             <div className="flex flex-col gap-4">
-              <div 
+              <div
                 className="relative aspect-square w-full rounded-[2rem] overflow-hidden bg-white shadow-xl shadow-black/5 cursor-zoom-in group"
                 onClick={() => setIsLightboxOpen(true)}
               >
@@ -190,11 +190,11 @@ export default function VarisaThemeProductPage() {
                       -{discount}% OFF
                     </span>
                   )}
-                  {product.qtyInStore === 0 && (
+                  {/* {product.qtyInStore === 0 && (
                     <span className="bg-gray-800 text-white text-[12px] font-extrabold px-3 py-1.5 rounded-lg shadow-lg">
                       OUT OF STOCK
                     </span>
-                  )}
+                  )} */}
                 </div>
               </div>
 
@@ -205,11 +205,10 @@ export default function VarisaThemeProductPage() {
                     <button
                       key={idx}
                       onClick={() => setActiveImageIndex(idx)}
-                      className={`relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300 ${
-                        activeImageIndex === idx 
-                          ? 'ring-4 ring-accent ring-offset-2 scale-95 opacity-100' 
-                          : 'opacity-60 hover:opacity-100'
-                      }`}
+                      className={`relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300 ${activeImageIndex === idx
+                        ? 'ring-4 ring-accent ring-offset-2 scale-95 opacity-100'
+                        : 'opacity-60 hover:opacity-100'
+                        }`}
                     >
                       <Image
                         src={img}
@@ -244,7 +243,7 @@ export default function VarisaThemeProductPage() {
                 </h1>
 
                 {/* Reviews placeholder */}
-                <div className="flex items-center gap-1.5 mb-8">
+                {/* <div className="flex items-center gap-1.5 mb-8">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -253,7 +252,7 @@ export default function VarisaThemeProductPage() {
                     />
                   ))}
                   <span className="text-gray-500 font-semibold text-sm ml-2">(12 Reviews)</span>
-                </div>
+                </div> */}
 
                 <div className="flex items-baseline gap-4 mb-8">
                   <span className={`text-4xl font-black ${discount > 0 ? 'text-[#E74C3C]' : 'text-gray-900'}`}>
@@ -282,11 +281,10 @@ export default function VarisaThemeProductPage() {
                           key={v.id}
                           type="button"
                           onClick={() => setSelectedVariantId(v.id)}
-                          className={`relative overflow-hidden rounded-xl border-2 px-5 py-3 text-sm font-bold transition-all ${
-                            selectedVariantId === v.id
-                              ? 'border-accent bg-accent/5 text-accent shadow-sm'
-                              : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
+                          className={`relative overflow-hidden rounded-xl border-2 px-5 py-3 text-sm font-bold transition-all ${selectedVariantId === v.id
+                            ? 'border-accent bg-accent/5 text-accent shadow-sm'
+                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                            }`}
                         >
                           {selectedVariantId === v.id && (
                             <div className="absolute right-0 top-0 h-4 w-4 -translate-y-1/2 translate-x-1/2 rotate-45 bg-accent" />
@@ -330,26 +328,19 @@ export default function VarisaThemeProductPage() {
 
                     <button
                       onClick={() => addToCart(productToCart as any)}
-                      disabled={product.qtyInStore === 0 || (hasVariants && !selectedVariantId)}
-                      className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 ${
-                        product.qtyInStore === 0 || (hasVariants && !selectedVariantId)
-                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                          : quantity > 0
-                          ? 'bg-gray-900 text-white hover:bg-black hover:shadow-xl hover:-translate-y-1'
-                          : 'bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
-                      }`}
+                      // disabled={(hasVariants && !selectedVariantId)}
+                      className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
+                        }`}
                     >
                       <ShoppingCart className="w-5 h-5" />
-                      {product.qtyInStore === 0 
-                        ? 'Out of Stock' 
-                        : (hasVariants && !selectedVariantId)
+                      {(hasVariants && !selectedVariantId)
                         ? 'Select an Option'
-                        : quantity > 0 
-                        ? 'Add More' 
-                        : 'Add to Cart'}
+                        : quantity > 0
+                          ? 'Add More'
+                          : 'Add to Cart'}
                     </button>
                   </div>
-                  
+
                   <div className="mt-4 flex items-center justify-center gap-6 text-[12px] font-semibold text-gray-500">
                     <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> In Stock</span>
                     <span>•</span>
@@ -361,21 +352,19 @@ export default function VarisaThemeProductPage() {
                 <div className="flex gap-2 mb-6 bg-gray-100/50 p-1.5 rounded-full w-max">
                   <button
                     onClick={() => setActiveTab('description')}
-                    className={`px-6 py-2.5 rounded-full font-extrabold text-[13px] tracking-wide transition-all duration-300 ${
-                      activeTab === 'description'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
+                    className={`px-6 py-2.5 rounded-full font-extrabold text-[13px] tracking-wide transition-all duration-300 ${activeTab === 'description'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                      }`}
                   >
                     Description
                   </button>
                   <button
                     onClick={() => setActiveTab('details')}
-                    className={`px-6 py-2.5 rounded-full font-extrabold text-[13px] tracking-wide transition-all duration-300 ${
-                      activeTab === 'details'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-800'
-                    }`}
+                    className={`px-6 py-2.5 rounded-full font-extrabold text-[13px] tracking-wide transition-all duration-300 ${activeTab === 'details'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                      }`}
                   >
                     Featured
                   </button>
