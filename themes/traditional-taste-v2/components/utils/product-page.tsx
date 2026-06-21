@@ -56,7 +56,7 @@ export default function ProductPage() {
   // Log it to the console so you can see it!
   console.log("LIVE API RESPONSE:", productData);
   console.log("LIVE API ERROR:", error);
-  const { addToCart, decrement, increment, singleQuantity, openCart } = useCart();
+  const { addToCart, decrement, increment, singleQuantity, openCart, cart } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
@@ -66,13 +66,16 @@ export default function ProductPage() {
 
   const basePrice = product?.salePrice || 0;
 
+  console.log(cart, 'cart');
+
   const variants = itemVariants.map((v: any, index: number) => ({
     id: parseInt(v.id),
     qty: v.qty,
     size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
     weight: parseFloat(v.size) || product?.weight || 1,
-    original: v
+    original: v,
+    vat: v.vat,
   }));
 
   console.log(variants, 'variants');
@@ -412,7 +415,9 @@ export default function ProductPage() {
                         salePrice: currentPrice,
                         weight: itemWeight,
                         // weightUnit: product.weightUnit || undefined,
-                        variantId: selectedVariantId || 0
+                        variantId: selectedVariantId || 0,
+                        vat: currentVariant?.vat || product?.vat || 0,
+                        discount: Number(product?.discount || 0)
                       } as any, localQty);
                       openCart();
                     }}

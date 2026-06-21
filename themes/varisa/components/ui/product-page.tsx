@@ -43,6 +43,8 @@ export default function VarisaThemeProductPage() {
 
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
 
+  // console.log(cart, 'cart');
+
   const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
   const hasVariants = itemVariants.length > 0;
   const basePrice = product?.salePrice ?? product?.oldPrice ?? 0;
@@ -53,7 +55,8 @@ export default function VarisaThemeProductPage() {
     size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
     weight: parseFloat(v.size) || product?.weight || 1,
-    original: v
+    original: v,
+    vat: v.vat || 0,
   }));
 
   const currentVariant = variants.find((v: any) => v.id === selectedVariantId);
@@ -82,6 +85,7 @@ export default function VarisaThemeProductPage() {
       ? Math.ceil(((product.oldPrice - product.salePrice) / product.oldPrice) * 100)
       : 0;
 
+
   const activeImage = gallery[activeImageIndex] || product?.picture || '/placeholder-image.png';
 
   const productToCart = useMemo(() => {
@@ -92,7 +96,9 @@ export default function VarisaThemeProductPage() {
       salePrice: price,
       size: currentVariant?.size || product.itemSize || product.unit,
       originalId: product.id,
-      variantId: currentVariant?.id
+      variantId: currentVariant?.id,
+      vat: currentVariant?.vat || product?.vat || 0,
+      discount: Number(product?.discount || 0)
     };
   }, [product, currentProductId, price, currentVariant]);
   const ccy = product?.ccy || '$';
