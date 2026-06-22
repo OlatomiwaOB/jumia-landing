@@ -42,6 +42,7 @@ export default function VarisaThemeProductPage() {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
+  const [note, setNote] = useState('');
 
   // console.log(cart, 'cart');
 
@@ -98,15 +99,17 @@ export default function VarisaThemeProductPage() {
       originalId: product.id,
       variantId: currentVariant?.id,
       vat: currentVariant?.vat || product?.vat || 0,
-      discount: Number(product?.discount || 0)
+      discount: Number(product?.discount || 0),
+      note: note
     };
-  }, [product, currentProductId, price, currentVariant]);
+  }, [product, currentProductId, price, currentVariant, note]);
   const ccy = product?.ccy || '$';
 
   useEffect(() => {
     setActiveImageIndex(0);
     setActiveTab('description');
     setIsLightboxOpen(false);
+    setNote('');
   }, [product?.id]);
 
   if (isLoading) {
@@ -311,6 +314,24 @@ export default function VarisaThemeProductPage() {
 
                 {/* Add to Cart Area */}
                 <div className="bg-gray-50/80 rounded-3xl p-6 md:p-8 mb-10 border border-gray-100">
+                  <div className="mb-6">
+                    <div className="mb-2">
+                      <label htmlFor="product-note" className="block text-[14px] font-extrabold tracking-tight text-gray-900">
+                        Personalise Your Order (optional)
+
+                      </label>
+                      <p className="text-[12px] font-medium text-gray-500 mt-0.5">
+                        Share any allergies, dietary requirements or meal selections for your bundle here.</p>
+                    </div>
+                    <textarea
+                      id="product-note"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Any special instructions or preferences?"
+                      rows={2}
+                      className="w-full rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 outline-none transition-all focus:border-accent focus:ring-4 focus:ring-accent/10 resize-none placeholder:text-gray-400"
+                    />
+                  </div>
                   <div className="flex flex-col sm:flex-row items-center gap-4">
                     {quantity > 0 ? (
                       <div className="flex items-center justify-between w-full sm:w-auto bg-white rounded-full p-2 shadow-sm border border-gray-200">
