@@ -332,19 +332,19 @@ export default function VarisaThemeProductPage() {
                       </div>
                     ) : null}
 
-                    <button
-                      onClick={() => addToCart(productToCart as any)}
-                      // disabled={(hasVariants && !selectedVariantId)}
-                      className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
+                    {
+                      quantity <= 0 && <button
+                        onClick={() => addToCart(productToCart as any)}
+                        // disabled={(hasVariants && !selectedVariantId)}
+                        className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
                         }`}
-                    >
-                      <ShoppingCart className="w-5 h-5" />
-                      {(hasVariants && !selectedVariantId)
-                        ? 'Select an Option'
-                        : quantity > 0
-                          ? 'Add More'
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                        {(hasVariants && !selectedVariantId)
+                          ? 'Select an Option'
                           : 'Add to Cart'}
-                    </button>
+                      </button>
+                    }
                   </div>
 
                   <div className="mt-4 flex items-center justify-center gap-6 text-[12px] font-semibold text-gray-500">
