@@ -32,6 +32,8 @@ export interface WeightDeliveryOptionsResponse {
  * @param totalWeightKg - Total weight of the cart in kg (defaults to total item quantity)
  * @param sourceType - Optional source type for guest vs authenticated
  */
+
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!
 const useWeightDeliveryOptions = (
   zoneCode: string | undefined = 'Camden',
   totalWeightKg: number = 1,
@@ -49,6 +51,7 @@ const useWeightDeliveryOptions = (
         params: {
           zoneCode,
           totalWeightKg,
+          storeCode
         },
       }),
     enabled: !!zoneCode && totalWeightKg > 0,
