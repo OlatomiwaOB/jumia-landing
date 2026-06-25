@@ -16,6 +16,7 @@ import { usePageMetadata } from '@/hooks/usePageMetadata';
 import { OptionTypeDeleteModal } from '@/components/Operations/delivery-option-types/delete-option-type';
 import { WeightConfigModal } from '@/components/Operations/delivery-option-types/weight-config';
 import { CalculateSummaryModal } from '@/components/Operations/delivery-option-types/calculate-summary';
+import { CreateEditOptionTypeModal } from '@/components/Operations/delivery-option-types/create-edit-option-type-modal';
 
 interface OptionType {
     id: number;
@@ -25,6 +26,8 @@ interface OptionType {
     description: string;
     status: string;
 }
+
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
 
 const getMultiplierColor = (multiplier: number): string => {
     if (multiplier === 1.0) return 'bg-blue-100 text-blue-700 border-blue-200';
@@ -95,6 +98,7 @@ export default function DeliveryOptionTypesPage() {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [configModalOpen, setConfigModalOpen] = useState(false);
     const [calculateModalOpen, setCalculateModalOpen] = useState(false);
+    const [createEditModalOpen, setCreateEditModalOpen] = useState(false);
     const [selectedType, setSelectedType] = useState<OptionType | null>(null);
     const ITEMS_PER_PAGE = 10;
 
@@ -102,7 +106,10 @@ export default function DeliveryOptionTypesPage() {
         queryKey: ['delivery-option-types'],
         queryFn: () => axiosOperations.request({
             url: '/delivery-by-weight/option-type/all',
-            method: 'GET'
+            method: 'GET',
+            params: {
+                storeCode
+            }
         })
     });
 
@@ -122,7 +129,13 @@ export default function DeliveryOptionTypesPage() {
     const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     const handleEdit = (type: OptionType) => {
-        router.push(`/operations/delivery-option-types/create?id=${type.id}`);
+        setSelectedType(type);
+        setCreateEditModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setSelectedType(null);
+        setCreateEditModalOpen(true);
     };
 
     const handleDelete = (type: OptionType) => {
@@ -173,7 +186,7 @@ export default function DeliveryOptionTypesPage() {
                             requiredPermissions={['MANAGE_DELIVERY_OPTIONS']}
                             requireAll={true} hideIfNoPermission={false}
                             tooltipMessage="No permission to create"
-                            onClick={() => router.push('/operations/delivery-option-types/create')}
+                            onClick={handleCreate}
                             size="lg"
                         >
                             + Add Option Type
@@ -291,6 +304,13 @@ export default function DeliveryOptionTypesPage() {
                 open={calculateModalOpen}
                 onOpenChange={setCalculateModalOpen}
                 optionType={selectedType}
+            />
+
+            <CreateEditOptionTypeModal
+                open={createEditModalOpen}
+                onOpenChange={setCreateEditModalOpen}
+                optionType={selectedType}
+                onSuccess={() => refetch()}
             />
         </div>
     );

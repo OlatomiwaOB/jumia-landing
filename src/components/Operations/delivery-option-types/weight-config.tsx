@@ -24,6 +24,7 @@ interface OptionType {
 interface WeightConfig {
     id: number;
     zoneCode: string;
+    area?: string[];
     typeCode: string;
     typeName: string | null;
     multiplier: number | null;
@@ -39,6 +40,7 @@ interface WeightConfig {
 interface WeightConfigFormData {
     id: number;
     zoneCode: string;
+    area: string[];
     typeCode: string;
     baseFee: number;
     ratePerKg: number;
@@ -59,6 +61,7 @@ interface WeightConfigModalProps {
 const defaultFormData: WeightConfigFormData = {
     id: 0,
     zoneCode: '',
+    area: [],
     typeCode: '',
     baseFee: 0,
     ratePerKg: 0,
@@ -68,6 +71,8 @@ const defaultFormData: WeightConfigFormData = {
     estimatedTimeType: '',
     status: 'Active'
 };
+
+const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
 
 export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOpenChange, optionType, onSuccess }) => {
     const queryClient = useQueryClient();
@@ -96,7 +101,10 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
         queryFn: async () => {
             const response = await axiosOperations.request({
                 url: `/delivery-by-weight/config/all`,
-                method: 'GET'
+                method: 'GET',
+                params: {
+                    storeCode
+                }
             });
             return response;
         },
@@ -141,6 +149,7 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                 ...data,
                 typeCode: optionType?.typeCode || data.typeCode,
                 zoneCode: data.zoneCode?.trim(),
+                area: data.area,
                 estimatedTimeType: data.estimatedTimeType?.toUpperCase()
             };
             console.log('Saving weight config payload:', payload);
@@ -186,8 +195,10 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
         setIsLoading(true);
         const saveData = {
             ...formData,
+            storeCode: storeCode,
             typeCode: optionType.typeCode,
             zoneCode: formData.zoneCode?.trim(),
+            area: formData.area,
             estimatedTimeType: formData.estimatedTimeType?.toUpperCase()
         };
 
@@ -199,6 +210,7 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
         setFormData({
             id: config.id || 0,
             zoneCode: config.zoneCode?.trim() || '',
+            area: config.area || [],
             typeCode: config.typeCode || optionType?.typeCode || '',
             baseFee: config.baseFee || 0,
             ratePerKg: config.ratePerKg || 0,
@@ -234,6 +246,12 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
             o.name.toUpperCase() === value.toUpperCase()
         );
         return option ? option.name : value;
+    };
+
+    const getAreaNames = (areaIds?: string[]): string => {
+        if (!areaIds || !areaIds.length) return 'N/A';
+        if (!areaOptions) return areaIds.join(', ');
+        return areaIds.map(id => areaOptions.find((a: any) => a.id === id)?.name || id).join(', ');
     };
 
     if (!optionType) return null;
@@ -325,6 +343,34 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                                             <SelectItem value="Inactive">Inactive</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+
+                                <div className="space-y-1.5 col-span-2">
+                                    <Label>Area(s)</Label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3 border rounded-lg max-h-48 overflow-y-auto bg-gray-50/50">
+                                        {areaOptions?.map((area: any) => (
+                                            <label key={area.id} className="flex items-center space-x-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={formData.area?.includes(area.id) || false}
+                                                    onChange={(e) => {
+                                                        const checked = e.target.checked;
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            area: checked
+                                                                ? [...(prev.area || []), area.id]
+                                                                : (prev.area || []).filter(a => a !== area.id)
+                                                        }));
+                                                    }}
+                                                    className="w-4 h-4 rounded border-gray-300 text-orange-500 focus:ring-orange-500"
+                                                />
+                                                <span className="text-sm font-medium text-gray-700 truncate" title={area.name}>{area.name}</span>
+                                            </label>
+                                        ))}
+                                        {(!areaOptions || areaOptions.length === 0) && (
+                                            <div className="col-span-full text-xs text-gray-500 p-2">No areas available</div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-1.5">
@@ -451,6 +497,7 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                                     <thead>
                                         <tr className="border-b border-gray-100">
                                             <th className="text-left px-4 py-3 text-medium-gray font-semibold">Zone</th>
+                                            <th className="text-left px-4 py-3 text-medium-gray font-semibold">Area</th>
                                             <th className="text-left px-4 py-3 text-medium-gray font-semibold">Base Fee</th>
                                             <th className="text-left px-4 py-3 text-medium-gray font-semibold">Rate/Kg</th>
                                             <th className="text-left px-4 py-3 text-medium-gray font-semibold">Weight Range</th>
@@ -464,6 +511,9 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                                             <tr key={config.id || index} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/50 transition-colors">
                                                 <td className="px-4 py-3 font-medium text-dark-gray">
                                                     {config.zoneCode || 'N/A'}
+                                                </td>
+                                                <td className="px-4 py-3 text-dark-gray truncate max-w-[120px]" title={getAreaNames(config.area)}>
+                                                    {getAreaNames(config.area)}
                                                 </td>
                                                 <td className="px-4 py-3 text-dark-gray">
                                                     {config.baseFee != null ? config.baseFee.toFixed(2) : 'N/A'}
