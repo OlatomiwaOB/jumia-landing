@@ -7,8 +7,9 @@ export const traditionalTasteV2Config: ClientConfig = {
     colors: {
       accent: 'F97316',
       accentForeground: 'FFFFFF',
-      accentColor2: '967BB6',
+      accentColor2: 'FFEDD5',
       accentColor3: '2F3E33',
+      textCharcoal: '1C1917',
       dashboardSidebar: '191970',
     },
     logos: {
