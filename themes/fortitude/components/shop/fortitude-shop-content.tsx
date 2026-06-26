@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import { useState, useEffect, use, useRef } from 'react';
 import { ProductProps } from '@/types';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
@@ -48,7 +50,7 @@ export default function Shop() {
     const [shopByCategorySelected, setShopByCategorySelected] = useState(initialCategory);
     const [topCategoriesSelected, setTopCategoriesSelected] = useState('');
 
-    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+    const entityCode = getClientIdentifiers().entityCode;
     const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
     const initialTab = searchParams ? (searchParams.get('tab') as TabType) || 'new-arrivals' : 'new-arrivals';
 

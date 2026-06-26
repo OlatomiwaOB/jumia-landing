@@ -6,6 +6,7 @@ import axiosCustomer from "@/utils/fetch-function-no-auth"
 import { toast } from "sonner"
 import { Label } from "../ui/label"
 import { PinInput } from "../ui/pin-input"
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface OtpVerificationProps {
   onBack: () => void
@@ -25,7 +26,7 @@ const useAutoResendOtp = (email: string | undefined, shouldAutoResend: boolean) 
       method: 'GET',
       params: {
         username: email || '',
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+        entityCode: getClientIdentifiers().entityCode,
       },
     }),
     onSuccess: (data) => {
@@ -70,7 +71,7 @@ export function OtpVerification({
       method: 'GET',
       params: {
         username: email || '',
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+        entityCode: getClientIdentifiers().entityCode,
       },
     }),
     onSuccess: (data) => {

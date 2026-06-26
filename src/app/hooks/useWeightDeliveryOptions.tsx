@@ -2,6 +2,7 @@ import useCustomer from '@/store/customerStore';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import { useQuery } from '@tanstack/react-query';
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface WeightDeliveryOption {
   responseCode: string;
@@ -33,7 +34,7 @@ export interface WeightDeliveryOptionsResponse {
  * @param sourceType - Optional source type for guest vs authenticated
  */
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!
+const storeCode = getClientIdentifiers().storeCode
 const useWeightDeliveryOptions = (
   zoneCode: string | undefined = 'Camden',
   totalWeightKg: number = 1,

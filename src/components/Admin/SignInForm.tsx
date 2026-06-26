@@ -15,10 +15,12 @@ import { Eye, EyeOff, Loader2 } from "lucide-react"
 import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
 import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
+import { clientConfig } from '@/config/client-config'
 
-const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
-const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
-const brandColor = process.env.NEXT_PUBLIC_ACCENT_COLOR!
+const { branding } = clientConfig()
+const clientName = branding.clientName
+const logo = branding.logos.primary
+const brandColor = branding.colors.accent
 
 export function SignInForm() {
   const currentYear = new Date().getFullYear()
@@ -33,7 +35,7 @@ export function SignInForm() {
 
   const returnUrl = searchParams.get('returnUrl') || '/admin/dashboard'
 
-  const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg"
+  const bannerUrl = branding.images.banner
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('remembered_admin_username')

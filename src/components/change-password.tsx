@@ -12,6 +12,7 @@ import PinInput from '@/components/ui/pin-input'
 import { Eye, EyeOff, Shield } from 'lucide-react'
 import useCustomer from '@/store/customerStore'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { getClientIdentifiers } from '@/config/client-config';
 
 type SetPasswordFormData = {
     newPassword: string
@@ -172,7 +173,7 @@ const ChangePasswordModal: React.FC<ChangePasswordProps> = ({ isOpen, setIsOpen 
             method: 'GET',
             params: {
                 username: customer?.username || '',
-                entityCode: customer?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                entityCode: customer?.entityCode || getClientIdentifiers().entityCode,
             },
         }),
         onSuccess: (data) => {
@@ -194,7 +195,7 @@ const ChangePasswordModal: React.FC<ChangePasswordProps> = ({ isOpen, setIsOpen 
             method: 'POST',
             params: {
                 username: customer?.username || '',
-                entityCode: customer?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                entityCode: customer?.entityCode || getClientIdentifiers().entityCode,
                 action: 'PASSWORD_RESET'
             },
             headers: {
@@ -221,7 +222,7 @@ const ChangePasswordModal: React.FC<ChangePasswordProps> = ({ isOpen, setIsOpen 
             data: {
                 username: customer?.username || '',
                 newPwd: data.newPassword,
-                entityCode: customer?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                entityCode: customer?.entityCode || getClientIdentifiers().entityCode,
                 channel: "WEB",
             },
         }),
@@ -251,7 +252,7 @@ const ChangePasswordModal: React.FC<ChangePasswordProps> = ({ isOpen, setIsOpen 
             method: 'GET',
             params: {
                 username: customer?.username || '',
-                entityCode: customer?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                entityCode: customer?.entityCode || getClientIdentifiers().entityCode,
                 action: 'PASSWORD_RESET'
             },
         }),

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import { useState, useEffect } from 'react';
 import { ProductProps } from '@/types';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
@@ -21,10 +23,10 @@ export default function HomePage() {
   const [featuredDeals, setFeaturedDeals] = useState<ProductProps[]>([]);
   const searchParams = useSearchParams();
   const storeCode = searchParams
-    ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
-    : process.env.NEXT_PUBLIC_STORE_CODE || '';
+    ? searchParams.get('storeCode') || getClientIdentifiers().storeCode
+    : getClientIdentifiers().storeCode;
 
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE;
+  const entityCode = getClientIdentifiers().entityCode;
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
 
   const { data: featuredProductsData, isLoading: featuredLoading } = useQuery({

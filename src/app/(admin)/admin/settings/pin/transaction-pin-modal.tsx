@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import PinInput from '@/components/ui/pin-input';
 import { AlertTriangle } from "lucide-react";
 import axiosInstance from "@/utils/fetch-function-no-auth";
+import { getClientIdentifiers } from '@/config/client-config';
 
 type SetPinFormData = {
     newPin: string
@@ -95,7 +96,7 @@ const TransactionPinModal: React.FC<TransactionPinModalProps> = ({ isOpen, onClo
                 data: {
                     username: user?.username || '',
                     newPin: data.newPin,
-                    entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                    entityCode: user?.entityCode || getClientIdentifiers().entityCode,
                     channel: 'WEB',
                 },
             });

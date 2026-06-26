@@ -1,4 +1,6 @@
 'use client';
+
+import { clientConfig } from '@/config/client-config';
 import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,10 +12,10 @@ interface TopDealsProps {
 }
 
 export default function TopDeals({ products: dynamicProducts = [] }: TopDealsProps) {
-    const envBgColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+    const envBgColor = clientConfig().branding.colors.accentForeground;
     const sectionBg = envBgColor ? (envBgColor.startsWith('#') ? envBgColor : `#${envBgColor}`) : '#FCFBF8';
 
-    const envAccentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
+    const envAccentColor = clientConfig().branding.colors.accent;
     const accentColor = envAccentColor ? (envAccentColor.startsWith('#') ? envAccentColor : `#${envAccentColor}`) : '#A0522D';
 
     const [activeIndex, setActiveIndex] = useState(0);

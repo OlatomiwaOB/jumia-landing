@@ -11,6 +11,7 @@ import PinInput from '@/components/ui/pin-input'
 import { Eye, EyeOff, ArrowLeft, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
+import { getClientIdentifiers } from '@/config/client-config';
 
 type ForgotPasswordFormData = {
   username: string
@@ -143,7 +144,7 @@ export default function ForgotPasswordContent() {
       axiosInstance.request({
         url: '/ecommerce/initiatePasswordReset',
         method: 'GET',
-        params: { username: data.username, entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '' },
+        params: { username: data.username, entityCode: getClientIdentifiers().entityCode },
       }),
     onSuccess: (data) => {
       const code = data?.data?.code
@@ -168,7 +169,7 @@ export default function ForgotPasswordContent() {
         data: {
           otp,
           username,
-          entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+          entityCode: getClientIdentifiers().entityCode,
           newPwd: data.newPassword,
         },
       }),

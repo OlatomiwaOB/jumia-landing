@@ -29,13 +29,14 @@ import { useFileUpload } from "@/app/hooks/useUpload";
 import { fileUrlFormatted } from "@/utils/helperfns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import useUser from "@/store/userStore";
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface CategoryFormProps {
     category?: Category;
     mode?: 'create' | 'edit';
 }
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+const storeCode = getClientIdentifiers().storeCode;
 
 // export const sectorOptions = [
 //   { label: 'Electronics', value: 'electronics' },

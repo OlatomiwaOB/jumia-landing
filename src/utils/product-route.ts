@@ -1,9 +1,10 @@
 import { ProductProps } from "@/types";
+import { getClientIdentifiers } from '@/config/client-config';
 
 const DEFAULT_PRODUCT_SLUG = "product";
 
 const buildStoreAwarePath = (pathname: string, storeCode?: string | null) => {
-  const defaultStoreCode = process.env.NEXT_PUBLIC_STORE_CODE || "";
+  const defaultStoreCode = getClientIdentifiers().storeCode;
   const resolvedStoreCode = storeCode?.trim();
 
   if (!resolvedStoreCode || resolvedStoreCode === defaultStoreCode) {

@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react'
+import { clientConfig } from '@/config/client-config'
 // Depot Theme Imports
 import DepotLayout from '../../../../themes/depot/layout'
 import DepotShopContent from '../../../../themes/depot/components/shop/depot-shop-content'
@@ -20,7 +21,7 @@ import VarisaLayout from '../../../../themes/varisa/layout'
 import VarisaShopContent from '../../../../themes/varisa/page'
 
 const Shop = () => {
-    const storefront = process.env.NEXT_PUBLIC_STORE_FRONT;
+    const storefront = clientConfig().branding.storefront;
     const isDepot = storefront === 'depot';
 
     if (isDepot) {

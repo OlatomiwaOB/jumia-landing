@@ -55,16 +55,19 @@ export interface FormData {
   subscriptionType?: string
 }
 
-const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
-const logo = process.env.NEXT_PUBLIC_LOGO_URL || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+import { clientConfig, getClientIdentifiers } from '@/config/client-config'
+
+const { branding } = clientConfig()
+const clientName = branding.clientName
+const logo = branding.logos.primary
 export function SignUpForm() {
   const currentYear = new Date().getFullYear()
   const [currentStep, setCurrentStep] = useState(1)
   const [onboardStep, setOnBoardStep] = useState<'register' | 'success'>('register')
   const totalSteps = 5
   const router = useRouter()
-  const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg";
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const bannerUrl = branding.images.banner
+  const entityCode = getClientIdentifiers().entityCode;
 
   const { location } = useLocationStore()
 

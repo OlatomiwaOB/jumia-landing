@@ -1,8 +1,9 @@
+import { clientConfig } from '@/config/client-config';
 export default function WhyChooseUs() {
-  const envBgColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+  const envBgColor = clientConfig().branding.colors.accentForeground;
   const bgColor = envBgColor ? (envBgColor.startsWith('#') ? envBgColor : `#${envBgColor}`) : '#FCFBF8';
 
-  const envTextColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
+  const envTextColor = clientConfig().branding.colors.accent;
   const textColor = envTextColor ? (envTextColor.startsWith('#') ? envTextColor : `#${envTextColor}`) : '#222222';
 
   const benefits = [

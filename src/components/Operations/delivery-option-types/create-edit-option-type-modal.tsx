@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import axiosOperations from '@/utils/fetch-function-op-auth';
 import { toast } from 'sonner';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface OptionType {
     id: number;
@@ -37,7 +38,7 @@ interface CreateEditOptionTypeModalProps {
     onSuccess: () => void;
 }
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
+const storeCode = getClientIdentifiers().storeCode;
 
 export const CreateEditOptionTypeModal: React.FC<CreateEditOptionTypeModalProps> = ({ 
     open, 

@@ -1,4 +1,6 @@
 'use client';
+
+import { getClientIdentifiers } from '@/config/client-config';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery } from "@tanstack/react-query";
@@ -8,8 +10,8 @@ import { ProductProps } from '@/types';
 
 export default function HeroPromoGrid() {
   const searchParams = useSearchParams();
-  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
 
   const { data: allProductsData } = useQuery({
     queryKey: ["hero-promo-products", storeCode],

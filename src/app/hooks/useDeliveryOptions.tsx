@@ -3,6 +3,7 @@ import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface DeliveryOption {
     id: string;
@@ -21,7 +22,7 @@ export interface DeliveryOption {
     capLimit: number;
 }
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE
+const storeCode = getClientIdentifiers().storeCode
 const useDeliveryOptions = (sourceType?: string | undefined) => {
     const { customer } = useCustomer()
     // console.log('customer avail', !customer)

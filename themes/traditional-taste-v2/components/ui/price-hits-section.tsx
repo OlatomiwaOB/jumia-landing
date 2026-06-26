@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard, { Product } from './product-card';
@@ -13,8 +15,8 @@ import { ProductProps } from '@/types';
 
 export default function PriceHitsSection() {
   const searchParams = useSearchParams();
-  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
 
   const { data: allProductsData, isLoading } = useQuery({
     queryKey: ["testapp-all-products", storeCode],

@@ -27,6 +27,7 @@ import {
 import { usePermission } from '@/hooks/usePermission';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
 import { ArrowIcon } from '@/components/icons/icons';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface DashboardResponse {
     responseCode: string;
@@ -532,7 +533,7 @@ export default function OperationsDashboard() {
                 params: {
                     startDate: dateRange.startDate,
                     endDate: dateRange.endDate,
-                    entityCode: process.env.NEXT_PUBLIC_ENTITYCODE,
+                    entityCode: getClientIdentifiers().entityCode,
                 },
             });
             return response.data;

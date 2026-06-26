@@ -92,24 +92,7 @@ const CardPayment = ({ setCurrentStep, setSelectedPayment }: CardPaymentProps) =
             </CardContent>
           )}
 
-          {/* {paymentMethod === 'stripe' && (
-              <CardContent className="space-y-4">
-                {isPending && <p>Setting up payment...</p>}
-                {error && (
-                  <div className="text-red-500 text-sm">
-                    Error: {(error as Error).message}
-                  </div>
-                )}
-                {options && (
-                  <Elements stripe={stripePromise} options={options}>
-                    <StripePaymentForm 
-                      onSuccess={handlePaymentSuccess}
-                      onError={handlePaymentError}
-                    />
-                  </Elements>
-                )}
-              </CardContent>
-            )} */}
+
 
           {paymentMethod === 'paystack' && (
             <CardContent>

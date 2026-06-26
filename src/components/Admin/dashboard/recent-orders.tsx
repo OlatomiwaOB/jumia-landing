@@ -636,7 +636,7 @@
 //         pageNumber: 1,
 //         pageSize: 10,
 //         storeCode: user?.storeCode || '',
-//         entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE,
+//         entityCode: user?.entityCode || getClientIdentifiers().entityCode,
 //       }
 //     })
 //   });
@@ -839,6 +839,7 @@ import Link from 'next/link';
 import { RoutingIcon, StarIcon } from '@/components/icons/icons';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Star } from 'lucide-react';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface CartItem {
   itemCode: string;
@@ -1150,7 +1151,7 @@ export default function OrderHistory(): React.ReactElement {
         pageNumber: 1,
         pageSize: 10,
         storeCode: user?.storeCode || '',
-        entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE,
+        entityCode: user?.entityCode || getClientIdentifiers().entityCode,
       }
     })
   });

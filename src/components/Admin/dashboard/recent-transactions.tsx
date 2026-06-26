@@ -311,7 +311,7 @@
 //       method: 'GET',
 //       params: {
 //         storeCode: user?.storeCode || '',
-//         entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE,
+//         entityCode: user?.entityCode || getClientIdentifiers().entityCode,
 //         pageNumber: 1,
 //         pageSize: 10
 //       }
@@ -459,6 +459,7 @@ import { TransInflowIcon, TransOutflowIcon } from '@/components/icons/icons';
 import { TransactionDetailsModal } from '../transactions/transactions-details';
 import Link from 'next/link';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface Transaction {
   date: string;
@@ -636,7 +637,7 @@ export default function TransactionHistory(): React.ReactElement {
       method: 'GET',
       params: {
         storeCode: user?.storeCode || '',
-        entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE,
+        entityCode: user?.entityCode || getClientIdentifiers().entityCode,
         pageNumber: 1,
         pageSize: 10
       }

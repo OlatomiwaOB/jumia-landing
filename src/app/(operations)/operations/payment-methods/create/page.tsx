@@ -19,6 +19,7 @@ import useUser from '@/store/userStore';
 import { PaymentMethod } from '@/types';
 import { CameraIcon } from '@/components/icons/icons';
 import { StoreCombobox } from '@/components/shared/StoreCombobox';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface PaymentMethodFormData {
     name: string;
@@ -39,7 +40,7 @@ interface PaymentMethodFormData {
     storeCode: string;
 }
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+const storeCode = getClientIdentifiers().storeCode;
 
 const FormSection = ({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) => (
     <div className="border-b border-gray-100 pb-6 mb-6 last:border-b-0 last:pb-0 last:mb-0">

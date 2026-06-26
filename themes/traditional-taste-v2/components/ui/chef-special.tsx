@@ -1,5 +1,7 @@
 "use client";
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,8 +24,8 @@ export default function ChefSpecialSection() {
   const [activeImage, setActiveImage] = useState(0);
   const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
 
-  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const storeCode = getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
 
   const { data: featuredProductsData, isLoading } = useQuery({
     queryKey: ["testapp-featured", storeCode],

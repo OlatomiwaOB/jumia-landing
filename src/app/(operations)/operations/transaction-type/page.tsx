@@ -118,7 +118,7 @@
 //                 url: '/lookupdata/new-list',
 //                 params: {
 //                     categoryCode: 'TRAN_CODE',
-//                     entityCode: process.env.NEXT_PUBLIC_ENTITYCODE
+//                     entityCode: getClientIdentifiers().entityCode
 //                 }
 //             }),
 //         enabled: true,
@@ -569,6 +569,7 @@ import { TransInflowIcon, SeperatorIcon, EditIcon, DeleteIconGray } from '@/comp
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface TransactionType {
     id: number;
@@ -691,7 +692,7 @@ export default function TransactionTypePage() {
         queryFn: () => axiosOperations.request({
             method: 'GET',
             url: '/lookupdata/new-list',
-            params: { categoryCode: 'TRAN_CODE', entityCode: process.env.NEXT_PUBLIC_ENTITYCODE }
+            params: { categoryCode: 'TRAN_CODE', entityCode: getClientIdentifiers().entityCode }
         }),
         enabled: true,
     });

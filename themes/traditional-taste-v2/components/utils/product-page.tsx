@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -41,8 +43,8 @@ export default function ProductPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
-  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
+  const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
   const { product: oldProduct, products, isLoading: isLoadingOld } = useProductBySlug(productSlug, storeCode, entityCode);
 
   // Use your new API endpoint to get the live product (passing the numeric ID from the oldProduct)

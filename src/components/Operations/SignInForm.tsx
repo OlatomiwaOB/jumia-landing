@@ -17,9 +17,11 @@ import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
 import { OPERATIONS, REVENUE_ASSURANCE } from '@/utils/constants'
 import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
+import { clientConfig, getClientIdentifiers } from '@/config/client-config'
 
-const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
-const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+const { branding } = clientConfig()
+const clientName = branding.clientName
+const logo = branding.logos.primary
 export function SignInForm() {
   const currentYear = new Date().getFullYear()
   const [username, setUsername] = useState("")
@@ -38,7 +40,7 @@ export function SignInForm() {
   const { setOperations } = useOperations()
   const { push } = useRouter()
   const searchParams = useSearchParams()
-  const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg"
+  const bannerUrl = branding.images.banner
 
   const returnUrl = searchParams.get('returnUrl') || '/operations/dashboard'
 
@@ -112,7 +114,7 @@ export function SignInForm() {
         username: username,
         otp: otp,
         mobileNo: "",
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || "",
+        entityCode: getClientIdentifiers().entityCode,
         language: "en",
         externalRefNo: "",
         tranCode: "",

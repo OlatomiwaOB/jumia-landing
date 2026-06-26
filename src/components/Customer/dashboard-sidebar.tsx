@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { clientConfig } from '@/config/client-config';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -249,7 +250,7 @@ const SidebarGroup = ({ group, pathname }: { group: NavGroup; pathname: string }
 
 export const DashboardSidebar = () => {
   const pathname = usePathname();
-  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL_WHITE_FULL;
+  const logoUrl = clientConfig().branding.logos.whiteFull;
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   return (

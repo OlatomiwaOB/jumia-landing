@@ -39,8 +39,11 @@ export interface FormData {
   identificationType?: 'bvn' | 'nin' | ''
   // customerPic: string | File
 }
-const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
-const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+import { clientConfig, getClientIdentifiers } from '@/config/client-config'
+
+const { branding } = clientConfig()
+const clientName = branding.clientName
+const logo = branding.logos.primary
 export function SignUpForm() {
   const currentYear = new Date().getFullYear()
   const [currentStep, setCurrentStep] = useState(1)
@@ -48,8 +51,8 @@ export function SignUpForm() {
   const totalSteps = 4
   const router = useRouter()
   const { location } = useLocationStore()
-  const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg";
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const bannerUrl = branding.images.banner
+  const entityCode = getClientIdentifiers().entityCode;
 
 
   const {

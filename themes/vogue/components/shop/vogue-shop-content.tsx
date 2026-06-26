@@ -1,5 +1,7 @@
 "use client";
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -17,8 +19,8 @@ export default function VogueShopContent() {
   
   const initialCategory = searchParams?.get("category") || "";
   const initialSearch = searchParams?.get("search") || "";
-  const storeCode = searchParams?.get("storeCode") || process.env.NEXT_PUBLIC_STORE_CODE || "";
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || "FTD";
+  const storeCode = searchParams?.get("storeCode") || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
 
   const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);

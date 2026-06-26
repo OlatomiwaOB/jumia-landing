@@ -1,21 +1,23 @@
 'use client';
 
+
+import { clientConfig } from '@/config/client-config';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChefHat, Star, Truck, Heart, ShieldCheck, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function AboutPage() {
-  const envBgColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+  const envBgColor = clientConfig().branding.colors.accentForeground;
   const bgColor = envBgColor ? (envBgColor.startsWith('#') ? envBgColor : `#${envBgColor}`) : '#FCFBF8';
 
-  const envAccentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
+  const envAccentColor = clientConfig().branding.colors.accent;
   const accentColor = envAccentColor ? (envAccentColor.startsWith('#') ? envAccentColor : `#${envAccentColor}`) : '#A0522D';
 
-  const envAccentColor2 = process.env.NEXT_PUBLIC_ACCENT_COLOR_2;
+  const envAccentColor2 = clientConfig().branding.colors.accentColor2;
   const accentColor2 = envAccentColor2 ? (envAccentColor2.startsWith('#') ? envAccentColor2 : `#${envAccentColor2}`) : '#967BB6';
 
-  const envAccentColor3 = process.env.NEXT_PUBLIC_ACCENT_COLOR_3;
+  const envAccentColor3 = clientConfig().branding.colors.accentColor3;
   const accentColor3 = envAccentColor3 ? (envAccentColor3.startsWith('#') ? envAccentColor3 : `#${envAccentColor3}`) : '#2F3E33';
 
   // Hover color can default to primary accent

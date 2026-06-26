@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import Loader from '@/components/ui/loader';
 import { AuthLayoutProps } from './default-auth-layout';
+import { clientConfig } from '@/config/client-config';
 
 // Lazy load theme specific auth layouts
 const VarisaAuthLayout = lazy(() => import('../../../themes/varisa/components/ui/auth-layout'));
@@ -8,7 +9,7 @@ const TraditionalTasteAuthLayout = lazy(() => import('../../../themes/traditiona
 const DefaultAuthLayout = lazy(() => import('./default-auth-layout'));
 
 export default function DynamicAuthLayout(props: AuthLayoutProps) {
-  const storefront = process.env.NEXT_PUBLIC_STORE_FRONT;
+  const storefront = clientConfig().branding.storefront;
 
   if (storefront === 'varisa') {
     return (

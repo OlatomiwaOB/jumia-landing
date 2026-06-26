@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import * as z from 'zod'
 import { get } from 'http'
 import axiosCustomer from '@/utils/fetch-function-no-auth'
+import { getClientIdentifiers } from '@/config/client-config';
 
 
 export type RegisterProps = {
@@ -52,7 +53,7 @@ const RegisterForm = ({ setState }: RegisterProps) => {
     const storeCode = searchParams.get('storeCode') || ''
     const [registerStep, setRegisterStep] = useState<'credentials' | 'otp'>('credentials')
     const [registerData, setRegisterData] = useState('');
-    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+    const entityCode = getClientIdentifiers().entityCode;
     const { mutate, isPending } = useMutation({
         mutationFn: (data: any) => axiosCustomer.request({
             url: '/ecommerce/customer/simple-onboard',

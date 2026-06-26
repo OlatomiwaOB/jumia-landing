@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { AuthLayoutProps } from '@/components/shared/default-auth-layout';
+import { clientConfig } from '@/config/client-config';
 
 export default function TraditionalTasteAuthLayout({
   children,
@@ -11,9 +12,9 @@ export default function TraditionalTasteAuthLayout({
   leftPanelSubtitle,
 }: AuthLayoutProps) {
   const currentYear = new Date().getFullYear();
-  const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME || 'Traditional Taste';
+  const clientName = clientConfig().branding.clientName || 'Traditional Taste';
   const logo =
-    process.env.NEXT_PUBLIC_LOGO_URL ||
+    clientConfig().branding.logos.primary ||
     'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
 
   return (

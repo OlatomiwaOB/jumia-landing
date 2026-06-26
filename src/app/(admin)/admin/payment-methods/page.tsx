@@ -12,6 +12,7 @@ import useUser from "@/store/userStore";
 import dynamic from "next/dynamic";
 import { PaymentMethodsTable } from "@/components/Admin/payment-methods/payment-methods-table";
 import { StoreCombobox } from "@/components/shared/StoreCombobox";
+import { getClientIdentifiers, getClientFeatures } from '@/config/client-config';
 
 const PaymentMethodModal = dynamic(() => import("@/components/Admin/payment-methods/payment-method-modal"), { ssr: false });
 
@@ -24,7 +25,7 @@ export default function PaymentMethods() {
     const { toast } = useToast();
     const { user } = useUser();
     const queryClient = useQueryClient();
-    const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';
+    const isEnabled = getClientFeatures().enablePaymentMethods;
 
 
     const [selectedStoreCode, setSelectedStoreCode] = useState<string>(storeCodeDefault);
@@ -123,7 +124,7 @@ export default function PaymentMethods() {
     const paymentMethods = data?.data?.list || [];
     const totalRecords = paymentMethods.length;
 
-    if (!isH2P) {
+    if (!isEnabled) {
         return (
             <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
                 <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">

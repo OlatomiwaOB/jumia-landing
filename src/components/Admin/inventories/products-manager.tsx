@@ -681,6 +681,7 @@ import useUser from "@/store/userStore";
 import Image from "next/image";
 import placeholder from "@/components/images/placeholder-product.webp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface Product {
     productId: string;
@@ -887,7 +888,7 @@ const ProductVariantModal = ({
         price: "",
     });
 
-    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+    const entityCode = getClientIdentifiers().entityCode;
 
     // Fetch product variants via getById
     const { data: productData, isLoading: isLoadingVariants } = useQuery({

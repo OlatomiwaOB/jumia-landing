@@ -1,5 +1,7 @@
 "use client";
 
+
+import { clientConfig, getClientIdentifiers } from '@/config/client-config';
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,8 +10,8 @@ import { Scale, ThumbsUp, UtensilsCrossed, ArrowRight } from "lucide-react";
 
 export default function FastDeliverySection() {
   const searchParams = useSearchParams();
-  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
 
   const { data: productsData } = useProducts(
     storeCode,
@@ -43,8 +45,8 @@ export default function FastDeliverySection() {
     },
   ];
 
-  const bannerBg = process.env.NEXT_PUBLIC_ACCENT_COLOR
-    ? `#${process.env.NEXT_PUBLIC_ACCENT_COLOR}`
+  const bannerBg = clientConfig().branding.colors.accent
+    ? `#${clientConfig().branding.colors.accent}`
     : "#F97316";
 
   return (

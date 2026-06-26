@@ -546,7 +546,7 @@
 //         queryFn: async () => {
 //             const params: any = {
 //                 storeCode: '',
-//                 entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD',
+//                 entityCode: getClientIdentifiers().entityCode,
 //                 pageNumber: page,
 //                 pageSize: pageSize,
 //             };
@@ -804,6 +804,7 @@ import { usePageMetadata } from '@/hooks/usePageMetadata';
 import { formatPrice, CurrencyCode } from '@/utils/helperfns';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Value } from '@radix-ui/react-select';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface CartItem {
     itemCode: string;
@@ -1079,7 +1080,7 @@ export default function OrdersPage() {
         queryFn: async () => {
             const params: any = {
                 storeCode: '',
-                entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD',
+                entityCode: getClientIdentifiers().entityCode,
                 pageNumber: 1,
                 pageSize: 5000,
             };

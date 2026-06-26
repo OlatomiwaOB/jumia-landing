@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import PinInput from '@/components/ui/pin-input'
 import useUser from '@/store/userStore'
 import { AlertTriangle } from "lucide-react"
+import { getClientIdentifiers } from '@/config/client-config';
 
 type SetPasswordFormData = {
     newPin: string
@@ -94,7 +95,7 @@ const ForgotPinModal: React.FC<ResetPinProps> = ({ isOpen, setIsOpen }) => {
     const initiateMutation = useMutation({
         mutationFn: () => axiosInstance.request({
             url: '/ecommerce/initiateForgotPin?skipAuth=true', method: 'GET',
-            params: { username: user?.username || '', entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '', skipAuth: false },
+            params: { username: user?.username || '', entityCode: user?.entityCode || getClientIdentifiers().entityCode, skipAuth: false },
         }),
         onSuccess: (data) => {
             if (data?.data?.code !== '000') { toast.error(data?.data?.desc); return; }
@@ -107,7 +108,7 @@ const ForgotPinModal: React.FC<ResetPinProps> = ({ isOpen, setIsOpen }) => {
     const validateOTPMutation = useMutation({
         mutationFn: () => axiosInstance.request({
             url: '/ecommerce/validatePinResetOtp?skipAuth=true', method: 'POST',
-            params: { username: user?.username || '', entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '', action: 'PIN_RESET', skipAuth: false },
+            params: { username: user?.username || '', entityCode: user?.entityCode || getClientIdentifiers().entityCode, action: 'PIN_RESET', skipAuth: false },
             headers: { 'x-otp': otp },
         }),
         onSuccess: (data) => {
@@ -121,7 +122,7 @@ const ForgotPinModal: React.FC<ResetPinProps> = ({ isOpen, setIsOpen }) => {
     const setPasswordMutation = useMutation({
         mutationFn: (data: SetPasswordFormData) => axiosInstance.request({
             url: '/ecommerce/setPIN?skipAuth=false', method: 'POST',
-            data: { username: user?.username || '', newPin: data.newPin, entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '', channel: 'WEB', skipAuth: false },
+            data: { username: user?.username || '', newPin: data.newPin, entityCode: user?.entityCode || getClientIdentifiers().entityCode, channel: 'WEB', skipAuth: false },
         }),
         onSuccess: (data) => {
             if (data?.data?.code !== '000') { toast.error(data?.data?.desc); return; }
@@ -134,7 +135,7 @@ const ForgotPinModal: React.FC<ResetPinProps> = ({ isOpen, setIsOpen }) => {
     const resendOTPMutation = useMutation({
         mutationFn: () => axiosInstance.request({
             url: '/usermanager/resendotp?skipAuth=false', method: 'GET', 
-            params: { username: user?.username || '', entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '', skipAuth: false },
+            params: { username: user?.username || '', entityCode: user?.entityCode || getClientIdentifiers().entityCode, skipAuth: false },
         }),
         onSuccess: (data) => {
             setIsResending(false);

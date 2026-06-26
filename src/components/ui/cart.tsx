@@ -14,6 +14,7 @@ import axiosCustomer from '@/utils/fetch-function-customer'
 import useUser from '@/store/userStore'
 import { AxiosError } from 'axios'
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth'
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface Product {
     storeCode: string
@@ -63,7 +64,7 @@ const Cart = () => {
     const isUserAuthenticated = !!token && Array.isArray(permissions) && permissions.length > 0;
     const currentDate = getCurrentDate();
     const searchParams = useSearchParams();
-    const storeCode = searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE;
+    const storeCode = searchParams.get('storeCode') || getClientIdentifiers().storeCode;
 
     console.log('totalAmount', totalAmount);
 
@@ -77,7 +78,7 @@ const Cart = () => {
                 params: {
                     name: '',
                     storeCode,
-                    entityCode: process.env.NEXT_PUBLIC_ENTITYCODE,
+                    entityCode: getClientIdentifiers().entityCode,
                     category: '',
                     tag: '',
                     pageNumber: 1,
@@ -180,7 +181,7 @@ const Cart = () => {
 
             sessionStorage.setItem('checkout', JSON.stringify(cartData))
             toast.success(data?.data?.desc || data?.data?.responseMessage || 'Order submitted successfully!')
-            router.push(`/checkout?storeCode=${storeCode || process.env.NEXT_PUBLIC_STORE_CODE}&orderNo=${data?.data?.orderNo}`)
+            router.push(`/checkout?storeCode=${storeCode || getClientIdentifiers().storeCode}&orderNo=${data?.data?.orderNo}`)
         },
         onError: (error: AxiosError) => {
             if (error.response?.status === 400) {
@@ -228,7 +229,7 @@ const Cart = () => {
                 ccy: mainCcy?.()
             };
             sessionStorage.setItem('checkout', JSON.stringify(cartData))
-            router.push(`/checkout?storeCode=${storeCode || process.env.NEXT_PUBLIC_STORE_CODE}&orderNo=${guestOrderNo}`)
+            router.push(`/checkout?storeCode=${storeCode || getClientIdentifiers().storeCode}&orderNo=${guestOrderNo}`)
             return
         }
 

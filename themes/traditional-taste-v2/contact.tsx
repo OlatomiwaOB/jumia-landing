@@ -1,14 +1,16 @@
 'use client';
 
+
+import { clientConfig, getClientIdentifiers } from '@/config/client-config';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, Navigation, Loader2 } from 'lucide-react';
 
 export default function ContactPage() {
-  const envColor = process.env.NEXT_PUBLIC_BG_OFF_WHITE;
+  const envColor = clientConfig().branding.colors.accentForeground;
   const bgColor = envColor ? (envColor.startsWith('#') ? envColor : `#${envColor}`) : '#FAFAF9';
-  const primaryColor = process.env.NEXT_PUBLIC_ACCENT_COLOR
-    ? `#${process.env.NEXT_PUBLIC_ACCENT_COLOR}`
+  const primaryColor = clientConfig().branding.colors.accent
+    ? `#${clientConfig().branding.colors.accent}`
     : "#F97316";
 
   const [formData, setFormData] = useState({
@@ -35,7 +37,7 @@ export default function ContactPage() {
     try {
       const payload = {
         ...formData,
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || ''
+        entityCode: getClientIdentifiers().entityCode
       };
 
       const endpoint = `${process.env.NEXT_PUBLIC_REACT_APP_API_URL}/customer-info/send-contactus-mail`;
