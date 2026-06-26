@@ -1,8 +1,9 @@
 import axiosInstance from '@/utils/fetch-function';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { getClientIdentifiers } from '@/config/client-config';
 
-const entityCode = process.env.NEXT_PUBLIC_ENTITY_CODE || 'H2P'
+const entityCode = getClientIdentifiers().entityCode
 
 export const useGetBvnInfo = () => {
   const mutation = useMutation({

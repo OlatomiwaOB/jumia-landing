@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import PinInput from '@/components/ui/pin-input'
 import { Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
+import { getClientIdentifiers } from '@/config/client-config';
 
 type ForgotPasswordFormData = {
   username: string
@@ -134,7 +135,7 @@ export default function LostPasswordPage() {
     mutationFn: (data: ForgotPasswordFormData) => axiosInstance.request({
       url: '/ecommerce/initiatePasswordReset',
       method: 'GET',
-      params: { username: data.username, entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '' },
+      params: { username: data.username, entityCode: getClientIdentifiers().entityCode },
     }),
     onSuccess: (data) => {
       if (data?.data?.code !== '000') {
@@ -154,7 +155,7 @@ export default function LostPasswordPage() {
     mutationFn: (otp: string) => axiosInstance.request({
       url: '/ecommerce/validatePinResetOtp',
       method: 'POST',
-      params: { username: username, entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '', action: 'PASSWORD_RESET' },
+      params: { username: username, entityCode: getClientIdentifiers().entityCode, action: 'PASSWORD_RESET' },
       headers: { 'x-otp': otp }
     }),
     onSuccess: (data) => {
@@ -174,7 +175,7 @@ export default function LostPasswordPage() {
     mutationFn: (data: SetPasswordFormData) => axiosInstance.request({
       url: '/ecommerce/selfPasswordReset',
       method: 'POST',
-      data: { username: username, newPwd: data.newPassword, entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '', channel: "WEB" },
+      data: { username: username, newPwd: data.newPassword, entityCode: getClientIdentifiers().entityCode, channel: "WEB" },
     }),
     onSuccess: (data) => {
       toast.success("Password reset successfully!")
@@ -193,7 +194,7 @@ export default function LostPasswordPage() {
     mutationFn: () => axiosInstance.request({
       url: '/usermanager/resendotp',
       method: 'GET',
-      params: { username: username || '', entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '', action: 'PASSWORD_RESET' },
+      params: { username: username || '', entityCode: getClientIdentifiers().entityCode, action: 'PASSWORD_RESET' },
     }),
     onSuccess: (data) => {
       setIsResending(false)

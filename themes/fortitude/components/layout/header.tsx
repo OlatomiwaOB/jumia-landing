@@ -1,5 +1,6 @@
 "use client"
 
+import { clientConfig } from '@/config/client-config'
 import { Suspense, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -22,7 +23,7 @@ export default function Header() {
   const { token, permissions } = getAuthCredentials();
   const isUserAuthenticated = !!token && Array.isArray(permissions) && permissions.length > 0;
 
-  const logo = process?.env?.NEXT_PUBLIC_LOGO_URL || '/placeholder.svg'
+  const logo = clientConfig().branding.logos.primary;
   
   return (
     <>

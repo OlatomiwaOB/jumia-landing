@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,8 +13,8 @@ import { formatPrice, CurrencyCode } from '@/utils/helperfns';
 
 export default function CategoryShowcaseSection() {
   const searchParams = useSearchParams();
-  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
 
   const scrollRef = useRef<HTMLDivElement>(null);
 

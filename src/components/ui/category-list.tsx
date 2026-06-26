@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { getCategoryHref } from '@/utils/product-route';
 import { useSearchParams } from 'next/navigation';
+import { getClientIdentifiers } from '@/config/client-config';
 
 const mockCategories = [
   {
@@ -75,8 +76,8 @@ export default function CategoryList({ categories: dynamicCategories }: Category
 
   const searchParams = useSearchParams();
   const storeCode = searchParams
-    ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
-    : process.env.NEXT_PUBLIC_STORE_CODE || '';
+    ? searchParams.get('storeCode') || getClientIdentifiers().storeCode
+    : getClientIdentifiers().storeCode;
 
   const displayCategories = dynamicCategories && dynamicCategories.length > 0
     ? dynamicCategories.map((c, i) => ({

@@ -2,12 +2,13 @@
 import { TransferForm } from '@/components/Customer/send-money/send-money-from'
 import { usePageMetadata } from '@/hooks/usePageMetadata';
 import React from 'react'
+import { getClientFeatures } from '@/config/client-config';
 
 const SendMoneyPage = () => {
   usePageMetadata('Send Money', 'View and manage financial transactions');
-  const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';
+  const isEnabled = getClientFeatures().enableSendMoney;
 
-  if (!isH2P) {
+  if (!isEnabled) {
     return (
       <div className="flex flex-col items-center justify-center py-16 mt-20 gap-3">
         <p className="text-2xl font-medium text-dark-gray">Coming Soon</p>

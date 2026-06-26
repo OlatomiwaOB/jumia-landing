@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Download, Plus, Search, Eye, MapPin, Phone, Mail, Globe, Edit, ExternalLink, AlertCircle } from 'lucide-react';
+import { getClientFeatures } from '@/config/client-config';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/utils/fetch-function';
 import useUser from '@/store/userStore';
@@ -22,6 +23,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePermission } from '@/hooks/usePermissionBusiness';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface Store {
     id: number;
@@ -380,7 +382,7 @@ export default function StoresPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStore, setSelectedStore] = useState<Store | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';
+    const isEnabled = getClientFeatures().enableStores;
 
 
     const stores: Store[] = data?.data?.data || [];
@@ -483,7 +485,7 @@ export default function StoresPage() {
         },
     ];
 
-    if (!isH2P) {
+    if (!isEnabled) {
         return (
             <div className="flex flex-col items-center justify-center py-16 mt-20 gap-3">
                 <p className="text-2xl font-medium text-dark-gray">Coming Soon</p>

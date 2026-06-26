@@ -1,5 +1,7 @@
 'use client';
 
+
+import { clientConfig, getClientIdentifiers } from '@/config/client-config';
 import React, { useState, useEffect, useRef } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { useProducts } from '@/hooks/useProducts';
@@ -8,14 +10,14 @@ import { Loader2, Search, SlidersHorizontal, ChefHat, AlertTriangle } from 'luci
 import { ProductProps } from '@/types';
 
 export default function ShopPage() {
-  const envColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+  const envColor = clientConfig().branding.colors.accentForeground;
   const bgColor = envColor ? (envColor.startsWith('#') ? envColor : `#${envColor}`) : '#FCFBF8';
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
-  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
+  const entityCode = getClientIdentifiers().entityCode;
+  const storeCode = getClientIdentifiers().storeCode;
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories();

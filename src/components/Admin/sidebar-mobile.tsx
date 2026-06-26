@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { clientConfig } from '@/config/client-config';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -252,7 +253,7 @@ interface SidebarMobileProps {
 
 const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
   const pathname = usePathname();
-  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL_WHITE_FULL;
+  const logoUrl = clientConfig().branding.logos.whiteFull;
   const { hasAnyPermission, userPermissions } = usePermission();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 

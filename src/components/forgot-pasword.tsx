@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { Label } from '@radix-ui/react-dropdown-menu'
 import PinInput from '@/components/ui/pin-input'
 import { Eye, EyeOff } from 'lucide-react'
+import { getClientIdentifiers } from '@/config/client-config';
 
 type ForgotPasswordFormData = {
   username: string
@@ -197,7 +198,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordProps> = ({ isOpen, setIsOpen 
       method: 'GET',
       params: {
         username: data.username,
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+        entityCode: getClientIdentifiers().entityCode,
       },
     }),
     onSuccess: (data) => {
@@ -220,7 +221,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordProps> = ({ isOpen, setIsOpen 
       method: 'POST',
       params: {
         username: username,
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+        entityCode: getClientIdentifiers().entityCode,
         action: 'PASSWORD_RESET'
       },
       headers: {
@@ -247,7 +248,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordProps> = ({ isOpen, setIsOpen 
       data: {
         username: username,
         newPwd: data.newPassword,
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+        entityCode: getClientIdentifiers().entityCode,
         channel: "WEB",
       },
     }),
@@ -270,7 +271,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordProps> = ({ isOpen, setIsOpen 
       method: 'GET',
       params: {
         username: username || '',
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || '',
+        entityCode: getClientIdentifiers().entityCode,
         action: 'PASSWORD_RESET'
       },
     }),

@@ -16,9 +16,11 @@ import { Checkbox } from "../ui/checkbox"
 import { Label } from "../ui/label"
 import { OtpVerification } from "./otp-verification"
 import DynamicAuthLayout from "@/components/shared/dynamic-auth-layout"
+import { clientConfig, getClientIdentifiers } from '@/config/client-config'
 
-const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME!
-const logo = process.env.NEXT_PUBLIC_LOGO_URL! || 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+const { branding } = clientConfig()
+const clientName = branding.clientName
+const logo = branding.logos.primary
 
 export function SignInForm() {
   const currentYear = new Date().getFullYear()
@@ -36,8 +38,8 @@ export function SignInForm() {
 
   const returnUrl = searchParams.get('returnUrl') || '/dashboard'
 
-  const bannerUrl = process.env.NEXT_PUBLIC_BANNER_URL || "https://mmcpdocs.s3.eu-west-2.amazonaws.com/16574_ecommerce-svg.jpg";
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+  const bannerUrl = branding.images.banner
+  const entityCode = getClientIdentifiers().entityCode;
 
   useEffect(() => {
     const savedUsername = localStorage.getItem('remembered_customer_username');

@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, ArrowLeft } from 'lucide-react';
 import { ProductProps } from '@/types';
+import { clientConfig } from '@/config/client-config';
 
 interface HeroSplashProps {
   products?: ProductProps[];
@@ -15,10 +16,10 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
   // Safely parse colors from .env, adding '#' if missing
   const getHex = (val?: string, fallback = '') => val ? (val.startsWith('#') ? val : `#${val}`) : fallback;
 
-  const color1 = getHex(process.env.NEXT_PUBLIC_ACCENT_COLOR, '#A0522D');
-  const color2 = getHex(process.env.NEXT_PUBLIC_ACCENT_COLOR_2, '#967BB6');
-  const color3 = getHex(process.env.NEXT_PUBLIC_ACCENT_COLOR_3, '#2F3E33');
-  const textColor = getHex(process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR, '#FFFDF5');
+  const color1 = getHex(clientConfig().branding.colors.accent, '#A0522D');
+  const color2 = getHex(clientConfig().branding.colors.accentColor2, '#967BB6');
+  const color3 = getHex(clientConfig().branding.colors.accentColor3, '#2F3E33');
+  const textColor = getHex(clientConfig().branding.colors.accentForeground, '#FFFDF5');
 
   const findProduct = (keyword: string) => 
     products.find(p => p.name?.toLowerCase().includes(keyword.toLowerCase()));

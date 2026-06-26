@@ -1,24 +1,12 @@
 import { Suspense, lazy } from 'react'
 import { Metadata } from 'next'
 import Loader from '@/components/ui/loader'
+import { clientConfig } from '@/config/client-config'
 
-const entityObject = {
-  'depot': {
-    name: 'DEPOT | home',
-  },
-  'fortitude': {
-    name: 'FORTITUDE | home'
-  },
-  'vogue': {
-    name: 'VOGUE | home'
-  },
-  'varisa': {
-    name: 'VARISA | home'
-  }
-}
+const config = clientConfig()
 
 export const metadata: Metadata = {
-  title: entityObject[process.env.NEXT_PUBLIC_STORE_FRONT as keyof typeof entityObject]?.name || 'Shop | home',
+  title: config.branding.metadata.title || 'Shop | home',
 }
 
 // Lazy loading components
@@ -29,7 +17,7 @@ const HomePageTraditionalTaste = lazy(() => import('../../../themes/traditional-
 const HomePageVarisa = lazy(() => import('../../../themes/varisa/homepage'))
 
 const HomePage = () => {
-  const storefront = process?.env?.NEXT_PUBLIC_STORE_FRONT;
+  const storefront = config.branding.storefront;
 
   if (storefront === 'depot') {
     return <Suspense fallback={<Loader text='Loading...' />}><HomePageDepot /></Suspense>

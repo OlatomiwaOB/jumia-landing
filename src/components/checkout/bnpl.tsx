@@ -24,6 +24,7 @@ import axiosCustomer from '@/utils/fetch-function-customer'
 import useCustomer from '@/store/customerStore'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import WorkEmailOtpValidation from './bnpl/work-email-otp-validation'
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface RegistrationData {
   firstname: string;
@@ -66,7 +67,7 @@ const BNPL = () => {
   const [workEmailConfirmed,setWorkEmailConfirmed] = useState(false)
   const [isOpen,setIsOpen] = useState(false)
   useEffect(() => {
-    router?.push(`?storeCode=${process.env.NEXT_PUBLIC_STORE_CODE}`)
+    router?.push(`?storeCode=${getClientIdentifiers().storeCode}`)
   }, [router])
   // console.log(customer);
   const totalAmount = form.watch('totalAmount')

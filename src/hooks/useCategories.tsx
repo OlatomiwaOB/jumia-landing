@@ -3,14 +3,14 @@
 import { Category } from '@/types';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import { useQuery } from '@tanstack/react-query';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface CategoriesResponse {
   categories: Category[];
 }
 
 export const useCategories = (retry?: unknown) => {
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
-  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
+  const { entityCode, storeCode } = getClientIdentifiers();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['categories', entityCode, storeCode, retry],

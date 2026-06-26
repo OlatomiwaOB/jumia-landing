@@ -15,6 +15,7 @@ import useCustomer from '@/store/customerStore'
 import { hasAccess, setAuthCredentials } from '@/utils/auth-utils-customer'
 import { Label } from '@radix-ui/react-dropdown-menu'
 import { Eye, EyeOff } from "lucide-react"
+import { getClientIdentifiers } from '@/config/client-config';
 
 export type LoginProps = {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
@@ -45,7 +46,7 @@ export const LoginForm = ({ setIsOpen, onForgotPassword }: LoginProps) => {
     const { refresh, push } = useRouter()
     const [loginStep, setLoginStep] = useState<'credentials' | 'otp'>('credentials')
     const [loginData, setLoginData] = useState<FormData | null>(null);
-    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+    const entityCode = getClientIdentifiers().entityCode;
     const storeCode = searchParams.get('storeCode') || ''
     const [showPassword, setShowPassword] = useState(false)
 

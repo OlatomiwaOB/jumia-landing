@@ -3,6 +3,7 @@ import useCustomer from '@/store/customerStore';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface ShippingOption {
   id: string;
@@ -15,7 +16,7 @@ export interface ShippingOption {
 
 const useShippingOptions = () => {
   const { customer } = useCustomer();
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || customer?.entityCode || 'FTD';
+  const entityCode = getClientIdentifiers().entityCode;
   
   const { data, isLoading, error } = useQuery({
     queryKey: ['shipping-options', entityCode],

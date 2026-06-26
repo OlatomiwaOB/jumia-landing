@@ -12,6 +12,7 @@ import useCustomer from '@/store/customerStore'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Shield, Eye, EyeOff, AlertTriangle } from "lucide-react"
 import axiosCustomer from "@/utils/fetch-function-customer";
+import { getClientIdentifiers } from '@/config/client-config';
 
 
 type SetPasswordFormData = {
@@ -106,7 +107,7 @@ const ChangePinModal: React.FC<ChangePinProps> = ({ isOpen, setIsOpen }) => {
             method: 'POST',
             params: {
                 username: customer?.username || '',
-                entityCode: customer?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                entityCode: customer?.entityCode || getClientIdentifiers().entityCode,
                 channel: 'WEB'
             },
             headers: {
@@ -133,7 +134,7 @@ const ChangePinModal: React.FC<ChangePinProps> = ({ isOpen, setIsOpen }) => {
             data: {
                 username: customer?.username || '',
                 newPin: data.newPin,
-                entityCode: customer?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '',
+                entityCode: customer?.entityCode || getClientIdentifiers().entityCode,
                 channel: "WEB",
             },
         }),

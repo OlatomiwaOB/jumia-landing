@@ -1,4 +1,6 @@
 'use client';
+
+import { getClientIdentifiers } from '@/config/client-config';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import HeroSlider from "./components/utils/hero-slider";
@@ -18,12 +20,12 @@ export default function DepotHome() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const storeCode = searchParams
-    ? searchParams.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || ''
-    : process.env.NEXT_PUBLIC_STORE_CODE || '';
+    ? searchParams.get('storeCode') || getClientIdentifiers().storeCode
+    : getClientIdentifiers().storeCode;
   const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE;
+  const entityCode = getClientIdentifiers().entityCode;
   const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
 
   // We reuse the api fetching logic from ftd

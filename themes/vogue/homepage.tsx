@@ -1,5 +1,7 @@
 "use client";
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import React from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +16,7 @@ import { getProductHref } from "@/utils/product-route";
 export default function VogueHomepage() {
   const searchParams = useSearchParams();
   const storeCode = searchParams?.get("storeCode") || "";
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || "FTD";
+  const entityCode = getClientIdentifiers().entityCode;
   const router = useRouter()
 
 

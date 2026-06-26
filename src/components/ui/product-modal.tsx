@@ -9,6 +9,7 @@ import { useCart } from '@/store/cart';
 import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/utils/fetch-function';
 import { Product } from '../gadgets/product';
+import { getClientIdentifiers } from '@/config/client-config';
 // import { parseHTML } from '@/utils/parsed-html';
 // import useBackButtonClose from '@/hooks/useBackButtonClose';
 
@@ -20,7 +21,7 @@ type ProductDetailProps = {
 
 const ProductDetail = ({ product, setIsOpen, setModalProduct }: ProductDetailProps) => {
     const { addToCart, decrement, increment, inCart, singleQuantity } = useCart()
-    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || '';
+    const entityCode = getClientIdentifiers().entityCode;
     const { data, isLoading } = useQuery({
         queryKey: ["products"],
         queryFn: () => {

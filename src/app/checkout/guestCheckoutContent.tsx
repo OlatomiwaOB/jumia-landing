@@ -16,6 +16,7 @@ import { useGuestCheckoutStore } from '@/store/guestCheckoutStore';
 import { CheckoutStep, PaymentMethod, FormData } from './checkoutContent';
 import { ShoppingBag } from 'lucide-react';
 import GuestInfoForm from '@/components/checkout/guest-info-form';
+import { getClientIdentifiers } from '@/config/client-config';
 
 /**
  * Extended form schema for guest checkout.
@@ -101,7 +102,7 @@ const GuestCheckoutContent = () => {
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || '';
+  const storeCode = getClientIdentifiers().storeCode;
   const { toast } = useToast();
   const { getCartTotal, totalVat: cartVat, cart } = useCart();
 

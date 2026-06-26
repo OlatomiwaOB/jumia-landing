@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import { clientConfig } from '@/config/client-config';
 
 export interface AuthLayoutProps {
   children: React.ReactNode;
@@ -19,10 +20,9 @@ export default function DefaultAuthLayout({
   leftPanelSubtitle,
 }: AuthLayoutProps) {
   const currentYear = new Date().getFullYear();
-  const clientName = process.env.NEXT_PUBLIC_CLIENT_NAME || 'Fortitude';
-  const logo =
-    process.env.NEXT_PUBLIC_LOGO_URL ||
-    'https://mmcpdocs.s3.eu-west-2.amazonaws.com/80254_varisa.jpeg';
+  const { branding } = clientConfig();
+  const clientName = branding.clientName;
+  const logo = branding.logos.primary;
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">

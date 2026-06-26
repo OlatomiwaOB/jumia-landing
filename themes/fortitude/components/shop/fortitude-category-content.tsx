@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -34,8 +36,8 @@ export default function FortitudeCategoryContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryCode = decodeURIComponent(params.categoryCode as string);
-    const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-    const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+    const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+    const entityCode = getClientIdentifiers().entityCode;
 
     const [selectedProduct, setSelectedProduct] = useState<ProductProps | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);

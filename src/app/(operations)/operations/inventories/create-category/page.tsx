@@ -501,12 +501,13 @@ import { usePageMetadata } from "@/hooks/usePageMetadata";
 import Image from "next/image";
 import { CameraIcon } from "@/components/icons/icons";
 import { StoreCombobox } from "@/components/shared/StoreCombobox";
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface CategoryFormProps {
   category?: Category;
   mode?: 'create' | 'edit';
 }
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'STO4430';
+const storeCode = getClientIdentifiers().storeCode;
 export const sectorOptions = [
   { label: 'Electronics', value: 'Electronics' },
   { label: 'Clothing & Fashion', value: 'Clothing & Fashion' },

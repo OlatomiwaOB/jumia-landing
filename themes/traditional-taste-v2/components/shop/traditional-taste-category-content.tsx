@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useCategories } from '@/hooks/useCategories';
@@ -15,8 +17,8 @@ export default function TraditionalTasteCategoryContent() {
 
   const [sortBy, setSortBy] = useState('Sort by Name');
 
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
-  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'WEB';
+  const entityCode = getClientIdentifiers().entityCode;
+  const storeCode = getClientIdentifiers().storeCode;
 
   // Fetch categories to get the category name
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories();

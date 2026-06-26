@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react'
+import { clientConfig } from '@/config/client-config'
 // Depot Theme Imports
 import DepotLayout from '../../../../../themes/depot/layout'
 import DepotCategoryContent from '../../../../../themes/depot/components/shop/depot-category-content'
@@ -16,7 +17,7 @@ import TraditionalTasteLayout from '../../../../../themes/traditional-taste-v2/l
 import TraditionalTasteCategoryContent from '../../../../../themes/traditional-taste-v2/components/shop/traditional-taste-category-content'
 
 const CategoryPage = () => {
-    const storefront = process.env.NEXT_PUBLIC_STORE_FRONT;
+    const storefront = clientConfig().branding.storefront;
     const isDepot = storefront === 'depot';
 
     if (isDepot) {

@@ -11,6 +11,7 @@ import axiosOperations from '@/utils/fetch-function-op-auth';
 import { toast } from 'sonner';
 import useGetLookup from "@/app/hooks/useGetLookup";
 import { SelectOption } from '@/types';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface OptionType {
     id: number;
@@ -72,7 +73,7 @@ const defaultFormData: WeightConfigFormData = {
     status: 'Active'
 };
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
+const storeCode = getClientIdentifiers().storeCode;
 
 export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOpenChange, optionType, onSuccess }) => {
     const queryClient = useQueryClient();

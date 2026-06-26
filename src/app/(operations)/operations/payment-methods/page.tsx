@@ -23,7 +23,7 @@
 //   const [currentPage, setCurrentPage] = useState(1);
 //   const { toast } = useToast();
 //   const queryClient = useQueryClient();
-//   const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';
+//   const isH2P = getClientIdentifiers().entityCode === 'H2P';
 
 
 //   const { data, isLoading } = useQuery({
@@ -237,6 +237,7 @@ import { CreditCard, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Papa from "papaparse";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
+import { getClientIdentifiers } from '@/config/client-config';
 
 const getDisplayValue = (value: any): string => value?.toString() || 'N/A';
 

@@ -1,5 +1,7 @@
 'use client';
 
+
+import { clientConfig } from '@/config/client-config';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRef, useState, useEffect } from 'react';
@@ -11,16 +13,16 @@ interface FeaturedProductsSliderProps {
 }
 
 export default function FeaturedProductsSlider({ categories = [] }: FeaturedProductsSliderProps) {
-  const envBgColor = process.env.NEXT_PUBLIC_ACCENT_COLOR_3;
+  const envBgColor = clientConfig().branding.colors.accentColor3;
   const bgColor = envBgColor ? (envBgColor.startsWith('#') ? envBgColor : `#${envBgColor}`) : '#2F3E33';
 
-  const envTextColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR;
+  const envTextColor = clientConfig().branding.colors.accentForeground;
   const textColor = envTextColor ? (envTextColor.startsWith('#') ? envTextColor : `#${envTextColor}`) : '#FFFDF5';
 
-  const envAccentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR;
+  const envAccentColor = clientConfig().branding.colors.accent;
   const accentColor = envAccentColor ? (envAccentColor.startsWith('#') ? envAccentColor : `#${envAccentColor}`) : '#A0522D';
 
-  const envAccentColor2 = process.env.NEXT_PUBLIC_ACCENT_COLOR_2;
+  const envAccentColor2 = clientConfig().branding.colors.accentColor2;
   const accentColor2 = envAccentColor2 ? (envAccentColor2.startsWith('#') ? envAccentColor2 : `#${envAccentColor2}`) : '#967BB6';
 
   const scrollRef = useRef<HTMLDivElement>(null);

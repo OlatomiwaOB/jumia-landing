@@ -4,11 +4,13 @@ import cn from 'classnames';
 import { siteSettings } from '@/settings/site.settings';
 import pos from '@/assets/placeholders/pos.png';
 
+import { clientConfig } from '@/config/client-config';
+
 const Logo: React.FC<React.AnchorHTMLAttributes<{}>> = ({
   className,
   ...props
 }) => {
-  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL ?? pos;
+  const logoUrl = clientConfig().branding.logos.primary ?? pos;
   return (
     <Link
       href={siteSettings.logo.href}

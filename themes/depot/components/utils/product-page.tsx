@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -38,8 +40,8 @@ export default function DepotThemeProductPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
-  const storeCode = searchParams?.get('storeCode') || process.env.NEXT_PUBLIC_STORE_CODE || '';
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+  const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
+  const entityCode = getClientIdentifiers().entityCode;
   const { product, products, isLoading } = useProductBySlug(productSlug, storeCode, entityCode);
   const { addToCart, decrement, increment, singleQuantity } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');

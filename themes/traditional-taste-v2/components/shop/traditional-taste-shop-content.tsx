@@ -1,5 +1,5 @@
 'use client';
-
+import { clientConfig, getClientIdentifiers } from '@/config/client-config';
 import React, { useState, useRef, useEffect } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { useProducts } from '@/hooks/useProducts';
@@ -9,8 +9,8 @@ import { ProductProps } from '@/types';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 
 export default function TraditionalTasteShopContent() {
-  const envColor = process.env.NEXT_PUBLIC_PRIMARY_COLOR || '#F97316';
-  const bgColor = process.env.NEXT_PUBLIC_ACCENT_COLOR // Traditional Taste background
+  const envColor = clientConfig().branding.colors.accent;
+  const bgColor = clientConfig().branding.colors.accent // Traditional Taste background
 
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,8 +22,8 @@ export default function TraditionalTasteShopContent() {
   const [isPaused, setIsPaused] = useState(false);
   const [showAllergenDetails, setShowAllergenDetails] = useState(false);
 
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'H2P';
-  const storeCode = process.env.NEXT_PUBLIC_STORE_CODE || 'WEB';
+  const entityCode = getClientIdentifiers().entityCode;
+  const storeCode = getClientIdentifiers().storeCode;
 
   // Fetch categories
   const { data: categoriesData, isLoading: isLoadingCategories } = useCategories();

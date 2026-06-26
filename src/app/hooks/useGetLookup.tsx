@@ -4,6 +4,7 @@ import { LoggedInUser, SelectOption, UserProfile } from '@/types';
 import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosResponse } from 'axios';
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface LookupOptions {
   id: number;
@@ -19,7 +20,7 @@ export interface LookupOptions {
 
 
 const useGetLookup = (categoryCode: string) => {
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || 'FTD';
+  const entityCode = getClientIdentifiers().entityCode;
   const { data: lookupData } = useQuery<AxiosResponse<LookupOptions[]>>({
     queryKey: [categoryCode],
     queryFn: () =>

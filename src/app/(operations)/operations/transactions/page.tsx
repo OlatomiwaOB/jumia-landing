@@ -252,7 +252,7 @@
 //                 url: '/lookupdata/new-list',
 //                 params: {
 //                     categoryCode: 'TRAN_CODE',
-//                     entityCode: process.env.NEXT_PUBLIC_ENTITYCODE
+//                     entityCode: getClientIdentifiers().entityCode
 //                 }
 //             }),
 //         enabled: true,
@@ -792,6 +792,7 @@ import Papa from 'papaparse';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
 import { format, parse } from 'date-fns';
 import { useRouter } from 'next/navigation';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface Transaction {
     id: number;
@@ -1036,7 +1037,7 @@ export default function TransactionsPage() {
         queryFn: () => axiosOperations.request({
             method: 'GET',
             url: '/lookupdata/new-list',
-            params: { categoryCode: 'TRAN_CODE', entityCode: process.env.NEXT_PUBLIC_ENTITYCODE }
+            params: { categoryCode: 'TRAN_CODE', entityCode: getClientIdentifiers().entityCode }
         }),
         enabled: true,
     });

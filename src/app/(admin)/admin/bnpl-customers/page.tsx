@@ -12,6 +12,7 @@ import Loader from '@/components/ui/loader';
 import { getStatusBadge } from '@/utils/helperfns';
 import { usePermission } from '@/hooks/usePermissionBusiness';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
+import { getClientIdentifiers, getClientFeatures } from '@/config/client-config';
 
 interface CreditRecord {
   id: string;
@@ -54,7 +55,7 @@ const CreditAssessment = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const isH2P = process.env.NEXT_PUBLIC_ENTITYCODE === 'H2P';
+  const isEnabled = getClientFeatures().enableBNPL;
 
 
   const { data, isLoading, error } = useQuery({
@@ -197,7 +198,7 @@ const CreditAssessment = () => {
   const showingStart = (currentPage - 1) * itemsPerPage + 1;
   const showingEnd = Math.min(currentPage * itemsPerPage, totalRecords);
 
-  if (!isH2P) {
+  if (!isEnabled) {
     return (
       <div className="flex flex-col items-center justify-center py-16 mt-20 gap-3">
         <p className="text-2xl font-medium text-dark-gray">Coming Soon</p>

@@ -1,5 +1,7 @@
 "use client";
 
+
+import { clientConfig } from '@/config/client-config';
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -9,18 +11,18 @@ const Footer = () => {
 
 
   // Sourcing variables from the theme .env
-  const accentBg = process.env.NEXT_PUBLIC_ACCENT_COLOR
-    ? `#${process.env.NEXT_PUBLIC_ACCENT_COLOR}`
+  const accentBg = clientConfig().branding.colors.accent
+    ? `#${clientConfig().branding.colors.accent}`
     : "#F97316";
-  const textCharcoal = process.env.NEXT_PUBLIC_TEXT_CHARCOAL
-    ? `#${process.env.NEXT_PUBLIC_TEXT_CHARCOAL}`
+  const textCharcoal = clientConfig().branding.colors.accent
+    ? `#${clientConfig().branding.colors.accent}`
     : "#1C1917";
 
-  const textOffWhite = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR
-    ? `#${process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR}`
+  const textOffWhite = clientConfig().branding.colors.accentForeground
+    ? `#${clientConfig().branding.colors.accentForeground}`
     : "#FFFFFF";
   const logoUrl =
-    process.env.NEXT_PUBLIC_LOGO_URL ||
+    clientConfig().branding.logos.primary ||
     "https://mmcpdocs.s3.eu-west-2.amazonaws.com/66044_direct-logo.png";
 
   return (

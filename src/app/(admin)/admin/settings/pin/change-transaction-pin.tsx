@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import PinInput from '@/components/ui/pin-input'
 import useUser from '@/store/userStore'
 import { AlertTriangle } from "lucide-react"
+import { getClientIdentifiers } from '@/config/client-config';
 
 type SetPasswordFormData = {
     newPin: string
@@ -90,7 +91,7 @@ const ChangePinModal: React.FC<ChangePinProps> = ({ isOpen, setIsOpen }) => {
     const validateCurrentPinMutation = useMutation({
         mutationFn: (pin: string) => axiosInstance.request({
             url: '/ecommerce/validateTransactPin?skipAuth=false', method: 'POST',
-            params: { username: user?.username || '', entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '', channel: 'WEB', skipAuth: false },
+            params: { username: user?.username || '', entityCode: user?.entityCode || getClientIdentifiers().entityCode, channel: 'WEB', skipAuth: false },
             headers: { 'x-enc-pwd': pin },
         }),
         onSuccess: (data) => {
@@ -104,7 +105,7 @@ const ChangePinModal: React.FC<ChangePinProps> = ({ isOpen, setIsOpen }) => {
     const setPasswordMutation = useMutation({
         mutationFn: (data: SetPasswordFormData) => axiosInstance.request({
             url: '/ecommerce/setPIN?skipAuth=false', method: 'POST',
-            data: { username: user?.username || '', newPin: data.newPin, entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '', channel: 'WEB', skipAuth: false },
+            data: { username: user?.username || '', newPin: data.newPin, entityCode: user?.entityCode || getClientIdentifiers().entityCode, channel: 'WEB', skipAuth: false },
         }),
         onSuccess: (data) => {
             if (data?.data?.code !== '000') { toast.error(data?.data?.desc); return; }

@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import axiosInstance from '@/utils/fetch-function';
 import useUser from '@/store/userStore';
+import { getClientIdentifiers } from '@/config/client-config';
 
 export interface ReportDefinition {
   id: string;
@@ -35,7 +36,7 @@ export interface ReportResponse {
 
 export const useReports = () => {
   const { user } = useUser();
-  const entityCode = process.env.NEXT_PUBLIC_ENTITYCODE || user?.entityCode || 'FTD';
+  const entityCode = getClientIdentifiers().entityCode;
   const storeCode = user?.storeCode || '';
 
   const formatDate = (date: string | null) => {

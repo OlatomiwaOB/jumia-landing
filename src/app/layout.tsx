@@ -9,6 +9,7 @@ import { getConfig } from "../../wagmi.config";
 import { headers } from "next/headers";
 import AlgorandWalletProvider from "./AlgorandWalletProvider";
 import ScrollToTop from "@/components/ui/scroll-to-top";
+import { clientConfig } from "@/config/client-config";
 
 
 const funnelDisplay = Funnel_Display({
@@ -25,58 +26,16 @@ const manropeFont = Manrope({
   display: "swap",
 });
 
-const storefrontConfigs = {
-  depot: {
-    name: 'Depot',
-    favicon: '/favicons/fortitude.ico',
-    metadata: {
-      title: 'DEPOT | Home',
-      description: 'Curated essentials for everyday living.',
-    }
-  },
-
-  varisa: {
-    name: 'Varisa',
-    favicon: '/favicons/varisa.ico',
-    metadata: {
-      title: 'Varisa',
-      description: 'Varisa',
-    }
-  },
-
-  vogue: {
-    name: 'Vogue',
-    favicon: '/favicons/vogue.ico',
-    metadata: {
-      title: 'VOGUE | Home',
-      description: 'Premium fashion and wearables.',
-    }
-  },
-  'traditional-taste-v2': {
-    name: 'Traditional Taste',
-    favicon: '/traditional-taste-logo.jpg',
-    metadata: {
-      title: 'Traditional Taste | Home',
-      description: 'Traditional Taste Home',
-    }
-  },
-};
-
-function getCurrentStorefront() {
-  const storefrontKey = process.env.NEXT_PUBLIC_STORE_FRONT as keyof typeof storefrontConfigs;
-  return storefrontConfigs[storefrontKey] || storefrontConfigs.depot;
-}
-
 export async function generateMetadata(): Promise<Metadata> {
-  const storefront = getCurrentStorefront();
+  const { branding } = clientConfig();
 
   return {
-    title: storefront.metadata.title,
-    description: storefront.metadata.description,
+    title: branding.metadata.title,
+    description: branding.metadata.description,
     icons: {
-      icon: storefront.favicon,
-      shortcut: storefront.favicon,
-      apple: storefront.favicon,
+      icon: branding.images.favicon,
+      shortcut: branding.images.favicon,
+      apple: branding.images.favicon,
     },
   };
 }
@@ -86,12 +45,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const storefront = getCurrentStorefront();
-  const accentColor = process.env.NEXT_PUBLIC_ACCENT_COLOR || '0652e9';
-  const accentForegroundColor = process.env.NEXT_PUBLIC_ACCENT_FOREGROUND_COLOR || '76a2fc';
-  const accentColor2 = process.env.NEXT_PUBLIC_ACCENT_COLOR_2 || '967BB6';
-  const accentColor3 = process.env.NEXT_PUBLIC_ACCENT_COLOR_3 || '2F3E33';
-  const dashboardSidebarColor = process.env.NEXT_PUBLIC_DASHBOARD_SIDEBAR || '1A1D23';
+  const config = clientConfig();
+  const { colors, images, storefront } = config.branding;
   const headersList = await headers();
   const initialState = cookieToInitialState(
     getConfig(),
@@ -101,17 +56,17 @@ export default async function RootLayout({
   return (
     <html lang="en" className={manropeFont.variable}>
       <head>
-        <meta name="google-site-verification" content="3mJ66FK4ohtkK2BWhKbmiHPwRx4DP6fIXyAJwHi5wPo" />
-        <link rel="icon" href={storefront.favicon} type="image/x-icon" />
+        <meta name="google-site-verification" content="3mJ66FK4ohtkK2BWhKbmiHPwRx4DP6fIXyAJwDnuhM_fUBA" />
+        <link rel="icon" href={images.favicon} type="image/x-icon" />
 
         <style suppressHydrationWarning>
           {`
           :root {
-              --accent-env: #${accentColor};
-              --accent-foreground-env: #${accentForegroundColor};
-              --accent-color2: #${accentColor2};
-              --accent-color3: #${accentColor3};
-              --dashboard-sidebar-color: #${dashboardSidebarColor};
+              --accent-env: #${colors.accent};
+              --accent-foreground-env: #${colors.accentForeground};
+              --accent-color2: #${colors.accentColor2};
+              --accent-color3: #${colors.accentColor3};
+              --dashboard-sidebar-color: #${colors.dashboardSidebar};
             }
             
             body {
@@ -129,7 +84,7 @@ export default async function RootLayout({
             </LocationProvider>
           </AlgorandWalletProvider>
         </Providers>
-        {process.env.NEXT_PUBLIC_STORE_FRONT === 'varisa' && <ScrollToTop />}
+        {storefront === 'varisa' && <ScrollToTop />}
         <Toaster />
       </body>
     </html>

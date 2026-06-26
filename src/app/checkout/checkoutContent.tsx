@@ -14,6 +14,7 @@ import WalletPayment from '@/components/checkout/wallet-payment';
 import { Button } from '@/components/ui/button';
 import axiosCustomer from '@/utils/fetch-function-customer';
 import useCustomer from '@/store/customerStore'
+import { getClientIdentifiers } from '@/config/client-config';
 
 export type PaymentMethod = 'card' | 'card2' | 'crypto_token' | 'bnpl' | 'bank_transfer' | 'tron' | 'rexpay' | 'solana_pay' | 'wallet' | null;
 export type CheckoutStep = 'cart' | 'payment' | 'processing' | 'success' | 'guest-info' | 'retry';
@@ -88,7 +89,8 @@ const CheckoutContent = () => {
 
   const searchParams = useSearchParams()
   const router = useRouter();
-  const storeCode = searchParams.get('storeCode') || ''
+  const clientIdentifier = getClientIdentifiers()
+  const storeCode = searchParams.get('storeCode') || clientIdentifier?.storeCode
   const { toast } = useToast();
   const { getCartTotal, totalVat: cartVat, cart } = useCart();
 

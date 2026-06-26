@@ -1,5 +1,7 @@
 'use client';
 
+
+import { getClientIdentifiers } from '@/config/client-config';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
@@ -18,8 +20,8 @@ export default function PromotionalCards() {
         pageNumber: 1,
         pageSize: 4,
         componentType: 'BANNER',
-        storeCode: process.env.NEXT_PUBLIC_STORE_CODE,
-        entityCode: process.env.NEXT_PUBLIC_ENTITYCODE
+        storeCode: getClientIdentifiers().storeCode,
+        entityCode: getClientIdentifiers().entityCode
       }
     }).then(res => res.data),
   });

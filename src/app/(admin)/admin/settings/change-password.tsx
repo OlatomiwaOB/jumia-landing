@@ -11,6 +11,7 @@ import axiosInstance from '@/utils/fetch-function-no-auth';
 import { logout } from '@/utils/auth-utils';
 import useUser from '@/store/userStore';
 import PinInput from '@/components/ui/pin-input';
+import { getClientIdentifiers } from '@/config/client-config';
 
 const validatePassword = (p: string) => {
     if (p.length < 8) return { ok: false, strength: 'weak' as const, msg: 'At least 8 characters required' };
@@ -91,7 +92,7 @@ const ChangePasswordModal: React.FC<Props> = ({ isOpen, setIsOpen }) => {
     const initiateMutation = useMutation({
         mutationFn: () => axiosInstance.request({
             url: '/ecommerce/initiatePasswordReset', method: 'GET',
-            params: { username: user?.username || '', entityCode: user?.entityCode || process.env.NEXT_PUBLIC_ENTITYCODE || '' },
+            params: { username: user?.username || '', entityCode: user?.entityCode || getClientIdentifiers().entityCode },
         }),
         onSuccess: (data) => {
             if (data?.data?.code !== '000') { toast.error(data?.data?.desc); return; }

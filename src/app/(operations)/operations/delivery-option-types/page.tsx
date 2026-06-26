@@ -17,6 +17,7 @@ import { OptionTypeDeleteModal } from '@/components/Operations/delivery-option-t
 import { WeightConfigModal } from '@/components/Operations/delivery-option-types/weight-config';
 import { CalculateSummaryModal } from '@/components/Operations/delivery-option-types/calculate-summary';
 import { CreateEditOptionTypeModal } from '@/components/Operations/delivery-option-types/create-edit-option-type-modal';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface OptionType {
     id: number;
@@ -27,7 +28,7 @@ interface OptionType {
     status: string;
 }
 
-const storeCode = process.env.NEXT_PUBLIC_STORE_CODE!;
+const storeCode = getClientIdentifiers().storeCode;
 
 const getMultiplierColor = (multiplier: number): string => {
     if (multiplier === 1.0) return 'bg-blue-100 text-blue-700 border-blue-200';

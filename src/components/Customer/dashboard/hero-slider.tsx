@@ -116,7 +116,7 @@
 //           params: {
 //             name: "",
 //             storeCode: storeCode || "",
-//             entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || "FTD",
+//             entityCode: getClientIdentifiers().entityCode,
 //             category: "",
 //             tag: "",
 //             pageNumber: 1,
@@ -352,6 +352,7 @@ import { ProductProps } from "@/types";
 import { useSearchParams } from "next/navigation";
 import { CurrencyCode, formatPrice } from "@/utils/helperfns";
 import ProductDetailsModal from "@/utils/checkout-product-details";
+import { getClientIdentifiers } from '@/config/client-config';
 
 function SliderBackground() {
   return (
@@ -412,7 +413,7 @@ function LoadingSkeleton({ height }: { height: string }) {
   );
 }
 
-const storeCodeEnv = process.env.NEXT_PUBLIC_STORE_CODE!
+const storeCodeEnv = getClientIdentifiers().storeCode
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState<number>(1);
@@ -441,7 +442,7 @@ export default function HeroSlider() {
           params: {
             name: "",
             storeCode: storeCode || "",
-            entityCode: process.env.NEXT_PUBLIC_ENTITYCODE || "FTD",
+            entityCode: getClientIdentifiers().entityCode,
             category: "",
             tag: "",
             pageNumber: 1,
