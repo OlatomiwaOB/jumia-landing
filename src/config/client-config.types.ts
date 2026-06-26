@@ -40,6 +40,8 @@ export interface ClientColors {
   accentColor3: string;
   /** Dashboard sidebar background color — hex without '#' */
   dashboardSidebar: string;
+  /** Text charcoal color — hex without '#' */
+  textCharcoal?: string;
 }
 
 export interface ClientLogos {

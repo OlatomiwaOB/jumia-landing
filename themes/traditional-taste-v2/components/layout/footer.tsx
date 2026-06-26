@@ -14,8 +14,8 @@ const Footer = () => {
   const accentBg = clientConfig().branding.colors.accent
     ? `#${clientConfig().branding.colors.accent}`
     : "#F97316";
-  const textCharcoal = clientConfig().branding.colors.accent
-    ? `#${clientConfig().branding.colors.accent}`
+  const textCharcoal = clientConfig().branding.colors.textCharcoal
+    ? `#${clientConfig().branding.colors.textCharcoal}`
     : "#1C1917";
 
   const textOffWhite = clientConfig().branding.colors.accentForeground
@@ -33,7 +33,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-8">
         {/* Top Section: Links & Store Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-14 border-b border-white/10">
-          
+
           {/* Column 1: Brand & Badge */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left gap-6">
             <div className="flex items-center gap-3">
@@ -52,56 +52,56 @@ const Footer = () => {
             <p className="text-[14px] opacity-80 leading-relaxed max-w-[300px]">
               Authentic African cuisine, freshly prepared and delivered straight to your door. Experience the true taste of tradition.
             </p>
-            
+
             {/* Food Hygiene Rating Badge (Pure CSS Replica for maximum professionalism) */}
             <div className="mt-2 w-full flex justify-center md:justify-start">
-                <a
-                  href="https://www.food.gov.uk/safety-hygiene/food-hygiene-rating-scheme"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-[260px] rounded-[10px] shadow-2xl hover:scale-105 transition-transform duration-300 overflow-hidden flex flex-col font-sans border border-white/20 select-none"
-                >
-                  {/* Top Black Section */}
-                  <div className="bg-[#1A1A1A] text-white p-3 flex justify-between items-center h-[55px]">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-8 bg-white/10 rounded-[2px] border border-white/20 flex flex-col justify-evenly p-[2px]">
-                        <div className="h-1 bg-white/80 rounded-full w-full"></div>
-                        <div className="h-1 bg-white/80 rounded-full w-full"></div>
-                        <div className="h-1 bg-white/80 rounded-full w-3/4"></div>
-                      </div>
-                      <div className="text-[9px] font-bold leading-tight tracking-wide">
-                        Food<br />Standards<br />Agency
-                      </div>
+              <a
+                href="https://www.food.gov.uk/safety-hygiene/food-hygiene-rating-scheme"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-[260px] rounded-[10px] shadow-2xl hover:scale-105 transition-transform duration-300 overflow-hidden flex flex-col font-sans border border-white/20 select-none"
+              >
+                {/* Top Black Section */}
+                <div className="bg-[#1A1A1A] text-white p-3 flex justify-between items-center h-[55px]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-8 bg-white/10 rounded-[2px] border border-white/20 flex flex-col justify-evenly p-[2px]">
+                      <div className="h-1 bg-white/80 rounded-full w-full"></div>
+                      <div className="h-1 bg-white/80 rounded-full w-full"></div>
+                      <div className="h-1 bg-white/80 rounded-full w-3/4"></div>
                     </div>
-                    <div className="text-[7px] text-right text-gray-400 max-w-[80px] leading-tight">
-                      This scheme is operated in partnership with your local authority
+                    <div className="text-[9px] font-bold leading-tight tracking-wide">
+                      Food<br />Standards<br />Agency
                     </div>
                   </div>
+                  <div className="text-[7px] text-right text-gray-400 max-w-[80px] leading-tight">
+                    This scheme is operated in partnership with your local authority
+                  </div>
+                </div>
 
-                  {/* Bottom Green Section */}
-                  <div className="bg-[#7AC142] p-3 text-[#1A1A1A] flex flex-col h-[95px] relative">
-                    <h4 className="text-[17px] font-black tracking-tighter uppercase mb-1">
-                      Food Hygiene Rating
-                    </h4>
-                    <div className="w-full h-[2px] bg-[#1A1A1A] mb-2 relative">
-                      <div className="absolute -bottom-[6px] right-[40px] w-3 h-3 bg-[#1A1A1A] rotate-45"></div>
-                    </div>
+                {/* Bottom Green Section */}
+                <div className="bg-[#7AC142] p-3 text-[#1A1A1A] flex flex-col h-[95px] relative">
+                  <h4 className="text-[17px] font-black tracking-tighter uppercase mb-1">
+                    Food Hygiene Rating
+                  </h4>
+                  <div className="w-full h-[2px] bg-[#1A1A1A] mb-2 relative">
+                    <div className="absolute -bottom-[6px] right-[40px] w-3 h-3 bg-[#1A1A1A] rotate-45"></div>
+                  </div>
 
-                    <div className="flex justify-between items-center mt-1 pr-1">
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <div key={num} className="w-7 h-7 rounded-full border-[1.5px] border-[#1A1A1A] flex items-center justify-center text-[13px] font-bold">
-                          {num}
-                        </div>
-                      ))}
-                      <div className="flex flex-col items-center -mt-2">
-                        <div className="w-11 h-11 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[26px] font-black shadow-lg z-10">
-                          5
-                        </div>
-                        <span className="text-[8px] font-bold mt-0.5 tracking-wider uppercase">Very Good</span>
+                  <div className="flex justify-between items-center mt-1 pr-1">
+                    {[0, 1, 2, 3, 4].map((num) => (
+                      <div key={num} className="w-7 h-7 rounded-full border-[1.5px] border-[#1A1A1A] flex items-center justify-center text-[13px] font-bold">
+                        {num}
                       </div>
+                    ))}
+                    <div className="flex flex-col items-center -mt-2">
+                      <div className="w-11 h-11 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-[26px] font-black shadow-lg z-10">
+                        5
+                      </div>
+                      <span className="text-[8px] font-bold mt-0.5 tracking-wider uppercase">Very Good</span>
                     </div>
                   </div>
-                </a>
+                </div>
+              </a>
             </div>
           </div>
 
