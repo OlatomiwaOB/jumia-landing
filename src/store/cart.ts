@@ -21,6 +21,7 @@ export interface MenuItem {
   weight?: number;
   weightUnit?: string;
   variantId?: any
+  note?: string;
   //   bg?: string;
   //   color?: string;
 }
