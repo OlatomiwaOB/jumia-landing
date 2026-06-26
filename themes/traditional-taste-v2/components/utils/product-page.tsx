@@ -62,6 +62,7 @@ export default function ProductPage() {
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
+  const [note, setNote] = useState('');
 
   const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
   const hasVariants = itemVariants.length > 0;
@@ -160,6 +161,7 @@ export default function ProductPage() {
   useEffect(() => {
     setActiveImageIndex(0);
     setActiveTab('description');
+    setNote('');
   }, [product?.id]);
 
   /* ── LOADING ── */
@@ -364,6 +366,23 @@ export default function ProductPage() {
 
             {/* Add to Cart */}
             <div className="border-t border-[var(--color-text)]/10 pt-6 mt-4">
+              <div className="mb-6">
+                <div className="mb-2">
+                  <label htmlFor="product-note" className="block text-[14px] font-bold tracking-tight text-[var(--color-text)]">
+                    Personalise Your Order (optional)
+                  </label>
+                  <p className="text-[12px] font-medium text-[var(--color-text)] opacity-70 mt-0.5">
+                    Share any allergies, dietary requirements or meal selections for your bundle here. </p>
+                </div>
+                <textarea
+                  id="product-note"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Any special instructions or preferences?"
+                  rows={2}
+                  className="w-full rounded-xl border border-[var(--color-text)]/20 bg-transparent px-4 py-3 text-sm font-medium text-[var(--color-text)] outline-none transition-all focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] resize-none placeholder:text-[var(--color-text)] placeholder:opacity-40"
+                />
+              </div>
               <div className="flex flex-col gap-3 sm:flex-row">
 
                 {/* Quantity Selector */}
@@ -419,7 +438,8 @@ export default function ProductPage() {
                         // weightUnit: product.weightUnit || undefined,
                         variantId: selectedVariantId || 0,
                         vat: currentVariant?.vat || product?.vat || 0,
-                        discount: Number(product?.discount || 0)
+                        discount: Number(product?.discount || 0),
+                        note: note
                       } as any, localQty);
                       openCart();
                     }}
