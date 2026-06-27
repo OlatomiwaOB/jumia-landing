@@ -1,31 +1,8 @@
-import { ClientConfig } from '../client-config.types';
+import { ClientConfig, brandJsonToBranding } from '../client-config.types';
+import brand from '../brands/vogue.brand.json';
 
 export const vogueConfig: ClientConfig = {
-  branding: {
-    clientName: 'Vogue',
-    storefront: 'vogue',
-    colors: {
-      accent: '5A3522',
-      accentForeground: 'CE9C5D',
-      accentColor2: '967BB6',
-      accentColor3: '2F3E33',
-      dashboardSidebar: '1A1D23',
-    },
-    logos: {
-      primary: 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/66044_direct-logo.png',
-      white: 'https://fortitude-anl.s3.eu-west-1.amazonaws.com/31863_direct-white-logo.png',
-      whiteFull: 'https://fortitude-anl.s3.eu-west-1.amazonaws.com/33686_direct-white-full-logo.png',
-    },
-    images: {
-      banner: 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/85471_login-image.png',
-      favicon: '/favicons/vogue.ico',
-    },
-    font: { family: 'roboto' },
-    metadata: {
-      title: 'VOGUE | Home',
-      description: 'Premium fashion and wearables.',
-    },
-  },
+  branding: brandJsonToBranding(brand),
   identifiers: {
     entityCode: {
       development: 'FTD',

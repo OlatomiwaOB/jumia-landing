@@ -41,8 +41,29 @@
 
 /** @type {import('next').NextConfig} */
 import { webpackFallback } from '@txnlab/use-wallet-react'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const isProd = process.env.NODE_ENV === 'production'
+
+// ---------------------------------------------------------------------------
+// 🔥 BUILD-TIME THEME RESOLUTION
+// ---------------------------------------------------------------------------
+// The storefront env var selects which theme folder gets bundled.
+// Only the selected theme's code is included — all others are tree-shaken out.
+// Changing NEXT_PUBLIC_STORE_FRONT requires a dev server restart.
+// ---------------------------------------------------------------------------
+const storefront = process.env.NEXT_PUBLIC_STORE_FRONT || 'depot'
+// 🔥 FIX: Turbopack on Windows crashes with backslashes ("windows imports are not implemented yet").
+// We MUST replace \ with / to ensure it parses as a standard absolute path.
+const themeDir = path.resolve(__dirname, `themes/${storefront}`).replace(/\\/g, '/')
+const brandJson = path.resolve(__dirname, `src/config/brands/${storefront}.brand.json`).replace(/\\/g, '/')
+
+console.log('\n=============================================')
+console.log('🚀 BUILDING THEME:', storefront.toUpperCase())
+console.log('=============================================\n')
 
 const nextConfig = {
   /**
@@ -128,6 +149,14 @@ const nextConfig = {
       'rc-table',
     ],
   },
+  // 🔥 BUILD-TIME THEME: Turbopack alias for dev server (next dev --turbopack)
+  turbopack: {
+    resolveAlias: {
+      '@theme/*': `./themes/${storefront}/*`,
+      '@theme': `./themes/${storefront}`,
+      '@brand': `./src/config/brands/${storefront}.brand.json`,
+    },
+  },
 
   webpack: (config, { isServer, dev }) => {
     /**
@@ -184,8 +213,11 @@ const nextConfig = {
     }
 
     // Add aliases to resolve React Native modules to empty modules
+    // 🔥 BUILD-TIME THEME: Webpack alias for prod builds & dev:webpack
     config.resolve.alias = {
       ...config.resolve.alias,
+      '@theme': themeDir,
+      '@brand': brandJson,
       ...reactNativeModules.reduce((acc, mod) => {
         acc[mod] = false
         return acc

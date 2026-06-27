@@ -1,7 +1,6 @@
-import { Suspense, lazy } from 'react'
 import { Metadata } from 'next'
-import Loader from '@/components/ui/loader'
 import { clientConfig } from '@/config/client-config'
+import ThemeHomepage from '@theme/homepage'
 
 const config = clientConfig()
 
@@ -9,33 +8,12 @@ export const metadata: Metadata = {
   title: config.branding.metadata.title || 'Shop | home',
 }
 
-// Lazy loading components
-const HomePageDepot = lazy(() => import('../../../themes/depot/homepage'))
-const HomePageFortitude = lazy(() => import('../../../themes/fortitude/homepage'))
-const HomePageVogue = lazy(() => import('../../../themes/vogue/homepage'))
-const HomePageTraditionalTaste = lazy(() => import('../../../themes/traditional-taste-v2/homepage'))
-const HomePageVarisa = lazy(() => import('../../../themes/varisa/homepage'))
-
+/**
+ * Home Page — uses build-time @theme alias.
+ * Only the selected storefront's homepage code is bundled.
+ */
 const HomePage = () => {
-  const storefront = config.branding.storefront;
-
-  if (storefront === 'depot') {
-    return <Suspense fallback={<Loader text='Loading...' />}><HomePageDepot /></Suspense>
-  }
-
-  if (storefront === 'vogue') {
-    return <Suspense fallback={<Loader text='Loading...' />}><HomePageVogue /></Suspense>
-  }
-
-  if (storefront === 'traditional-taste-v2') {
-    return <Suspense fallback={<Loader text='Loading...' />}><HomePageTraditionalTaste /></Suspense>
-  }
-
-  if (storefront === 'varisa') {
-    return <Suspense fallback={<Loader text='Loading...' />}><HomePageVarisa /></Suspense>
-  }
-
-  return <Suspense fallback={<Loader text='Loading...' />}><HomePageFortitude /></Suspense>
+  return <ThemeHomepage />;
 }
 
 export default HomePage

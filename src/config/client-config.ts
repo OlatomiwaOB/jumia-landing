@@ -1,4 +1,4 @@
-import { ClientConfig, ClientBranding, ClientIdentifiers, ClientFeatureFlags, EnvironmentAwareValue } from './client-config.types';
+import { ClientConfig, ClientBranding, ClientIdentifiers, ClientFeatureFlags, EnvironmentAwareValue, BrandJson } from './client-config.types';
 import { clientRegistry } from './clients';
 
 // ---------------------------------------------------------------------------

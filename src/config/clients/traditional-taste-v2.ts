@@ -1,32 +1,8 @@
-import { ClientConfig } from '../client-config.types';
+import { ClientConfig, brandJsonToBranding } from '../client-config.types';
+import brand from '../brands/traditional-taste-v2.brand.json';
 
 export const traditionalTasteV2Config: ClientConfig = {
-  branding: {
-    clientName: 'Traditional Taste',
-    storefront: 'traditional-taste-v2',
-    colors: {
-      accent: 'F97316',
-      accentForeground: 'FFFFFF',
-      accentColor2: 'FFEDD5',
-      accentColor3: '2F3E33',
-      textCharcoal: '1C1917',
-      dashboardSidebar: '191970',
-    },
-    logos: {
-      primary: 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/31626_traditional-taste-logo.jpg',
-      white: 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/31626_traditional-taste-logo.jpg',
-      whiteFull: 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/31626_traditional-taste-logo.jpg',
-    },
-    images: {
-      banner: 'https://mmcpdocs.s3.eu-west-2.amazonaws.com/85471_login-image.png',
-      favicon: '/traditional-taste-logo.jpg',
-    },
-    font: { family: 'roboto' },
-    metadata: {
-      title: 'Traditional Taste | Home',
-      description: 'Traditional Taste Home',
-    },
-  },
+  branding: brandJsonToBranding(brand),
   identifiers: {
     entityCode: {
       development: 'H2P',

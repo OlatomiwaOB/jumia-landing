@@ -1,36 +1,12 @@
-import React, { Suspense, lazy } from 'react';
-import Loader from '@/components/ui/loader';
+import React from 'react';
 import { AuthLayoutProps } from './default-auth-layout';
-import { clientConfig } from '@/config/client-config';
+import { ThemeAuthLayout } from '@theme/exports';
 
-// Lazy load theme specific auth layouts
-const VarisaAuthLayout = lazy(() => import('../../../themes/varisa/components/ui/auth-layout'));
-const TraditionalTasteAuthLayout = lazy(() => import('../../../themes/traditional-taste-v2/components/ui/auth-layout'));
-const DefaultAuthLayout = lazy(() => import('./default-auth-layout'));
-
+/**
+ * Dynamic Auth Layout — uses build-time @theme alias.
+ * Only the selected storefront's auth layout is bundled.
+ * Themes without a custom auth layout re-export the shared default via their stub.
+ */
 export default function DynamicAuthLayout(props: AuthLayoutProps) {
-  const storefront = clientConfig().branding.storefront;
-
-  if (storefront === 'varisa') {
-    return (
-      <Suspense fallback={<Loader text="Loading..." />}>
-        <VarisaAuthLayout {...props} />
-      </Suspense>
-    );
-  }
-
-  if (storefront === 'traditional-taste-v2') {
-    return (
-      <Suspense fallback={<Loader text="Loading..." />}>
-        <TraditionalTasteAuthLayout {...props} />
-      </Suspense>
-    );
-  }
-
-  // Fallback to default for depot, fortitude, vogue until they have specific layouts
-  return (
-    <Suspense fallback={<Loader text="Loading..." />}>
-      <DefaultAuthLayout {...props} />
-    </Suspense>
-  );
+  return <ThemeAuthLayout {...props} />;
 }
