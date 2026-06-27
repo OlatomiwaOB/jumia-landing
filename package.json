@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prebuild": "node scripts/set-theme.js",
     "dev": "cross-env NODE_OPTIONS='--max-old-space-size=6144' NODE_ENV=development next dev --turbopack --port 3002",
     "dev:fast": "cross-env NODE_OPTIONS='--max-old-space-size=6144 --max-semi-space-size=256' NODE_ENV=development ANALYZE=false next dev",
     "build": "cross-env NODE_OPTIONS='--max-old-space-size=8192' next build",
