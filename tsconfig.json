@@ -21,6 +21,9 @@
     "paths": {
       "@/*": ["./src/*"],
       "@themes/*": ["./themes/*"],
+      "@theme": ["./themes/depot"],
+      "@theme/*": ["./themes/depot/*"],
+      "@brand": ["./src/config/brands/depot.brand.json"],
       "@/wagmi.config": ["./wagmi.config"]
     }
   },

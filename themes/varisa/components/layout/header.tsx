@@ -158,7 +158,13 @@ export default function Header() {
               </div>
               <div className="hidden lg:flex flex-col leading-tight text-left gap-[3px]">
                 <span className="text-[11px] font-bold tracking-wide text-white/50 group-hover:text-accent transition-colors duration-200">Cart</span>
-                <span className="text-[12px] font-extrabold text-white group-hover:text-accent transition-colors duration-200">{isMounted ? formatPrice(totalAmount, ccy as any) : '$0.00'}</span>
+                {
+                  itemCount > 0 ? (
+                    <span className="text-[12px] font-extrabold text-white group-hover:text-accent transition-colors duration-200">{isMounted ? formatPrice(totalAmount, ccy as any) : '0.00'}</span>
+                  ) : (
+                    <span className="text-[12px] font-extrabold text-white group-hover:text-accent transition-colors duration-200">{isMounted ? '0.00' : '0.00'}</span>
+                  )
+                }
               </div>
             </SheetTrigger>
             <Cart />

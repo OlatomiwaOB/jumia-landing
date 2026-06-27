@@ -1,42 +1,13 @@
+import React, { ReactNode } from 'react'
+import ThemeLayout from '@theme/layout'
 
-import React, { lazy, ReactNode, Suspense } from 'react'
-
-const AppLayoutDepot = lazy(() => import('../../../themes/depot/layout'))
-const AppLayoutFortitude = lazy(() => import('../../../themes/fortitude/layout'))
-const AppLayoutVogue = lazy(() => import('../../../themes/vogue/layout'))
-const AppLayoutTraditionalTaste = lazy(() => import('../../../themes/traditional-taste-v2/layout'))
-const AppLayoutVarisa = lazy(() => import('../../../themes/varisa/layout'))
-
+/**
+ * App Layout — uses build-time @theme alias.
+ * Only the selected storefront's layout code is bundled.
+ * No lazy loading, no Suspense, no if/else cascade.
+ */
 const AppLayout = ({ children }: { children: ReactNode }) => {
-  const storefront = process.env?.NEXT_PUBLIC_STORE_FRONT;
-
-  if (storefront === 'depot') {
-    return (
-      <Suspense><AppLayoutDepot>{children}</AppLayoutDepot></Suspense>
-    );
-  }
-
-  if (storefront === 'vogue') {
-    return (
-      <Suspense><AppLayoutVogue>{children}</AppLayoutVogue></Suspense>
-    );
-  }
-
-  if (storefront === 'traditional-taste-v2') {
-    return (
-      <Suspense><AppLayoutTraditionalTaste>{children}</AppLayoutTraditionalTaste></Suspense>
-    );
-  }
-
-  if (storefront === 'varisa') {
-    return (
-      <Suspense><AppLayoutVarisa>{children}</AppLayoutVarisa></Suspense>
-    );
-  }
-
-  return (
-    <Suspense><AppLayoutFortitude>{children}</AppLayoutFortitude></Suspense>
-  );
+  return <ThemeLayout>{children}</ThemeLayout>;
 }
 
 export default AppLayout

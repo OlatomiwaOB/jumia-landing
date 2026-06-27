@@ -40,18 +40,46 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+/**
+ * Converts a camelCase color key to a CSS variable name.
+ * e.g. "accentForeground" → "--accent-foreground-env"
+ *      "dashboardSidebar" → "--dashboard-sidebar-color"
+ *      "textCharcoal" → "--text-charcoal"
+ */
+function colorKeyToCssVar(key: string): string {
+  // Handle known legacy variable names for backward compatibility
+  const legacyMap: Record<string, string> = {
+    accent: '--accent-env',
+    accentForeground: '--accent-foreground-env',
+    accentColor2: '--accent-color2',
+    accentColor3: '--accent-color3',
+    dashboardSidebar: '--dashboard-sidebar-color',
+  };
+
+  if (legacyMap[key]) return legacyMap[key];
+
+  // Convert camelCase to kebab-case for new/custom colors
+  return '--' + key.replace(/([A-Z])/g, '-$1').toLowerCase();
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const config = clientConfig();
-  const { colors, images, storefront } = config.branding;
+  const { colors, images } = config.branding;
   const headersList = await headers();
   const initialState = cookieToInitialState(
     getConfig(),
     headersList.get("cookie") ?? ""
   );
+
+  // Generate CSS variables from ALL colors in the brand config.
+  // Any color key added to the brand JSON automatically becomes a CSS variable.
+  const colorVars = Object.entries(colors)
+    .map(([key, value]) => `${colorKeyToCssVar(key)}: #${value};`)
+    .join('\n              ');
 
   return (
     <html lang="en" className={manropeFont.variable}>
@@ -59,14 +87,10 @@ export default async function RootLayout({
         <meta name="google-site-verification" content="3mJ66FK4ohtkK2BWhKbmiHPwRx4DP6fIXyAJwDnuhM_fUBA" />
         <link rel="icon" href={images.favicon} type="image/x-icon" />
 
-        <style suppressHydrationWarning>
+        <style>
           {`
           :root {
-              --accent-env: #${colors.accent};
-              --accent-foreground-env: #${colors.accentForeground};
-              --accent-color2: #${colors.accentColor2};
-              --accent-color3: #${colors.accentColor3};
-              --dashboard-sidebar-color: #${colors.dashboardSidebar};
+              ${colorVars}
             }
             
             body {
@@ -84,7 +108,7 @@ export default async function RootLayout({
             </LocationProvider>
           </AlgorandWalletProvider>
         </Providers>
-        {storefront === 'varisa' && <ScrollToTop />}
+        <ScrollToTop />
         <Toaster />
       </body>
     </html>
