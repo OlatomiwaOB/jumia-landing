@@ -21,15 +21,15 @@ jobs:
           script: |
             set -e
             cd /opt/fortitude-direct 
-            
+
             # Pull latest code
             git fetch origin
             git reset --hard origin/main
-            
+
             # Stop and remove existing container
             docker stop nextjs-app || true
             docker rm nextjs-app || true
-            
+
             # Build new Docker image
             docker build \
               --build-arg NEXT_PUBLIC_STORE_FRONT=${{ secrets.NEXT_PUBLIC_STORE_FRONT }} \
@@ -39,7 +39,7 @@ jobs:
               --build-arg NEXT_PUBLIC_CLIENT_SECRET=${{ secrets.NEXT_PUBLIC_CLIENT_SECRET }} \
               --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \
               -t nextjs-app:latest .
-            
+
             # Run container with network mode
             docker run -d \
               --name nextjs-app \
