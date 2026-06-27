@@ -20,17 +20,16 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             set -e
-            cd /opt/fortitude-direct 
+            cd /opt/ecommerce-app/Dimensionlogic-templates
 
             # Pull latest code
             git fetch origin
             git reset --hard origin/main
 
-            # Stop and remove existing container
-            docker stop nextjs-app || true
-            docker rm nextjs-app || true
+            # ── App 1 (port 3000) ──────────────────────────────────────────
+            docker stop verisafoods || true
+            docker rm verisafoods || true
 
-            # Build new Docker image
             docker build \
               --build-arg NEXT_PUBLIC_STORE_FRONT=${{ secrets.NEXT_PUBLIC_STORE_FRONT }} \
               --build-arg NEXT_PUBLIC_REACT_APP_API_URL=${{ secrets.NEXT_PUBLIC_REACT_APP_API_URL }} \
@@ -38,11 +37,29 @@ jobs:
               --build-arg NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }} \
               --build-arg NEXT_PUBLIC_CLIENT_SECRET=${{ secrets.NEXT_PUBLIC_CLIENT_SECRET }} \
               --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \
-              -t nextjs-app:latest .
+              -t verisafoods:latest .
 
-            # Run container with network mode
             docker run -d \
-              --name nextjs-app \
+              --name verisafoods \
               --restart unless-stopped \
-              --network host \
-              nextjs-app:latest
+              -p 3000:3000 \
+              verisafoods:latest
+
+            # ── App 2 (port 3001) ──────────────────────────────────────────
+            docker stop traditionaltastes || true
+            docker rm traditionaltastes || true
+
+            docker build \
+              --build-arg NEXT_PUBLIC_STORE_FRONT=${{ secrets.NEXT_PUBLIC_STORE_FRONT_2 }} \
+              --build-arg NEXT_PUBLIC_REACT_APP_API_URL=${{ secrets.NEXT_PUBLIC_REACT_APP_API_URL_2 }} \
+              --build-arg NEXT_PUBLIC_SOURCE_CODE=${{ secrets.NEXT_PUBLIC_SOURCE_CODE_2 }} \
+              --build-arg NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID_2 }} \
+              --build-arg NEXT_PUBLIC_CLIENT_SECRET=${{ secrets.NEXT_PUBLIC_CLIENT_SECRET_2 }} \
+              --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY_2 }} \
+              -t traditionaltastes:latest .
+
+            docker run -d \
+              --name traditionaltastes \
+              --restart unless-stopped \
+              -p 3001:3000 \
+              traditionaltastes:latest
