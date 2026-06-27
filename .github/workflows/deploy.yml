@@ -51,11 +51,11 @@ jobs:
 
             docker build \
               --build-arg NEXT_PUBLIC_STORE_FRONT=${{ secrets.NEXT_PUBLIC_STORE_FRONT_2 }} \
-              --build-arg NEXT_PUBLIC_REACT_APP_API_URL=${{ secrets.NEXT_PUBLIC_REACT_APP_API_URL_2 }} \
-              --build-arg NEXT_PUBLIC_SOURCE_CODE=${{ secrets.NEXT_PUBLIC_SOURCE_CODE_2 }} \
-              --build-arg NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID_2 }} \
-              --build-arg NEXT_PUBLIC_CLIENT_SECRET=${{ secrets.NEXT_PUBLIC_CLIENT_SECRET_2 }} \
-              --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY_2 }} \
+              --build-arg NEXT_PUBLIC_REACT_APP_API_URL=${{ secrets.NEXT_PUBLIC_REACT_APP_API_URL }} \
+              --build-arg NEXT_PUBLIC_SOURCE_CODE=${{ secrets.NEXT_PUBLIC_SOURCE_CODE }} \
+              --build-arg NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }} \
+              --build-arg NEXT_PUBLIC_CLIENT_SECRET=${{ secrets.NEXT_PUBLIC_CLIENT_SECRET }} \
+              --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }} \
               -t traditionaltastes:latest . 2>&1
 
             docker run -d \
