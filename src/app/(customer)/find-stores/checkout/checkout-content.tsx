@@ -66,6 +66,7 @@ const CheckoutContent = () => {
     const [shippingFee, setShippingFee] = useState(0);
     const [totalVat, setTotalVat] = useState(0);
     const [subtotal, setSubtotal] = useState(0);
+    const clientIdentifier = getClientIdentifiers();
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -267,7 +268,7 @@ const CheckoutContent = () => {
 
             const receiptPayload = {
                 orderNo: checkoutData.orderNo,
-                entityCode: "FTD",
+                entityCode: customer?.entityCode || clientIdentifier?.entityCode,
                 customerEmail: customer?.username || "",
                 ordDate: checkoutData.orderDate,
                 // salePerson: "",
