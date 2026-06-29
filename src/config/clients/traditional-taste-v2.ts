@@ -12,6 +12,10 @@ export const traditionalTasteV2Config: ClientConfig = {
       development: 'STO1575',
       production: 'STO1575', // TODO: Replace with production store code
     },
+    sourceCode: {
+      development: 'HELP2PAY',
+      production: 'TRADITIONAL_TASTE',
+    }
   },
   features: {
     enableBNPL: true,

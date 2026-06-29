@@ -12,6 +12,10 @@ export const varisaConfig: ClientConfig = {
       development: 'STO7056',
       production: 'STO7056', // TODO: Replace with production store code
     },
+    sourceCode: {
+      development: 'HELP2PAY',
+      production: 'VARISSA'
+    }
   },
   features: {
     enableBNPL: true,
