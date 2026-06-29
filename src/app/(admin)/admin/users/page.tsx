@@ -1222,7 +1222,7 @@ export default function StaffsPage() {
 
             {isLoading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
                 </div>
             ) : error ? (
                 <div className="flex items-center justify-center py-20 text-red-400 text-sm">Error loading users</div>
@@ -1250,7 +1250,7 @@ export default function StaffsPage() {
                                             {paginated.map((staff, idx) => (
                                                 <tr key={staff.staffUserId}
                                                     onClick={() => handleView(staff)}
-                                                    className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-orange-50/40 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
+                                                    className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-sidebar-accent/10 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
                                                     <td className="px-3 py-3.5">
                                                         <div className="flex items-center gap-3">
                                                             <Avatar className="w-10 h-10">

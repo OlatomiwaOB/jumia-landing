@@ -118,7 +118,7 @@ function OrdersTable<T extends Record<string, any>>({
             {paginated.map((item, idx) => (
               <tr key={String(item[rowKey]) + idx}
                 onClick={() => onRowClick?.(item)}
-                className={`border-b-2 border-[#EEEEEE] transition-colors ${onRowClick ? 'cursor-pointer hover:bg-orange-50/40' : ''
+                className={`border-b-2 border-[#EEEEEE] transition-colors ${onRowClick ? 'cursor-pointer hover:bg-sidebar-accent/10' : ''
                   } ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
                 {columns.map((col) => (
                   <td key={col.key} className="px-3 py-3.5 text-sm">

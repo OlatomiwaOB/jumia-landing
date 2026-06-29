@@ -54,7 +54,7 @@ export function ImageUploadField({
             </Button>
           </div>
         )}
-        <div className="border-2 border-dashed border-faded-accent rounded-lg p-6 text-center hover:border-orange-300 transition-colors">
+        <div className="border-2 border-dashed border-faded-accent rounded-lg p-6 text-center hover:border-sidebar-accent/50 transition-colors">
           <input
             ref={fileInputRef}
             type="file"

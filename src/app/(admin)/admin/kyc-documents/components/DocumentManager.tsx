@@ -302,7 +302,7 @@ export function DocumentManager({
                                                 onClick={() => handleBoxClick(!!isUploadDisabled)}
                                                 className={`
                                                     border-2 border-dashed rounded-lg p-8 transition-all duration-200 flex flex-col items-center justify-center gap-3 text-center min-h-[160px]
-                                                    ${isUploadDisabled ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed' : 'border-faded-accent hover:border-orange-300 cursor-pointer'}
+                                                    ${isUploadDisabled ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed' : 'border-faded-accent hover:border-sidebar-accent/50 cursor-pointer'}
                                                 `}
                                             >
                                                 {isLoading && currentFileName ? (

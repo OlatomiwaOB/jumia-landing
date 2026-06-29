@@ -125,10 +125,10 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
               </div>
             </div>
 
-              <button
-                onClick={toggleAmountVisibility}
-                className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-black/10"
-              >
+            <button
+              onClick={toggleAmountVisibility}
+              className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-black/10"
+            >
               {showAmount ? <Eye size={16} className='font-bold' /> : <EyeOff size={16} className='font-bold' />}
             </button>
           </div>
@@ -457,7 +457,7 @@ export const WalletOverview = () => {
           </TabsContent>
         </Tabs>
 
-        <div className="flex flex-row justify-between items-center gap-4 py-2">
+        {/* <div className="flex flex-row justify-between items-center gap-4 py-2">
           {quickMenuData.map((item, index) => (
             <div
               key={index}
@@ -468,7 +468,7 @@ export const WalletOverview = () => {
               <p className="text-sm font-semibold">{item.title}</p>
             </div>
           ))}
-        </div>
+        </div> */}
       </div>
 
       <AlertDialog open={!!openId} onOpenChange={(open) => { if (!open) setOpenId(null); }}>

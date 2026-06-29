@@ -611,7 +611,7 @@ export default function CreateStaffPage() {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
+                    <Loader2 className="w-8 h-8 animate-spin text-sidebar-accent mx-auto mb-4" />
                     <p className="text-medium-gray">Loading user data...</p>
                 </div>
             </div>

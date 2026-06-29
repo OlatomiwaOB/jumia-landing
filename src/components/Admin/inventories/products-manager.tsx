@@ -993,7 +993,7 @@ const ProductVariantModal = ({
                         type="button"
                         onClick={() => { setActiveTab('add'); if (!isEditMode) resetForm(); }}
                         className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'add'
-                            ? 'bg-orange-500 text-white'
+                            ? 'bg-sidebar-accent text-white'
                             : 'bg-white text-medium-gray hover:text-dark-gray'
                             }`}
                     >
@@ -1003,7 +1003,7 @@ const ProductVariantModal = ({
                         type="button"
                         onClick={() => setActiveTab('view')}
                         className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'view'
-                            ? 'bg-orange-500 text-white'
+                            ? 'bg-sidebar-accent text-white'
                             : 'bg-white text-medium-gray hover:text-dark-gray'
                             }`}
                     >
@@ -1015,9 +1015,9 @@ const ProductVariantModal = ({
                 {activeTab === 'add' && (
                     <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4">
                         {isEditMode && (
-                            <div className="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-2">
-                                <p className="text-xs text-orange-700"><span className="font-semibold">Editing variant</span> — modify and save to update.</p>
-                                <button type="button" onClick={resetForm} className="text-xs text-orange-600 hover:text-orange-800 font-semibold underline">
+                            <div className="flex items-center justify-between bg-sidebar-accent/10 border border-sidebar-accent/20 rounded-lg p-2">
+                                <p className="text-xs text-sidebar-accent"><span className="font-semibold">Editing variant</span> — modify and save to update.</p>
+                                <button type="button" onClick={resetForm} className="text-xs text-sidebar-accent hover:text-sidebar-accent/80 font-semibold underline">
                                     Cancel Edit
                                 </button>
                             </div>
@@ -1074,7 +1074,7 @@ const ProductVariantModal = ({
                         </div>
                         <div className="flex gap-3 justify-end pt-1">
                             <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>Cancel</Button>
-                            <Button type="submit" disabled={isLoading} className="bg-orange-500 hover:bg-orange-600 text-white">
+                            <Button type="submit" disabled={isLoading} className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-white">
                                 {isLoading
                                     ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</>
                                     : isEditMode
@@ -1092,7 +1092,7 @@ const ProductVariantModal = ({
                         {isLoadingVariants ? (
                             <div className="bg-white rounded-2xl p-8 flex items-center justify-center">
                                 <div className="text-center">
-                                    <Loader2 className="w-6 h-6 animate-spin text-orange-500 mx-auto mb-2" />
+                                    <Loader2 className="w-6 h-6 animate-spin text-sidebar-accent mx-auto mb-2" />
                                     <p className="text-xs text-medium-gray">Loading variants...</p>
                                 </div>
                             </div>
@@ -1145,7 +1145,7 @@ const ProductVariantModal = ({
                                                     <button
                                                         type="button"
                                                         onClick={() => handleEditVariant(variant)}
-                                                        className="inline-flex items-center gap-1 text-orange-500 hover:text-orange-700 font-semibold transition-colors"
+                                                        className="inline-flex items-center gap-1 text-sidebar-accent hover:text-sidebar-accent/80 font-semibold transition-colors"
                                                     >
                                                         <Pencil className="w-3.5 h-3.5" />
                                                         Edit
@@ -1340,7 +1340,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
 
             {isLoading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
                 </div>
             ) : error ? (
                 <div className="flex items-center justify-center py-20 text-red-400 text-sm">Error loading products</div>
@@ -1386,7 +1386,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                                                 <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => handleView(product)}>
                                                     <Eye className="w-3.5 h-3.5 mr-1" /> View
                                                 </Button>
-                                                <Button size="sm" className="flex-1 text-xs bg-orange-500 hover:bg-orange-600 text-white" onClick={() => handleEdit(product)}>
+                                                <Button size="sm" className="flex-1 text-xs bg-sidebar-accent hover:bg-sidebar-accent/90 text-white" onClick={() => handleEdit(product)}>
                                                     <Edit className="w-3.5 h-3.5 mr-1" /> Edit
                                                 </Button>
                                             </div>
@@ -1417,7 +1417,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                                                 {paginated.map((p, idx) => (
                                                     <tr key={p.id}
                                                         onClick={() => handleView(p)}
-                                                        className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-orange-50/40 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
+                                                        className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-sidebar-accent/10 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
                                                         <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</p></td>
                                                         <td className="px-3 py-3.5">
                                                             <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">

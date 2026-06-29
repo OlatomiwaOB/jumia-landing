@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import { useCart } from '@/store/cart';
@@ -24,6 +24,15 @@ export default function Header() {
   const { customer } = useCustomer();
   const [isRTL, setIsRTL] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const router = useRouter();
+
+  const handleUserIconClick = () => {
+    if (customer) {
+      router.push('/dashboard');
+    } else {
+      router.push('/customer-login');
+    }
+  };
 
   useEffect(() => {
     if (isMounted) {
@@ -126,17 +135,25 @@ export default function Header() {
           {/* Login / Register */}
 
           <div className="hidden lg:flex items-center gap-3">
-            <Link href="/customer-login">
+            <button onClick={handleUserIconClick} aria-label="User account">
               <User size={28} className="hover:text-accent transition-colors duration-200" strokeWidth={2.5} />
-            </Link>
-            <div className="flex flex-col gap-[3px]">
-              <Link href="/customer-login" className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none">
-                Login
-              </Link>
-              <Link href="/customer-onboarding" className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none text-white/60">
-                Register
-              </Link>
-            </div>
+            </button>
+            {customer ? (
+              <div className="flex flex-col gap-[3px]">
+                <button onClick={handleUserIconClick} className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none text-left">
+                  Dashboard
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-[3px]">
+                <Link href="/customer-login" className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none">
+                  Login
+                </Link>
+                <Link href="/customer-onboarding" className="text-[12px] font-extrabold tracking-wider hover:text-accent transition-colors cursor-pointer leading-none text-white/60">
+                  Register
+                </Link>
+              </div>
+            )}
           </div>
 
 
@@ -308,14 +325,13 @@ export default function Header() {
             {/* Utilities */}
 
             <div className="flex flex-col mt-2 mb-6">
-              <Link
-                href="/customer-login"
-                onClick={() => setMobileMenuOpen(false)}
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleUserIconClick(); }}
                 className="flex items-center gap-3 py-3 px-5 text-[14px] font-medium text-gray-600 hover:text-accent transition-colors w-full text-left"
               >
                 <User size={20} strokeWidth={1.5} className="text-gray-500" />
-                My account
-              </Link>
+                {customer ? 'My Dashboard' : 'My account'}
+              </button>
             </div>
 
           </nav>

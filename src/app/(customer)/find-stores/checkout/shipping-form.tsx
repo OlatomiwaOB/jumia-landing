@@ -233,7 +233,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                             {deliveryAddress.length === 0 ? (
                                 <button
                                     onClick={() => { setEditingAddress(null); setIsModalOpen(true); }}
-                                    className="w-full border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center gap-2 hover:border-[#d8480b] hover:bg-orange-50/30 transition-all"
+                                    className="w-full border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center gap-2 hover:border-[#d8480b] hover:bg-sidebar-accent/10 transition-all"
                                 >
                                     <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
                                         <Plus className="w-5 h-5 text-medium-gray" />

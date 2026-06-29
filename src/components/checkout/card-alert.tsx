@@ -132,7 +132,7 @@ const CardAlert = ({
       vat: (item as any).vat || 0,
       itemWeight: item?.weight || 1,
       itemWeightUnit: item?.weightUnit || 'ltr',
-      variantId: item?.variantId,
+      variantID: item?.variantId,
     }))
 
     const totalAmount = orderTotal;

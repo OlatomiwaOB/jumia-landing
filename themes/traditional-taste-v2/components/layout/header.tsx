@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/store/cart';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
@@ -22,6 +23,15 @@ export default function Header() {
   const { cart } = useCart();
   const { customer } = useCustomer();
   const { data: categoriesData } = useCategories();
+  const router = useRouter();
+
+  const handleUserIconClick = () => {
+    if (customer) {
+      router.push('/dashboard');
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   const categories: Category[] = (categoriesData?.categories || []).filter(
     (cat: Category) => cat.code && cat.name
@@ -164,7 +174,7 @@ export default function Header() {
             </button>
 
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={handleUserIconClick}
               className="text-gray-600 hover:text-tt-primary transition-colors flex items-center"
             >
               <User size={26} strokeWidth={1.5} />
@@ -199,7 +209,7 @@ export default function Header() {
         <div className="sticky top-0 z-10 w-full bg-tt-primary text-white py-3.5 px-5 flex items-center justify-between shadow-sm">
           <span className="text-[13px] font-bold">Welcome to Traditional Taste</span>
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsOpen(true)} className="hover:opacity-80 transition-opacity">
+            <button onClick={handleUserIconClick} className="hover:opacity-80 transition-opacity">
               <User size={18} strokeWidth={2.5} />
             </button>
             <button onClick={toggleTheme} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
@@ -284,9 +294,9 @@ export default function Header() {
           </SheetTrigger>
           <Cart />
         </CartWrapper>
-        <button onClick={() => setIsOpen(true)} className={`flex flex-col items-center gap-1 hover:text-tt-primary transition-colors ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+        <button onClick={handleUserIconClick} className={`flex flex-col items-center gap-1 hover:text-tt-primary transition-colors ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
           <User size={22} strokeWidth={2} />
-          <span className="text-[10px] font-bold">Profile</span>
+          <span className="text-[10px] font-bold">{customer ? 'Dashboard' : 'Profile'}</span>
         </button>
       </div>
 

@@ -36,7 +36,7 @@
 //     }
 
 //     return (
-//         <Card className="w-full border-none shadow-sm bg-orange-50/30">
+//         <Card className="w-full border-none shadow-sm bg-sidebar-accent/10">
 //             <CardHeader>
 //                 <CardTitle className="text-base text-gray-900 flex items-center gap-2">
 //                     <AlertCircle className="h-5 w-5 text-orange-600" />

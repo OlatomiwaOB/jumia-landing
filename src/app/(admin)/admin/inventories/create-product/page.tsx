@@ -323,7 +323,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-sidebar-accent mx-auto mb-4" />
           <p className="text-medium-gray">Loading product data...</p>
         </div>
       </div>
@@ -687,7 +687,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                           </Button>
                         </div>
                       )}
-                      <div className="border-2 border-dashed border-faded-accent rounded-lg p-6 text-center hover:border-orange-300 transition-colors">
+                      <div className="border-2 border-dashed border-faded-accent rounded-lg p-6 text-center hover:border-sidebar-accent/50 transition-colors">
                         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="photo-upload" disabled={isUploadingFile} />
                         <Label htmlFor="photo-upload" className="cursor-pointer">
                           <div className="flex flex-col items-center gap-2">

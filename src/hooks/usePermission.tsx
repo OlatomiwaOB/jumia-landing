@@ -1,6 +1,6 @@
 'use client';
 
-import useOperations from '@/store/operationsStore';
+import useUser from '@/store/userStore';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
@@ -13,11 +13,11 @@ interface PermissionCheckOptions {
 }
 
 export const usePermission = () => {
-  const { operations } = useOperations();
+  const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   
-  const userPermissions = operations?.userPermissions || [];
+  const userPermissions = user?.userPermissions || [];
 
   const hasPermission = (permissionCode: string): boolean => {
     return userPermissions.includes(permissionCode);
@@ -36,7 +36,7 @@ export const usePermission = () => {
     options: PermissionCheckOptions = {}
   ) => {
     const {
-      redirectTo = '/operations/not-permitted',
+      redirectTo = '/admin/not-permitted',
       showToast = true,
       toastMessage = "You don't have permission to access this page",
       redirectToNotPermitted = true
@@ -63,7 +63,7 @@ export const usePermission = () => {
           
           if (redirectToNotPermitted) {
             const pageName = pathname.split('/').pop() || 'this';
-            router.push(`/operations/not-permitted?page=${encodeURIComponent(pageName)}`);
+            router.push(`/admin/not-permitted?page=${encodeURIComponent(pageName)}`);
           } else {
             router.push(redirectTo);
           }

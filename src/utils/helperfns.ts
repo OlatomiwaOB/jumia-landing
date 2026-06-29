@@ -27,8 +27,8 @@ const currencySymbols: Record<CurrencyCode, string> = {
   GHS: "₵" // Ghana Cedis
 };
 
-export function formatPrice(amount: number, currencyCode: CurrencyCode): string {
-  const symbol = currencySymbols[currencyCode] || "₦";
+export function formatPrice(amount: number, currencyCode: CurrencyCode = 'GBP'): string {
+  const symbol = currencySymbols[currencyCode] || "£";
 
   // Safe fallback if amount is null/undefined
   const safeAmount = Number(amount) || 0;
@@ -130,7 +130,7 @@ export const randomNDigitNumber = (digits = 20) => {
   if (digits < 1) {
     throw new Error('Number of digits must be at least 1');
   }
-  
+
   if (digits > 15) {
     // For large numbers, use string manipulation to avoid precision issues
     let result = '';
@@ -144,7 +144,7 @@ export const randomNDigitNumber = (digits = 20) => {
     }
     return result;
   }
-  
+
   // For smaller numbers, use the mathematical approach
   const min = Math.pow(10, digits - 1);
   const max = Math.pow(10, digits) - 1;
@@ -153,9 +153,9 @@ export const randomNDigitNumber = (digits = 20) => {
 
 export function getCustomVariantPrices(productName: string, defaultBasePrice: number) {
   if (!productName) return { price2L: defaultBasePrice, price4L: defaultBasePrice * 2 };
-  
+
   const name = productName.toLowerCase();
-  
+
   const customPrices = [
     { keywords: ['seafood rice'], price2L: 50, price4L: 90 },
     { keywords: ['seafood okro'], price2L: 70, price4L: 130 },

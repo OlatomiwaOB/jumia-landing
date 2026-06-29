@@ -138,7 +138,7 @@ const getStatusColor = (status: string): string => {
     case 'pending':
       return 'bg-blue-500 text-white';
     case 'shipped':
-      return 'bg-orange-500 text-white';
+      return 'bg-sidebar-accent text-white';
     case 'cancelled':
     case 'failed':
     case 'draft':

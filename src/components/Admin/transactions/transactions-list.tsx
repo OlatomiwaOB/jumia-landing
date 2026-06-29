@@ -460,7 +460,7 @@ const DesktopRow: React.FC<{
 }> = ({ transaction, onClick, isLast }) => {
   return (
     <tr
-      className={`border-b-2 border-[#EEEEEE] transition-colors cursor-pointer hover:bg-orange-50/40 ${isLast ? 'border-b-0' : ''}`}
+      className={`border-b-2 border-[#EEEEEE] transition-colors cursor-pointer hover:bg-sidebar-accent/10 ${isLast ? 'border-b-0' : ''}`}
     >
       <td className="px-3 py-3.5">
         <p className="text-sm text-medium-gray">{transaction.date}</p>
