@@ -31,8 +31,6 @@ WORKDIR /app
 # Copy package files first to leverage docker layer cache
 COPY package.json pnpm-lock.yaml ./
 
-# Copy the .env file for the build step
-COPY .env ./
 
 # Enable corepack and install dependencies via pnpm
 RUN corepack enable \
@@ -74,9 +72,6 @@ RUN corepack enable \
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-
-# Copy the .env file from the builder for runtime
-COPY --from=builder /app/.env ./
 
 # Switch to non-root user
 USER nextjs
