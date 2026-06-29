@@ -106,17 +106,17 @@ export function SignInForm() {
       subtitle="Welcome back, please sign in to your account."
       leftPanelTitle={<>Manage your business with <span className="font-semibold text-[var(--accent)]">confidence.</span></>}
       leftPanelSubtitle="Secure, efficient, and tailored to your brand's needs."
-      footerNode={
-        <>
-          <span className="text-sm text-medium-gray">Don&apos;t have an account? </span>
-          <Link
-            href="/business-onboarding"
-            className="text-sm font-semibold text-[var(--accent)] hover:underline"
-          >
-            Sign up
-          </Link>
-        </>
-      }
+    // footerNode={
+    //   <>
+    //     <span className="text-sm text-medium-gray">Don&apos;t have an account? </span>
+    //     <Link
+    //       href="/business-onboarding"
+    //       className="text-sm font-semibold text-[var(--accent)] hover:underline"
+    //     >
+    //       Sign up
+    //     </Link>
+    //   </>
+    // }
     >
       <form className="space-y-6" onSubmit={onSubmit}>
         <div className="space-y-2">
