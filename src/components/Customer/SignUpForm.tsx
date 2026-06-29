@@ -53,6 +53,8 @@ export function SignUpForm() {
   const { location } = useLocationStore()
   const bannerUrl = branding.images.banner
   const entityCode = getClientIdentifiers().entityCode;
+  const sourceCode = getClientIdentifiers().sourceCode;
+
 
 
   const {
@@ -95,7 +97,7 @@ export function SignUpForm() {
       method: 'POST',
       data,
       headers: {
-        'x-source-code': process.env.NEXT_PUBLIC_SOURCE_CODE || 'HELP2PAY',
+        'x-source-code': sourceCode || 'HELP2PAY',
         'x-client-id': process.env.NEXT_PUBLIC_CLIENT_ID || 'TST03054745785188010772',
         'x-client-secret': process.env.NEXT_PUBLIC_CLIENT_SECRET || 'TST03722175625334233555707073458615741827171811840881'
       }
@@ -353,13 +355,12 @@ export function SignUpForm() {
               {[1, 2, 3, 4].map((step, index) => (
                 <div key={step} className="flex items-center">
                   <div
-                    className={`relative z-10 transition-all duration-200 ${
-                      step < currentStep
+                    className={`relative z-10 transition-all duration-200 ${step < currentStep
                         ? "text-white"
                         : step === currentStep
-                        ? "text-faded-accent"
-                        : "text-gray-300"
-                    }`}
+                          ? "text-faded-accent"
+                          : "text-gray-300"
+                      }`}
                   >
                     {step < currentStep ? (
                       <div className="w-4.5 h-4.5 rounded-full bg-faded-accent flex items-center justify-center">
@@ -368,23 +369,20 @@ export function SignUpForm() {
                     ) : (
                       <>
                         <div
-                          className={`w-4.5 h-4.5 rounded-full border-2 ${
-                            step === currentStep ? "border-faded-accent" : "border-gray-300"
-                          }`}
+                          className={`w-4.5 h-4.5 rounded-full border-2 ${step === currentStep ? "border-faded-accent" : "border-gray-300"
+                            }`}
                         />
                         <div
-                          className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${
-                            step === currentStep ? "bg-faded-accent" : "bg-gray-300"
-                          }`}
+                          className={`absolute inset-0 m-auto w-2 h-2 rounded-full ${step === currentStep ? "bg-faded-accent" : "bg-gray-300"
+                            }`}
                         />
                       </>
                     )}
                   </div>
                   {index < 3 && (
                     <div
-                      className={`w-24 h-0.5 transition-colors duration-200 ${
-                        step < currentStep ? "bg-faded-accent" : "bg-gray-200"
-                      }`}
+                      className={`w-24 h-0.5 transition-colors duration-200 ${step < currentStep ? "bg-faded-accent" : "bg-gray-200"
+                        }`}
                     />
                   )}
                 </div>
