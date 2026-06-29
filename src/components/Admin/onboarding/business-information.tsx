@@ -10,6 +10,7 @@ import { DatePicker } from "@/components/ui/date-picker"
 // import { useValidateIdentity } from '@/hooks/useGetIDType'
 import { Loader2 } from 'lucide-react'
 import { useValidateIdentity } from '@/hooks/useGetIDType'
+import { getClientIdentifiers } from '@/config/client-config'
 
 type Props = {
   register: UseFormRegister<FormData>,
@@ -56,7 +57,7 @@ const BusinessInformation = ({ register, errors, watchedValues, setValue, watch,
 
     validateIdentity.mutate(
       {
-        entityId: 'H2P',
+        entityId: getClientIdentifiers().entityCode,
         idNo: idNo,
         idType: idType as 'BVN' | 'NIN',
         firstname: watchedValues.firstname || '',

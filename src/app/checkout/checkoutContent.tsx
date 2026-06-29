@@ -57,6 +57,7 @@ const formSchema = z.object({
 
 export type FormData = z.infer<typeof formSchema>;
 
+const entityCode = getClientIdentifiers()?.entityCode
 const CheckoutContent = () => {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('guest-info');
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(null);
@@ -287,7 +288,7 @@ const CheckoutContent = () => {
 
       const receiptPayload = {
         orderNo: checkoutData.orderNo,
-        entityCode: customer?.entityCode || 'H2P',
+        entityCode: customer?.entityCode || entityCode,
         customerEmail: customer?.username || "",
         ordDate: checkoutData.orderDate,
         // salePerson: "",

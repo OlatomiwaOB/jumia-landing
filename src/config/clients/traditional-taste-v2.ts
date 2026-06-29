@@ -6,7 +6,7 @@ export const traditionalTasteV2Config: ClientConfig = {
   identifiers: {
     entityCode: {
       development: 'H2P',
-      production: 'H2P', // TODO: Replace with production entity code
+      production: 'TTS', // TODO: Replace with production entity code
     },
     storeCode: {
       development: 'STO1575',

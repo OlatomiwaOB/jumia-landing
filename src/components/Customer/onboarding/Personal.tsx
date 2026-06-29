@@ -371,6 +371,7 @@ import { Label } from '@/components/ui/label'
 import { DatePicker } from "@/components/ui/date-picker"
 import { useValidateIdentity } from '@/hooks/useGetIDType'
 import { Loader2 } from 'lucide-react'
+import { getClientIdentifiers } from '@/config/client-config'
 
 type Props = {
   register: UseFormRegister<FormData>,
@@ -449,7 +450,7 @@ const Personal = ({ register, errors, watchedValues, setValue, watch, setError, 
 
     validateIdentity.mutate(
       {
-        entityId: 'FTD',
+        entityId: getClientIdentifiers().entityCode,
         idNo: idNo,
         idType: idType as 'BVN' | 'NIN',
         firstname: watchedValues.firstname || '',
@@ -786,7 +787,7 @@ const Personal = ({ register, errors, watchedValues, setValue, watch, setError, 
             <Input
               id="dateOfBirth"
               type="date"
-              {...register("dateOfBirth", { 
+              {...register("dateOfBirth", {
                 required: "Date of Birth is required",
                 validate: (value) => {
                   if (value) {

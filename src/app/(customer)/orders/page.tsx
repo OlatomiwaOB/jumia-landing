@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
 import { RoutingIcon, SeperatorIcon, StarIcon, TransInflowIcon } from '@/components/icons/icons';
 import { CurrencyCode, formatPrice, formatDateToDDMMYYYY } from '@/utils/helperfns';
+import { getClientIdentifiers } from '@/config/client-config';
 
 interface CartItem {
   itemCode: string;
@@ -207,16 +208,17 @@ const exportToCSV = (orders: Order[]) => {
 
 const useDownloadReceipt = () => {
   const { customer } = useCustomer();
+  const clientIdentifier = getClientIdentifiers();
   return async (order: Order) => {
     try {
       const isDelivery = order.deliveryOption?.toLowerCase() === 'delivery';
       const response = await axiosCustomer.post(
         '/sale-receipt/generate-pdf?download=true',
         {
-          orderNo: order.cartId, entityCode: 'FTD',
+          orderNo: order.cartId, entityCode: customer?.entityCode || clientIdentifier?.entityCode,
           customerEmail: customer?.username || '',
           ordDate: order.orderDate,
-          storeCode: order.storeCode || 'STO0715',
+          storeCode: order.storeCode || clientIdentifier?.storeCode,
           delivery: isDelivery,
           pickupId: isDelivery ? undefined : order.pickupId,
         },
@@ -406,17 +408,17 @@ const FilterBar: React.FC<{
         </Select>
 
         <div className="hidden sm:flex max-w-xs items-center gap-2">
-          <Input 
-            type="date" 
-            value={filters.startDate} 
-            onChange={(e) => update({ startDate: e.target.value })} 
+          <Input
+            type="date"
+            value={filters.startDate}
+            onChange={(e) => update({ startDate: e.target.value })}
             className="w-[140px]"
           />
           <span className="text-xs text-gray-400 shrink-0">to</span>
-          <Input 
-            type="date" 
-            value={filters.endDate} 
-            onChange={(e) => update({ endDate: e.target.value })} 
+          <Input
+            type="date"
+            value={filters.endDate}
+            onChange={(e) => update({ endDate: e.target.value })}
             max={today.toISOString().split('T')[0]}
             className="w-[140px]"
           />
