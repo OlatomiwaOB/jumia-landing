@@ -6,7 +6,7 @@ export const varisaConfig: ClientConfig = {
   identifiers: {
     entityCode: {
       development: 'H2P',
-      production: 'TTS', // TODO: Replace with production entity code
+      production: 'VAR', // TODO: Replace with production entity code
     },
     storeCode: {
       development: 'STO7056',
