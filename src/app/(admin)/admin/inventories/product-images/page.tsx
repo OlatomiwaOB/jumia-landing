@@ -491,7 +491,7 @@ const ProductImagesPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
       </div>
     );
   }

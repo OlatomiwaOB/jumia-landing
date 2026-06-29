@@ -265,7 +265,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     if (!order) return null;
 
     const subtotal = order.cartItems?.reduce((s, i) => s + i.amount, 0) ?? 0;
-    const ccy = order.ccy || '₦';
+    const ccy = order.ccy || '£';
     const canRate = order.orderStatus?.toLowerCase() === 'completed';
 
     return (

@@ -7,14 +7,7 @@ export const BUSINESS_MANAGER = 'BUSINESS_MANAGER'
 export const REVENUE_ASSURANCE = "REVENUE_ASSURANCE";
 export const CASHIER = 'CASHIER'
 export const SALES_REP = 'SALES_REP'
-export const OPERATIONS = 'OPERATIONS';
-export const TOKEN_OPERATIONS = 'token_operations';
-export const PERMISSIONS_OPERATIONS = 'permissions_operations';
-export const AUTH_CRED_OPERATIONS = 'AUTH_CRED_OPERATIONS';
-export const RIDERS = 'RIDERS';
-export const TOKEN_RIDERS = 'token_riders';
-export const PERMISSIONS_RIDERS = 'permissions_riders';
-export const AUTH_CRED_RIDERS = 'AUTH_CRED_RIDERS';
+
 export const TOKEN = 'token';
 export const TOKEN_CUSTOMER = 'token_customer'
 export const PERMISSIONS = 'permissions';

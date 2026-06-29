@@ -142,7 +142,7 @@ const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
 
         {isFetching && !info && (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <div className="w-10 h-10 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+            <div className="w-10 h-10 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
             <p className="text-sm text-gray-400">Loading tracking info…</p>
           </div>
         )}
@@ -273,7 +273,7 @@ const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
                       return (
                         <li key={step} className="flex gap-3">
                           <div className="flex flex-col items-center">
-                            <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 z-10 transition-all ${isDone ? 'bg-orange-500 text-white' :
+                            <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 z-10 transition-all ${isDone ? 'bg-sidebar-accent text-white' :
                               isCurrent ? 'bg-white border-2 border-faded-accent' :
                                 'bg-gray-100'
                               }`}>
@@ -286,7 +286,7 @@ const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
                               )}
                             </div>
                             {!isLast && (
-                              <div className={`w-0.5 flex-1 my-1 min-h-[20px] rounded-full ${isDone ? 'bg-orange-400' : 'bg-gray-200'
+                              <div className={`w-0.5 flex-1 my-1 min-h-[20px] rounded-full ${isDone ? 'bg-sidebar-accent' : 'bg-gray-200'
                                 }`} />
                             )}
                           </div>

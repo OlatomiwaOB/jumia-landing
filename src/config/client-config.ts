@@ -72,11 +72,12 @@ export function clientConfig(): ClientConfig {
 export const getClientBranding = (): ClientBranding => clientConfig().branding;
 
 /** Get the identifiers section with environment-aware resolution */
-export const getClientIdentifiers = (): { entityCode: string; storeCode: string } => {
+export const getClientIdentifiers = (): { entityCode: string; storeCode: string, sourceCode: string } => {
   const ids = clientConfig().identifiers;
   return {
     entityCode: resolveEnvValue(ids.entityCode),
     storeCode: resolveEnvValue(ids.storeCode),
+    sourceCode: resolveEnvValue(ids.sourceCode),
   };
 };
 

@@ -310,7 +310,7 @@ export const UpdateOrderTracking: React.FC<UpdateOrderTrackingProps> = ({
                                     return (
                                         <li key={step} className="flex gap-3">
                                             <div className="flex flex-col items-center">
-                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 z-10 transition-all ${isDone ? 'bg-orange-500 text-white' :
+                                                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 z-10 transition-all ${isDone ? 'bg-sidebar-accent text-white' :
                                                     isCurrent ? 'bg-white border-2 border-faded-accent' :
                                                         'bg-gray-100'
                                                     }`}>
@@ -323,7 +323,7 @@ export const UpdateOrderTracking: React.FC<UpdateOrderTrackingProps> = ({
                                                     )}
                                                 </div>
                                                 {!isLast && (
-                                                    <div className={`w-0.5 flex-1 my-0.5 min-h-[12px] rounded-full ${isDone ? 'bg-orange-400' : 'bg-gray-200'
+                                                    <div className={`w-0.5 flex-1 my-0.5 min-h-[12px] rounded-full ${isDone ? 'bg-sidebar-accent' : 'bg-gray-200'
                                                         }`} />
                                                 )}
                                             </div>

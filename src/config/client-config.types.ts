@@ -139,6 +139,8 @@ export interface ClientIdentifiers {
   entityCode: EnvironmentAwareValue;
   /** Store code for API calls (e.g., "STO7056") — differs per environment */
   storeCode: EnvironmentAwareValue;
+  /** Source code for API calls (e.g., varisa) — differs per environment */
+  sourceCode: EnvironmentAwareValue;
 }
 
 // ---------------------------------------------------------------------------

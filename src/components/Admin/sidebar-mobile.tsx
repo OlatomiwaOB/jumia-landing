@@ -76,6 +76,16 @@ const navigationGroups: NavGroup[] = [
     ]
   },
   {
+    name: 'Delivery Mgt.',
+    icon: CubeIcon,
+    activeIcon: CubeIconFilled,
+    requiredPermissions: ['MANAGE_DELIVERY_OPTIONS', 'MANAGE_PICKUP_LOCATIONS'],
+    items: [
+      { name: 'Delivery Option Types', href: '/admin/delivery-option-types', requiredPermissions: ['MANAGE_DELIVERY_OPTIONS'] },
+      { name: 'Pickup Locations', href: '/admin/pickup-locations', requiredPermissions: ['MANAGE_PICKUP_LOCATIONS'] },
+    ]
+  },
+  {
     name: 'User & Customer Mgt.',
     icon: ProfileIcon,
     activeIcon: ProfileIconFilled,

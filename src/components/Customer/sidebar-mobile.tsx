@@ -54,69 +54,69 @@ const navigationGroups: NavGroup[] = [
     activeIcon: HomeIconFilled2,
     items: []
   },
-  {
-    name: 'Transactions & Payments',
-    icon: TransactionIcon,
-    activeIcon: TransactionIconFilled,
-    items: [
-      { name: 'Transactions', href: '/transactions' },
-      { name: 'Send Money', href: '/send-money' },
-      { name: 'Manage Accounts', href: '/add-bank-account' },
-    ]
-  },
+  // {
+  //   name: 'Transactions & Payments',
+  //   icon: TransactionIcon,
+  //   activeIcon: TransactionIconFilled,
+  //   items: [
+  //     { name: 'Transactions', href: '/transactions' },
+  //     { name: 'Send Money', href: '/send-money' },
+  //     { name: 'Manage Accounts', href: '/add-bank-account' },
+  //   ]
+  // },
   {
     name: 'Orders & Shopping',
     icon: OrderIcon,
     activeIcon: OrderIconFilled2,
     items: [
-      { name: 'Find Stores', href: '/find-stores' },
-      { name: 'Store Front', href: '/' },
+      // { name: 'Find Stores', href: '/find-stores' },
+      // { name: 'Store Front', href: '/' },
       { name: 'Orders', href: '/orders' },
     ]
   },
-  {
-    name: 'Financial & Credit',
-    icon: CreditIcon,
-    activeIcon: CreditIconFilled,
-    items: [
-      { name: 'My Credit Score', href: '/credit-score' },
-    ]
-  },
-  {
-    name: 'Reports & Analytics',
-    icon: ReportIcon,
-    activeIcon: ReportIconFilled,
-    items: [
-      { name: 'Reports', href: '/reports' },
-    ]
-  },
-  {
-    name: 'Account & Profile',
-    icon: '',
-    isSectionTitle: true,
-    items: []
-  },
-  {
-    name: 'My Documents',
-    href: '/documents',
-    icon: FolderIcon,
-    activeIcon: FolderIconFilled,
-    items: []
-  },
-  {
-    name: 'API Key',
-    href: '/api-key',
-    icon: ApikeyIcon,
-    activeIcon: ApikeyIconFilled,
-    items: []
-  },
-  {
-    name: 'Settings',
-    href: '/settings',
-    icon: SettingIcon,
-    activeIcon: SettingIconFilled,
-    items: []
-  },
+  // {
+  //   name: 'Financial & Credit',
+  //   icon: CreditIcon,
+  //   activeIcon: CreditIconFilled,
+  //   items: [
+  //     { name: 'My Credit Score', href: '/credit-score' },
+  //   ]
+  // },
+  // {
+  //   name: 'Reports & Analytics',
+  //   icon: ReportIcon,
+  //   activeIcon: ReportIconFilled,
+  //   items: [
+  //     { name: 'Reports', href: '/reports' },
+  //   ]
+  // },
+  // {
+  //   name: 'Account & Profile',
+  //   icon: '',
+  //   isSectionTitle: true,
+  //   items: []
+  // },
+  // {
+  //   name: 'My Documents',
+  //   href: '/documents',
+  //   icon: FolderIcon,
+  //   activeIcon: FolderIconFilled,
+  //   items: []
+  // },
+  // {
+  //   name: 'API Key',
+  //   href: '/api-key',
+  //   icon: ApikeyIcon,
+  //   activeIcon: ApikeyIconFilled,
+  //   items: []
+  // },
+  // {
+  //   name: 'Settings',
+  //   href: '/settings',
+  //   icon: SettingIcon,
+  //   activeIcon: SettingIconFilled,
+  //   items: []
+  // },
 ];
 
 const isPathMatchingItem = (pathname: string, itemHref: string): boolean => {

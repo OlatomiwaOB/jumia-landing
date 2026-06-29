@@ -39,7 +39,7 @@ export default function CategoryShowcaseSection() {
       price: p.salePrice ? formatPrice(p.salePrice, (p.ccy as CurrencyCode) || 'GBP') : formatPrice(0, (p.ccy as CurrencyCode) || 'GBP'),
       originalPrice: p.oldPrice ? formatPrice(p.oldPrice, (p.ccy as CurrencyCode) || 'GBP') : null,
       discount: p.discount ? `-${p.discount}%` : null,
-      image: p.name?.toLowerCase().includes('peppered chicken') ? (productsData?.products?.find((prod: any) => prod.name?.toLowerCase().includes('egusi'))?.picture || '/pounded_yam_egusi.jpg') : p.picture,
+      image: p.name?.toLowerCase().includes('peppered chicken') ? (productsData?.products?.find((prod: any) => prod.name?.toLowerCase().includes(''))?.picture || '/pounded_yam_egusi.jpg') : p.picture,
       badges: [],
       stock: (p.qtyInStore ?? 1) > 0,
       offer: null
@@ -100,6 +100,7 @@ export default function CategoryShowcaseSection() {
                   if (egusiProduct && sliced.length > 1) {
                     sliced[1] = egusiProduct;
                   }
+
                   return sliced;
                 })().map((product) => (
                   <div key={product.id} className="flex flex-col items-center text-center group cursor-pointer w-full bg-white/40 hover:bg-white/80 rounded-[40px] p-6 lg:p-8 transition-colors duration-500 shadow-sm hover:shadow-xl border border-white/50">

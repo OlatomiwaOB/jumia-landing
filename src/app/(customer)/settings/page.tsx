@@ -27,8 +27,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { key: 'profile', label: 'Profile', IconActive: UserIcon, IconInactive: UserFilledIcon },
-  { key: 'kyc', label: 'KYC Verification', IconActive: KycIcon, IconInactive: KycFilledIcon },
-  { key: 'security', label: 'Security', IconActive: LockIcon, IconInactive: LockFilledIcon },
+  // { key: 'kyc', label: 'KYC Verification', IconActive: KycIcon, IconInactive: KycFilledIcon },
+  // { key: 'security', label: 'Security', IconActive: LockIcon, IconInactive: LockFilledIcon },
 ];
 
 export default function Settings(): React.ReactElement {

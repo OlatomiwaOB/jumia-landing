@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,14 +23,33 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@themes/*": ["./themes/*"],
-      "@theme": ["./themes/depot"],
-      "@theme/*": ["./themes/depot/*"],
-      "@brand": ["./src/config/brands/depot.brand.json"],
-      "@/wagmi.config": ["./wagmi.config"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@themes/*": [
+        "./themes/*"
+      ],
+      "@theme": [
+        "./themes/depot"
+      ],
+      "@theme/*": [
+        "./themes/depot/*"
+      ],
+      "@brand": [
+        "./src/config/brands/depot.brand.json"
+      ],
+      "@/wagmi.config": [
+        "./wagmi.config"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

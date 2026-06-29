@@ -413,7 +413,7 @@ const formatCellValue = (value: any, key: string): React.ReactNode => {
         return <span className="text-dark-gray">{value}</span>;
     }
     if ((key.toLowerCase().includes('amount') || key.toLowerCase().includes('price') || key.toLowerCase().includes('total')) && !isNaN(Number(value))) {
-        return <span className="font-medium text-green-700">₦{Number(value).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>;
+        return <span className="font-medium text-green-700">£{Number(value).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>;
     }
     if (key.toLowerCase().includes('status')) {
         return <Badge className={`text-[10px] px-2.5 py-0.5 border font-medium ${getStatusColor(value)}`}>{getDisplayValue(value)}</Badge>;
@@ -667,7 +667,7 @@ export default function ReportDetailPage() {
 
             {isGenerating ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
                 </div>
             ) : generateError ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -696,7 +696,7 @@ export default function ReportDetailPage() {
                             </thead>
                             <tbody>
                                 {filteredData.map((item: any, idx: number) => (
-                                    <tr key={idx} className={`border-b-2 border-[#EEEEEE] hover:bg-orange-50/40 transition-colors ${idx === filteredData.length - 1 ? 'border-b-0' : ''}`}>
+                                    <tr key={idx} className={`border-b-2 border-[#EEEEEE] hover:bg-sidebar-accent/10 transition-colors ${idx === filteredData.length - 1 ? 'border-b-0' : ''}`}>
                                         {columns.map((column) => (
                                             <td key={column} className="px-3 py-3 text-sm">
                                                 {formatCellValue(item[column], column)}

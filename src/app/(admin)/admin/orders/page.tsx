@@ -373,7 +373,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { DatePicker } from '@/components/ui/date-picker';
 import { CubeIcon, CubeIconGray, ProfileIconGray, RoutingIcon, SeperatorIcon, StarIcon, TransInflowIcon, UserIcon } from '@/components/icons/icons';
-import { CurrencyCode, formatPrice } from '@/utils/helperfns';
+import { CurrencyCode, formatDateToDDMMYYYY, formatPrice } from '@/utils/helperfns';
 import { usePermission } from '@/hooks/usePermissionBusiness';
 import OrdersTable, { ColumnDef } from '@/components/Customer/orders/dynamic-table';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
@@ -651,9 +651,20 @@ const FilterBar: React.FC<{
         </Select>
 
         <div className="hidden sm:flex max-w-xs items-center gap-2">
-          <DatePicker value={filters.startDate} onChange={(v) => update({ startDate: v })} />
+          <Input
+            type="date"
+            value={filters.startDate}
+            onChange={(e) => update({ startDate: e.target.value })}
+            className="w-[140px]"
+          />
           <span className="text-xs text-gray-400 shrink-0">to</span>
-          <DatePicker value={filters.endDate} onChange={(v) => update({ endDate: v })} maxDate={today} />
+          <Input
+            type="date"
+            value={filters.endDate}
+            onChange={(e) => update({ endDate: e.target.value })}
+            max={today.toISOString().split('T')[0]}
+            className="w-[140px]"
+          />
         </div>
 
         {hasActive && (
@@ -741,8 +752,8 @@ export default function OrderHistoryPage(): React.ReactElement {
     queryFn: () => {
       const params: Record<string, any> = { pageNumber: 1, pageSize: 5000, storeCode: user?.storeCode, entityCode: user?.entityCode };
       if (filters.orderStatus !== 'all') params.orderStatus = filters.orderStatus;
-      if (filters.startDate) { const iso = ddmmyyyyToISO(filters.startDate); if (iso) params.startDate = iso; }
-      if (filters.endDate) { const iso = ddmmyyyyToISO(filters.endDate); if (iso) params.endDate = iso; }
+      if (filters.startDate) params.startDate = formatDateToDDMMYYYY(filters.startDate);
+      if (filters.endDate) params.endDate = formatDateToDDMMYYYY(filters.endDate);
       if (filters.searchTerm) params.searchTerm = filters.searchTerm;
       return axiosInstance.request({ url: '/store-dashboard/fetch-recent-orders', method: 'GET', params });
     },
@@ -827,7 +838,7 @@ export default function OrderHistoryPage(): React.ReactElement {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+          <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
         </div>
       ) : error ? (
         <div className="flex items-center justify-center py-20 text-red-400 text-sm">Error loading orders</div>

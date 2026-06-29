@@ -465,14 +465,23 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, X, Eye, ChevronLeft, ChevronRight, Tag } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import axiosInstance from "@/utils/fetch-function";
+import { Search, X, Eye, ChevronLeft, ChevronRight, Plus, Upload, RefreshCw, Trash2, Edit, Grid, List, Tag, Loader2 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
 import { Badge } from "@/components/ui/badge";
-import useUser from "@/store/userStore";
+import { useRouter } from "next/navigation";
+import { usePermission } from "@/hooks/usePermissionBusiness";
+import { PermissionButton } from "@/components/Admin/permission/permission-button";
+import { TransInflowIcon, SeperatorIcon, EditIcon } from "@/components/icons/icons";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import UploadBulkForm from "../../upload/upload";
+import { toast } from "sonner";
+import Papa from "papaparse";
+
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import axiosInstance from "@/utils/fetch-function";
+import useUser from "@/store/userStore";
 
 export interface Category {
     id: number;
@@ -521,7 +530,7 @@ const TablePagination = ({
                         <span key={`e-${i}`} className="text-xs text-gray-400 px-1">···</span>
                     ) : (
                         <button key={p} onClick={() => onChange(p as number)}
-                            className={`h-8 w-8 rounded-lg text-xs font-medium transition-colors cursor-pointer ${p === current ? 'border-2 border-faded-accent text-faded-accent' : 'text-gray-600 hover:bg-gray-100'}`}>
+                            className={`h-8 w-8 rounded-lg text-xs font-medium transition-colors cursor-pointer ${p === current ? 'border-2 border-sidebar-accent text-sidebar-accent' : 'text-gray-600 hover:bg-gray-100'}`}>
                             {p}
                         </button>
                     )
@@ -534,19 +543,109 @@ const TablePagination = ({
     );
 };
 
+// Delete Category Modal
+const DeleteCategoryModal = ({
+    isOpen,
+    onClose,
+    category,
+    onSuccess,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    category: Category | null;
+    onSuccess?: () => void;
+}) => {
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const { user } = useUser()
+    const deleteCategoryMutation = useMutation({
+        mutationFn: async (payload: { itemCode: string; entityCode: string }) => {
+            return await axiosInstance.delete(`/products/delete-product-category?entityCode=${payload.entityCode}&itemCategoryCode=${payload.itemCode}`, {
+                data: payload,
+            });
+        },
+        onSuccess: (data) => {
+            if (data?.data?.code === '000') {
+                toast.success('Category deleted successfully');
+                if (onSuccess) onSuccess();
+                handleClose();
+            } else {
+                toast.error(data?.data?.desc || 'Failed to delete category');
+                setIsDeleting(false);
+            }
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to delete category');
+            setIsDeleting(false);
+        }
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!category) return;
+        setIsDeleting(true);
+        deleteCategoryMutation.mutate({ itemCode: category.code, entityCode: user?.entityCode! });
+    };
+
+    const handleClose = () => {
+        setIsDeleting(false);
+        onClose();
+    };
+
+    if (!category) return null;
+
+    return (
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+            <DialogContent className="sm:max-w-md rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0">
+                <DialogTitle className="sr-only">Delete Category</DialogTitle>
+                <div className="px-6 pt-5 pb-2">
+                    <h2 className="text-base font-bold text-dark-gray">Delete Category</h2>
+                    <p className="text-xs text-medium-gray mt-0.5">This action cannot be undone</p>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div className="bg-white rounded-2xl p-4 space-y-4">
+                        <div className="space-y-1.5">
+                            <p className="text-xs text-medium-gray">Category Name</p>
+                            <p className="text-sm font-semibold text-dark-gray bg-gray-50 p-2 rounded-lg">{category.name}</p>
+                        </div>
+                        <div className="space-y-1.5">
+                            <p className="text-xs text-medium-gray">Category Code</p>
+                            <p className="text-sm font-mono font-semibold text-dark-gray bg-gray-50 p-2 rounded-lg">{category.code}</p>
+                        </div>
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                            <p className="text-xs text-red-600"><span className="font-semibold">Warning:</span> This category will be permanently deleted.</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3 justify-end pt-1">
+                        <Button type="button" variant="outline" onClick={handleClose} disabled={isDeleting}>Cancel</Button>
+                        <Button type="submit" disabled={isDeleting} className="bg-red-600 hover:bg-red-700 text-white gap-2">
+                            {isDeleting ? <><Loader2 className="w-4 h-4 animate-spin" /> Deleting...</> : <><Trash2 className="w-4 h-4" /> Delete Category</>}
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
 const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
     const { user } = useUser();
+    const router = useRouter();
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<"grid" | "table">("table");
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const ITEMS_PER_PAGE = 10;
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading, error, refetch } = useQuery({
         queryKey: ['categories'],
         queryFn: () => axiosInstance.request({
             url: '/ecommerce/products/categories',
-            params: { name: "", entityCode: user?.entityCode, category: '', tag: '', pageNumber: 1, pageSize: 200 }
+            params: { name: "", entityCode: user?.entityCode, category: '', tag: '', pageNumber: 1, pageSize: 200, storeCode: user?.storeCode }
         })
     });
 
@@ -574,6 +673,30 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
         setIsModalOpen(true);
     };
 
+    const handleEdit = (category: Category) => {
+        router.push(`/admin/inventories/create-category?edit=true&id=${category.id}`);
+    };
+
+    const handleDelete = (category: Category) => {
+        setDeletingCategory(category);
+        setIsDeleteModalOpen(true);
+    };
+
+    const exportToCSV = () => {
+        if (!filtered.length) { toast.error('No data to export'); return; }
+        const csv = Papa.unparse(filtered.map((c) => ({
+            'Name': c.name, 'Code': c.code, 'Sector': c.sector, 'Description': c.description,
+        })), { header: true });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
+        link.download = `categories-${new Date().toISOString().split('T')[0]}.csv`;
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Export complete');
+    };
+
     return (
         <div>
             <div className="mb-4">
@@ -590,78 +713,178 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
                             className="pl-9 text-medium-gray"
                         />
                     </div>
-                    <div className="flex items-center gap-2">
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {/* Grid/Table Toggle */}
+                        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+                            <button
+                                onClick={() => setViewMode("table")}
+                                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === "table" ? 'bg-white text-dark-gray shadow-sm' : 'text-medium-gray hover:text-dark-gray'}`}
+                            >
+                                <List className="w-3.5 h-3.5 inline mr-1" /> Table
+                            </button>
+                            <button
+                                onClick={() => setViewMode("grid")}
+                                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${viewMode === "grid" ? 'bg-white text-dark-gray shadow-sm' : 'text-medium-gray hover:text-dark-gray'}`}
+                            >
+                                <Grid className="w-3.5 h-3.5 inline mr-1" /> Grid
+                            </button>
+                        </div>
+
                         {searchTerm && (
                             <Button variant="ghost" size="sm" onClick={() => { setSearchTerm(''); setCurrentPage(1); }} className="gap-1 text-xs">
                                 <X className="w-3.5 h-3.5" /> Clear
                             </Button>
                         )}
+
+                        <SeperatorIcon />
+                        <Button onClick={exportToCSV} size="lg" variant="outline">
+                            <TransInflowIcon className="w-4 h-4" />
+                            <span className="hidden sm:inline">Export</span>
+                        </Button>
+                        <Button onClick={() => refetch()} size="lg" variant="outline">
+                            <RefreshCw className="w-4 h-4" />
+                        </Button>
+
+                        <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" size="lg"><Upload className="w-4 h-4 mr-2" />Bulk Upload</Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader><DialogTitle></DialogTitle></DialogHeader>
+                                <UploadBulkForm uploadType="categories" onSuccess={() => { setIsBulkUploadOpen(false); refetch(); }} onCancel={() => setIsBulkUploadOpen(false)} />
+                            </DialogContent>
+                        </Dialog>
+
+                        <PermissionButton
+                            requiredPermissions={['MANAGE_INVENTORY']} requireAll={true} hideIfNoPermission={false}
+                            tooltipMessage="No permission" onClick={() => router.push('/admin/inventories/create-category')}
+                            size="lg" className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-white"
+                        >
+                            <Plus className="w-4 h-4" /> Add Category
+                        </PermissionButton>
                     </div>
                 </div>
             </div>
 
             {isLoading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="w-8 h-8 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                    <div className="w-8 h-8 rounded-full border-2 border-sidebar-accent border-t-transparent animate-spin" />
                 </div>
             ) : error ? (
                 <div className="flex items-center justify-center py-20 text-red-400 text-sm">Error loading categories</div>
             ) : (
                 <>
-                    <div className="hidden lg:block">
-                        {filtered.length === 0 ? (
+                    {viewMode === "grid" ? (
+                        /* Grid View */
+                        filtered.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-20 gap-3">
+                                <Tag className="w-10 h-10 text-gray-300" />
                                 <p className="text-2xl font-medium text-dark-gray">No categories found</p>
                                 <p className="text-sm text-medium-gray">Try adjusting your search</p>
                             </div>
                         ) : (
-                            <>
-                                <div className="w-full overflow-x-auto bg-white rounded-2xl overflow-hidden">
-                                    <table className="w-full border-collapse">
-                                        <thead>
-                                            <tr className="border-b-2 border-[#EEEEEE]">
-                                                {['S/N', 'Logo', 'Name', 'Code', 'Sector', ''].map((h) => (
-                                                    <th key={h} className="text-left px-3 py-3 text-sm font-semibold text-dark-gray">{h}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {paginated.map((c, idx) => (
-                                                <tr key={c.id}
-                                                    onClick={() => handleView(c)}
-                                                    className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-orange-50/40 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
-                                                    <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</p></td>
-                                                    <td className="px-3 py-3.5">
-                                                        <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">
-                                                            {c.logo ? (
-                                                                <Image src={c.logo} alt={c.name} width={40} height={40} className="w-full h-full object-cover" />
-                                                            ) : (
-                                                                <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-[10px] text-gray-500 font-bold">{c.name?.charAt(0) || 'C'}</div>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm font-semibold text-dark-gray">{getDisplayValue(c.name)}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm font-mono text-dark-gray">{getDisplayValue(c.code)}</p></td>
-                                                    <td className="px-3 py-3.5"><Badge className="text-[10px] px-2 py-0.5 bg-gray-100 text-dark-gray border-gray-200">{getDisplayValue(c.sector)}</Badge></td>
-                                                    <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button size="xs" variant="action" onClick={() => handleView(c)} title="View"><Eye className="w-4 h-4" /></Button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {paginated.map((category: Category) => (
+                                    <Card key={category.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden">
+                                        <CardHeader className="pb-3 text-center">
+                                            <div className="w-16 h-16 mx-auto bg-gray-50 rounded-lg overflow-hidden mb-3 border border-gray-200">
+                                                {category.logo ? (
+                                                    <Image src={category.logo} alt={category.name} width={64} height={64} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <Tag className="w-8 h-8 text-gray-300" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <CardTitle className="text-sm font-semibold text-dark-gray">{category.name}</CardTitle>
+                                            <p className="text-xs text-medium-gray">Code: {category.code}</p>
+                                        </CardHeader>
+                                        <CardContent className="space-y-2 pt-0">
+                                            <p className="text-xs text-medium-gray text-center line-clamp-2">{category.description}</p>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-xs text-medium-gray">Sector</span>
+                                                <Badge className="text-[10px] px-2 py-0.5 bg-gray-100 text-dark-gray border-gray-200">{category.sector}</Badge>
+                                            </div>
+                                            <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                                                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => handleView(category)}>
+                                                    <Eye className="w-3.5 h-3.5 mr-1" /> View
+                                                </Button>
+                                                <Button size="sm" className="flex-1 text-xs bg-sidebar-accent hover:bg-sidebar-accent/90 text-white" onClick={() => handleEdit(category)}>
+                                                    <Edit className="w-3.5 h-3.5 mr-1" /> Edit
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )
+                    ) : (
+                        /* Table View */
+                        <div className="hidden lg:block">
+                            {filtered.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                                    <Tag className="w-10 h-10 text-gray-300" />
+                                    <p className="text-2xl font-medium text-dark-gray">No categories found</p>
+                                    <p className="text-sm text-medium-gray">Try adjusting your search</p>
                                 </div>
-                                {Math.ceil(filtered.length / ITEMS_PER_PAGE) > 1 && (
-                                    <TablePagination current={currentPage} total={filtered.length} perPage={ITEMS_PER_PAGE} onChange={setCurrentPage} />
-                                )}
-                            </>
-                        )}
-                    </div>
+                            ) : (
+                                <>
+                                    <div className="w-full overflow-x-auto bg-white rounded-2xl overflow-hidden">
+                                        <table className="w-full border-collapse">
+                                            <thead>
+                                                <tr className="border-b-2 border-[#EEEEEE]">
+                                                    {['S/N', 'Logo', 'Name', 'Code', 'Sector', ''].map((h) => (
+                                                        <th key={h} className="text-left px-3 py-3 text-sm font-semibold text-dark-gray">{h}</th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {paginated.map((c, idx) => (
+                                                    <tr key={c.id}
+                                                        onClick={() => handleView(c)}
+                                                        className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-sidebar-accent/10 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
+                                                        <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</p></td>
+                                                        <td className="px-3 py-3.5">
+                                                            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">
+                                                                {c.logo ? (
+                                                                    <Image src={c.logo} alt={c.name} width={40} height={40} className="w-full h-full object-cover" />
+                                                                ) : (
+                                                                    <div className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center text-[10px] text-gray-500 font-bold">{c.name?.charAt(0) || 'C'}</div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-3 py-3.5"><p className="text-sm font-semibold text-dark-gray">{getDisplayValue(c.name)}</p></td>
+                                                        <td className="px-3 py-3.5"><p className="text-sm font-mono text-dark-gray">{getDisplayValue(c.code)}</p></td>
+                                                        <td className="px-3 py-3.5"><Badge className="text-[10px] px-2 py-0.5 bg-gray-100 text-dark-gray border-gray-200">{getDisplayValue(c.sector)}</Badge></td>
+                                                        <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
+                                                            <div className="flex items-center gap-1">
+                                                                <Button size="xs" variant="action" onClick={() => handleView(c)} title="View"><Eye className="w-4 h-4" /></Button>
+                                                                <PermissionButton requiredPermissions={['MANAGE_INVENTORY']} requireAll={true} hideIfNoPermission={false}
+                                                                    tooltipMessage="No permission" onClick={() => handleEdit(c)} size="xs" variant="action">
+                                                                    <EditIcon className="w-4 h-4" />
+                                                                </PermissionButton>
+                                                                {/* <Button disabled size="xs" variant="action" onClick={() => handleDelete(c)} title="Delete" className="text-red-500 hover:text-red-700">
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </Button> */}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {Math.ceil(filtered.length / ITEMS_PER_PAGE) > 1 && (
+                                        <TablePagination current={currentPage} total={filtered.length} perPage={ITEMS_PER_PAGE} onChange={setCurrentPage} />
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    )}
                 </>
             )}
 
+            {/* Category Details Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent
                     className="sm:max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0"
@@ -709,6 +932,13 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
                     </div>
                 </DialogContent>
             </Dialog>
+
+            <DeleteCategoryModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => { setIsDeleteModalOpen(false); setDeletingCategory(null); }}
+                category={deletingCategory}
+                onSuccess={() => refetch()}
+            />
         </div>
     );
 };

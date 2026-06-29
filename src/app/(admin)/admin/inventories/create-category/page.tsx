@@ -254,7 +254,7 @@ const CreateCategoryPage = ({
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/20 flex items-center justify-center">
                         <FolderOpen className="h-8 w-8 text-accent-foreground" />
                     </div>
-                    <h1 className="text-3xl font-bold text-accent-foreground">
+                    <h1 className="text-3xl font-bold text-sidebar-accent">
                         {isEditMode ? 'Edit Category' : 'Create New Category'}
                     </h1>
                     <p className="text-muted-foreground mt-2">

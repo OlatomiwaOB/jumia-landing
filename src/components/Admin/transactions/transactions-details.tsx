@@ -365,7 +365,7 @@ const getStatusStyles = (type: TranType) => {
 };
 
 const formatCurrency = (amount: number, currency: string | null): string => {
-    const symbol = currency || '₦';
+    const symbol = currency || '£';
     return `${symbol}${Number(amount).toLocaleString('en-NG', {
         minimumFractionDigits: 2,
     })}`;
