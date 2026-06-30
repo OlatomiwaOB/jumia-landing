@@ -27,6 +27,7 @@ interface CardAlertProps {
   orderTotal: number;
   totalVat: number;
   onEmailExists?: () => void;
+  setStripeLoading?: (loading: boolean) => void;
 }
 
 const CardAlert = ({
@@ -38,7 +39,8 @@ const CardAlert = ({
   wallets = [],
   orderTotal,
   totalVat,
-  onEmailExists
+  onEmailExists,
+  setStripeLoading
 }: CardAlertProps) => {
   const { cart, clearCart } = useCart()
   const { customer } = useCustomer()
@@ -79,13 +81,14 @@ const CardAlert = ({
 
   const { isPending, mutate, data } = useMutation({
     mutationFn: (data: any) => axiosCustomer({
-      url: '/ecommerce/submit-order',
+      url: '/ecommerce/submit-guest-order',
       method: 'POST',
       data
     }),
     onSuccess: (data) => {
       if (data?.data?.responseCode !== '000') {
         toast?.error(data?.data?.responseMessage)
+        setStripeLoading!(false)
         return
       }
       toast?.success(data?.data?.responseMessage)
@@ -99,6 +102,7 @@ const CardAlert = ({
 
       if (paymentMethod === 'card' && data?.data?.paymentLinkUrl) {
         // window.open(data?.data?.paymentLinkUrl, '_blank')
+        setStripeLoading!(true)
         clearCart()
         router?.replace(data?.data?.paymentLinkUrl)
         return
@@ -133,6 +137,7 @@ const CardAlert = ({
       itemWeight: item?.weight || 1,
       itemWeightUnit: item?.weightUnit || 'ltr',
       variantID: item?.variantId,
+      itemNote: item?.note || ''
     }))
 
     const totalAmount = orderTotal;
@@ -179,6 +184,7 @@ const CardAlert = ({
         country: getValues('country'),
         addressType: getValues('addressType') || 'HOME'
       },
+      orderNote: getValues('note') || '',
       cartItems: orderItems
     }
 
@@ -220,6 +226,7 @@ const CardAlert = ({
 
       if (paymentMethod === 'card' && data?.data?.paymentLinkUrl) {
         clearCart()
+        setStripeLoading!(true)
         useGuestCheckoutStore.getState().clear()
         router?.replace(data?.data?.paymentLinkUrl)
         return
@@ -229,6 +236,26 @@ const CardAlert = ({
       toast.error('Something went wrong!')
     }
   })
+
+  const getAuthPayload = (basePayload: any) => {
+    const authGuestInfo = {
+      firstname: null,
+      lastname: null,
+      email: null,
+      mobileNo: null,
+      city: null,
+      countryCode: null,
+      password: null
+    };
+    const authPayload = buildGuestOrderPayload(authGuestInfo as any, basePayload);
+    authPayload.userType = 'USER';
+    authPayload.oinfo.customerName = customer?.fullname
+    // Preserve the original deliveryAddress for authenticated users
+    if (basePayload.deliveryAddress) {
+      authPayload.oinfo.deliveryAddress = basePayload.deliveryAddress;
+    }
+    return authPayload;
+  };
 
   const onSubmit = () => {
     const payload = buildOrderPayload()
@@ -241,14 +268,24 @@ const CardAlert = ({
         toast.error("Guest info missing");
       }
     } else {
-      mutate(payload)
+      mutate(getAuthPayload(payload));
     }
   }
 
   const onBnplConfirm = (bnplData: any) => {
     setBnplPaymentData(bnplData)
     const payload = buildOrderPayload(bnplData)
-    mutate(payload)
+    if (isGuestCheckout) {
+      const guestInfo = useGuestCheckoutStore.getState().guestInfo;
+      if (guestInfo) {
+        const guestPayload = buildGuestOrderPayload(guestInfo, payload);
+        mutateGuest(guestPayload);
+      } else {
+        toast.error("Guest info missing");
+      }
+    } else {
+      mutate(getAuthPayload(payload));
+    }
   }
 
   const handleModalClose = () => {

@@ -4,6 +4,7 @@ import { GuestFormData } from '@/app/checkout/guestCheckoutContent';
 import { CartReview } from './bnpl_checkout/cart-review';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Truck, MapPin, Eye, EyeOff } from 'lucide-react';
 import { SearchSelect } from '@/components/ui/search-select';
@@ -567,6 +568,15 @@ const GuestInfoForm = ({
             )}
 
           </div>
+
+            <div className="space-y-2 mt-6 mb-4">
+              <Label>Order Note (Optional)</Label>
+              <Textarea 
+                placeholder="Add any special instructions for your order..." 
+                className="resize-none" 
+                {...register('note')} 
+              />
+            </div>
         </div>
 
         <div className="lg:pl-8 lg:border-l border-border">

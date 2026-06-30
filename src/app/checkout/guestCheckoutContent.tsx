@@ -18,13 +18,7 @@ import { ShoppingBag } from 'lucide-react';
 import GuestInfoForm from '@/components/checkout/guest-info-form';
 import { getClientIdentifiers } from '@/config/client-config';
 
-/**
- * Extended form schema for guest checkout.
- * Includes the same shipping/address fields as the authenticated checkout FormData,
- * plus guest personal info fields. The payment components only access the shared fields.
- */
 const guestFormSchema = z.object({
-  // --- Same fields as authenticated FormData ---
   shippingMethod: z.enum(["delivery", "pickup"]).optional(),
   shippingOption: z.string().optional(),
   pickupStore: z.number().optional(),
@@ -39,17 +33,15 @@ const guestFormSchema = z.object({
   landmark: z.string().optional(),
   agreeTerms: z.boolean().refine((val) => val === true, {
     message: "You must agree to the terms and conditions",
-  }),
+  }).optional(),
   deliveryOptionGroup: z.string().optional(),
-  // --- Guest-specific fields ---
+  note: z.string().optional(),
   firstname: z.string().min(2, "First name is required"),
   lastname: z.string().min(2, "Last name is required"),
   email: z.string().email("Valid email is required"),
   mobileNo: z.string().min(6, "Phone number is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string().min(6, "Confirm Password must be at least 6 characters"),
-  // nationality: z.string().min(1, "Nationality is required"),
-  // dateOfBirth: z.string().min(1, "Date of birth is required"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],

@@ -250,7 +250,7 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
         <div className="relative mt-1">
-          <div className="absolute left-[22px] top-0 bottom-0 w-px bg-gray-800" />
+          <div className="absolute left-[22px] top-0 bottom-0 w-px bg-[var(--sidebar-text)]/20" />
           <ul className="py-1 pr-3 space-y-1">
             {accessibleItems.map((item) => {
               const isActive = isPathMatchingItem(pathname, item.href);

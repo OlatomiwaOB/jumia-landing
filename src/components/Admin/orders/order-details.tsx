@@ -177,12 +177,14 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { MapPin, ShoppingCart } from 'lucide-react';
+import { MapPin, ShoppingCart, StickyNote, FileText } from 'lucide-react';
 import Image from 'next/image';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 import { RoutingIcon, StarIcon } from '@/components/icons/icons';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export interface CartItem {
+    itemNote?: string;
     itemCode: string;
     itemName: string;
     price: number;
@@ -209,6 +211,7 @@ export interface DeliveryAddress {
 }
 
 export interface OrderDetail {
+    orderNote?: string;
     channel: string | null;
     cartId: string;
     orderDate: string;
@@ -267,6 +270,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     const subtotal = order.cartItems?.reduce((s, i) => s + i.amount, 0) ?? 0;
     const ccy = order.ccy || '£';
     const canRate = order.orderStatus?.toLowerCase() === 'completed';
+    const hasNotes = !!order.orderNote || (order.cartItems?.some(item => !!item.itemNote));
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
@@ -280,10 +284,17 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 <DialogTitle className="sr-only">Order Details</DialogTitle>
 
                 <div className="px-2">
-                    <h2 className="text-md font-bold text-dark-gray">Order Details</h2>
-                </div>
+                    <Tabs defaultValue="details" className="w-full">
+                        <div className="flex items-center justify-between mt-2 mb-4">
+                            <h2 className="text-md font-bold text-dark-gray">Order Details</h2>
+                            <TabsList>
+                                <TabsTrigger value="details">Details</TabsTrigger>
+                                {hasNotes && <TabsTrigger value="notes">Notes</TabsTrigger>}
+                            </TabsList>
+                        </div>
 
-                <div className="px-2 pb-6 pt-4 flex flex-col lg:flex-row gap-5">
+                        <TabsContent value="details" className="m-0 border-none outline-none">
+                            <div className="pb-6 flex flex-col lg:flex-row gap-5">
 
                     <div className="flex-1 space-y-4">
 
@@ -422,7 +433,49 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                                 </div>
                             </div>
                         )}
-                    </div>
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                        {hasNotes && (
+                            <TabsContent value="notes" className="m-0 border-none outline-none pb-6">
+                                <div className="space-y-6">
+                                    {/* General Order Note */}
+                                    <div className="bg-white rounded-2xl p-5 space-y-3">
+                                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
+                                            <FileText className="w-4 h-4 text-medium-gray" />
+                                            <h3 className="text-sm font-semibold text-dark-gray">General Order Note</h3>
+                                        </div>
+                                        {order.orderNote ? (
+                                            <p className="text-sm text-dark-gray whitespace-pre-wrap">{order.orderNote}</p>
+                                        ) : (
+                                            <p className="text-sm text-medium-gray italic">No general note provided for this order.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Item Notes */}
+                                    <div className="bg-white rounded-2xl p-5 space-y-3">
+                                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
+                                            <StickyNote className="w-4 h-4 text-medium-gray" />
+                                            <h3 className="text-sm font-semibold text-dark-gray">Item Notes</h3>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {order.cartItems?.filter(item => item.itemNote).length > 0 ? (
+                                                order.cartItems.filter(item => item.itemNote).map((item, idx) => (
+                                                    <div key={idx} className="bg-[#F9F9F9] p-4 rounded-xl space-y-2">
+                                                        <p className="text-sm font-medium text-dark-gray">{item.itemName}</p>
+                                                        <p className="text-sm text-dark-gray whitespace-pre-wrap">{item.itemNote}</p>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-sm text-medium-gray italic">No specific item notes provided.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                        )}
+                    </Tabs>
                 </div>
             </DialogContent>
         </Dialog>

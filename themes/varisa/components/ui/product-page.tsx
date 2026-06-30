@@ -55,7 +55,7 @@ export default function VarisaThemeProductPage() {
   const variants = itemVariants.map((v: any, index: number) => ({
     id: parseInt(v.id),
     qty: v.qty,
-    size: v.qty ? `${v.qty} ${product?.unit || ''}`.trim() : (v.size),
+    size: v.size || 1,
     price: v.price > 0 ? v.price : basePrice,
     weight: parseFloat(v.size) || product?.weight || 1,
     original: v,
@@ -83,10 +83,10 @@ export default function VarisaThemeProductPage() {
 
   const gallery = useMemo(() => {
     const images = getProductGallery(product) || [];
-    return images.filter((img: any) => 
-      typeof img === 'string' && 
-      img.trim() !== '' && 
-      img !== 'null' && 
+    return images.filter((img: any) =>
+      typeof img === 'string' &&
+      img.trim() !== '' &&
+      img !== 'null' &&
       img !== 'undefined'
     );
   }, [product]);
@@ -111,6 +111,7 @@ export default function VarisaThemeProductPage() {
       vat: currentVariant?.vat || product?.vat || 0,
       discount: Number(product?.discount || 0),
       weight: currentVariant?.weight || product?.weight || 0,
+      note: note,
     };
   }, [product, currentProductId, price, currentVariant, note]);
   const ccy = product?.ccy || '$';

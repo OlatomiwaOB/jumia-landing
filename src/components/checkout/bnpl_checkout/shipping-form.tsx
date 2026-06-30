@@ -548,6 +548,8 @@ import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
 import { UseFormReturn } from "react-hook-form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ShippingFormProps {
   setCurrentStep: (currentStep: CheckoutStep) => void;
@@ -794,6 +796,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
           <h2 className="text-2xl font-bold"></h2>
         </div>
 
+        <Form {...form}>
         <form>
           <div className="mb-8">
             <h2 className="text-lg font-medium text-checkout-text mb-4">Shipping Information</h2>
@@ -1121,8 +1124,27 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                 <p>Please select a shipping method above</p>
               </div>
             )}
+
+            <FormField
+              control={form.control}
+              name="note"
+              render={({ field }) => (
+                <FormItem className="mt-6 mb-4">
+                  <FormLabel>Order Note (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Add any special instructions for your order..." 
+                      className="resize-none" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </form>
+        </Form>
       </div>
 
       <AddDeliveryAddress
