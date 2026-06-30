@@ -79,7 +79,7 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
 
   return (
     <div
-      className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden transition-colors duration-700 ease-in-out"
+      className="relative w-full min-h-[50vh] lg:min-h-[75vh] py-8 lg:py-16 flex items-center justify-center overflow-hidden transition-colors duration-700 ease-in-out"
       style={{ backgroundColor: currentDish.bgColor }}
     >
       {/* Massive Background Typography (Reads Dish Name) */}
@@ -89,41 +89,42 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
         </h1>
       </div>
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center justify-between gap-12">
+      {/* Increased max-width for better desktop spread, removed negative margins */}
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-16">
 
         {/* Left Side: Static Brand Text */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <div className="transition-colors duration-700">
+        <div className="w-full lg:w-[44%] flex flex-col items-center lg:items-start text-center lg:text-left pt-8 lg:pt-0">
+          <div className="transition-colors duration-700 w-full flex flex-col items-center lg:items-start">
             <span
-              className="inline-block text-sm sm:text-base font-bold tracking-widest uppercase mb-4"
+              className="inline-block text-xs sm:text-sm font-bold tracking-[0.2em] uppercase mb-6 px-5 py-1.5 rounded-full border border-current opacity-80"
               style={{ color: currentDish.accent }}
             >
               Discover Varisa Food
             </span>
 
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-serif leading-[1.1] mb-6" style={{ color: currentDish.accent }}>
-              Authentic Nigerian Meals <br />
-              <span className="opacity-90">Served Fresh.</span>
+            <h2 className="text-[2.5rem] leading-[1.1] sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-serif lg:font-bold mb-6 tracking-tight" style={{ color: currentDish.accent }}>
+              <span className="block whitespace-nowrap">Authentic Nigerian</span>
+              <span className="block whitespace-nowrap">Meals <span className="opacity-90">Served Fresh.</span></span>
             </h2>
 
-            <p className="text-base sm:text-lg lg:text-xl leading-relaxed mb-10 max-w-md mx-auto lg:mx-0 opacity-90" style={{ color: currentDish.accent }}>
-              Experience the rich, vibrant flavors of Varisa Food. We pride ourselves on using premium ingredients and authentic recipes passed down through generations to bring the true taste of home straight to your table.
+            <p className="text-sm sm:text-base lg:text-lg xl:text-xl leading-relaxed mb-10 max-w-lg mx-auto lg:mx-0 opacity-90" style={{ color: currentDish.accent }}>
+              Experience the rich, vibrant flavors of Varisa Food. We pride ourselves in using premium ingredients and authentic recipes passed down through generations to bring the true taste of home straight to your table.
             </p>
 
-            <div className="flex gap-4 flex-col sm:flex-row w-full sm:w-auto">
+            <div className="flex gap-4 flex-col sm:flex-row w-full sm:w-auto justify-center lg:justify-start">
               <Link
                 href="/shop"
-                className="inline-flex justify-center items-center gap-3 px-8 py-4 rounded-full font-bold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                className="inline-flex justify-center items-center gap-3 px-8 py-3.5 rounded-full font-bold transition-all duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
                 style={{ backgroundColor: currentDish.accent, color: currentDish.bgColor }}
               >
-                Order Now <ArrowRight size={20} />
+                Order Now <ArrowRight size={18} />
               </Link>
             </div>
           </div>
         </div>
 
         {/* Right Side: The "Floating" Plate */}
-        <div className="w-full lg:w-1/2 flex justify-center items-center relative h-[400px] sm:h-[500px] lg:h-[600px]">
+        <div className="w-full lg:w-[45%] flex justify-center items-center relative h-[350px] sm:h-[450px] lg:h-[600px] mt-8 lg:mt-0">
           {/* Decorative spinning dashed circle */}
           <div
             className="absolute w-[350px] h-[350px] sm:w-[450px] sm:h-[450px] lg:w-[550px] lg:h-[550px] rounded-full border-2 border-dashed animate-[spin_30s_linear_infinite] opacity-30"
