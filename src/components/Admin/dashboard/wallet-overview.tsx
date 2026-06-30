@@ -681,7 +681,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                 </Button>
               </div>
             </div>
-            <div>
+            {/* <div>
               <Button
                 variant="outline"
                 size="sm"
@@ -691,7 +691,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                 <Plus className="w-3 h-3" />
                 Fund Wallet
               </Button>
-            </div>
+            </div> */}
           </div>
 
           <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
