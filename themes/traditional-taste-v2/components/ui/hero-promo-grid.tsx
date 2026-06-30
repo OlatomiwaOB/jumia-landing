@@ -75,7 +75,7 @@ export default function HeroPromoGrid() {
             We are so happy you're here! Get ready to indulge in the most delicious, heartwarming meals crafted just for you.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-2">
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4">
             <Link
               href="/shop"
               className="bg-[var(--color-primary)] hover:bg-[#1C1917] hover:text-white text-white font-bold py-4 px-12 rounded-sm text-[15px] uppercase tracking-wider transition-all duration-300 w-full sm:w-max text-center"
