@@ -18,9 +18,9 @@ export const SidebarBase = ({ children, logoUrl, logoHref, onLogoutClick }: Side
   const { collapsed } = useSidebar()
 
   return (
-    <div className="w-full h-full flex flex-col bg-[var(--sidebar-accent)] text-white relative">
+    <div className="w-full h-full flex flex-col bg-[var(--sidebar-accent)] text-[var(--sidebar-text)] relative">
       {/* Logo Area */}
-      <div className="py-5 px-4 h-[72px] flex items-center shrink-0 border-b border-white/10">
+      <div className="py-5 px-4 h-[72px] flex items-center shrink-0 border-b border-[var(--sidebar-text)]/10">
         <Link href={logoHref} className={cn("block relative transition-all", collapsed ? "w-[40px] h-[28px]" : "w-[110px] h-[30px]")}>
           <Image
             src={logoUrl || 'logo.png'}
@@ -48,13 +48,13 @@ export const SidebarBase = ({ children, logoUrl, logoHref, onLogoutClick }: Side
         <button
           onClick={onLogoutClick}
           className={cn(
-            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg border border-white/10",
-            "text-white/70 hover:bg-white/10 hover:text-white hover:border-white/20 transition-colors",
+            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg border border-[var(--sidebar-text)]/10",
+            "text-[var(--sidebar-text)]/70 hover:bg-[var(--sidebar-text)]/5 hover:text-[var(--sidebar-text)] hover:border-[var(--sidebar-text)]/20 transition-all",
             collapsed && "justify-center px-0 border-transparent hover:border-transparent"
           )}
           title={collapsed ? "Logout" : undefined}
         >
-          <Logout2Icon className="text-inherit w-4 h-4 shrink-0" />
+          <Logout2Icon className="text-[var(--sidebar-text)] w-4 h-4 shrink-0" />
           {!collapsed && <span className="text-sm font-medium">Logout</span>}
         </button>
       </div>

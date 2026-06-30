@@ -14,7 +14,7 @@ export const DashboardShell = ({ sidebar, header, children }: DashboardShellProp
   const { collapsed } = useSidebar()
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5]" style={{ '--accent': 'var(--sidebar-accent)' } as React.CSSProperties}>
+    <div className="min-h-screen bg-[#F5F5F5]" style={{ '--accent': 'var(--sidebar-accent)', '--btn-text': 'var(--sidebar-text)' } as React.CSSProperties}>
       {/* Desktop sidebar — fixed position, width transitions on collapse */}
       <aside
         className={cn(

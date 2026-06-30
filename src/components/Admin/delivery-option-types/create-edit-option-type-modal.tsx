@@ -197,7 +197,7 @@ export const CreateEditOptionTypeModal: React.FC<CreateEditOptionTypeModalProps>
                         <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading} className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-white">
+                        <Button type="submit" disabled={isLoading} className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-[var(--sidebar-text)] font-bold">
                             {isLoading ? (
                                 <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
                             ) : (isEditMode ? 'Update Option Type' : 'Create Option Type')}

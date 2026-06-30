@@ -118,7 +118,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                   className="w-6 h-4 object-cover"
                 />
               </div>
-              <div className="flex gap-1 items-center justify-center text-xs text-sidebar-text">
+              <div className="flex gap-1 items-center justify-center text-xs text-[var(--sidebar-text)]">
                 <span>{label}</span>
                 <span>•</span>
                 <span>Available Balance</span>
@@ -127,14 +127,14 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
 
             <button
               onClick={toggleAmountVisibility}
-              className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-black/10"
+              className="transition-colors text-[var(--sidebar-text)]/80 hover:text-[var(--sidebar-text)] p-1.5 cursor-pointer rounded-full bg-[var(--sidebar-text)]/10"
             >
               {showAmount ? <Eye size={16} className='font-bold' /> : <EyeOff size={16} className='font-bold' />}
             </button>
           </div>
 
           <div className="">
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl font-bold text-[var(--sidebar-text)]">
               {showAmount ? formatPrice(amount || 0, currencyCode as CurrencyCode) : '••••••••'}
             </p>
           </div>
@@ -142,28 +142,28 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
           <div className='flex justify-between items-center'>
             <div className='-space-y-4'>
               <div className="flex items-center">
-                <div className="text-xs font-light text-sidebar-text">
+                <div className="text-xs font-light text-[var(--sidebar-text)]">
                   Virtual Account:
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyAccountNumber}
-                  className="text-white text-xs hover:text-sidebar-text"
+                  className="text-[var(--sidebar-text)] text-xs hover:text-[var(--sidebar-text)]/80"
                 >
                   {virtualAccountNo}
                   <CopyIcon className="w-3 h-3" />
                 </Button>
               </div>
               <div className="flex items-center">
-                <div className="text-xs font-light text-sidebar-text">
+                <div className="text-xs font-light text-[var(--sidebar-text)]">
                   Account Number:
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyWalletNumber}
-                  className="text-white text-xs hover:text-sidebar-text"
+                  className="text-[var(--sidebar-text)] text-xs hover:text-[var(--sidebar-text)]/80"
                 >
                   {accountNo}
                   <CopyIcon className="w-3 h-3" />
@@ -175,7 +175,7 @@ const CurrenciesCard: React.FC<CurrenciesCardProps> = ({
                 variant="outline"
                 size="sm"
                 onClick={handleOpenTopUpModal}
-                className="text-xs rounded-lg bg-white text-faded-accent hover:bg-white/90 hover:text-faded-accent"
+                className="text-xs rounded-lg bg-white text-[var(--sidebar-text)] hover:bg-white/90 hover:text-[var(--sidebar-text)] border-[var(--sidebar-text)]/20"
               >
                 <Plus className="w-3 h-3" />
                 Fund Wallet
@@ -334,26 +334,26 @@ const CryptoCard: React.FC<CryptoCardProps> = ({
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className="flex gap-1 items-center lowercase justify-center text-xs text-sidebar-text">
+            <div className="flex gap-1 items-center lowercase justify-center text-xs text-[var(--sidebar-text)]">
               <span>{currency}</span>
               <div>({chain})</div>
             </div>
           </div>
           <button
             onClick={toggleAmountVisibility}
-            className="transition-colors text-white/80 hover:text-white p-1.5 cursor-pointer rounded-full bg-white/10"
+            className="transition-colors text-[var(--sidebar-text)]/80 hover:text-[var(--sidebar-text)] p-1.5 cursor-pointer rounded-full bg-[var(--sidebar-text)]/10"
           >
             {showAmount ? <Eye size={16} className='font-bold' /> : <EyeOff size={16} className='font-bold' />}
           </button>
         </div>
         <div className="mb-2">
-          <p className="text-xl font-bold text-white">
+          <p className="text-xl font-bold text-[var(--sidebar-text)]">
             {showAmount ? formatPrice(amount || 0, currencyCode as CurrencyCode) : '••••••••'}
           </p>
         </div>
         <div className='flex items-center w-full'>
-          <Button variant={'ghost'} onClick={() => copyToClipboard(publicAddress!)} className="text-white hover:text-white/80 flex justify-between w-full">
-            <p className="break-all text-sidebar-text text-xs">{publicAddress?.slice(0, 10)}...{publicAddress?.slice(-8)}</p>
+          <Button variant={'ghost'} onClick={() => copyToClipboard(publicAddress!)} className="text-[var(--sidebar-text)] hover:text-[var(--sidebar-text)]/80 flex justify-between w-full">
+            <p className="break-all text-[var(--sidebar-text)] text-xs">{publicAddress?.slice(0, 10)}...{publicAddress?.slice(-8)}</p>
             <CopyIcon className='w-5 h-5' />
           </Button>
         </div>
@@ -401,10 +401,10 @@ export const WalletOverview = () => {
     <div className="w-full px-2">
       <div className="w-full space-y-6">
         <Tabs defaultValue="fiat" className="w-full">
-          <TabsList className="grid grid-cols-2">
+          {/* <TabsList className="grid grid-cols-2">
             <TabsTrigger value="fiat">Fiat Currencies</TabsTrigger>
             <TabsTrigger value="crypto">Crypto Currencies</TabsTrigger>
-          </TabsList>
+          </TabsList> */}
 
           <TabsContent value="fiat" className="mt-4">
             {balancesLoading ? (
