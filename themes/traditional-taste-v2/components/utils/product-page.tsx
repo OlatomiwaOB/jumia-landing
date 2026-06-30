@@ -36,6 +36,29 @@ import {
 
 type DetailTab = 'description' | 'details';
 
+const Thumbnail = ({ image, index, activeImageIndex, setActiveImageIndex, product }: any) => {
+  const [error, setError] = useState(false);
+  if (error) return null;
+  return (
+    <button
+      type="button"
+      className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${index === activeImageIndex
+        ? 'border-[var(--color-primary)] shadow-lg'
+        : 'border-transparent opacity-70 hover:opacity-100'
+        }`}
+      onClick={() => setActiveImageIndex(index)}
+    >
+      <Image
+        src={image}
+        alt={`${product.name} thumbnail ${index + 1}`}
+        fill
+        className="object-cover rounded-xl"
+        sizes="80px"
+        onError={() => setError(true)}
+      />
+    </button>
+  );
+};
 
 // Small update for PR testing
 export default function ProductPage() {
@@ -63,6 +86,7 @@ export default function ProductPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
   const [note, setNote] = useState('');
+  const [imageError, setImageError] = useState(false);
 
   const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
   const hasVariants = itemVariants.length > 0;
@@ -162,7 +186,12 @@ export default function ProductPage() {
     setActiveImageIndex(0);
     setActiveTab('description');
     setNote('');
+    setImageError(false);
   }, [product?.id]);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [activeImage]);
 
   /* ── LOADING ── */
   if (isLoading) {
@@ -233,36 +262,17 @@ export default function ProductPage() {
             <div className="relative overflow-hidden rounded-3xl bg-[var(--color-bg-secondary)] group">
               <div className="relative aspect-square w-full">
                 <Image
-                  src={activeImage}
+                  src={imageError ? '/placeholder-image.png' : activeImage}
                   alt={product.name || 'Product image'}
                   fill
                   className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
+                  onError={() => setImageError(true)}
                 />
               </div>
 
-              {/* Nav arrows */}
-              {gallery.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg text-[var(--color-text)] transition-all hover:bg-[var(--color-primary)] hover:text-white hover:scale-110"
-                    onClick={() =>
-                      setActiveImageIndex((c) => (c - 1 + gallery.length) % gallery.length)
-                    }
-                  >
-                    <ChevronLeft className="h-5 w-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-lg text-[var(--color-text)] transition-all hover:bg-[var(--color-primary)] hover:text-white hover:scale-110"
-                    onClick={() => setActiveImageIndex((c) => (c + 1) % gallery.length)}
-                  >
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                </>
-              )}
+              {/* Nav arrows removed */}
 
               {/* Discount badge */}
               {discount > 0 && (
@@ -276,23 +286,14 @@ export default function ProductPage() {
             {gallery.length > 1 && (
               <div className="flex gap-3 overflow-x-auto pb-1">
                 {gallery.map((image, index) => (
-                  <button
+                  <Thumbnail
                     key={`${product.code || product.name}-${index}`}
-                    type="button"
-                    className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all hover:scale-105 ${index === activeImageIndex
-                      ? 'border-[var(--color-primary)] shadow-lg'
-                      : 'border-transparent opacity-70 hover:opacity-100'
-                      }`}
-                    onClick={() => setActiveImageIndex(index)}
-                  >
-                    <Image
-                      src={image}
-                      alt={`${product.name} thumbnail ${index + 1}`}
-                      fill
-                      className="object-cover rounded-xl"
-                      sizes="80px"
-                    />
-                  </button>
+                    image={image}
+                    index={index}
+                    activeImageIndex={activeImageIndex}
+                    setActiveImageIndex={setActiveImageIndex}
+                    product={product}
+                  />
                 ))}
               </div>
             )}
@@ -414,7 +415,7 @@ export default function ProductPage() {
                         setLocalQty(prev => prev + 1);
                       }
                     }}
-                    disabled={(product.qtyInStore ?? 0) <= 0 || (hasVariants && !selectedVariantId) || (quantity > 0 ? quantity >= (product.qtyInStore ?? 0) : localQty >= (product.qtyInStore ?? 0))}
+                    disabled={(hasVariants && !selectedVariantId) || (typeof product.qtyInStore === 'number' && product.qtyInStore <= 0) || (typeof product.qtyInStore === 'number' && (quantity > 0 ? quantity >= product.qtyInStore : localQty >= product.qtyInStore))}
                   >
                     <Plus className="h-4 w-4" />
                   </button>

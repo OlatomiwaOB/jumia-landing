@@ -4,7 +4,7 @@
 import { clientConfig, getClientIdentifiers } from '@/config/client-config';
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Clock, Navigation, Loader2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Navigation, Loader2 } from 'lucide-react';
 
 export default function ContactPage() {
   const envColor = clientConfig().branding.colors.accentForeground;
@@ -116,28 +116,27 @@ export default function ContactPage() {
             </p>
 
             {/* Support Items */}
-            <div className="space-y-8">
+            <div className="space-y-8 mt-4">
               <div className="flex gap-5">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
                   <Phone className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-bold text-gray-900 mb-1">Customer Care</h3>
+                  <h3 className="text-[16px] font-bold text-gray-900 mb-1">Call Us</h3>
                   <div className="text-[15px] text-gray-600 space-y-1.5">
                     <p className="hover:text-accent cursor-pointer transition-colors">07834630134</p>
-                    <p className="hover:text-accent cursor-pointer transition-colors">Varisafoodsltd@gmail.com</p>
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-5">
                 <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                  <Clock className="w-5 h-5 text-accent" />
+                  <Mail className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                  <h3 className="text-[16px] font-bold text-gray-900 mb-1">Opening Hours</h3>
+                  <h3 className="text-[16px] font-bold text-gray-900 mb-1">Email Us</h3>
                   <div className="text-[15px] text-gray-600 space-y-1.5">
-                    <p>Everyday: 8:00 AM - 5:00 PM</p>
+                    <p className="hover:text-accent cursor-pointer transition-colors">Varisafoodsltd@gmail.com</p>
                   </div>
                 </div>
               </div>

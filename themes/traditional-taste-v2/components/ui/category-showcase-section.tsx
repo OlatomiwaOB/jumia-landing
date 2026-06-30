@@ -39,7 +39,7 @@ export default function CategoryShowcaseSection() {
       price: p.salePrice ? formatPrice(p.salePrice, (p.ccy as CurrencyCode) || 'GBP') : formatPrice(0, (p.ccy as CurrencyCode) || 'GBP'),
       originalPrice: p.oldPrice ? formatPrice(p.oldPrice, (p.ccy as CurrencyCode) || 'GBP') : null,
       discount: p.discount ? `-${p.discount}%` : null,
-      image: p.name?.toLowerCase().includes('peppered chicken') ? (productsData?.products?.find((prod: any) => prod.name?.toLowerCase().includes(''))?.picture || '/pounded_yam_egusi.jpg') : p.picture,
+      image: p.picture,
       badges: [],
       stock: (p.qtyInStore ?? 1) > 0,
       offer: null
@@ -96,7 +96,12 @@ export default function CategoryShowcaseSection() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 lg:gap-12 w-full pt-4 md:pt-8">
                 {(() => {
                   const sliced = displayProducts.slice(2, 4);
+                  const fishProduct = displayProducts.find(p => p.title.toLowerCase().includes('peppered fish') || p.title.toLowerCase().includes('fish'));
                   const egusiProduct = displayProducts.find(p => p.title.toLowerCase().includes('egusi'));
+                  
+                  if (fishProduct && sliced.length > 0) {
+                    sliced[0] = fishProduct;
+                  }
                   if (egusiProduct && sliced.length > 1) {
                     sliced[1] = egusiProduct;
                   }
