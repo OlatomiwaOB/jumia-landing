@@ -93,7 +93,7 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-16">
 
         {/* Left Side: Static Brand Text */}
-        <div className="w-full lg:w-[45%] flex flex-col items-center lg:items-start text-center lg:text-left pt-8 lg:pt-0">
+        <div className="w-full lg:w-[44%] flex flex-col items-center lg:items-start text-center lg:text-left pt-8 lg:pt-0">
           <div className="transition-colors duration-700 w-full flex flex-col items-center lg:items-start">
             <span
               className="inline-block text-xs sm:text-sm font-bold tracking-[0.2em] uppercase mb-6 px-5 py-1.5 rounded-full border border-current opacity-80"
