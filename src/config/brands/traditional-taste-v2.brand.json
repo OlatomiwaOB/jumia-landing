@@ -8,8 +8,9 @@
     "accentForeground": "FFFFFF",
     "accentColor2": "FFEDD5",
     "accentColor3": "2F3E33",
-    "dashboardSidebar": "191970",
-    "textCharcoal": "1C1917"
+    "dashboardSidebar": "FDD9B5",
+    "textCharcoal": "1C1917",
+    "sidebarText": "201E1F"
   },
   "logos": {
     "primary": "https://mmcpdocs.s3.eu-west-2.amazonaws.com/31626_traditional-taste-logo.jpg",

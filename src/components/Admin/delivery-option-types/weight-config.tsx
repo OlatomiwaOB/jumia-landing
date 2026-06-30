@@ -235,12 +235,12 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
 
                 <div className="px-6 flex gap-2 mb-2">
                     <button type="button" onClick={() => { setActiveTab('add'); if (!isEditMode) resetForm(); }}
-                        className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'add' ? 'bg-sidebar-accent text-white' : 'bg-white text-medium-gray hover:text-dark-gray'}`}>
+                        className={`px-4 py-2 text-xs rounded-lg transition-colors ${activeTab === 'add' ? 'bg-sidebar-accent text-[var(--sidebar-text)] font-bold' : 'bg-white text-medium-gray hover:text-dark-gray font-semibold'}`}>
                         {isEditMode ? 'Edit Config' : 'Add Config'}
                     </button>
                     <button type="button" onClick={() => setActiveTab('view')}
-                        className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${activeTab === 'view' ? 'bg-sidebar-accent text-white' : 'bg-white text-medium-gray hover:text-dark-gray'}`}>
-                        View Configs {allConfigs.length > 0 && <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]">({allConfigs.length})</span>}
+                        className={`px-4 py-2 text-xs rounded-lg transition-colors ${activeTab === 'view' ? 'bg-sidebar-accent text-[var(--sidebar-text)] font-bold' : 'bg-white text-medium-gray hover:text-dark-gray font-semibold'}`}>
+                        View Configs {allConfigs.length > 0 && <span className="ml-1 bg-black/10 px-1.5 py-0.5 rounded-full text-[10px]">({allConfigs.length})</span>}
                     </button>
                 </div>
 
@@ -248,8 +248,8 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                     <form onSubmit={handleSubmit} className="px-6 pb-6 space-y-4" key={`form-${renderKey}`}>
                         {isEditMode && (
                             <div className="flex items-center justify-between bg-sidebar-accent/10 border border-sidebar-accent rounded-lg p-2">
-                                <p className="text-xs text-sidebar-accent"><span className="font-semibold">Editing config</span> — modify and save to update.</p>
-                                <button type="button" onClick={resetForm} className="text-xs text-sidebar-accent font-semibold underline">Cancel Edit</button>
+                                <p className="text-xs text-[var(--sidebar-text)]"><span className="font-bold">Editing config</span> — modify and save to update.</p>
+                                <button type="button" onClick={resetForm} className="text-xs text-[var(--sidebar-text)] font-bold underline hover:text-opacity-80">Cancel Edit</button>
                             </div>
                         )}
                         <div className="bg-white rounded-2xl p-4 space-y-4">
@@ -309,7 +309,7 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <Label>Base Fee (₦) <span className="text-red-500">*</span></Label>
+                                    <Label>Base Fee <span className="text-red-500">*</span></Label>
                                     <Input name="baseFee" type="number" step="0.01" min="0" value={formData.baseFee || ""} onChange={handleInputChange} placeholder="e.g., 500" required />
                                 </div>
                                 <div className="space-y-1.5">
@@ -317,11 +317,11 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                                     <Input name="ratePerKg" type="number" step="0.01" min="0" value={formData.ratePerKg || ""} onChange={handleInputChange} placeholder="e.g., 200" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label>Min Weight (kg)</Label>
+                                    <Label>Min Weight</Label>
                                     <Input name="minWeightKg" type="number" step="0.01" min="0" value={formData.minWeightKg || ""} onChange={handleInputChange} placeholder="e.g., 0" />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label>Max Weight (kg)</Label>
+                                    <Label>Max Weight</Label>
                                     <Input name="maxWeightKg" type="number" step="0.01" min="0" value={formData.maxWeightKg || ""} onChange={handleInputChange} placeholder="e.g., 100" />
                                 </div>
                                 <div className="space-y-1.5">
@@ -347,7 +347,7 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                         </div>
                         <div className="flex gap-3 justify-end pt-1">
                             <Button type="button" variant="outline" onClick={handleClose} disabled={isLoading}>Cancel</Button>
-                            <Button type="submit" disabled={isLoading} className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-white">
+                            <Button type="submit" disabled={isLoading} className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-[var(--sidebar-text)] font-bold">
                                 {isLoading
                                     ? <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Saving...</>
                                     : isEditMode
@@ -393,7 +393,7 @@ export const WeightConfigModal: React.FC<WeightConfigModalProps> = ({ open, onOp
                                                 <td className="px-4 py-3 text-dark-gray truncate max-w-[120px]" title={getAreaNames(config.area)}>{getAreaNames(config.area)}</td>
                                                 <td className="px-4 py-3 text-dark-gray">{config.baseFee != null ? config.baseFee.toFixed(2) : 'N/A'}</td>
                                                 <td className="px-4 py-3 text-dark-gray">{config.ratePerKg != null ? config.ratePerKg.toFixed(2) : 'N/A'}</td>
-                                                <td className="px-4 py-3 text-dark-gray">{config.minWeightKg != null && config.maxWeightKg != null ? `${config.minWeightKg}–${config.maxWeightKg} kg` : 'N/A'}</td>
+                                                <td className="px-4 py-3 text-dark-gray">{config.minWeightKg != null && config.maxWeightKg != null ? `${config.minWeightKg}–${config.maxWeightKg}` : 'N/A'}</td>
                                                 <td className="px-4 py-3 text-dark-gray">{config.estimatedTime ? `${config.estimatedTime} ${config.estimatedTimeType || ''}` : 'N/A'}</td>
                                                 <td className="px-4 py-3">
                                                     <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${config.status?.toUpperCase() === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

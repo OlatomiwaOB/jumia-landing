@@ -26,6 +26,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
 import { parse, isValid } from "date-fns";
 import { Day } from "react-day-picker";
+import { getClientIdentifiers } from "@/config/client-config";
 
 interface ProductFormData {
   productId: string;
@@ -212,7 +213,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
       reset({
         productId: "", productName: "", productDescription: "", productCategory: "",
         productCode: "", productPrice: "", stockQuantity: 0, unitQuantity: "",
-        imageURL: "", costPrice: "", storeId: user?.storeCode || "",
+        imageURL: "", costPrice: "",
         barCode: "", brand: "", ccy: "NGN", color: "", itemSize: "", model: "",
         expiryDate: "", banner: false, featured: false, onSale: false,
         oldPrice: "", discount: 0, vatEligible: false, weight: "", weightUnit: ""
@@ -239,7 +240,6 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         unitQuantity: product?.unit || 'Piece',
         imageURL: product?.picture || "",
         costPrice: product?.costPrice?.toString() || "",
-        storeId: '',
         barCode: product?.barCode || "",
         brand: product?.brand || "",
         ccy: product?.ccy || 'NGN',
@@ -292,7 +292,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         unitQuantity: values?.unitQuantity || 'Piece',
         imageURL: fileUrl ? fileUrlFormatted(fileUrl) : (fileUrlFormatted(values?.imageURL) || ""),
         costPrice: values?.costPrice,
-        storeId: values?.storeId || user?.storeCode,
+        storeId: getClientIdentifiers()?.storeCode || user?.storeCode,
         barCode: values?.barCode,
         brand: values?.brand,
         ccy: values?.ccy || 'NGN',
@@ -387,7 +387,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                   <Input {...register("brand")} placeholder="Enter brand" />
                 </FormField>
 
-                <FormField label="Store" required>
+                {/* <FormField label="Store" required>
                   <Controller
                     name="storeId"
                     control={control}
@@ -402,7 +402,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                       />
                     )}
                   />
-                </FormField>
+                </FormField> */}
 
                 <div className="col-span-2">
                   <FormField label="Description" required>
@@ -447,17 +447,9 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                   <Input {...register("model")} placeholder="Product model number" />
                 </FormField>
                 <FormField label="Expiry Date">
-                  <DatePicker
-                    value={watch("expiryDate")}
-                    onChange={(dateString) => setValue("expiryDate", dateString)}
-                    placeholder="dd/mm/yyyy"
-                    minDate={new Date()}
-                    onValidationError={(message) => {
-                      setError("expiryDate", { type: "manual", message });
-                    }}
-                    onValidationClear={() => {
-                      clearErrors("expiryDate");
-                    }}
+                  <Input 
+                    type="date" 
+                    {...register("expiryDate")} 
                   />
                   {errors.expiryDate && <p className="text-xs text-red-500 mt-1">{errors.expiryDate.message}</p>}
                 </FormField>

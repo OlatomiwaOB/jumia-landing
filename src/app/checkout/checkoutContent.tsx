@@ -53,6 +53,7 @@ const formSchema = z.object({
     message: "You must agree to the terms and conditions",
   }),
   deliveryOptionGroup: z.string().optional(),
+  note: z.string().optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;

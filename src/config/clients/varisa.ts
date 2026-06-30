@@ -6,11 +6,11 @@ export const varisaConfig: ClientConfig = {
   identifiers: {
     entityCode: {
       development: 'H2P',
-      production: 'VAR', // TODO: Replace with production entity code
+      production: 'VAR',
     },
     storeCode: {
       development: 'STO7056',
-      production: 'STO7056', // TODO: Replace with production store code
+      production: 'STO7056',
     },
     sourceCode: {
       development: 'HELP2PAY',

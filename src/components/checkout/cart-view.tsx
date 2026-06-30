@@ -55,6 +55,7 @@ const CartView = ({
   const storeCode = searchParams ? searchParams.get('storeCode') || '' : '';
   const [wallets, setLocalWallets] = useState<any[]>([])
   const axiosInstance = !customer?.ticketID ? axiosInstanceNoAuth : axiosCustomer
+  const [stripeLoading, setStripeLoading] = useState(false)
 
   // console.log(customer);
 
@@ -123,12 +124,18 @@ const CartView = ({
   };
 
   const CartViewContent = () => (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-2">
+    <div className="max-w-2xl mx-auto space-y-6 relative">
+      {stripeLoading && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[2px] rounded-lg">
+          <Loader text="Redirecting to secure payment..." />
+        </div>
+      )}
+      <div className={`flex items-center gap-2 ${stripeLoading ? 'opacity-50 pointer-events-none' : ''}`}>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setCurrentStep('guest-info')}
+          disabled={stripeLoading}
         >
           <ArrowLeft className="w-4 h-4" />
         </Button>
@@ -136,7 +143,7 @@ const CartView = ({
       </div>
 
       {/* Order Summary */}
-      <div className="bg-muted p-4 rounded-lg">
+      <div className={`bg-muted p-4 rounded-lg ${stripeLoading ? 'opacity-50' : ''}`}>
         <h3 className="font-semibold mb-3">Order Summary</h3>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -160,7 +167,7 @@ const CartView = ({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className={`space-y-4 ${stripeLoading ? 'pointer-events-none' : ''}`}>
         <h3 className="text-lg font-semibold">Choose Payment Method</h3>
 
         {isLoading ? (
@@ -175,13 +182,14 @@ const CartView = ({
                 <Card
                   key={method.code}
                   className={`
-                    cursor-pointer transition-all
+                    transition-all
+                    ${stripeLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
                     ${method.isRecommended
                       ? 'border-accent bg-accent/5 shadow-md'
-                      : 'hover:shadow-md'}
+                      : stripeLoading ? '' : 'hover:shadow-md'}
                     ${isLastOdd ? 'md:col-span-2' : ''}
                   `}
-                  onClick={() => handlePaymentClick(method)}
+                  onClick={() => !stripeLoading && handlePaymentClick(method)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-3">
@@ -248,6 +256,7 @@ const CartView = ({
         orderTotal={orderTotal}
         totalVat={totalVat}
         onEmailExists={onEmailExists}
+        setStripeLoading={setStripeLoading}
       />
     </>
   );
