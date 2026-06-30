@@ -81,7 +81,15 @@ export default function VarisaThemeProductPage() {
     prevQuantityRef.current = quantity;
   }, [quantity, selectedVariantId]);
 
-  const gallery = useMemo(() => getProductGallery(product), [product]);
+  const gallery = useMemo(() => {
+    const images = getProductGallery(product) || [];
+    return images.filter((img: any) => 
+      typeof img === 'string' && 
+      img.trim() !== '' && 
+      img !== 'null' && 
+      img !== 'undefined'
+    );
+  }, [product]);
 
   const discount =
     product?.salePrice && product.oldPrice && product.oldPrice > product.salePrice
@@ -188,11 +196,7 @@ export default function VarisaThemeProductPage() {
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center">
-                  <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-900 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100 shadow-xl">
-                    <Eye className="w-5 h-5" />
-                  </div>
-                </div>
+                {/* Removed Eye Icon Overlay */}
 
                 {/* Badges */}
                 <div className="absolute top-6 left-6 z-10 flex flex-col gap-2 pointer-events-none">
@@ -215,6 +219,7 @@ export default function VarisaThemeProductPage() {
                   {gallery.map((img, idx) => (
                     <button
                       key={idx}
+                      id={`gallery-thumb-${idx}`}
                       onClick={() => setActiveImageIndex(idx)}
                       className={`relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden transition-all duration-300 ${activeImageIndex === idx
                         ? 'ring-4 ring-accent ring-offset-2 scale-95 opacity-100'
@@ -227,6 +232,10 @@ export default function VarisaThemeProductPage() {
                         fill
                         className="object-cover"
                         sizes="96px"
+                        onError={() => {
+                          const btn = document.getElementById(`gallery-thumb-${idx}`);
+                          if (btn) btn.style.display = 'none';
+                        }}
                       />
                     </button>
                   ))}
