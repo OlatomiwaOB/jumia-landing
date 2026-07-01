@@ -11,7 +11,6 @@ import { SearchSelect } from '@/components/ui/search-select';
 import { nationalityOptions, countryOptions } from '@/utils/country-data';
 import { useRouter } from 'next/navigation';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
-import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -42,8 +41,11 @@ const GuestInfoForm = ({
 }: GuestInfoFormProps) => {
   const router = useRouter();
   const { watch, register, formState: { errors }, setValue, trigger } = form;
-  const { mainCcy, getCartWeight } = useCart();
-  const cartWeight = getCartWeight();
+  const { mainCcy, getVariantCartWeight } = useCart();
+  // Only variant items with a configured weight contribute to totalWeight.
+  // If the result is 0 (no variant items), we pass undefined so the hook omits the param.
+  const variantWeight = getVariantCartWeight();
+  const { deliveryOptions, isLoading: isLoadingDeliveryOptions } = useDeliveryOptions('GUEST', variantWeight || undefined);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const watchShippingMethod = watch("shippingMethod");
@@ -53,16 +55,7 @@ const GuestInfoForm = ({
 
 
 
-  const [selectedZone, setSelectedZone] = useState<string>('');
-  // const cartWeight = Object.values(cart).reduce((total: any, item: any) => total + (item.quantity || 1), 0);
-
-  const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
-    selectedZone,
-    cartWeight
-  );
-
   const addressTypeOptions = useGetLookup('ADDRESS_TYPE');
-  const areaOptions = useGetLookup('AREAS');
 
   const { data: pickupData, isLoading: isLoadingPickup } = useQuery({
     queryKey: ['pickup-locations-guest'],
@@ -100,13 +93,9 @@ const GuestInfoForm = ({
   useEffect(() => {
     let shippingAmount = 0;
     if (watchShippingMethod === 'delivery' && watchShippingOption) {
-      const selectedOption = weightOptions?.find((opt: any) => opt.typeCode === watchShippingOption);
-      shippingAmount = selectedOption?.finalFee || 0;
-      if (selectedZone) {
-        setValue("deliveryOptionGroup", selectedOption?.typeCode);
-      } else {
-        setValue("deliveryOptionGroup", "");
-      }
+      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === watchShippingOption);
+      shippingAmount = selectedOption?.price || 0;
+      setValue("deliveryOptionGroup", selectedOption?.groupCode || "");
     } else if (watchShippingMethod === 'pickup' && watchPickupStore) {
       const selectedStore = pickupStores.find((store: any) => store.id === watchPickupStore);
       shippingAmount = selectedStore?.amount || 0;
@@ -117,7 +106,7 @@ const GuestInfoForm = ({
       lastShippingAmount.current = shippingAmount;
       onShippingUpdate?.(shippingAmount);
     }
-  }, [watchShippingMethod, watchShippingOption, watchPickupStore, weightOptions, pickupStores, onShippingUpdate, selectedZone, setValue]);
+  }, [watchShippingMethod, watchShippingOption, watchPickupStore, deliveryOptions, pickupStores, onShippingUpdate, setValue]);
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     setValue("shippingMethod", method);
@@ -144,42 +133,40 @@ const GuestInfoForm = ({
     setValue('state', store?.state || store?.city || '');
   };
 
-  const handleZoneSelect = (zoneCode: string) => {
-    setSelectedZone(zoneCode);
-    // Reset the selected option type when zone changes
-    setValue("shippingOption", undefined);
-    setValue("deliveryOptionGroup", "");
-  };
-
-  const handleWeightOptionSelect = (typeCode: string) => {
-    setValue("shippingOption", typeCode);
-    setValue("deliveryOptionGroup", typeCode);
-    // Persist the full option so buildGuestOrderPayload can read zoneCode, typeCode, totalWeightKg
-    const selectedOpt = weightOptions?.find((opt) => opt.typeCode === typeCode);
+  const handleDeliveryOptionSelect = (optionId: string) => {
+    setValue("shippingOption", optionId);
+    const selectedOpt = deliveryOptions?.find((opt: any) => opt.id === optionId);
     if (selectedOpt) {
-      sessionStorage.setItem('selectedWeightOption', JSON.stringify(selectedOpt));
+      setValue("deliveryOptionGroup", selectedOpt.groupCode);
+      // Persist for order payload
+      try {
+        const stored = sessionStorage.getItem('selectedWeightOption');
+        sessionStorage.setItem('selectedWeightOption', JSON.stringify({ ...JSON.parse(stored || '{}'), groupCode: selectedOpt.groupCode, id: selectedOpt.id }));
+      } catch { }
     }
   };
 
   const getSelectedShippingOption = () => {
-    if (watchShippingMethod !== 'delivery' || !watchShippingOption || !selectedZone) return null;
-    const selectedWeightOpt = weightOptions?.find((opt) => opt.typeCode === watchShippingOption);
-    const selectedZoneOpt = areaOptions.find((opt) => opt.id === selectedZone);
-    if (!selectedWeightOpt) return null;
+    if (watchShippingMethod !== 'delivery' || !watchShippingOption) return null;
+    const selectedOpt = deliveryOptions?.find((opt: any) => opt.id === watchShippingOption);
+    if (!selectedOpt) return null;
+
+    console.log('selectOpt', selectedOpt);
+
 
     return {
       id: watchShippingOption,
-      name: `${selectedZoneOpt?.name || selectedZone} - ${selectedWeightOpt.typeName}`,
-      price: selectedWeightOpt.finalFee,
-      description: selectedWeightOpt.breakdown,
-      icon: selectedWeightOpt.typeCode === 'EXPRESS' ? '⚡' : '📦',
-      estimatedArrival: `${selectedWeightOpt.estimatedTime} ${selectedWeightOpt.estimatedTimeType}`,
-      area: selectedZoneOpt?.description || '',
-      groupCode: selectedZone,
-      estimatedTime: selectedWeightOpt.estimatedTime,
-      estimatedTimeType: selectedWeightOpt.estimatedTimeType,
-      amount: selectedWeightOpt.finalFee,
-      deliveryVatAmount: 0
+      name: selectedOpt.name,
+      price: selectedOpt.price,
+      description: selectedOpt.description,
+      icon: selectedOpt.icon,
+      estimatedArrival: selectedOpt.estimatedArrival,
+      area: selectedOpt.area,
+      groupCode: selectedOpt.groupCode,
+      estimatedTime: selectedOpt.estimatedTime,
+      estimatedTimeType: selectedOpt.estimatedTimeType,
+      amount: selectedOpt.amount,
+      deliveryVatAmount: selectedOpt.deliveryVatAmount
     };
   };
 
@@ -390,104 +377,76 @@ const GuestInfoForm = ({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-2">
-                      <Label>Area (Zone) *</Label>
-                      <Select
-                        value={selectedZone || ""}
-                        onValueChange={(value) => handleZoneSelect(value)}
-                      >
-                        <SelectTrigger className={`w-full ${!selectedZone && watchShippingMethod === 'delivery' ? "border-destructive" : ""}`}>
-                          <SelectValue placeholder="Select your area" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                          {areaOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {!selectedZone && watchShippingMethod === 'delivery' && (
-                        <p className="text-xs text-destructive">Please select an area</p>
-                      )}
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             )}
 
 
 
-            {/* Weight-based Delivery Options (Regular / Express) */}
-            {watchShippingMethod === 'delivery' && selectedZone && (
+            {/* Delivery Options */}
+            {watchShippingMethod === 'delivery' && (
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="text-lg">Delivery Options</CardTitle>
-                  {/* <p className="text-sm text-muted-foreground">Cart weight: {cartWeight.toFixed(1)} kg</p> */}
                 </CardHeader>
                 <CardContent>
-                  {isLoadingWeightOptions ? (
+                  {isLoadingDeliveryOptions ? (
                     <div className="text-center py-4">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
                       <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
                     </div>
-                  ) : weightOptions.length === 0 ? (
+                  ) : deliveryOptions.length === 0 ? (
                     <div className="text-center py-4 text-muted-foreground">
-                      <p>No delivery options available for this zone</p>
+                      <p>No delivery options available</p>
                     </div>
                   ) : (
                     <RadioGroup
                       value={watchShippingOption || ""}
-                      onValueChange={handleWeightOptionSelect}
+                      onValueChange={handleDeliveryOptionSelect}
                       className="space-y-3"
                     >
-                      {weightOptions.map((option) => (
+                      {deliveryOptions.map((option: any) => (
                         <div
-                          key={option.typeCode}
-                          className={`border rounded-lg p-4 cursor-pointer transition-all ${watchShippingOption === option.typeCode
+                          key={option.id}
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${watchShippingOption === option.id
                             ? 'border-accent bg-accent/5 shadow-sm'
                             : 'border-gray-200 hover:border-accent/50'
                             }`}
                         >
                           <label
-                            htmlFor={`weight-opt-${option.typeCode}`}
+                            htmlFor={`delivery-opt-${option.id}`}
                             className="md:flex items-center gap-4 cursor-pointer w-full"
                           >
                             <RadioGroupItem
-                              value={option.typeCode}
-                              id={`weight-opt-${option.typeCode}`}
+                              value={option.id}
+                              id={`delivery-opt-${option.id}`}
                               onClick={(e) => e.stopPropagation()}
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <div className="text-2xl">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
-                                <div className="font-semibold cursor-pointer text-checkout-text">{option.typeName}</div>
-                                {option.typeCode === 'EXPRESS' && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                    Fastest
-                                  </span>
+                                <div className="text-2xl">{option.icon}</div>
+                                <div className="font-semibold cursor-pointer text-checkout-text">{option.name}</div>
+                                {option.description && (
+                                  <span className="text-xs text-muted-foreground">({option.description})</span>
                                 )}
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Est. {option.estimatedTime} {option.estimatedTimeType}
-                              </p>
-                              {/* <p className="text-xs text-muted-foreground mt-0.5">{option.breakdown}</p> */}
+                              <p className="text-sm text-muted-foreground mt-1">{option.estimatedArrival}</p>
                             </div>
                             <div className="md:text-right mt-2 md:mt-0">
-                              <p className="font-semibold text-checkout-text">{formatPrice(option.finalFee, mainCcy() as any)}</p>
+                              <p className="font-semibold text-checkout-text">{formatPrice(option.price, mainCcy() as any)}</p>
                             </div>
                           </label>
                         </div>
                       ))}
                     </RadioGroup>
                   )}
-                  {!watchShippingOption && watchShippingMethod === 'delivery' && selectedZone && weightOptions.length > 0 && (
-                    <p className="text-sm text-destructive mt-2">Please select a delivery speed</p>
+                  {!watchShippingOption && watchShippingMethod === 'delivery' && deliveryOptions.length > 0 && (
+                    <p className="text-sm text-destructive mt-2">Please select a delivery option</p>
                   )}
                 </CardContent>
               </Card>
             )}
+
 
             {watchShippingMethod === 'pickup' && (
               <Card className="mb-6">
@@ -569,14 +528,14 @@ const GuestInfoForm = ({
 
           </div>
 
-            <div className="space-y-2 mt-6 mb-4">
-              <Label>Order Note (Optional)</Label>
-              <Textarea 
-                placeholder="Add any special instructions for your order..." 
-                className="resize-none" 
-                {...register('note')} 
-              />
-            </div>
+          <div className="space-y-2 mt-6 mb-4">
+            <Label>Order Note (Optional)</Label>
+            <Textarea
+              placeholder="Add any special instructions for your order..."
+              className="resize-none"
+              {...register('note')}
+            />
+          </div>
         </div>
 
         <div className="lg:pl-8 lg:border-l border-border">

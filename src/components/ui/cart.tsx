@@ -145,54 +145,7 @@ const Cart = () => {
         }
     }, [cart, refetchProducts]);
 
-    const { mutate, isPending } = useMutation({
-        mutationFn: (data: any) => axiosCustomer.request({
-            url: '/store/save-cart',
-            method: 'POST',
-            params: {
-                entityCode: customer?.entityCode,
-                storeCode
-            },
-            data
-        }),
-        onSuccess: (data) => {
-            if (data?.data?.responseCode !== '000') {
-                toast.error(data?.data?.desc || data?.data?.responseMessage || 'Something went wrong!')
-                return
-            }
 
-            const cartData = {
-                ...data.data,
-                cartItems: enhancedCart.map(item => ({
-                    itemCode: item?.code,
-                    itemName: item?.name,
-                    price: item?.salePrice,
-                    quantity: item?.quantity,
-                    amount: item?.subTotal,
-                    discount: item?.discount,
-                    picture: item?.picture,
-                    vat: item?.vat
-                })),
-                subtotal: totalAmount,
-                totalVat: totalVat?.(),
-                shippingFee: 0,
-                totalAmount: totalAmount
-            };
-
-            sessionStorage.setItem('checkout', JSON.stringify(cartData))
-            toast.success(data?.data?.desc || data?.data?.responseMessage || 'Order submitted successfully!')
-            router.push(`/checkout?storeCode=${storeCode || getClientIdentifiers().storeCode}&orderNo=${data?.data?.orderNo}`)
-        },
-        onError: (error: AxiosError) => {
-            if (error.response?.status === 400) {
-                toast.error('Please ensure you are logged in!')
-                return
-            }
-            else {
-                toast.error('An error occurred while submitting the order.')
-            }
-        }
-    })
 
     const submitOrder = () => {
         // if (hasMultipleStores) {
@@ -217,51 +170,22 @@ const Cart = () => {
             vat: item?.vat,
         }))
 
-        if (!isUserAuthenticated) {
-            const guestOrderNo = `CART${rand}`
-            const cartData = {
-                orderNo: guestOrderNo,
-                cartItems: orderItems,
-                subtotal: totalAmount,
-                totalVat: totalVat?.(),
-                shippingFee: 0,
-                totalAmount: totalAmount,
-                ccy: mainCcy?.()
-            };
-            sessionStorage.setItem('checkout', JSON.stringify(cartData))
-            router.push(`/checkout?storeCode=${storeCode || getClientIdentifiers().storeCode}&orderNo=${guestOrderNo}`)
-            return
-        }
-
-        const payload = {
-            channel: "WEB",
-            cartId: `CART${rand}`,
-            orderDate: currentDate,
+        const guestOrderNo = `CART${rand}`
+        const cartData = {
+            orderNo: guestOrderNo,
+            cartItems: orderItems,
+            subtotal: totalAmount,
+            totalVat: totalVat?.(),
+            shippingFee: 0,
             totalAmount: totalAmount,
-            totalDiscount: 0,
-            deliveryOption: "",
-            paymentMethod: "",
-            couponCode: "",
-            ccy,
-            deliveryFee: 0,
-            geolocation: "",
-            deviceId: "",
-            orderStatus: "",
-            paymentStatus: "",
-            deliveryAddress: {
-                id: 0,
-                street: "",
-                landmark: "",
-                postCode: "",
-                city: "",
-                state: "",
-                country: "",
-                addressType: ""
-            },
-            cartItems: orderItems
-        }
+            ccy: mainCcy?.()
+        };
+        sessionStorage.setItem('checkout', JSON.stringify(cartData))
+        router.push(`/checkout?storeCode=${storeCode || getClientIdentifiers().storeCode}&orderNo=${guestOrderNo}`)
+        return
 
-        mutate(payload)
+        // Unused payload since we now use local cart session for both guest and authenticated
+        // mutate(payload)
     }
 
 
@@ -513,12 +437,11 @@ const Cart = () => {
                                     ? 'bg-accent-foreground cursor-not-allowed hover:bg-accent-foreground'
                                     : 'bg-accent hover:bg-accent3 transition-colors duration-300'
                                 }`}
-                            // disabled={isCartEmpty || hasOutOfStockItems || hasMultipleStores || hasItemsExceedingStock || isPending}
-                            disabled={isCartEmpty || hasOutOfStockItems || hasItemsExceedingStock || isPending}
+                            // disabled={isCartEmpty || hasOutOfStockItems || hasItemsExceedingStock}
+                            disabled={isCartEmpty || hasOutOfStockItems || hasItemsExceedingStock}
                             onClick={submitOrder}
                         >
-                            {isPending ? 'Processing Order...' : (
-                                <>
+                            <>
                                     <span className=''>
                                         {/* {hasMultipleStores
                                             ? 'Multiple stores detected'
@@ -543,7 +466,6 @@ const Cart = () => {
                                         </span>
                                     )}
                                 </>
-                            )}
                         </Button>
                     </div>
                 </SheetFooter>

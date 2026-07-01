@@ -541,10 +541,7 @@ import { useGetDeliveryAddress } from "@/app/hooks/useGetDeliveryAddress";
 import AddDeliveryAddress from "../add-delivery-address";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
-import useGetLookup from "@/app/hooks/useGetLookup";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
-import useWeightDeliveryOptions from '@/app/hooks/useWeightDeliveryOptions';
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
 import { UseFormReturn } from "react-hook-form";
@@ -559,7 +556,7 @@ interface ShippingFormProps {
 
 export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: ShippingFormProps) => {
   const { customer } = useCustomer();
-  const { cart, getCartTotal, mainCcy, getCartWeight } = useCart();
+  const { cart, getCartTotal, mainCcy, getVariantCartWeight } = useCart();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { location } = useLocationStore();
   const { back } = useRouter();
@@ -572,23 +569,17 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     getValues,
   } = form;
 
-  const addressTypeOptions = useGetLookup('ADDRESS_TYPE');
   const { deliveryAddress } = useGetDeliveryAddress();
-
-  const areaOptions = useGetLookup('AREAS');
 
   const shippingMethod = watch("shippingMethod");
   const selectedShippingOption = watch("shippingOption");
   const selectedAddressId = watch("selectedAddressId");
   const selectedStore = watch("pickupStore");
 
-  const [selectedZone, setSelectedZone] = useState<string>('');
-  const cartWeight = getCartWeight();
-
-  const { options: weightOptions, isLoading: isLoadingWeightOptions } = useWeightDeliveryOptions(
-    selectedZone,
-    cartWeight,
-  );
+  // Only variant items with a configured weight contribute to totalWeight.
+  // If the result is 0 (no variant items), the hook omits totalWeight from the API call.
+  const variantWeight = getVariantCartWeight();
+  const { deliveryOptions, isLoading: isLoadingDeliveryOptions } = useDeliveryOptions(undefined, variantWeight || undefined);
 
   const { data: pickupData, isLoading: isLoadingPickup, error: pickupError } = useQuery({
     queryKey: ['pickup-locations'],
@@ -646,17 +637,13 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       shippingAmount = selectedPickupLocation?.amount || 0;
       setValue("deliveryOptionGroup", "");
     } else if (shippingMethod === 'delivery' && selectedShippingOption) {
-      const selectedOption = weightOptions?.find((opt: any) => opt.typeCode === selectedShippingOption);
-      shippingAmount = selectedOption?.finalFee || 0;
-      if (selectedZone) {
-        setValue("deliveryOptionGroup", selectedOption?.typeCode);
-      } else {
-        setValue("deliveryOptionGroup", "");
-      }
+      const selectedOption = deliveryOptions?.find((opt: any) => opt.id === selectedShippingOption);
+      shippingAmount = selectedOption?.price || 0;
+      setValue("deliveryOptionGroup", selectedOption?.groupCode || "");
     }
 
     onShippingUpdate?.(shippingAmount);
-  }, [shippingMethod, selectedShippingOption, selectedStore, weightOptions, selectedZone, setValue, onShippingUpdate]);
+  }, [shippingMethod, selectedShippingOption, selectedStore, deliveryOptions, setValue, onShippingUpdate]);
 
   const handleShippingMethodChange = (method: "delivery" | "pickup") => {
     if (method === 'delivery') {
@@ -686,18 +673,17 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     // console.log(`Switched to ${method} mode, cleared all related fields`);
   };
 
-  const handleZoneSelect = (zoneCode: string) => {
-    setSelectedZone(zoneCode);
-    setValue("shippingOption", undefined);
-    setValue("deliveryOptionGroup", "");
-  };
-
-  const handleWeightOptionSelect = (typeCode: string) => {
-    setValue("shippingOption", typeCode);
-    setValue("deliveryOptionGroup", typeCode);
-    const selectedOpt = weightOptions?.find((opt) => opt.typeCode === typeCode);
+  const handleDeliveryOptionSelect = (optionId: string) => {
+    setValue("shippingOption", optionId);
+    const selectedOpt = deliveryOptions?.find((opt: any) => opt.id === optionId);
     if (selectedOpt) {
-      sessionStorage.setItem('selectedWeightOption', JSON.stringify(selectedOpt));
+      setValue("deliveryOptionGroup", selectedOpt.groupCode);
+      // Persist shippingName for order payload
+      try {
+        const stored = sessionStorage.getItem('checkout');
+        const parsedData = stored ? JSON.parse(stored) : {};
+        sessionStorage.setItem('checkout', JSON.stringify({ ...parsedData, shippingName: selectedOpt.name }));
+      } catch { }
     }
   };
 
@@ -797,206 +783,172 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
         </div>
 
         <Form {...form}>
-        <form>
-          <div className="mb-8">
-            <h2 className="text-lg font-medium text-checkout-text mb-4">Shipping Information</h2>
+          <form>
+            <div className="mb-8">
+              <h2 className="text-lg font-medium text-checkout-text mb-4">Shipping Information</h2>
 
-            <div className="flex gap-4 mb-6">
-              <Button
-                type="button"
-                className={`flex-1 justify-start gap-3 h-12 ${shippingMethod === 'delivery' ? 'bg-accent/5 border-accent border text-accent' : 'bg-white border text-black'} hover:bg-accent/10`}
-                onClick={() => handleShippingMethodChange("delivery")}
-              >
-                <Truck className="w-4 h-4" />
-                Delivery
-              </Button>
-              <Button
-                type="button"
-                className={`flex-1 justify-start gap-3 h-12 ${shippingMethod === 'pickup' ? 'bg-accent/5 border-accent border text-accent' : "bg-white border text-black"} hover:bg-accent/10`}
-                onClick={() => handleShippingMethodChange("pickup")}
-              >
-                <MapPin className="w-4 h-4" />
-                Pick up
-              </Button>
-            </div>
+              <div className="flex gap-4 mb-6">
+                <Button
+                  type="button"
+                  className={`flex-1 justify-start gap-3 h-12 ${shippingMethod === 'delivery' ? 'bg-accent/5 border-accent border text-accent' : 'bg-white border text-black'} hover:bg-accent/10`}
+                  onClick={() => handleShippingMethodChange("delivery")}
+                >
+                  <Truck className="w-4 h-4" />
+                  Delivery
+                </Button>
+                <Button
+                  type="button"
+                  className={`flex-1 justify-start gap-3 h-12 ${shippingMethod === 'pickup' ? 'bg-accent/5 border-accent border text-accent' : "bg-white border text-black"} hover:bg-accent/10`}
+                  onClick={() => handleShippingMethodChange("pickup")}
+                >
+                  <MapPin className="w-4 h-4" />
+                  Pick up
+                </Button>
+              </div>
 
-            {shippingMethod === 'delivery' && (
-              <>
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Delivery Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {deliveryAddress.length === 0 ? (
-                      <div className="border-2 border-dashed border-accent rounded-md p-4 bg-accent/5 hover:bg-accent/10 cursor-pointer">
-                        <Button
-                          type="button"
-                          className="w-full bg-transparent h-full flex flex-col items-center justify-center text-center py-10 hover:bg-accent/10"
-                          onClick={handleAddNewAddress}
-                        >
-                          <div className="flex items-center justify-center rounded-full border-2 border-dashed bg-white border-border w-16 h-16 mb-4">
-                            <Plus className="w-7 h-7 text-muted-foreground" />
-                          </div>
-                          <h3 className="text-lg font-medium mb-2 text-muted-foreground">Add New Address</h3>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {deliveryAddress.map((address: any) => (
-                          <div
-                            key={address.id}
-                            className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedAddressId === address.id
-                              ? "border-accent bg-accent/5 shadow-sm"
-                              : "border-gray-200 hover:border-accent/50"
-                              }`}
-                            onClick={() => handleAddressSelect(address)}
+              {shippingMethod === 'delivery' && (
+                <>
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Delivery Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {deliveryAddress.length === 0 ? (
+                        <div className="border-2 border-dashed border-accent rounded-md p-4 bg-accent/5 hover:bg-accent/10 cursor-pointer">
+                          <Button
+                            type="button"
+                            className="w-full bg-transparent h-full flex flex-col items-center justify-center text-center py-10 hover:bg-accent/10"
+                            onClick={handleAddNewAddress}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
-                                    {address.addressType}
-                                  </span>
-                                  {selectedAddressId === address.id && (
-                                    <span className="text-xs text-accent font-medium">✓ Selected</span>
-                                  )}
-                                </div>
-
-                                <div className="space-y-1 text-sm">
-                                  <p className="font-medium text-checkout-text">{address.street}</p>
-                                  {address.landmark && (
-                                    <p className="text-muted-foreground">Landmark: {address.landmark}</p>
-                                  )}
-                                  <p className="text-muted-foreground">
-                                    {[address.city, address.state, address.postCode]
-                                      .filter(Boolean)
-                                      .join(", ")}
-                                  </p>
-                                  <p className="text-muted-foreground font-medium">{address.country}</p>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => handleEditAddress(address, e)}
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                                <div className="ml-2">
-                                  <div
-                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedAddressId === address.id
-                                      ? "border-accent bg-accent"
-                                      : "border-gray-300"
-                                      }`}
-                                  >
+                            <div className="flex items-center justify-center rounded-full border-2 border-dashed bg-white border-border w-16 h-16 mb-4">
+                              <Plus className="w-7 h-7 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-lg font-medium mb-2 text-muted-foreground">Add New Address</h3>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          {deliveryAddress.map((address: any) => (
+                            <div
+                              key={address.id}
+                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedAddressId === address.id
+                                ? "border-accent bg-accent/5 shadow-sm"
+                                : "border-gray-200 hover:border-accent/50"
+                                }`}
+                              onClick={() => handleAddressSelect(address)}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent">
+                                      {address.addressType}
+                                    </span>
                                     {selectedAddressId === address.id && (
-                                      <div className="w-2 h-2 bg-white rounded-full" />
+                                      <span className="text-xs text-accent font-medium">✓ Selected</span>
                                     )}
+                                  </div>
+
+                                  <div className="space-y-1 text-sm">
+                                    <p className="font-medium text-checkout-text">{address.street}</p>
+                                    {address.landmark && (
+                                      <p className="text-muted-foreground">Landmark: {address.landmark}</p>
+                                    )}
+                                    <p className="text-muted-foreground">
+                                      {[address.city, address.state, address.postCode]
+                                        .filter(Boolean)
+                                        .join(", ")}
+                                    </p>
+                                    <p className="text-muted-foreground font-medium">{address.country}</p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => handleEditAddress(address, e)}
+                                    className="h-8 w-8 p-0"
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <div className="ml-2">
+                                    <div
+                                      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedAddressId === address.id
+                                        ? "border-accent bg-accent"
+                                        : "border-gray-300"
+                                        }`}
+                                    >
+                                      {selectedAddressId === address.id && (
+                                        <div className="w-2 h-2 bg-white rounded-full" />
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full border-dashed border-accent text-accent hover:bg-accent/10"
-                          onClick={handleAddNewAddress}
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Another Address
-                        </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Delivery Area</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Select
-                        value={selectedZone || ""}
-                        onValueChange={(value) => handleZoneSelect(value)}
-                      >
-                        <SelectTrigger className={`w-full ${!selectedZone && shippingMethod === 'delivery' ? "border-red-400" : ""}`}>
-                          <SelectValue placeholder="Select your area" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                          {areaOptions.map((option) => (
-                            <SelectItem key={option.id} value={option.id}>
-                              {option.name}
-                            </SelectItem>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      {!selectedZone && (
-                        <p className="text-sm text-red-400 mt-2">Please select a delivery area</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
 
-                {selectedZone && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full border-dashed border-accent text-accent hover:bg-accent/10"
+                            onClick={handleAddNewAddress}
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Another Address
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
                   <Card className="mb-6">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                      <CardTitle className="text-lg">Delivery Information</CardTitle>
-                      {/* <p className="text-sm text-muted-foreground font-medium">Weight: {cartWeight.toFixed(1)}</p> */}
+                    <CardHeader>
+                      <CardTitle className="text-lg">Delivery Options</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      {isLoadingWeightOptions ? (
+                      {isLoadingDeliveryOptions ? (
                         <div className="text-center py-8">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
                           <p className="text-sm text-muted-foreground mt-2">Loading delivery options...</p>
                         </div>
-                      ) : weightOptions.length === 0 ? (
+                      ) : deliveryOptions.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground">
-                          <p>No delivery options available for this zone</p>
+                          <p>No delivery options available</p>
                         </div>
                       ) : (
                         <div className="space-y-3">
-                          {weightOptions.map((option: any) => (
+                          {deliveryOptions.map((option: any) => (
                             <div
-                              key={option.typeCode}
-                              onClick={() => handleWeightOptionSelect(option.typeCode)}
-                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedShippingOption === option.typeCode
+                              key={option.id}
+                              onClick={() => handleDeliveryOptionSelect(option.id)}
+                              className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedShippingOption === option.id
                                 ? 'border-accent bg-accent/5 shadow-sm'
                                 : 'border-gray-200 hover:border-accent/50'
                                 }`}
                             >
                               <div className="flex items-start gap-4 cursor-pointer">
-                                <div className={`mt-1 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedShippingOption === option.typeCode ? 'border-accent' : 'border-gray-300'}`}>
-                                  {selectedShippingOption === option.typeCode && <div className="w-2 h-2 rounded-full bg-accent" />}
+                                <div className={`mt-1 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedShippingOption === option.id ? 'border-accent' : 'border-gray-300'}`}>
+                                  {selectedShippingOption === option.id && <div className="w-2 h-2 rounded-full bg-accent" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <div className="text-xl shrink-0">{option.typeCode === 'EXPRESS' ? '⚡' : '📦'}</div>
+                                      <div className="text-xl shrink-0">{option.icon}</div>
                                       <span className="font-semibold cursor-pointer text-checkout-text">
-                                        {option.typeName}
+                                        {option.name}
                                       </span>
-                                      {option.typeCode === 'EXPRESS' && (
-                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                          Fastest
-                                        </span>
+                                      {option.description && (
+                                        <span className="text-xs text-muted-foreground">({option.description})</span>
                                       )}
                                     </div>
-                                    <p className="font-semibold text-checkout-text shrink-0 mt-0.5 text-right">{formatPrice(option.finalFee, mainCcy() as any)}</p>
+                                    <p className="font-semibold text-checkout-text shrink-0 mt-0.5 text-right">{formatPrice(option.price, mainCcy() as any)}</p>
                                   </div>
-
                                   <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
                                     <span className="flex items-center gap-1.5">
                                       <Clock className="w-4 h-4 shrink-0" />
-                                      <span className="truncate">Est. Delivery: {option.estimatedTime} {option.estimatedTimeType.toLowerCase()}{option.estimatedTime > 1 ? 's' : ''}</span>
+                                      <span className="truncate">{option.estimatedArrival}</span>
                                     </span>
-                                    {/* <p className="text-sm text-muted-foreground">{option.breakdown}</p> */}
                                   </div>
                                 </div>
                               </div>
@@ -1004,146 +956,146 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                           ))}
                         </div>
                       )}
-                      {!selectedShippingOption && weightOptions.length > 0 && (
-                        <p className="text-sm text-muted-foreground mt-2">Please select a delivery speed</p>
+                      {!selectedShippingOption && deliveryOptions.length > 0 && (
+                        <p className="text-sm text-muted-foreground mt-2">Please select a delivery option</p>
                       )}
                     </CardContent>
                   </Card>
-                )}
-              </>
-            )}
-
-            {shippingMethod === 'pickup' && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Pickup Locations</CardTitle>
-                  <p className="text-sm text-muted-foreground">Select a store near you for pickup</p>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingPickup ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
-                      <p className="text-sm text-muted-foreground mt-2">Loading pickup locations...</p>
-                    </div>
-                  ) : pickupError ? (
-                    <div className="text-center py-8">
-                      <p className="text-red-500">Failed to load pickup locations</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.location.reload()}
-                        className="mt-2"
-                      >
-                        Retry
-                      </Button>
-                    </div>
-                  ) : pickupStores.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>No pickup locations available in your area</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {pickupStores.map((store: any) => (
-                        <div
-                          key={store.id}
-                          className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedStore === store.id
-                            ? "border-accent bg-accent/5 shadow-sm"
-                            : "border-gray-200 hover:border-accent/50"
-                            }`}
-                          onClick={() => handleStoreSelect(store)}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Store className="w-4 h-4 text-accent" />
-                                <h3 className="font-semibold text-checkout-text">{store.name}</h3>
-                                {selectedStore === store.id && (
-                                  <Badge variant="secondary" className="bg-accent text-white text-xs">
-                                    Selected
-                                  </Badge>
-                                )}
-                              </div>
-
-                              <div className="space-y-1 text-sm text-muted-foreground">
-                                <p>{store.address}</p>
-                                <div className="flex items-center gap-4 text-xs">
-                                  <span className="flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" />
-                                    {store.distance}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {store.hours}
-                                  </span>
-                                </div>
-                                {store.phone && (
-                                  <p className="text-xs">Contact: {store.phone}</p>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="ml-4">
-                              <div
-                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedStore === store.id
-                                  ? "border-accent bg-accent"
-                                  : "border-gray-300"
-                                  }`}
-                              >
-                                {selectedStore === store.id && (
-                                  <div className="w-2 h-2 bg-white rounded-full" />
-                                )}
-
-                              </div>
-
-                            </div>
-
-                          </div>
-                          <div>
-                            <div className="text-right">
-                              <p className={`font-semibold text-checkout-text ${selectedStore === store.id
-                                ? "text-accent"
-                                : ""
-                                }`}
-                              >
-                                {formatPrice(store.amount || 0, mainCcy() as any)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {!selectedStore && (
-                    <p className="text-sm text-muted-foreground mt-2">Please select a pickup store</p>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {!shippingMethod && (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Please select a shipping method above</p>
-              </div>
-            )}
-
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem className="mt-6 mb-4">
-                  <FormLabel>Order Note (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Add any special instructions for your order..." 
-                      className="resize-none" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                </>
               )}
-            />
-          </div>
-        </form>
+
+
+              {shippingMethod === 'pickup' && (
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Pickup Locations</CardTitle>
+                    <p className="text-sm text-muted-foreground">Select a store near you for pickup</p>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingPickup ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto"></div>
+                        <p className="text-sm text-muted-foreground mt-2">Loading pickup locations...</p>
+                      </div>
+                    ) : pickupError ? (
+                      <div className="text-center py-8">
+                        <p className="text-red-500">Failed to load pickup locations</p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.location.reload()}
+                          className="mt-2"
+                        >
+                          Retry
+                        </Button>
+                      </div>
+                    ) : pickupStores.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>No pickup locations available in your area</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {pickupStores.map((store: any) => (
+                          <div
+                            key={store.id}
+                            className={`border rounded-lg p-4 cursor-pointer transition-all ${selectedStore === store.id
+                              ? "border-accent bg-accent/5 shadow-sm"
+                              : "border-gray-200 hover:border-accent/50"
+                              }`}
+                            onClick={() => handleStoreSelect(store)}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Store className="w-4 h-4 text-accent" />
+                                  <h3 className="font-semibold text-checkout-text">{store.name}</h3>
+                                  {selectedStore === store.id && (
+                                    <Badge variant="secondary" className="bg-accent text-white text-xs">
+                                      Selected
+                                    </Badge>
+                                  )}
+                                </div>
+
+                                <div className="space-y-1 text-sm text-muted-foreground">
+                                  <p>{store.address}</p>
+                                  <div className="flex items-center gap-4 text-xs">
+                                    <span className="flex items-center gap-1">
+                                      <MapPin className="w-3 h-3" />
+                                      {store.distance}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      {store.hours}
+                                    </span>
+                                  </div>
+                                  {store.phone && (
+                                    <p className="text-xs">Contact: {store.phone}</p>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="ml-4">
+                                <div
+                                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedStore === store.id
+                                    ? "border-accent bg-accent"
+                                    : "border-gray-300"
+                                    }`}
+                                >
+                                  {selectedStore === store.id && (
+                                    <div className="w-2 h-2 bg-white rounded-full" />
+                                  )}
+
+                                </div>
+
+                              </div>
+
+                            </div>
+                            <div>
+                              <div className="text-right">
+                                <p className={`font-semibold text-checkout-text ${selectedStore === store.id
+                                  ? "text-accent"
+                                  : ""
+                                  }`}
+                                >
+                                  {formatPrice(store.amount || 0, mainCcy() as any)}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {!selectedStore && (
+                      <p className="text-sm text-muted-foreground mt-2">Please select a pickup store</p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {!shippingMethod && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Please select a shipping method above</p>
+                </div>
+              )}
+
+              <FormField
+                control={form.control}
+                name="note"
+                render={({ field }) => (
+                  <FormItem className="mt-6 mb-4">
+                    <FormLabel>Order Note (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add any special instructions for your order..."
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </form>
         </Form>
       </div>
 

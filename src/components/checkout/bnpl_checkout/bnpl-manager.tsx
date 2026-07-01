@@ -82,7 +82,8 @@ import { ShippingForm } from './shipping-form'
 import { CartReview } from './cart-review'
 import { CheckoutStep, FormData } from '@/app/checkout/checkoutContent'
 import { UseFormReturn } from 'react-hook-form'
-import useDeliveryOptions from '@/app/hooks/useDeliveryOptions'; // Changed import
+import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
+import { useCart } from "@/store/cart";
 
 interface BnplManagerProps {
   setCurrentStep: (currentStep: CheckoutStep) => void;
@@ -101,37 +102,20 @@ const BnplManager = ({ setCurrentStep, form, onShippingUpdate, onVatUpdate, onSu
   const watchPickupStore = watch("pickupStore");
   const watchSelectedAddressId = watch("selectedAddressId");
 
-
+  const { getVariantCartWeight } = useCart();
+  const variantWeight = getVariantCartWeight();
+  const { deliveryOptions } = useDeliveryOptions(undefined, variantWeight || undefined);
 
   const getSelectedShippingOption = () => {
     if (watchShippingMethod !== 'delivery' || !watchShippingOption) {
       return null;
     }
 
-    let selectedOption: any = null;
-    try {
-      const stored = sessionStorage.getItem('selectedWeightOption');
-      if (stored) {
-        selectedOption = JSON.parse(stored);
-      }
-    } catch { /* ignore */ }
+    const selectedOption = deliveryOptions?.find((opt: any) => opt.id === watchShippingOption);
 
-    if (!selectedOption || selectedOption.typeCode !== watchShippingOption) return null;
+    if (!selectedOption) return null;
 
-    return {
-      id: selectedOption.typeCode,
-      name: selectedOption.typeName,
-      price: selectedOption.finalFee,
-      description: selectedOption.breakdown,
-      icon: '',
-      estimatedArrival: `${selectedOption.estimatedTime} ${selectedOption.estimatedTimeType}`,
-      area: selectedOption.area || '',
-      groupCode: selectedOption.zoneCode || '',
-      estimatedTime: selectedOption.estimatedTime,
-      estimatedTimeType: selectedOption.estimatedTimeType,
-      amount: selectedOption.finalFee,
-      deliveryVatAmount: 0
-    };
+    return selectedOption;
   };
 
   const selectedShippingOption = getSelectedShippingOption();

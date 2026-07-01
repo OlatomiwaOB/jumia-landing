@@ -88,7 +88,7 @@ export const CartReview = ({
   hideContinueButton = false
 }: CartReviewProps) => {
   const [discountCode, setDiscountCode] = useState("");
-  const { cart, getCartTotal, mainCcy } = useCart();
+  const { cart, getCartTotal, mainCcy, totalVat: vatTotal } = useCart();
   const [checkoutData, setCheckoutData] = useState<any>(null);
   const [selectedProduct, setSelectedProduct] = useState<CartItem | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -172,10 +172,7 @@ export const CartReview = ({
     // console.log('Shipping method changed to:', shippingMethod);
   }, [shippingMethod]);
 
-  const totalVat = cart.reduce((total, item) => {
-    const itemVat = (item as any).vat || 0;
-    return total + (itemVat * item.quantity);
-  }, 0);
+  const totalVat = vatTotal!();
 
   const totalDiscountAmount = cart.reduce((total, item) => {
     if (item.oldPrice && item.salePrice && item.oldPrice > item.salePrice) {
@@ -448,7 +445,7 @@ export const CartReview = ({
         {displayedItems.map((item) => {
           const itemVat = (item as any).vat || 0;
           // console.log('Item VAT:', item.name, itemVat);
-          const itemTotalVat = itemVat * item.quantity;
+          const itemTotalVat = itemVat;
           // console.log('Item Total VAT:', item.name, itemTotalVat);
           const itemDiscountAmount = item.oldPrice && item.salePrice
             ? (item.oldPrice - item.salePrice) * item.quantity
@@ -652,7 +649,7 @@ export const CartReview = ({
               }
             </span>
           </div>
-          {totalVat > 0 && (
+          {totalVat! > 0 && (
             <p className="text-xs text-checkout-text-muted mt-1 text-right">
               Includes {formatPrice(totalVatWithShippingVat, mainCcy() as any)} Total VAT
             </p>

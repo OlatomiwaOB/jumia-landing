@@ -74,6 +74,10 @@ export const LoginForm = ({ setIsOpen, onForgotPassword }: LoginProps) => {
                 }
             }
             else {
+                if (data?.data?.responseCode === 'E70') {
+                    push(`/customer-login`);
+                    return
+                }
                 toast.error(data?.data?.responseMessage)
             }
         },
