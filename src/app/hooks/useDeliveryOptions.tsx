@@ -22,20 +22,32 @@ export interface DeliveryOption {
     capLimit: number;
 }
 
-const storeCode = getClientIdentifiers().storeCode
-const useDeliveryOptions = (sourceType?: string | undefined) => {
-    const { customer } = useCustomer()
-    // console.log('customer avail', !customer)
+const storeCode = getClientIdentifiers().storeCode;
+
+/**
+ * Fetches delivery options from /delivery/option/all.
+ *
+ * @param sourceType  - Optional source type (e.g. 'GUEST' for unauthenticated flows)
+ * @param totalWeight - Optional total weight in kg computed from variant items only.
+ *                      When provided and > 0, it is sent as a query param so the backend
+ *                      can filter/price weight-based options. When undefined or 0, the
+ *                      param is omitted entirely (NOT sent as 0).
+ */
+const useDeliveryOptions = (sourceType?: string | undefined, totalWeight?: number) => {
+    const { customer } = useCustomer();
     const axiosInstance = !customer?.ticketID ? axiosInstanceNoAuth : axiosCustomer;
+
     const { data, isLoading, error } = useQuery({
-        queryKey: ['delivery-options'],
+        queryKey: ['delivery-options', sourceType, totalWeight],
         queryFn: () =>
             axiosInstance.request({
                 url: '/delivery/option/all',
                 method: 'GET',
                 params: {
                     sourceType,
-                    storeCode
+                    storeCode,
+                    // Only include totalWeight when it is a positive number — do NOT send 0
+                    totalWeight: totalWeight || 0
                 }
             }),
         staleTime: 5 * 60 * 1000,

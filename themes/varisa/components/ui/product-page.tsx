@@ -55,7 +55,7 @@ export default function VarisaThemeProductPage() {
   const variants = itemVariants.map((v: any, index: number) => ({
     id: parseInt(v.id),
     qty: v.qty,
-    size: v.size || 1,
+    size: v.size ? `${v.size}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
     weight: parseFloat(v.size) || product?.weight || 1,
     original: v,

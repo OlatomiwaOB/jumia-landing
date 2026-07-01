@@ -49,6 +49,10 @@ interface CartStore {
   clearCart: () => void;
   getCartTotal: () => number;
   getCartWeight: () => number;
+  /** Returns total weight (kg) from ONLY cart items that have a variantId.
+   *  Items without a variantId are excluded entirely (weight is nullified, not zeroed).
+   *  Variant items with no weight configured contribute 0 — no fallback to 1. */
+  getVariantCartWeight: () => number;
   totalItems: number;
   mainCcy: () => string | undefined;
   usdTotal: () => number;
@@ -170,13 +174,35 @@ export const useCart = create<CartStore>()(
           return total + (itemWeight * item.quantity);
         }, 0);
       },
+      // Calculate total cart weight ONLY from items that have a variantId.
+      // Items without variantId are excluded entirely (weight nullified).
+      // Variant items with no weight configured contribute 0 — no fallback to 1.
+      getVariantCartWeight: () => {
+        const { cart } = get();
+        return cart.reduce((total, item) => {
+          if (!item.variantId) return total; // exclude non-variant items completely
+          const itemWeight = item.weight && item.weight > 0 ? item.weight : 0;
+          return total + (itemWeight * item.quantity);
+        }, 0);
+      },
+
       usdTotal: () => {
         const { cart } = get();
         return cart.reduce((total, item) => total + (item.usdPrice || 0) * item.quantity, 0);
       },
       totalVat: () => {
         const { cart } = get();
-        return cart.reduce((total, item) => total + Number(item.vat || 0) * item.quantity, 0);
+        // VAT should not increment for products of the same code/id.
+        // We track seen codes/ids to apply VAT only once per product.
+        const seen = new Set();
+        return cart.reduce((total, item) => {
+          const identifier = item.code || item.id;
+          if (!seen.has(identifier)) {
+            seen.add(identifier);
+            return total + Number(item.vat || 0);
+          }
+          return total;
+        }, 0);
       }
 
     }),

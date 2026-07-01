@@ -466,7 +466,7 @@ const CreateCategoryPage = ({
                     </Button>
                     <Button
                         type="submit"
-                        className="bg-accent hover:bg-accent/90 text-white flex items-center gap-2 px-6 py-2"
+                        className="bg-accent hover:bg-accent/90 text-[var(--sidebar-text)] flex items-center gap-2 px-6 py-2"
                         disabled={isPending || isUploadingFile}
                     >
                         <Save className="h-4 w-4" />

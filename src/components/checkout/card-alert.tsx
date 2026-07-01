@@ -42,7 +42,8 @@ const CardAlert = ({
   onEmailExists,
   setStripeLoading
 }: CardAlertProps) => {
-  const { cart, clearCart } = useCart()
+  const { cart, clearCart, getVariantCartWeight } = useCart()
+  const variantWeight = getVariantCartWeight();
   const { customer } = useCustomer()
   const { getValues } = form
   const { location } = useLocationStore()
@@ -116,6 +117,10 @@ const CardAlert = ({
   console.log(paymentMethod)
 
   console.log(getValues('selectedAddressId'));
+  const stored = sessionStorage.getItem('selectedWeightOption');
+
+  console.log('stored', stored);
+
 
   const buildOrderPayload = (bnplData?: any) => {
     let selectedWeightOption: any = null;
@@ -123,6 +128,8 @@ const CardAlert = ({
       const stored = sessionStorage.getItem('selectedWeightOption');
       if (stored) selectedWeightOption = JSON.parse(stored);
     } catch { /* ignore */ }
+
+    console.log('selected weight option', selectedWeightOption);
 
     const orderItems = cart.map(item => ({
       itemCode: item?.code,
@@ -157,8 +164,8 @@ const CardAlert = ({
       totalDiscount: cart?.reduce((sum, item) => sum + (item?.discount || 0), 0),
       deliveryOption: getValues('shippingMethod'),
       deliveryOptionGroup: getValues('shippingMethod') === 'delivery' ? (getValues('deliveryOptionGroup') || '') : '',
-      zoneCode: selectedWeightOption?.zoneCode || "",
-      totalWeight: selectedWeightOption?.totalWeightKg || 0,
+      // zoneCode: selectedWeightOption?.zoneCode || "",
+      totalWeight: variantWeight || 0,
       weightUnit: "ltr",
       paymentMethod: paymentMethod?.toUpperCase(),
       // paymentMethod: 'STRIPE_CARD',

@@ -759,7 +759,7 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
                         <PermissionButton
                             requiredPermissions={['MANAGE_INVENTORY']} requireAll={true} hideIfNoPermission={false}
                             tooltipMessage="No permission" onClick={() => router.push('/admin/inventories/create-category')}
-                            size="lg" className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-white"
+                            size="lg" className="bg-sidebar-accent text-[var(--sidebar-text)] hover:bg-sidebar-accent/90"
                         >
                             <Plus className="w-4 h-4" /> Add Category
                         </PermissionButton>

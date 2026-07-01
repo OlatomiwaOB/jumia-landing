@@ -415,7 +415,7 @@ export default function ProductPage() {
                         setLocalQty(prev => prev + 1);
                       }
                     }}
-                    disabled={(hasVariants && !selectedVariantId) || (typeof product.qtyInStore === 'number' && product.qtyInStore <= 0) || (typeof product.qtyInStore === 'number' && (quantity > 0 ? quantity >= product.qtyInStore : localQty >= product.qtyInStore))}
+                    disabled={(hasVariants && !selectedVariantId)}
                   >
                     <Plus className="h-4 w-4" />
                   </button>
