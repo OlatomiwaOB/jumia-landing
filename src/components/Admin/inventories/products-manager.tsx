@@ -1329,7 +1329,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                             <DialogTrigger asChild>
                                 <Button variant="outline" className="h-10"><TransInflowIcon className="w-4 h-4 rotate-180" />Bulk Upload</Button>
                             </DialogTrigger>
-                            <DialogContent className='overflow-y-auto rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0 max-h-[80vh]' style={{ scrollbarWidth: 'none', scrollbarColor: 'transparent' }}>
+                            <DialogContent className='overflow-y-auto rounded-2xl border-0 shadow-xl bg-[#F5F5F5] p-0 gap-0 max-h-[80vh] p-6' style={{ scrollbarWidth: 'none', scrollbarColor: 'transparent' }}>
                                 <DialogHeader><DialogTitle></DialogTitle></DialogHeader>
                                 <UploadBulkForm uploadType="products" onSuccess={() => { setIsBulkUploadOpen(false); refetch(); }} onCancel={() => setIsBulkUploadOpen(false)} />
                             </DialogContent>
