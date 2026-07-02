@@ -681,7 +681,8 @@ import useUser from "@/store/userStore";
 import Image from "next/image";
 import placeholder from "@/components/images/placeholder-product.webp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getClientIdentifiers } from '@/config/client-config';
+import { getClientIdentifiers, getClientFeatures } from '@/config/client-config';
+import { BundleSubItem } from '@/types';
 
 export interface Product {
     productId: string;
@@ -731,6 +732,8 @@ export interface Product {
         qty: number;
         price: number;
     }>;
+    /** Present when the product category is BUNDLE */
+    bundleSubItems?: BundleSubItem[];
 }
 
 const getDisplayValue = (value: any): string => value?.toString() || 'N/A';
@@ -1182,6 +1185,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [variantProduct, setVariantProduct] = useState<Product | null>(null);
     const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+    const { enableBundleManagement } = getClientFeatures();
     const ITEMS_PER_PAGE = 10;
 
     const { data, isLoading, error, refetch } = useQuery({
@@ -1231,6 +1235,10 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
     const handleAddVariant = (product: Product) => {
         setVariantProduct(product);
         setIsVariantModalOpen(true);
+    };
+
+    const handleManageBundle = (product: Product) => {
+        router.push(`/admin/inventories/bundle?productId=${product.id}`);
     };
 
     const handleDeleteSuccess = () => {
@@ -1446,6 +1454,11 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                                                                 <Button size="xs" variant="action" onClick={() => handleAddVariant(p)} title="Add Variant" className="text-blue-500 hover:text-blue-700">
                                                                     <Plus className="w-4 h-4" />
                                                                 </Button>
+                                                                {enableBundleManagement && p.category?.toUpperCase() === 'BUNDLE' && (
+                                                                    <Button size="xs" variant="action" onClick={() => handleManageBundle(p)} title="Manage Bundle" className="text-purple-600 hover:text-purple-800">
+                                                                        <Package className="w-4 h-4" />
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         </td>
                                                     </tr>

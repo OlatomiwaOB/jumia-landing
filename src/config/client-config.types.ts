@@ -160,6 +160,8 @@ export interface ClientFeatureFlags {
   enableStores: boolean;
   /** Whether payment methods management is enabled */
   enablePaymentMethods: boolean;
+  /** Whether bundle product management and selection is enabled (Varisa only) */
+  enableBundleManagement: boolean;
 }
 
 // ---------------------------------------------------------------------------

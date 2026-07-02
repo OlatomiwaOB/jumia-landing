@@ -1,10 +1,11 @@
 "use client"
 import { Item } from "@radix-ui/react-dropdown-menu";
+import { BundleSubItem } from "@/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface MenuItem {
-  id?: number;
+  id?: number | string;
   name?: string;
   salePrice: number;
   picture?: any;
@@ -22,6 +23,8 @@ export interface MenuItem {
   weightUnit?: string;
   variantId?: any
   note?: string;
+  /** Bundle sub-item selections — present only when the cart item is a BUNDLE product */
+  bundleSelections?: BundleSubItem[];
   //   bg?: string;
   //   color?: string;
 }
@@ -37,15 +40,15 @@ export interface CartItem extends MenuItem {
 
 interface CartStore {
   cartVisibility: boolean;
-  inCart: (id: number | undefined) => boolean;
-  singleQuantity: (id: number | undefined) => number;
+  inCart: (id: number | string | undefined) => boolean;
+  singleQuantity: (id: number | string | undefined) => number;
   cart: CartItem[];
   openCart: () => void;
   closeCart: () => void;
   increment: (payload: CartItem) => void;
   decrement: (payload: CartItem) => void;
   addToCart: (payload: MenuItem, qty?: number) => void;
-  removeItem: (id: number | undefined) => void;
+  removeItem: (id: number | string | undefined) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartWeight: () => number;

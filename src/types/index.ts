@@ -28,15 +28,40 @@ export interface ProductProps {
   storeName?: string | null;
   storeLocationCity?: string | null;
   imageClass?: string;
-  vat?: string | null;
+  vat?: string | number | null;
+  weight?: number | string | null;
   itemVariants?: {
     id: number,
     size: string,
     qty: number,
-    color: number,
+    color: string,
     price: number
   }[] | null
 }
+
+/** A single sub-item within a bundle, as returned by the API */
+export interface BundleSubItem {
+  id: number;
+  subItemCode: string;
+  subItemName: string;
+  /** Defaults to 1 when not provided by API */
+  minQty: number;
+  /** Defaults to 1 when not provided by API */
+  maxQty: number;
+  price: number;
+  /** Defaults to 1 when not provided by API */
+  qtyChosen: number;
+}
+
+/** Payload for POST /bundles/save */
+export interface BundleSavePayload {
+  /** The parent bundle product's code */
+  bundleItemCode: string;
+  /** The parent bundle product's store code */
+  storeCode: string;
+  subItems: BundleSubItem[];
+}
+
 
 export interface Category {
   id?: number;

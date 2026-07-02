@@ -32,9 +32,7 @@ export function getConfig() {
   return createConfig({
     chains: [baseSepolia, arcTestnet], // Added Arc testnet here
     connectors:[
-      metaMask({
-        infuraAPIKey: process.env.NEXT_PUBLIC_INFURA_API_KEY!
-      })
+      metaMask()
     ],
     ssr: true,
     storage: createStorage({

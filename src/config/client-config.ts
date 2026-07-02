@@ -6,12 +6,15 @@ import { clientRegistry } from './clients';
 // ---------------------------------------------------------------------------
 
 /**
- * Resolves an environment-aware value based on the current NODE_ENV.
- * Returns the `production` value when NODE_ENV === 'production',
+ * Resolves an environment-aware value based on the current environment.
+ * Uses NEXT_PUBLIC_APP_ENV if available (allowing overrides on Vercel preview environments),
+ * otherwise falls back to NODE_ENV.
+ * Returns the `production` value when the env is 'production',
  * otherwise returns the `development` value.
  */
 export function resolveEnvValue(value: EnvironmentAwareValue): string {
-  return process.env.NODE_ENV === 'production' ? value.production : value.development;
+  const currentEnv = process.env.NEXT_PUBLIC_APP_ENV || process.env.NODE_ENV;
+  return currentEnv === 'production' ? value.production : value.development;
 }
 
 // ---------------------------------------------------------------------------

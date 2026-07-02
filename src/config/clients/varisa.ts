@@ -24,5 +24,6 @@ export const varisaConfig: ClientConfig = {
     enableAddBankAccount: true,
     enableStores: true,
     enablePaymentMethods: true,
+    enableBundleManagement: true,
   },
 };

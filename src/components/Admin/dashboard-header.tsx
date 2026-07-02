@@ -81,7 +81,7 @@ export const DashboardHeader = () => {
   };
 
   const handleGoToProfile = () => {
-    router.push('/admin-profile')
+    router.push('/admin/admin-profile')
   };
 
   const headerActions = (
@@ -105,9 +105,9 @@ export const DashboardHeader = () => {
           </div>
         )} */}
 
-        <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
+        {/* <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
           <MessageIcon className="w-5 h-5" />
-        </button>
+        </button> */}
 
         <button
           ref={notifBtnRef}
@@ -123,12 +123,12 @@ export const DashboardHeader = () => {
         </button>
       </div>
 
-      <div className="hidden md:flex items-center pl-4 border-l border-gray-200">
+      <div className="flex items-center pl-2 md:pl-4 border-l border-gray-200">
         <DropdownMenu>
           <DropdownMenuTrigger onClick={handleGoToProfile} asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-full hover:bg-gray-100">
               <Avatar className="w-8 h-8 ring-2 ring-white shadow-sm">
-                <AvatarImage src={`https://fortitude-anl.s3.eu-west-1.amazonaws.com${user?.photoLinks}`} />
+                <AvatarImage src={`https://mmcpdocs.s3.eu-west-2.amazonaws.com${user?.photoLinks}`} />
                 <AvatarFallback>
                   <Image
                     src={'/images/no-profile-img.jpg'}
