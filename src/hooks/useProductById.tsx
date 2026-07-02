@@ -1,10 +1,25 @@
 import axiosInstanceNoAuth from "@/utils/fetch-function-auth";
 import { useQuery } from "@tanstack/react-query";
+import { BundleSubItem } from "@/types";
 
-// Step 1: Define what the API response looks like
+// ─── Shared sub-types ────────────────────────────────────────────────────────
+
+export interface ItemVariant {
+    id: number;
+    size: string;
+    color: string;
+    qty: number;
+    price: number;
+    oldPrice: number;
+    vat: number;
+}
+
+// ─── Full API response shape ─────────────────────────────────────────────────
+
 export interface ProductApiResponse {
     code: string;
     desc: string;
+    /** Flat product data section */
     data: {
         productId: string;
         productName: string;
@@ -26,33 +41,69 @@ export interface ProductApiResponse {
         weight: number;
         weightUnit: string;
     };
-    productDto?: any; // Leaving this flexible based on your screenshot
+    /** Rich product DTO — preferred for storefront use */
+    productDto?: {
+        id: number;
+        storeCode: string;
+        storeName: string;
+        picture: string;
+        code: string;
+        category: string;
+        topCategory: string;
+        name: string;
+        description: string;
+        qtyInStore: number;
+        costPrice: number;
+        salePrice: number;
+        oldPrice: number;
+        ccy: string;
+        pictureList: string[];
+        color: string;
+        itemSize: string;
+        model: string;
+        barCode: string;
+        expiryDate: string;
+        unit: string;
+        brand: string;
+        banner: boolean;
+        featured: boolean;
+        onSale: boolean;
+        discount: string;
+        vat: number;
+        usdPrice: number;
+        storeLocationCountry: string;
+        storeLocationCity: string;
+        weight: string;
+        weightUnit: string;
+        itemVariants?: ItemVariant[];
+        /** Present when the product category is BUNDLE */
+        bundleSubItems?: BundleSubItem[];
+    };
 }
 
-// Step 2: Create the custom hook using React Query (just like your other files!)
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 export const useProductById = (productId: string, entityCode: string) => {
     const { data, isLoading, error } = useQuery<ProductApiResponse>({
-        // The query key makes sure we cache the specific product we fetched
         queryKey: ["productById", productId, entityCode],
-        // The query function actually calls the endpoint
         queryFn: async () => {
-            // Note: we might need to adjust the exact parameter name like "?productId=" or "?id=" based on the API
             const response = await axiosInstanceNoAuth.request({
                 method: "GET",
                 url: "/products/getById",
                 params: {
-                    id: productId, // or productId: productId depending on what your boss expects!
-                    entityCode: entityCode
-                }
+                    id: productId,
+                    entityCode: entityCode,
+                },
             });
             return response.data;
         },
-        // Only run this query if we actually have an ID to search for
         enabled: !!productId,
     });
 
     return {
         productData: data?.productDto || data?.data,
+        /** Full typed productDto (preferred — includes bundleSubItems, itemVariants) */
+        productDto: data?.productDto,
         isLoading,
         error,
     };

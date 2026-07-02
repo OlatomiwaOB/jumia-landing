@@ -1,7 +1,7 @@
 'use client';
 
 
-import { getClientIdentifiers } from '@/config/client-config';
+import { getClientFeatures, getClientIdentifiers } from '@/config/client-config';
 import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
@@ -13,7 +13,9 @@ import {
   Plus,
   Minus,
   ShoppingCart,
-  Star
+  Star,
+  Package,
+  CheckCircle2,
 } from 'lucide-react';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 import { useProductBySlug } from '@/hooks/useProductBySlug';
@@ -21,8 +23,112 @@ import { useProductById } from '@/hooks/useProductById';
 import { useCart } from '@/store/cart';
 import { getProductGallery, getProductHref } from '@/utils/product-route';
 import { ProductImageLightbox } from '@themes/depot/components/utils/product-image-lightbox';
+import { BundleSubItem } from '@/types';
 
 type DetailTab = 'description' | 'details';
+
+// ─── Bundle group helper ──────────────────────────────────────────────────────
+
+interface BundleGroup {
+  code: string;
+  items: BundleSubItem[];
+}
+
+function groupBundleItems(items: BundleSubItem[]): BundleGroup[] {
+  const map = new Map<string, BundleSubItem[]>();
+  items.forEach(item => {
+    const existing = map.get(item.subItemCode) ?? [];
+    map.set(item.subItemCode, [...existing, item]);
+  });
+  return Array.from(map.entries()).map(([code, items]) => ({ code, items }));
+}
+
+// ─── Bundle selector sub-component ───────────────────────────────────────────
+
+interface BundleSelectorProps {
+  bundleGroups: BundleGroup[];
+  checkedItems: Record<number, BundleSubItem>;
+  onToggle: (item: BundleSubItem, groupItems: BundleSubItem[]) => void;
+}
+
+function BundleSelector({ bundleGroups, checkedItems, onToggle }: BundleSelectorProps) {
+  const REQUIRED_PER_GROUP = 4;
+
+  return (
+    <div className="space-y-5">
+      {bundleGroups.map(group => {
+        const selectedCount = group.items.filter(i => !!checkedItems[i.id]).length;
+        const groupComplete = selectedCount === REQUIRED_PER_GROUP;
+
+        return (
+          <div key={group.code} className="bg-gray-50/80 rounded-2xl p-5 border border-gray-100">
+            {/* Group header */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-accent">
+                  {group.code}
+                </span>
+              </div>
+              <div className={`flex items-center gap-1.5 text-[11px] font-bold ${
+                groupComplete ? 'text-green-600' : selectedCount > 0 ? 'text-amber-500' : 'text-gray-400'
+              }`}>
+                {groupComplete ? (
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                ) : null}
+                {selectedCount}/{REQUIRED_PER_GROUP} selected
+              </div>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-2">
+              {group.items.map(item => {
+                const isChecked = !!checkedItems[item.id];
+                // Disable if group is full and this item is not checked
+                const isDisabledByLimit = !isChecked && selectedCount >= REQUIRED_PER_GROUP;
+
+                return (
+                  <label
+                    key={item.id}
+                    className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 select-none ${
+                      isChecked
+                        ? 'border-accent bg-accent/5 shadow-sm'
+                        : isDisabledByLimit
+                        ? 'border-gray-100 bg-white opacity-40 cursor-not-allowed'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={isChecked}
+                      disabled={isDisabledByLimit}
+                      onChange={() => onToggle(item, group.items)}
+                    />
+                    {/* Custom checkbox */}
+                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                      isChecked ? 'bg-accent border-accent' : 'border-gray-300 bg-white'
+                    }`}>
+                      {isChecked && (
+                        <svg className="w-3 h-3 text-white" viewBox="0 0 12 9" fill="none">
+                          <path d="M1 4.5L4.5 8L11 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className={`text-sm font-semibold flex-1 ${isChecked ? 'text-gray-900' : 'text-gray-600'}`}>
+                      {item.subItemName}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Main page component ──────────────────────────────────────────────────────
 
 export default function VarisaThemeProductPage() {
   const params = useParams();
@@ -31,12 +137,14 @@ export default function VarisaThemeProductPage() {
   const productSlug = decodeURIComponent((params.productSlug as string) || '');
   const storeCode = searchParams?.get('storeCode') || getClientIdentifiers().storeCode;
   const entityCode = getClientIdentifiers().entityCode;
+  const { enableBundleManagement } = getClientFeatures();
+
   const { product: oldProduct, products, isLoading: isLoadingOld } = useProductBySlug(productSlug, storeCode, entityCode);
 
   const productId = oldProduct?.id?.toString() || '';
-  const { productData, isLoading: isLoadingLive, error } = useProductById(productId, entityCode);
+  const { productData, productDto, isLoading: isLoadingLive, error } = useProductById(productId, entityCode);
 
-  const product = productData || oldProduct || null;
+  const product = productDto || oldProduct || null;
   const isLoading = isLoadingOld || isLoadingLive;
   const { addToCart, decrement, increment, singleQuantity } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');
@@ -46,8 +154,62 @@ export default function VarisaThemeProductPage() {
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
   const [note, setNote] = useState('');
 
-  // console.log(cart, 'cart');
+  // ── Bundle state ────────────────────────────────────────────────────────────
+  const bundleSubItems: BundleSubItem[] = (enableBundleManagement && productDto?.bundleSubItems) ? productDto.bundleSubItems : [];
+  const isBundleProduct = bundleSubItems.length > 0;
+  const REQUIRED_PER_GROUP = 4;
 
+  const bundleGroups = useMemo(() => groupBundleItems(bundleSubItems), [bundleSubItems]);
+
+  // key = item.id → BundleSubItem
+  const [checkedItems, setCheckedItems] = useState<Record<number, BundleSubItem>>({});
+
+  // Validate: every group must have exactly REQUIRED_PER_GROUP selections
+  const canAddBundleToCart = useMemo(() => {
+    if (!isBundleProduct || bundleGroups.length === 0) return false;
+    return bundleGroups.every(group => {
+      const count = group.items.filter(i => !!checkedItems[i.id]).length;
+      return count === REQUIRED_PER_GROUP;
+    });
+  }, [bundleGroups, checkedItems, isBundleProduct]);
+
+  const handleBundleToggle = (item: BundleSubItem, groupItems: BundleSubItem[]) => {
+    setCheckedItems(prev => {
+      const isCurrentlyChecked = !!prev[item.id];
+
+      if (isCurrentlyChecked) {
+        // Uncheck
+        const next = { ...prev };
+        delete next[item.id];
+        return next;
+      }
+
+      // Check — count how many in this group are already checked
+      const checkedInGroup = groupItems.filter(gi => !!prev[gi.id]);
+      if (checkedInGroup.length >= REQUIRED_PER_GROUP) {
+        // Auto-deselect the first-checked in the group to maintain exactly 4
+        const oldest = checkedInGroup[0];
+        const next = { ...prev };
+        delete next[oldest.id];
+        next[item.id] = item;
+        return next;
+      }
+
+      return { ...prev, [item.id]: item };
+    });
+  };
+
+  const handleAddBundleToCart = () => {
+    if (!product || !canAddBundleToCart) return;
+    addToCart({
+      ...product,
+      salePrice: product.salePrice ?? product.oldPrice ?? 0,
+      bundleSelections: Object.values(checkedItems).map((item: any) => ({ ...item, qtyChosen: 1 })),
+      note,
+    } as any);
+  };
+
+  // ── Standard variant / non-bundle logic ─────────────────────────────────────
   const itemVariants = Array.isArray(product?.itemVariants) ? product.itemVariants : [];
   const hasVariants = itemVariants.length > 0;
   const basePrice = product?.salePrice ?? product?.oldPrice ?? 0;
@@ -121,6 +283,7 @@ export default function VarisaThemeProductPage() {
     setActiveTab('description');
     setIsLightboxOpen(false);
     setNote('');
+    setCheckedItems({});
   }, [product?.id]);
 
   if (isLoading) {
@@ -155,7 +318,7 @@ export default function VarisaThemeProductPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#FCFBF8] relative overflow-hidden pb-24">
+      <div className="min-h-screen bg-[#FCFBF8] relative overflow-clip pb-24">
         {/* Aesthetic Background Blobs */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] opacity-70 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px] opacity-60 pointer-events-none" />
@@ -184,7 +347,7 @@ export default function VarisaThemeProductPage() {
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-start">
 
             {/* Left: Image Gallery */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 lg:sticky lg:top-24 self-start">
               <div
                 className="relative aspect-square w-full rounded-[2rem] overflow-hidden bg-white shadow-xl shadow-black/5 cursor-zoom-in group"
                 onClick={() => setIsLightboxOpen(true)}
@@ -197,8 +360,6 @@ export default function VarisaThemeProductPage() {
                   priority
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
-                {/* Removed Eye Icon Overlay */}
-
                 {/* Badges */}
                 <div className="absolute top-6 left-6 z-10 flex flex-col gap-2 pointer-events-none">
                   {discount > 0 && (
@@ -206,11 +367,11 @@ export default function VarisaThemeProductPage() {
                       -{discount}% OFF
                     </span>
                   )}
-                  {/* {product.qtyInStore === 0 && (
-                    <span className="bg-gray-800 text-white text-[12px] font-extrabold px-3 py-1.5 rounded-lg shadow-lg">
-                      OUT OF STOCK
+                  {isBundleProduct && (
+                    <span className="bg-purple-600 text-white text-[12px] font-extrabold px-3 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5">
+                      <Package className="w-3 h-3" /> Bundle
                     </span>
-                  )} */}
+                  )}
                 </div>
               </div>
 
@@ -263,18 +424,6 @@ export default function VarisaThemeProductPage() {
                   {product.name}
                 </h1>
 
-                {/* Reviews placeholder */}
-                {/* <div className="flex items-center gap-1.5 mb-8">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={18}
-                      className="text-[#F39C12] fill-[#F39C12]"
-                    />
-                  ))}
-                  <span className="text-gray-500 font-semibold text-sm ml-2">(12 Reviews)</span>
-                </div> */}
-
                 <div className="flex items-baseline gap-4 mb-8">
                   <span className={`text-4xl font-black ${discount > 0 ? 'text-[#E74C3C]' : 'text-gray-900'}`}>
                     {formatPrice(price, ccy as any)}
@@ -324,68 +473,146 @@ export default function VarisaThemeProductPage() {
                   </div>
                 )}
 
-                {/* Add to Cart Area */}
-                <div className="bg-gray-50/80 rounded-3xl p-6 md:p-8 mb-10 border border-gray-100">
-                  <div className="mb-6">
-                    <div className="mb-2">
-                      <label htmlFor="product-note" className="block text-[14px] font-extrabold tracking-tight text-gray-900">
-                        Personalise Your Order (optional)
-
-                      </label>
-                      <p className="text-[12px] font-medium text-gray-500 mt-0.5">
-                        Share any allergies, dietary requirements or meal selections for your bundle here.</p>
+                {/* ── Bundle Selector (replaces Add to Cart area for BUNDLE products) ── */}
+                {isBundleProduct ? (
+                  <div className="mb-10">
+                    {/* Bundle intro */}
+                    <div className="mb-5 flex items-center gap-3">
+                      <div className="flex-1 h-px bg-gray-100" />
+                      <span className="text-[11px] font-extrabold uppercase tracking-widest text-gray-400">
+                        Bundle Selection
+                      </span>
+                      <div className="flex-1 h-px bg-gray-100" />
                     </div>
-                    <textarea
-                      id="product-note"
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder="Any special instructions or preferences?"
-                      rows={2}
-                      className="w-full rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 outline-none transition-all focus:border-accent focus:ring-4 focus:ring-accent/10 resize-none placeholder:text-gray-400"
+                    <p className="text-xs font-semibold text-gray-500 mb-5 text-center">
+                      Select exactly {REQUIRED_PER_GROUP} items from each group to complete your bundle
+                    </p>
+
+                    <BundleSelector
+                      bundleGroups={bundleGroups}
+                      checkedItems={checkedItems}
+                      onToggle={handleBundleToggle}
                     />
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-center gap-4">
-                    {quantity > 0 ? (
-                      <div className="flex items-center justify-between w-full sm:w-auto bg-white rounded-full p-2 shadow-sm border border-gray-200">
-                        <button
-                          onClick={() => decrement(productToCart as any)}
-                          className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors"
-                        >
-                          <Minus className="w-5 h-5" />
-                        </button>
-                        <span className="w-16 text-center font-black text-xl text-gray-900">
-                          {quantity}
-                        </span>
-                        <button
-                          onClick={() => increment(productToCart as any)}
-                          className="w-12 h-12 flex items-center justify-center rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors shadow-md shadow-accent/20"
-                        >
-                          <Plus className="w-5 h-5" />
-                        </button>
+
+                    {/* Progress summary */}
+                    <div className="mt-5 mb-5 space-y-1.5">
+                      {bundleGroups.map(group => {
+                        const count = group.items.filter(i => !!checkedItems[i.id]).length;
+                        const pct = Math.round((count / REQUIRED_PER_GROUP) * 100);
+                        return (
+                          <div key={group.code} className="flex items-center gap-2">
+                            <span className="text-[11px] font-semibold text-gray-500 w-24 truncate">{group.code}</span>
+                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-300 ${count === REQUIRED_PER_GROUP ? 'bg-green-500' : 'bg-accent'}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                            <span className={`text-[11px] font-bold w-8 text-right ${count === REQUIRED_PER_GROUP ? 'text-green-600' : 'text-gray-400'}`}>
+                              {count}/{REQUIRED_PER_GROUP}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    <div className="mb-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
+                      <div className="mb-2">
+                        <label htmlFor="bundle-note" className="block text-[14px] font-extrabold tracking-tight text-gray-900">
+                          Personalise Your Order (optional)
+                        </label>
+                        <p className="text-[12px] font-medium text-gray-500 mt-0.5">
+                          Share any allergies, dietary requirements or meal selections for your bundle here.
+                        </p>
                       </div>
-                    ) : null}
+                      <textarea
+                        id="bundle-note"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Any special instructions or preferences?"
+                        rows={2}
+                        className="w-full rounded-xl border-2 border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 outline-none transition-all focus:border-accent focus:ring-4 focus:ring-accent/10 resize-none placeholder:text-gray-400"
+                      />
+                    </div>
 
-                    {
-                      quantity <= 0 && <button
-                        onClick={() => addToCart(productToCart as any)}
-                        // disabled={(hasVariants && !selectedVariantId)}
-                        className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
+                    <button
+                      type="button"
+                      disabled={!canAddBundleToCart}
+                      onClick={handleAddBundleToCart}
+                      className={`w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 ${
+                        canAddBundleToCart
+                          ? 'bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      <ShoppingCart className="w-5 h-5" />
+                      {canAddBundleToCart ? 'Add Bundle to Cart' : 'Complete Your Selections'}
+                    </button>
+                  </div>
+                ) : (
+                  /* ── Standard Add to Cart Area ── */
+                  <div className="bg-gray-50/80 rounded-3xl p-6 md:p-8 mb-10 border border-gray-100">
+                    <div className="mb-6">
+                      <div className="mb-2">
+                        <label htmlFor="product-note" className="block text-[14px] font-extrabold tracking-tight text-gray-900">
+                          Personalise Your Order (optional)
+
+                        </label>
+                        <p className="text-[12px] font-medium text-gray-500 mt-0.5">
+                          Share any allergies, dietary requirements or meal selections for your bundle here.</p>
+                      </div>
+                      <textarea
+                        id="product-note"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        placeholder="Any special instructions or preferences?"
+                        rows={2}
+                        className="w-full rounded-2xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 outline-none transition-all focus:border-accent focus:ring-4 focus:ring-accent/10 resize-none placeholder:text-gray-400"
+                      />
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      {quantity > 0 ? (
+                        <div className="flex items-center justify-between w-full sm:w-auto bg-white rounded-full p-2 shadow-sm border border-gray-200">
+                          <button
+                            onClick={() => decrement(productToCart as any)}
+                            className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-50 text-gray-700 hover:bg-gray-100 transition-colors"
+                          >
+                            <Minus className="w-5 h-5" />
+                          </button>
+                          <span className="w-16 text-center font-black text-xl text-gray-900">
+                            {quantity}
+                          </span>
+                          <button
+                            onClick={() => increment(productToCart as any)}
+                            className="w-12 h-12 flex items-center justify-center rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-colors shadow-md shadow-accent/20"
+                          >
+                            <Plus className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ) : null}
+
+                      {
+                        quantity <= 0 && <button
+                          onClick={() => addToCart(productToCart as any)}
+                          // disabled={(hasVariants && !selectedVariantId)}
+                          className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
                         }`}
-                      >
-                        <ShoppingCart className="w-5 h-5" />
-                        {(hasVariants && !selectedVariantId)
-                          ? 'Select an Option'
-                          : 'Add to Cart'}
-                      </button>
-                    }
-                  </div>
+                        >
+                          <ShoppingCart className="w-5 h-5" />
+                          {(hasVariants && !selectedVariantId)
+                            ? 'Select an Option'
+                            : 'Add to Cart'}
+                        </button>
+                      }
+                    </div>
 
-                  <div className="mt-4 flex items-center justify-center gap-6 text-[12px] font-semibold text-gray-500">
-                    <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> In Stock</span>
-                    <span>•</span>
-                    <span>Taxes included</span>
+                    <div className="mt-4 flex items-center justify-center gap-6 text-[12px] font-semibold text-gray-500">
+                      <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500"></span> In Stock</span>
+                      <span>•</span>
+                      <span>Taxes included</span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Tabs */}
                 <div className="flex gap-2 mb-6 bg-gray-100/50 p-1.5 rounded-full w-max">

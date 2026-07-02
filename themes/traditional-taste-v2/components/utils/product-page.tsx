@@ -72,14 +72,14 @@ export default function ProductPage() {
 
   // Use your new API endpoint to get the live product (passing the numeric ID from the oldProduct)
   const productId = oldProduct?.id?.toString() || '';
-  const { productData, isLoading: isLoadingLive, error } = useProductById(productId, entityCode);
+  const { productDto, isLoading: isLoadingLive, error } = useProductById(productId, entityCode);
 
   // If the live data exists, use it! Otherwise fallback to the old product or null
-  const product = productData || oldProduct || null;
+  const product = productDto || oldProduct || null;
   const isLoading = isLoadingOld || isLoadingLive;
 
   // Log it to the console so you can see it!
-  console.log("LIVE API RESPONSE:", productData);
+  console.log("LIVE API RESPONSE:", productDto);
   console.log("LIVE API ERROR:", error);
   const { addToCart, decrement, increment, singleQuantity, openCart, cart } = useCart();
   const [activeTab, setActiveTab] = useState<DetailTab>('description');

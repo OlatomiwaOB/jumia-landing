@@ -66,7 +66,7 @@ export const DashboardHeader = () => {
 
   const headerActions = (
     <>
-      <div className="hidden md:flex items-center gap-2">
+      {/* <div className="hidden md:flex items-center gap-2">
         <button className="relative p-2.5 rounded-full hover:bg-gray-100 transition-colors text-gray-600">
           <MessageIcon className="w-5 h-5" />
         </button>
@@ -81,9 +81,9 @@ export const DashboardHeader = () => {
             <span className="absolute top-2.5 right-2.5 bg-[#EA813C] rounded-full w-2 h-2"></span>
           )}
         </button>
-      </div>
+      </div> */}
 
-      <div className="hidden md:flex items-center pl-4 border-l border-gray-200">
+      <div className="flex items-center pl-2 md:pl-4 border-l border-gray-200">
         <DropdownMenu>
           <DropdownMenuTrigger onClick={handleGoToSettings} asChild>
             <Button variant="ghost" className="flex items-center gap-2 px-2 py-1.5 h-auto rounded-full hover:bg-gray-100">

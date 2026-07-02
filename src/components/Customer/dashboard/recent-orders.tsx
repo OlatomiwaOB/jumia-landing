@@ -29,6 +29,16 @@ interface CartItem {
   tax?: number;
   oldPrice?: number;
   vat: number;
+  bundleSubItems?: {
+    id?: number;
+    subItemCode: string;
+    subItemName: string;
+    minQty: number;
+    maxQty: number;
+    price: number;
+    bundlePrice?: number | null;
+    qtyChosen: number;
+  }[];
 }
 
 interface Order {
@@ -357,7 +367,7 @@ export default function OrderHistory(): React.ReactElement {
             <h2 className="text-dark-gray text-lg font-semibold">
               Recent Orders
             </h2>
-            <Link href='/customer/orders'>
+            <Link href='/orders'>
               <Button
                 variant="ghost"
                 size="sm"
@@ -386,7 +396,7 @@ export default function OrderHistory(): React.ReactElement {
             <h2 className="text-dark-gray text-lg font-semibold">
               Recent Orders
             </h2>
-            <Link href='/customer/orders'>
+            <Link href='/orders'>
               <Button
                 variant="ghost"
                 size="sm"

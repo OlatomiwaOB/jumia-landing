@@ -20,5 +20,6 @@ export const depotConfig: ClientConfig = {
     enableAddBankAccount: false,
     enableStores: false,
     enablePaymentMethods: false,
+    enableBundleManagement: false,
   },
 };

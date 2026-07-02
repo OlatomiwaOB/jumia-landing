@@ -173,7 +173,7 @@
 
 
 'use client'
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
@@ -182,6 +182,7 @@ import Image from 'next/image';
 import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 import { RoutingIcon, StarIcon } from '@/components/icons/icons';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { BundleItemsModal, BundleTriggerBadge, type BundleSubItem } from '@/components/shared/bundle-items-modal';
 
 export interface CartItem {
     itemNote?: string;
@@ -197,6 +198,7 @@ export interface CartItem {
     oldPrice?: number;
     vat: number;
     storeCode?: string | null;
+    bundleSubItems?: BundleSubItem[];
 }
 
 export interface DeliveryAddress {
@@ -266,6 +268,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     order, open, onClose, onTrackOrder, onRateOrder, onDownloadReceipt,
 }) => {
     if (!order) return null;
+    const [bundleModal, setBundleModal] = useState<{ item: CartItem } | null>(null);
 
     const subtotal = order.cartItems?.reduce((s, i) => s + i.amount, 0) ?? 0;
     const ccy = order.ccy || '£';
@@ -273,6 +276,7 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     const hasNotes = !!order.orderNote || (order.cartItems?.some(item => !!item.itemNote));
 
     return (
+        <>
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent
                 className="sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl gap-0 border-0 shadow-xl bg-[#F5F5F5]"
@@ -351,33 +355,44 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                             </div>
                             <div className="">
                                 {order.cartItems?.length ? (
-                                    order.cartItems.map((item, i) => (
-                                        <div key={i} className="flex items-center gap-3 mb-2">
-                                            <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-gray-100 shrink-0">
-                                                <Image src={item.picture || '/images/placeholder-image.png'} alt={item.itemName} fill
-                                                    className="object-cover" sizes="48px"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder-image.png'; }} />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-semibold text-dark-gray truncate">{item.itemName}</p>
-                                                <p className="text-xs text-medium-gray flex flex-wrap gap-x-2">
-                                                    <span>Code: {item.itemCode}</span>
-                                                    <span className='text-[#9E9E9E]'>•</span>
-                                                    <span>Qty: {item.quantity}</span>
-                                                    {item.discount > 0 && <><span className='text-[#9E9E9E]'>•</span><span className="text-green-600">Discount: {item.discount}%</span></>}
-                                                    {item.vat > 0 && <><span className='text-[#9E9E9E]'>•</span><span>VAT: {formatPrice(item.vat, ccy as CurrencyCode)}</span></>}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-dark-gray shrink-0">{formatPrice(item.amount, ccy as CurrencyCode)}</p>
-                                                {item.discount > 0 && (
-                                                    <p className="text-xs text-medium-gray line-through">
-                                                        {formatPrice(item.oldPrice ?? 0, ccy as CurrencyCode)}
+                                    order.cartItems.map((item, i) => {
+                                        const hasBundle = Array.isArray(item.bundleSubItems) && item.bundleSubItems.length > 0;
+                                        return (
+                                            <div key={i} className="flex items-center gap-3 mb-2">
+                                                <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-gray-100 shrink-0">
+                                                    <Image src={item.picture || '/images/placeholder-image.png'} alt={item.itemName} fill
+                                                        className="object-cover" sizes="48px"
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder-image.png'; }} />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-semibold text-dark-gray truncate">{item.itemName}</p>
+                                                    <p className="text-xs text-medium-gray flex flex-wrap gap-x-2">
+                                                        <span>Code: {item.itemCode}</span>
+                                                        <span className='text-[#9E9E9E]'>•</span>
+                                                        <span>Qty: {item.quantity}</span>
+                                                        {item.discount > 0 && <><span className='text-[#9E9E9E]'>•</span><span className="text-green-600">Discount: {item.discount}%</span></>}
+                                                        {item.vat > 0 && <><span className='text-[#9E9E9E]'>•</span><span>VAT: {formatPrice(item.vat, ccy as CurrencyCode)}</span></>}
                                                     </p>
-                                                )}
+                                                    {hasBundle && (
+                                                        <div className="mt-1.5">
+                                                            <BundleTriggerBadge
+                                                                count={item.bundleSubItems!.length}
+                                                                onClick={(e) => { e.stopPropagation(); setBundleModal({ item }); }}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-dark-gray shrink-0">{formatPrice(item.amount, ccy as CurrencyCode)}</p>
+                                                    {item.discount > 0 && (
+                                                        <p className="text-xs text-medium-gray line-through">
+                                                            {formatPrice(item.oldPrice ?? 0, ccy as CurrencyCode)}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                                         <ShoppingCart className="w-8 h-8 mb-2 opacity-40" />
@@ -479,6 +494,19 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
             </DialogContent>
         </Dialog>
+
+        {/* Bundle sub-items modal */}
+        {bundleModal && (
+            <BundleItemsModal
+                open={!!bundleModal}
+                onClose={() => setBundleModal(null)}
+                bundleName={bundleModal.item.itemName}
+                bundlePrice={bundleModal.item.price}
+                ccy={ccy}
+                subItems={bundleModal.item.bundleSubItems!}
+            />
+        )}
+        </>
     );
 };
 

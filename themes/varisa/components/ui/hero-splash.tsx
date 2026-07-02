@@ -32,7 +32,7 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
     {
       id: p1?.id || 1,
       title: p1?.name || "Red Bream",
-      subtitle: p1?.category?.name || p1?.category || "Our Signature",
+      subtitle: p1?.category || "Our Signature",
       image: p1?.picture || "/images/cat_main_meals.png",
       bgColor: color1,
       accent: textColor
@@ -40,7 +40,7 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
     {
       id: p2?.id || 2,
       title: p2?.name || "Jumbo Turkey",
-      subtitle: p2?.category?.name || p2?.category || "Hearty Favorite",
+      subtitle: p2?.category || "Hearty Favorite",
       image: p2?.picture || "/images/cat_specials.png",
       bgColor: color2,
       accent: textColor
@@ -48,7 +48,7 @@ export default function HeroSplash({ products = [] }: HeroSplashProps) {
     {
       id: p3?.id || 3,
       title: p3?.name || "Gizdodo",
-      subtitle: p3?.category?.name || p3?.category || "Crowd Pleaser",
+      subtitle: p3?.category || "Crowd Pleaser",
       image: p3?.picture || "/images/cat_grills.png",
       bgColor: color3,
       accent: textColor

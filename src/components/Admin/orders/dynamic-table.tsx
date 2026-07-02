@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from 'sonner';
+import { BundleItemsModal, BundleTriggerBadge, type BundleSubItem } from '@/components/shared/bundle-items-modal';
 
 interface CartItem {
   itemCode: string;
@@ -35,6 +36,7 @@ interface CartItem {
   oldPrice?: number;
   vat: number;
   discountAmount?: number;
+  bundleSubItems?: BundleSubItem[];
 }
 
 interface DeliveryAddress {
@@ -197,6 +199,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   const [isLoadingDeliveryRequest, setIsLoadingDeliveryRequest] = useState(false);
   const [pickupLocations, setPickupLocations] = useState<PickupLocation[]>([]);
   const [existingDeliveryRequest, setExistingDeliveryRequest] = useState<DeliveryRequest | null>(null);
+  const [bundleModal, setBundleModal] = useState<{ item: CartItem; ccy: string } | null>(null);
   const { user } = useUser();
 
   useEffect(() => {
@@ -766,54 +769,65 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
                 </div>
                 <div className="p-4 space-y-3">
                   {selectedOrder.cartItems && selectedOrder.cartItems.length > 0 ? (
-                    selectedOrder.cartItems.map((item, index) => (
-                      <div key={index} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="w-16 h-16 relative rounded-lg overflow-hidden border">
-                          <Image
-                            src={item.picture || placeholder.src}
-                            alt={item.itemName}
-                            fill
-                            className="object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = placeholder.src;
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{getDisplayValue(item.itemName)}</p>
-                          <p className="text-xs text-gray-500 truncate">
-                            Code: {getDisplayValue(item.itemCode)}
-                          </p>
-                          <div className="flex items-center gap-4 mt-1 text-xs text-gray-600">
-                            <span>Qty: {getDisplayValue(item.quantity)}</span>
-                            <span>•</span>
-                            <span>{selectedOrder.ccy || 'NGN'} {item.price?.toFixed(2) || '0.00'}</span>
-                            {item.discount > 0 && (
-                              <>
-                                <span>•</span>
-                                <span className="text-green-600">Discount: {item.discount}%</span>
-                              </>
+                    selectedOrder.cartItems.map((item, index) => {
+                      const hasBundle = Array.isArray(item.bundleSubItems) && item.bundleSubItems.length > 0;
+                      return (
+                        <div key={index} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
+                          <div className="w-16 h-16 relative rounded-lg overflow-hidden border">
+                            <Image
+                              src={item.picture || placeholder.src}
+                              alt={item.itemName}
+                              fill
+                              className="object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = placeholder.src;
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{getDisplayValue(item.itemName)}</p>
+                            <p className="text-xs text-gray-500 truncate">
+                              Code: {getDisplayValue(item.itemCode)}
+                            </p>
+                            <div className="flex items-center gap-4 mt-1 text-xs text-gray-600">
+                              <span>Qty: {getDisplayValue(item.quantity)}</span>
+                              <span>•</span>
+                              <span>{selectedOrder.ccy || 'NGN'} {item.price?.toFixed(2) || '0.00'}</span>
+                              {item.discount > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-green-600">Discount: {item.discount}%</span>
+                                </>
+                              )}
+                              {item.vat > 0 && (
+                                <>
+                                  <span>•</span>
+                                  <span className="text-gray-600">VAT: {selectedOrder.ccy || 'NGN'} {item.vat.toFixed(2)}</span>
+                                </>
+                              )}
+                            </div>
+                            {hasBundle && (
+                              <div className="mt-1.5">
+                                <BundleTriggerBadge
+                                  count={item.bundleSubItems!.length}
+                                  onClick={(e) => { e.stopPropagation(); setBundleModal({ item, ccy: selectedOrder.ccy || 'NGN' }); }}
+                                />
+                              </div>
                             )}
-                            {item.vat > 0 && (
-                              <>
-                                <span>•</span>
-                                <span className="text-gray-600">VAT: {selectedOrder.ccy || 'NGN'} {item.vat.toFixed(2)}</span>
-                              </>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold">
+                              {selectedOrder.ccy || 'NGN'} {item.amount?.toFixed(2) || '0.00'}
+                            </p>
+                            {item.discount > 0 && (
+                              <p className="text-xs text-gray-500 line-through">
+                                {selectedOrder.ccy} {item.oldPrice?.toFixed(2)}
+                              </p>
                             )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold">
-                            {selectedOrder.ccy || 'NGN'} {item.amount?.toFixed(2) || '0.00'}
-                          </p>
-                          {item.discount > 0 && (
-                            <p className="text-xs text-gray-500 line-through">
-                              {selectedOrder.ccy} {item.oldPrice?.toFixed(2)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-8 text-gray-500">
                       <ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -1118,6 +1132,18 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
 
         </DialogContent>
       </Dialog>
+
+      {/* Bundle sub-items modal */}
+      {bundleModal && (
+        <BundleItemsModal
+          open={!!bundleModal}
+          onClose={() => setBundleModal(null)}
+          bundleName={bundleModal.item.itemName}
+          bundlePrice={bundleModal.item.price}
+          ccy={bundleModal.ccy}
+          subItems={bundleModal.item.bundleSubItems!}
+        />
+      )}
 
     </>
   );

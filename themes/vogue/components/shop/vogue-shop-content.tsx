@@ -10,7 +10,7 @@ import { VogueProductCard } from "./vogue-product-card";
 import { VogueProductDetails } from "./vogue-product-details";
 import { ProductProps } from "@/types/index";
 import { useCategories } from "@/hooks/useCategories";
-import { Search, X, SlidersHorizontal, ChevronRight, ChevronLeft, Dialog } from "lucide-react";
+import { Search, X, SlidersHorizontal, ChevronRight, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function VogueShopContent() {

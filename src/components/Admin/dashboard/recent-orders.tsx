@@ -853,6 +853,16 @@ interface CartItem {
   tax?: number;
   oldPrice?: number;
   vat: number;
+  bundleSubItems?: {
+    id?: number;
+    subItemCode: string;
+    subItemName: string;
+    minQty: number;
+    maxQty: number;
+    price: number;
+    bundlePrice?: number | null;
+    qtyChosen: number;
+  }[];
 }
 
 interface Order {

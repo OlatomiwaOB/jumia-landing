@@ -24,5 +24,6 @@ export const traditionalTasteV2Config: ClientConfig = {
     enableAddBankAccount: true,
     enableStores: true,
     enablePaymentMethods: true,
+    enableBundleManagement: false,
   },
 };
