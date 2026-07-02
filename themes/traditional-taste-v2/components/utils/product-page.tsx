@@ -100,7 +100,7 @@ export default function ProductPage() {
     qty: v.qty,
     size: v.size ? `${v.size}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
-    weight: parseFloat(v.size) || product?.weight || 1,
+    weight: parseFloat(v.size) || 0,
     original: v,
     vat: v.vat,
   }));

@@ -69,9 +69,8 @@ function BundleSelector({ bundleGroups, checkedItems, onToggle }: BundleSelector
                   {group.code}
                 </span>
               </div>
-              <div className={`flex items-center gap-1.5 text-[11px] font-bold ${
-                groupComplete ? 'text-green-600' : selectedCount > 0 ? 'text-amber-500' : 'text-gray-400'
-              }`}>
+              <div className={`flex items-center gap-1.5 text-[11px] font-bold ${groupComplete ? 'text-green-600' : selectedCount > 0 ? 'text-amber-500' : 'text-gray-400'
+                }`}>
                 {groupComplete ? (
                   <CheckCircle2 className="w-3.5 h-3.5" />
                 ) : null}
@@ -89,13 +88,12 @@ function BundleSelector({ bundleGroups, checkedItems, onToggle }: BundleSelector
                 return (
                   <label
                     key={item.id}
-                    className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 select-none ${
-                      isChecked
+                    className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 select-none ${isChecked
                         ? 'border-accent bg-accent/5 shadow-sm'
                         : isDisabledByLimit
-                        ? 'border-gray-100 bg-white opacity-40 cursor-not-allowed'
-                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                    }`}
+                          ? 'border-gray-100 bg-white opacity-40 cursor-not-allowed'
+                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                      }`}
                   >
                     <input
                       type="checkbox"
@@ -105,9 +103,8 @@ function BundleSelector({ bundleGroups, checkedItems, onToggle }: BundleSelector
                       onChange={() => onToggle(item, group.items)}
                     />
                     {/* Custom checkbox */}
-                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                      isChecked ? 'bg-accent border-accent' : 'border-gray-300 bg-white'
-                    }`}>
+                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${isChecked ? 'bg-accent border-accent' : 'border-gray-300 bg-white'
+                      }`}>
                       {isChecked && (
                         <svg className="w-3 h-3 text-white" viewBox="0 0 12 9" fill="none">
                           <path d="M1 4.5L4.5 8L11 1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -153,6 +150,7 @@ export default function VarisaThemeProductPage() {
 
   const [selectedVariantId, setSelectedVariantId] = useState<number>(0);
   const [note, setNote] = useState('');
+  const [isBundleAdded, setIsBundleAdded] = useState(false);
 
   // ── Bundle state ────────────────────────────────────────────────────────────
   const bundleSubItems: BundleSubItem[] = (enableBundleManagement && productDto?.bundleSubItems) ? productDto.bundleSubItems : [];
@@ -174,6 +172,7 @@ export default function VarisaThemeProductPage() {
   }, [bundleGroups, checkedItems, isBundleProduct]);
 
   const handleBundleToggle = (item: BundleSubItem, groupItems: BundleSubItem[]) => {
+    setIsBundleAdded(false);
     setCheckedItems(prev => {
       const isCurrentlyChecked = !!prev[item.id];
 
@@ -207,6 +206,8 @@ export default function VarisaThemeProductPage() {
       bundleSelections: Object.values(checkedItems).map((item: any) => ({ ...item, qtyChosen: 1 })),
       note,
     } as any);
+    setIsBundleAdded(true);
+    setTimeout(() => setIsBundleAdded(false), 3000);
   };
 
   // ── Standard variant / non-bundle logic ─────────────────────────────────────
@@ -219,7 +220,7 @@ export default function VarisaThemeProductPage() {
     qty: v.qty,
     size: v.size ? `${v.size}`.trim() : (v.size),
     price: v.price > 0 ? v.price : basePrice,
-    weight: parseFloat(v.size) || product?.weight || 1,
+    weight: parseFloat(v.size) || 0,
     original: v,
     vat: v.vat || 0,
   }));
@@ -284,6 +285,7 @@ export default function VarisaThemeProductPage() {
     setIsLightboxOpen(false);
     setNote('');
     setCheckedItems({});
+    setIsBundleAdded(false);
   }, [product?.id]);
 
   if (isLoading) {
@@ -515,7 +517,7 @@ export default function VarisaThemeProductPage() {
                         );
                       })}
                     </div>
-                    
+
                     <div className="mb-6 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                       <div className="mb-2">
                         <label htmlFor="bundle-note" className="block text-[14px] font-extrabold tracking-tight text-gray-900">
@@ -528,7 +530,10 @@ export default function VarisaThemeProductPage() {
                       <textarea
                         id="bundle-note"
                         value={note}
-                        onChange={(e) => setNote(e.target.value)}
+                        onChange={(e) => {
+                          setNote(e.target.value);
+                          setIsBundleAdded(false);
+                        }}
                         placeholder="Any special instructions or preferences?"
                         rows={2}
                         className="w-full rounded-xl border-2 border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 outline-none transition-all focus:border-accent focus:ring-4 focus:ring-accent/10 resize-none placeholder:text-gray-400"
@@ -537,16 +542,15 @@ export default function VarisaThemeProductPage() {
 
                     <button
                       type="button"
-                      disabled={!canAddBundleToCart}
+                      disabled={!canAddBundleToCart || isBundleAdded}
                       onClick={handleAddBundleToCart}
-                      className={`w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 ${
-                        canAddBundleToCart
+                      className={`w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 ${canAddBundleToCart && !isBundleAdded
                           ? 'bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      }`}
+                        }`}
                     >
                       <ShoppingCart className="w-5 h-5" />
-                      {canAddBundleToCart ? 'Add Bundle to Cart' : 'Complete Your Selections'}
+                      {isBundleAdded ? 'Bundle Added to Cart' : canAddBundleToCart ? 'Add Bundle to Cart' : 'Complete Your Selections'}
                     </button>
                   </div>
                 ) : (
