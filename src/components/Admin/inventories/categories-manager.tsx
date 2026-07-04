@@ -746,6 +746,14 @@ const CategoriesManager = ({ onCountChange }: CategoriesManagerProps) => {
                             <RefreshCw className="w-4 h-4" />
                         </Button>
 
+                        <PermissionButton
+                            requiredPermissions={['MANAGE_INVENTORY']} requireAll={true} hideIfNoPermission={false}
+                            tooltipMessage="No permission" onClick={() => router.push('/admin/inventories/category-images')}
+                            size="lg" variant="outline"
+                        >
+                            <TransInflowIcon className="w-4 h-4 rotate-180 mr-2" /> Category Images
+                        </PermissionButton>
+
                         <Dialog open={isBulkUploadOpen} onOpenChange={setIsBulkUploadOpen}>
                             <DialogTrigger asChild>
                                 <Button variant="outline" size="lg"><Upload className="w-4 h-4 mr-2" />Bulk Upload</Button>

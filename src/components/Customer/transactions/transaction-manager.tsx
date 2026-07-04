@@ -5,6 +5,7 @@ import axiosCustomer from '@/utils/fetch-function-customer';
 import Papa from 'papaparse';
 import TransactionsFilter, { TransactionFilterState } from './transactions-filter';
 import TransactionsList, { Transaction } from './transactions-list';
+import { formatDateToDDMMYYYY } from '@/utils/helperfns';
 
 const ddmmyyyyToDate = (ddmmyyyy: string): Date | null => {
   if (!ddmmyyyy) return null;
@@ -64,8 +65,8 @@ const TransactionsManager: React.FC = () => {
     queryFn: () => {
       const params: Record<string, any> = { pageNumber: 1, pageSize: 5000 };
       if (filters.status !== 'all') params.status = filters.status;
-      if (filters.startDate) params.startDate = ddmmyyyyToISO(filters.startDate);
-      if (filters.endDate) params.endDate = ddmmyyyyToISO(filters.endDate);
+      if (filters.startDate) params.startDate = formatDateToDDMMYYYY(filters.startDate);
+      if (filters.endDate) params.endDate = formatDateToDDMMYYYY(filters.endDate);
       return axiosCustomer.request({
         url: '/customer-dashboard/fetchRecentTrans',
         method: 'GET',
@@ -141,7 +142,7 @@ const TransactionsManager: React.FC = () => {
           Error loading transactions
         </div>
       ) : (
-        <TransactionsList data={filteredTransactions} itemsPerPage={15} />
+        <TransactionsList data={filteredTransactions} itemsPerPage={30} />
       )}
     </div>
   );

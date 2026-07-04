@@ -1061,7 +1061,7 @@ const OrderRow: React.FC<{
       >
         <OrderImageCollage items={order.cartItems} />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 px-6">
           <p className="text-sm font-semibold text-dark-gray truncate">
             {order.cartId}
           </p>
@@ -1201,7 +1201,7 @@ export default function OrderHistory(): React.ReactElement {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
+                className="text-xs text-faded-accent hover:text-[var(--sidebar-text)] px-1 font-semibold"
               >
                 See All
               </Button>
@@ -1230,7 +1230,7 @@ export default function OrderHistory(): React.ReactElement {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
+                className="text-xs text-faded-accent hover:text-[var(--sidebar-text)] px-1 font-semibold"
               >
                 See All
               </Button>

@@ -230,6 +230,7 @@ import {
 import { TransFlowIcon } from '@/components/icons/icons';
 import { useQuery } from '@tanstack/react-query';
 import axiosCustomer from '@/utils/fetch-function-customer';
+import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 
 export type TranType = 'inward' | 'outward' | 'pending';
 
@@ -429,12 +430,12 @@ export const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
             value: transaction.name,
             avatar: initials,
         },
-        {
-            label: 'Currency',
-            value: transaction.currency
-                ? `${transaction.currency === 'NGN' ? 'Naira' : transaction.currency} (${transaction.currency})`
-                : 'Naira (NGN)',
-        },
+        // {
+        //     label: 'Currency',
+        //     value: transaction.currency
+        //         ? `${transaction.currency === 'NGN' ? 'Naira' : transaction.currency} (${transaction.currency})`
+        //         : 'Naira (NGN)',
+        // },
     ];
 
     const allDetails = [...defaultDetails, ...extraDetails];
@@ -450,13 +451,13 @@ export const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
                 </div>
 
                 <div className="mx-4 mb-4 rounded-2xl bg-white px-6 py-5 flex flex-col items-center gap-2">
-                    <div className={`flex items-center gap-1.5 text-sm font-medium ${styles.icon} px-3 py-1 rounded-full`}>
+                    {/* <div className={`flex items-center gap-1.5 text-sm font-medium ${styles.icon} px-3 py-1 rounded-full`}>
                         <TranTypeIcon type={type} className="w-4 h-4" />
                         <span>{styles.label}</span>
-                    </div>
+                    </div> */}
 
                     <p className="text-3xl font-bold text-dark-gray tracking-tight">
-                        {formatCurrency(transaction.amount, transaction.currency)}
+                        {formatPrice(transaction.amount, transaction.currency as CurrencyCode)}
                     </p>
 
                     <Badge

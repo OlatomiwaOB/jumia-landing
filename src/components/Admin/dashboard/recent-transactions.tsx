@@ -670,7 +670,7 @@ export default function TransactionHistory(): React.ReactElement {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
+                  className="text-xs text-faded-accent hover:text-[var(--sidebar-text)] px-1 font-semibold"
                 >
                   See All
                 </Button>
@@ -700,7 +700,7 @@ export default function TransactionHistory(): React.ReactElement {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
+                  className="text-xs text-faded-accent hover:text-[var(--sidebar-text)] px-1 font-semibold"
                 >
                   See All
                 </Button>

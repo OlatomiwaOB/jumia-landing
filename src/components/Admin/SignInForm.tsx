@@ -27,7 +27,8 @@ export function SignInForm() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
+  // const [rememberMe, setRememberMe] = useState(false)
   const { push } = useRouter()
   const { setUser } = useUser()
   const searchParams = useSearchParams()
@@ -37,23 +38,23 @@ export function SignInForm() {
 
   const bannerUrl = branding.images.banner
 
-  useEffect(() => {
-    const savedUsername = localStorage.getItem('remembered_admin_username')
-    if (savedUsername) {
-      setUsername(savedUsername)
-      setRememberMe(true)
-    }
-  }, [])
+  // useEffect(() => {
+  //   const savedUsername = localStorage.getItem('remembered_admin_username')
+  //   if (savedUsername) {
+  //     setUsername(savedUsername)
+  //     setRememberMe(true)
+  //   }
+  // }, [])
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: any) =>
       axiosInstanceNoAuth.post("/usermanager/weblogin", data),
     onSuccess: (data) => {
-      if (rememberMe) {
-        localStorage.setItem('remembered_admin_username', username)
-      } else {
-        localStorage.removeItem('remembered_admin_username')
-      }
+      // if (rememberMe) {
+      //   localStorage.setItem('remembered_admin_username', username)
+      // } else {
+      //   localStorage.removeItem('remembered_admin_username')
+      // }
       localStorage.setItem("token_store_admin", data.data.ticketID)
       localStorage.setItem("user_store", JSON.stringify(data.data))
       setUser(data?.data)
@@ -65,6 +66,7 @@ export function SignInForm() {
           //   push(`/twofa_setup/admin`)
           //   return
           // }
+          setSigningIn(true)
           toast.success('Login successful!')
           push(decodeURIComponent(returnUrl))
           return
@@ -152,7 +154,7 @@ export function SignInForm() {
           </div>
 
           <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center space-x-2">
+            {/* <div className="flex items-center space-x-2">
               <Checkbox
                 id="remember-me"
                 checked={rememberMe}
@@ -164,7 +166,7 @@ export function SignInForm() {
               >
                 Remember me
               </label>
-            </div>
+            </div> */}
 
             <Button
               type="button"
@@ -181,7 +183,7 @@ export function SignInForm() {
           type="submit"
           size="lg"
           className="mt-8 w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium h-12 rounded-lg"
-          disabled={!isFormValid || isPending}
+          disabled={!isFormValid || isPending || signingIn}
         >
           {isPending ? (
             <>
