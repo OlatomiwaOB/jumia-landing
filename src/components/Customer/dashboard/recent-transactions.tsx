@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock } from 'lucide-react';
+import { Clock, Receipt } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import useCustomer from '@/store/customerStore';
 import axiosCustomer from '@/utils/fetch-function-customer';
@@ -213,46 +213,46 @@ export default function TransactionHistory(): React.ReactElement {
   if (!transactions.length && !isLoading)
     return (
       <>
-      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
-        <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
-          <div className="flex items-center justify-between">
-            <h2 className="text-dark-gray text-lg font-semibold">
-              Recent Transactions
-            </h2>
-            <Link href='/customer/transactions'>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
-              >
-                See All
-              </Button>
-            </Link>
+        <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
+          <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
+            <div className="flex items-center justify-between">
+              <h2 className="text-dark-gray text-lg font-semibold">
+                Recent Transactions
+              </h2>
+              <Link href='/transactions'>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
+                >
+                  See All
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
 
-        <div className="pt-1">
-          <div className="flex justify-center items-center h-40">
-            <p className="text-medium-gray text-sm">No recent transactions found</p>
+          <div className="pt-1">
+            <div className="flex justify-center items-center h-40">
+              <p className="text-medium-gray text-sm">No recent transactions found</p>
+            </div>
           </div>
         </div>
-      </div>
       </>
     );
 
   return (
     <>
-      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6">
+      <div className="border border-gray-200 bg-white shadow-sm rounded-2xl p-4 lg:p-6 lg:h-full">
         <div className='pb-4 mb-4 border-b border-[#EEEEEE]'>
           <div className="flex items-center justify-between">
             <h2 className="text-dark-gray text-lg font-semibold">
               Recent Transactions
             </h2>
-            <Link href='/customer/transactions'>
+            <Link href='/transactions'>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs text-faded-accent hover:text-accent px-0 font-semibold"
+                className="text-xs text-faded-accent hover:text-[var(--sidebar-text)] px-1 font-semibold"
               >
                 See All
               </Button>
@@ -277,6 +277,19 @@ export default function TransactionHistory(): React.ReactElement {
                   />
                 ))}
               </div>
+
+              {/* Decorative space filler for when there are few transactions */}
+              {paginated.length > 0 && paginated.length < 4 && (
+                <div className="flex flex-col items-center justify-center pt-24 pb-12 opacity-30 select-none pointer-events-none">
+                  <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 border-2 border-dashed border-gray-200">
+                    <Receipt className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <p className="text-xs text-gray-400 font-medium text-center max-w-[200px]">
+                    More transactions will appear here over time.
+                  </p>
+                </div>
+              )}
+
               {totalPages > 1 && (
                 <Pagination
                   currentPage={currentPage}
@@ -296,12 +309,12 @@ export default function TransactionHistory(): React.ReactElement {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         getTranType={getTranType}
-        // onShare={(t) => {
-        //   console.log('Share receipt for', t.tranRefNo);
-        // }}
-        // onDownload={(t) => {
-        //   console.log('Download receipt for', t.tranRefNo);
-        // }}
+      // onShare={(t) => {
+      //   console.log('Share receipt for', t.tranRefNo);
+      // }}
+      // onDownload={(t) => {
+      //   console.log('Download receipt for', t.tranRefNo);
+      // }}
       />
     </>
   );

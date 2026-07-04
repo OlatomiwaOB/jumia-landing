@@ -364,7 +364,7 @@ const ProductImagesPage = () => {
         url: '/ecommerce/products/list',
         params: {
           name: '',
-          storeCode: user?.storeCode,
+          storeCode: user?.storeCode || 'STO',
           entityCode: user?.entityCode,
           tag: '',
           pageNumber: 1,
@@ -510,7 +510,7 @@ const ProductImagesPage = () => {
   return (
     <div className="min-h-screen px-2">
       <div className="mb-4 px-2">
-        <Button variant="link" onClick={() => router.push('/admin/inventories')}>
+        <Button variant="link" onClick={() => router.push('/stock-management/inventories')}>
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
       </div>

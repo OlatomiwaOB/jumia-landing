@@ -177,6 +177,7 @@ import useUser from '@/store/userStore';
 import Papa from 'papaparse';
 import TransactionsFilter, { TransactionFilterState } from './transactions-filter';
 import TransactionsList, { Transaction } from './transactions-list';
+import { formatDateToDDMMYYYY } from '@/utils/helperfns';
 
 const ddmmyyyyToDate = (ddmmyyyy: string): Date | null => {
   if (!ddmmyyyy) return null;
@@ -188,14 +189,7 @@ const ddmmyyyyToDate = (ddmmyyyy: string): Date | null => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-const ddmmyyyyToISO = (ddmmyyyy: string): string => {
-  if (!ddmmyyyy) return '';
-  const datePart = ddmmyyyy.split(' ')[0];
-  const separator = datePart.includes('/') ? '/' : '-';
-  const [dd, mm, yyyy] = datePart.split(separator);
-  if (!dd || !mm || !yyyy) return '';
-  return `${dd}-${mm}-${yyyy}`;
-};
+
 
 const exportToCSV = (transactions: Transaction[]) => {
   if (!transactions?.length) { alert('No data to export'); return; }
@@ -240,8 +234,8 @@ const TransactionsManager: React.FC = () => {
       };
       if (filters.searchTerm) params.tranRefNo = filters.searchTerm;
       if (filters.status !== 'all') params.status = filters.status;
-      if (filters.startDate) params.startDate = ddmmyyyyToISO(filters.startDate);
-      if (filters.endDate) params.endDate = ddmmyyyyToISO(filters.endDate);
+      if (filters.startDate) params.startDate = formatDateToDDMMYYYY(filters.startDate);
+      if (filters.endDate) params.endDate = formatDateToDDMMYYYY(filters.endDate);
       return axiosInstance.request({
         url: '/store-dashboard/fetchRecentTrans',
         method: 'GET',

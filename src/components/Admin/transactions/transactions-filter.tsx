@@ -232,7 +232,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Search, X } from 'lucide-react';
-import { DatePicker } from '@/components/ui/date-picker';
+
 import { SeperatorIcon, TransInflowIcon } from '@/components/icons/icons';
 
 export interface TransactionFilterState {
@@ -312,9 +312,20 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
         </Select>
 
         <div className="hidden sm:flex max-w-xs items-center gap-2">
-          <DatePicker value={startDate} onChange={(v) => emit({ startDate: v })} />
+          <Input 
+            type="date" 
+            value={startDate} 
+            onChange={(e) => emit({ startDate: e.target.value })} 
+            className="w-[140px] bg-white"
+          />
           <span className="text-xs text-gray-400 shrink-0">to</span>
-          <DatePicker value={endDate} onChange={(v) => emit({ endDate: v })} maxDate={today} />
+          <Input 
+            type="date" 
+            value={endDate} 
+            onChange={(e) => emit({ endDate: e.target.value })} 
+            max={today.toISOString().split('T')[0]}
+            className="w-[140px] bg-white"
+          />
         </div>
 
         {hasActive && (

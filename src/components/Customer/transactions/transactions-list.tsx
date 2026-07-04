@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { TransactionDetailsModal } from '@/components/Customer/transactions/transactions-details';
+import { CurrencyCode, formatPrice } from '@/utils/helperfns';
 
 export interface Transaction {
   date: string;
@@ -125,7 +126,7 @@ const DesktopRow: React.FC<{
 
       <td className="px-3 py-3.5">
         <p className="text-sm font-medium text-dark-gray">
-          {formatCurrency(transaction.amount, transaction.currency)}
+          {formatPrice(transaction.amount, transaction.currency as CurrencyCode)}
         </p>
       </td>
 
@@ -159,7 +160,7 @@ const MobileCard: React.FC<{
     <button
       type="button"
       onClick={() => onClick(transaction)}
-      className="w-full flex items-center gap-3 py-3 px-1 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg cursor-pointer border-b border-gray-100 last:border-b-0"
+      className="w-full flex items-center gap-3 py-3 px-2 text-left bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg cursor-pointer border-b border-gray-100 last:border-b-0"
     >
 
       <div className="flex-1 min-w-0">
@@ -171,7 +172,7 @@ const MobileCard: React.FC<{
 
       <div className="text-right shrink-0">
         <p className="text-sm font-bold text-dark-gray">
-          {formatCurrency(transaction.amount, transaction.currency)}
+          {formatPrice(transaction.amount, transaction.currency as CurrencyCode)}
         </p>
         <Badge className={`mt-1 text-[10px] px-2 py-0.5 border font-medium ${getStatusColor(transaction.status)}`}>
           {transaction.status}
@@ -253,12 +254,12 @@ const TransactionsList: React.FC<TransactionsListProps> = ({
         transaction={selectedTransaction}
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        // onShare={(t) => {
-        //   console.log('Share receipt for', t.tranRefNo);
-        // }}
-        // onDownload={(t) => {
-        //   console.log('Download receipt for', t.tranRefNo);
-        // }}
+      // onShare={(t) => {
+      //   console.log('Share receipt for', t.tranRefNo);
+      // }}
+      // onDownload={(t) => {
+      //   console.log('Download receipt for', t.tranRefNo);
+      // }}
       />
     </>
   );

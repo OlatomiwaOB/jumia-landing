@@ -64,6 +64,13 @@ const navigationGroups: NavGroup[] = [
   //   ]
   // },
   {
+    name: 'Transactions',
+    href: '/transactions',
+    icon: TransactionIcon,
+    activeIcon: TransactionIconFilled,
+    items: []
+  },
+  {
     name: 'Orders & Shopping',
     icon: OrderIcon,
     activeIcon: OrderIconFilled2,

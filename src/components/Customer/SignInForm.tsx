@@ -30,10 +30,11 @@ export function SignInForm() {
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [showOtpVerification, setShowOtpVerification] = useState(false)
   const [pendingEmail, setPendingEmail] = useState("")
+  const [signingIn, setSigningIn] = useState(false)
   const { push } = useRouter()
   const { setCustomer } = useCustomer()
   const searchParams = useSearchParams()
-  const [rememberMe, setRememberMe] = useState(false)
+  // const [rememberMe, setRememberMe] = useState(false)
   const router = useRouter();
 
   const returnUrl = searchParams.get('returnUrl') || '/dashboard'
@@ -41,13 +42,13 @@ export function SignInForm() {
   const bannerUrl = branding.images.banner
   const entityCode = getClientIdentifiers().entityCode;
 
-  useEffect(() => {
-    const savedUsername = localStorage.getItem('remembered_customer_username');
-    if (savedUsername) {
-      setUsername(savedUsername);
-      setRememberMe(true);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const savedUsername = localStorage.getItem('remembered_customer_username');
+  //   if (savedUsername) {
+  //     setUsername(savedUsername);
+  //     setRememberMe(true);
+  //   }
+  // }, []);
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: any) => axiosCustomer.request({
@@ -65,11 +66,11 @@ export function SignInForm() {
         setShowOtpVerification(true)
         return
       }
-      if (rememberMe) {
-        localStorage.setItem('remembered_customer_username', username);
-      } else {
-        localStorage.removeItem('remembered_customer_username');
-      }
+      // if (rememberMe) {
+      //   localStorage.setItem('remembered_customer_username', username);
+      // } else {
+      //   localStorage.removeItem('remembered_customer_username');
+      // }
       localStorage.setItem("token_customer", data.data.ticketID)
       localStorage.setItem("customer_store", JSON.stringify(data.data))
 
@@ -83,6 +84,7 @@ export function SignInForm() {
             return
           }
           toast.success('Login successful!')
+          setSigningIn(true)
           push(decodeURIComponent(returnUrl))
           return
         }
@@ -191,7 +193,7 @@ export function SignInForm() {
             </div>
 
             <div className="flex items-center justify-between pt-2">
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <Checkbox
                   id="remember-me"
                   checked={rememberMe}
@@ -203,7 +205,7 @@ export function SignInForm() {
                 >
                   Remember me
                 </label>
-              </div>
+              </div> */}
 
               <Button type="button" onClick={() => router.push('/forgot-password')} variant="link" className="text-sm">
                 Forgot your password?
@@ -215,7 +217,7 @@ export function SignInForm() {
             type="submit"
             size="lg"
             className="mt-8 w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white shadow-none font-medium h-12 rounded-lg"
-            disabled={!isFormValid || isPending}
+            disabled={!isFormValid || isPending || signingIn}
           >
             {isPending ? (
               <>

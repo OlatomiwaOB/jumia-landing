@@ -505,7 +505,7 @@ const MobileCard: React.FC<{
     <button
       type="button"
       onClick={() => onClick(transaction)}
-      className="w-full flex items-center gap-3 py-3 px-1 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg cursor-pointer border-b border-gray-100 last:border-b-0"
+      className="w-full flex items-center gap-3 py-3 px-2 text-left bg-white hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg cursor-pointer border-b border-gray-100 last:border-b-0"
     >
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-dark-gray truncate">
