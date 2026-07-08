@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { clientConfig } from '@/config/client-config';
+import { ClientFeatureFlags } from '@/config/client-config.types';
 import { usePathname } from 'next/navigation';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SidebarBase } from '@/components/common/sidebar-base';
@@ -36,6 +37,7 @@ interface NavItem {
   name: string;
   href: string;
   requiredPermissions?: string[];
+  requiredFeatures?: (keyof ClientFeatureFlags)[];
 }
 
 interface NavGroup {
@@ -45,6 +47,7 @@ interface NavGroup {
   href?: string;
   items: NavItem[];
   requiredPermissions?: string[];
+  requiredFeatures?: (keyof ClientFeatureFlags)[];
 }
 
 const navigationGroups: NavGroup[] = [
@@ -82,7 +85,7 @@ const navigationGroups: NavGroup[] = [
     requiredPermissions: ['MANAGE_DELIVERY_OPTIONS', 'MANAGE_PICKUP_LOCATIONS'],
     items: [
       { name: 'Delivery Options', href: '/admin/delivery-options', requiredPermissions: ['MANAGE_DELIVERY_OPTIONS'] },
-      { name: 'Pickup Locations', href: '/admin/pickup-locations', requiredPermissions: ['MANAGE_PICKUP_LOCATIONS'] },
+      { name: 'Pickup Locations', href: '/admin/pickup-locations', requiredPermissions: ['MANAGE_PICKUP_LOCATIONS'], requiredFeatures: ['enablePickupLocation'] },
     ]
   },
   {
@@ -157,6 +160,10 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
   const { collapsed } = useSidebar();
   const accessibleItems = useMemo(() => {
     return group.items.filter(item => {
+      if (item.requiredFeatures) {
+        const hasFeatures = item.requiredFeatures.every(feat => clientConfig().features[feat]);
+        if (!hasFeatures) return false;
+      }
       if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
         return true;
       }
@@ -281,11 +288,17 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
 export const DashboardSidebar = () => {
   const pathname = usePathname();
   const logoUrl = clientConfig().branding.logos.whiteFull;
+
   const { hasAnyPermission, userPermissions } = usePermission();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const accessibleGroups = useMemo(() => {
     return navigationGroups.filter(group => {
+      if (group.requiredFeatures) {
+        const hasFeatures = group.requiredFeatures.every(feat => clientConfig().features[feat]);
+        if (!hasFeatures) return false;
+      }
+
       if (group.requiredPermissions && group.requiredPermissions.length > 0) {
         const hasGroupAccess = hasAnyPermission(group.requiredPermissions);
         if (!hasGroupAccess) return false;
@@ -294,6 +307,11 @@ export const DashboardSidebar = () => {
       if (group.items.length === 0) return true;
 
       const hasAccessibleItems = group.items.some(item => {
+        if (item.requiredFeatures) {
+          const hasFeatures = item.requiredFeatures.every(feat => clientConfig().features[feat]);
+          if (!hasFeatures) return false;
+        }
+
         if (!item.requiredPermissions || item.requiredPermissions.length === 0) {
           return true;
         }

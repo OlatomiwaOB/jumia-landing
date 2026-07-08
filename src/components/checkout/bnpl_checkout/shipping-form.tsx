@@ -547,6 +547,7 @@ import axiosCustomer from "@/utils/fetch-function-customer";
 import { UseFormReturn } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { getClientConfig } from "@/config/client-config";
 
 interface ShippingFormProps {
   setCurrentStep: (currentStep: CheckoutStep) => void;
@@ -557,6 +558,7 @@ interface ShippingFormProps {
 export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: ShippingFormProps) => {
   const { customer } = useCustomer();
   const { cart, getCartTotal, mainCcy, getVariantCartWeight } = useCart();
+  const { features } = getClientConfig()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { location } = useLocationStore();
   const { back } = useRouter();
@@ -587,7 +589,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
       url: '/ecommerce/pickup-location/all',
       method: 'GET'
     }),
-    enabled: shippingMethod === 'pickup',
+    enabled: shippingMethod === 'pickup' && features?.enablePickupLocation,
   });
 
   // const activePickupLocations = pickupData?.data?.pickupLocations.filter((method: any) =>
@@ -796,14 +798,18 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                   <Truck className="w-4 h-4" />
                   Delivery
                 </Button>
-                <Button
-                  type="button"
-                  className={`flex-1 justify-start gap-3 h-12 ${shippingMethod === 'pickup' ? 'bg-accent/5 border-accent border text-accent' : "bg-white border text-black"} hover:bg-accent/10`}
-                  onClick={() => handleShippingMethodChange("pickup")}
-                >
-                  <MapPin className="w-4 h-4" />
-                  Pick up
-                </Button>
+                {
+                  features?.enablePickupLocation && (
+                    <Button
+                      type="button"
+                      className={`flex-1 justify-start gap-3 h-12 ${shippingMethod === 'pickup' ? 'bg-accent/5 border-accent border text-accent' : "bg-white border text-black"} hover:bg-accent/10`}
+                      onClick={() => handleShippingMethodChange("pickup")}
+                    >
+                      <MapPin className="w-4 h-4" />
+                      Pick up
+                    </Button>
+                  )
+                }
               </div>
 
               {shippingMethod === 'delivery' && (
@@ -965,7 +971,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
               )}
 
 
-              {shippingMethod === 'pickup' && (
+              {(shippingMethod === 'pickup' && features?.enablePickupLocation) && (
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="text-lg">Pickup Locations</CardTitle>

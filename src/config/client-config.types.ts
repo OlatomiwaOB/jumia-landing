@@ -162,6 +162,8 @@ export interface ClientFeatureFlags {
   enablePaymentMethods: boolean;
   /** Whether bundle product management and selection is enabled (Varisa only) */
   enableBundleManagement: boolean;
+  /** enable pickup location feature*/
+  enablePickupLocation?: boolean;
 }
 
 // ---------------------------------------------------------------------------

@@ -24,6 +24,7 @@ import { useCart } from '@/store/cart';
 import { getProductGallery, getProductHref } from '@/utils/product-route';
 import { ProductImageLightbox } from '@themes/depot/components/utils/product-image-lightbox';
 import { BundleSubItem } from '@/types';
+import { Button } from '@/components/ui/button';
 
 type DetailTab = 'description' | 'details';
 
@@ -89,10 +90,10 @@ function BundleSelector({ bundleGroups, checkedItems, onToggle }: BundleSelector
                   <label
                     key={item.id}
                     className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-200 select-none ${isChecked
-                        ? 'border-accent bg-accent/5 shadow-sm'
-                        : isDisabledByLimit
-                          ? 'border-gray-100 bg-white opacity-40 cursor-not-allowed'
-                          : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-accent bg-accent/5 shadow-sm'
+                      : isDisabledByLimit
+                        ? 'border-gray-100 bg-white opacity-40 cursor-not-allowed'
+                        : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
                       }`}
                   >
                     <input
@@ -545,8 +546,8 @@ export default function VarisaThemeProductPage() {
                       disabled={!canAddBundleToCart || isBundleAdded}
                       onClick={handleAddBundleToCart}
                       className={`w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 ${canAddBundleToCart && !isBundleAdded
-                          ? 'bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        ? 'bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
+                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         }`}
                     >
                       <ShoppingCart className="w-5 h-5" />
@@ -596,17 +597,17 @@ export default function VarisaThemeProductPage() {
                       ) : null}
 
                       {
-                        quantity <= 0 && <button
+                        quantity <= 0 && <Button
                           onClick={() => addToCart(productToCart as any)}
-                          // disabled={(hasVariants && !selectedVariantId)}
-                          className={`flex-grow w-full py-5 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1'
+                          disabled={(hasVariants && !selectedVariantId)}
+                          className={`flex-grow w-full py-6 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1 
                         }`}
                         >
                           <ShoppingCart className="w-5 h-5" />
                           {(hasVariants && !selectedVariantId)
                             ? 'Select an Option'
                             : 'Add to Cart'}
-                        </button>
+                        </Button>
                       }
                     </div>
 

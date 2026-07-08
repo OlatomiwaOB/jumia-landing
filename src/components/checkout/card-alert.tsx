@@ -217,7 +217,7 @@ const CardAlert = ({
       data
     }),
     onSuccess: (data) => {
-      if (data?.data?.responseCode === 'E412') {
+      if (data?.data?.responseCode === 'E412' || data?.data?.responseCode === 'E13') {
         toast?.error('An account with this email already exists. Please sign in to continue.');
         if (onEmailExists) onEmailExists();
         setModalOpen(false)
