@@ -21,6 +21,7 @@ import axiosInstanceNoAuth from '@/utils/fetch-function-auth';
 import { Store, Clock } from 'lucide-react';
 import useGetLookup from '@/app/hooks/useGetLookup';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getClientConfig } from '@/config/client-config';
 
 interface GuestInfoFormProps {
   form: UseFormReturn<GuestFormData>;
@@ -52,6 +53,7 @@ const GuestInfoForm = ({
   const watchShippingOption = watch("shippingOption");
   const watchPickupStore = watch("pickupStore");
   const watchSelectedAddressId = watch("selectedAddressId");
+  const { features } = getClientConfig()
 
 
 
@@ -66,7 +68,7 @@ const GuestInfoForm = ({
         sourceType: 'GUEST'
       }
     }),
-    enabled: watchShippingMethod === 'pickup',
+    enabled: (watchShippingMethod === 'pickup' && features?.enablePickupLocation),
   });
 
   const pickupStores = React.useMemo(() => {
@@ -303,14 +305,18 @@ const GuestInfoForm = ({
                 <Truck className="w-4 h-4" />
                 Delivery
               </Button>
-              <Button
-                type="button"
-                className={`flex-1 justify-start gap-3 h-12 ${watchShippingMethod === 'pickup' ? 'bg-accent/5 border-accent border text-accent' : "bg-white border text-black"} hover:bg-accent/10`}
-                onClick={() => handleShippingMethodChange("pickup")}
-              >
-                <MapPin className="w-4 h-4" />
-                Pick up
-              </Button>
+              {
+                features?.enablePickupLocation && (
+                  <Button
+                    type="button"
+                    className={`flex-1 justify-start gap-3 h-12 ${watchShippingMethod === 'pickup' ? 'bg-accent/5 border-accent border text-accent' : "bg-white border text-black"} hover:bg-accent/10`}
+                    onClick={() => handleShippingMethodChange("pickup")}
+                  >
+                    <MapPin className="w-4 h-4" />
+                    Pick up
+                  </Button>
+                )
+              }
             </div>
 
             {watchShippingMethod === 'delivery' && (
@@ -448,7 +454,7 @@ const GuestInfoForm = ({
             )}
 
 
-            {watchShippingMethod === 'pickup' && (
+            {(watchShippingMethod === 'pickup' && features?.enablePickupLocation) && (
               <Card className="mb-6">
                 <CardHeader>
                   <CardTitle className="text-lg">Select Pickup Store</CardTitle>

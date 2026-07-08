@@ -151,10 +151,10 @@ export const LoginForm = ({ setIsOpen, onForgotPassword }: LoginProps) => {
                             </div>
 
                             <div className="flex items-center justify-between mt-1 px-1">
-                                <div className="flex items-center gap-3">
+                                {/* <div className="flex items-center gap-3">
                                     <Checkbox id="remember-me" className="border-gray-200 rounded-[4px] w-5 h-5 data-[state=checked]:bg-[#111] data-[state=checked]:border-[#111]" />
                                     <label htmlFor="remember-me" className="text-sm text-gray-500 cursor-pointer">Remember me</label>
-                                </div>
+                                </div> */}
                                 <Link
                                     href={'/forgot-password'}
                                     target='_blank'

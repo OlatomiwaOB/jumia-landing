@@ -151,7 +151,7 @@ const SidebarGroup = ({ group, pathname, onNavItemClick }: SidebarGroupProps) =>
   if (group.isSectionTitle) {
     return (
       <div className="px-3 pt-5 pb-2">
-        <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+        <span className="text-[10px] font-semibold text-[var(--sidebar-text)]/60 uppercase tracking-wider">
           {group.name}
         </span>
       </div>
@@ -165,7 +165,7 @@ const SidebarGroup = ({ group, pathname, onNavItemClick }: SidebarGroupProps) =>
     return (
       <div className="relative mb-1">
         {isActive && (
-          <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[--accent] rounded-r-full" />
+          <div className="absolute left-[-12px] top-1/2 -translate-y-1/2 w-1 h-6 bg-[var(--sidebar-text)] rounded-r-full" />
         )}
         <Link
           href={group.href}
@@ -173,11 +173,11 @@ const SidebarGroup = ({ group, pathname, onNavItemClick }: SidebarGroupProps) =>
           className={cn(
             'flex items-center px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group',
             isActive
-              ? 'bg-[--accent]/10 text-[--accent] font-medium'
-              : 'text-white/70 hover:text-white hover:bg-white/10'
+              ? 'bg-[var(--sidebar-text)]/10 text-[var(--sidebar-text)] font-medium'
+              : 'text-[var(--sidebar-text)]/70 hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-text)]/5'
           )}
         >
-          <IconComponent className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-[--accent]" : "text-white/70 group-hover:text-white")} />
+          <IconComponent className={cn("w-5 h-5 flex-shrink-0 text-[var(--sidebar-text)]")} />
           <span className="ml-3 truncate">{group.name}</span>
         </Link>
       </div>
@@ -192,24 +192,24 @@ const SidebarGroup = ({ group, pathname, onNavItemClick }: SidebarGroupProps) =>
         <div className={cn(
           'flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-all duration-200 group',
           hasActiveChild
-            ? 'text-white'
-            : 'text-white/70 hover:text-white hover:bg-white/10'
+            ? 'text-[var(--sidebar-text)] font-medium'
+            : 'text-[var(--sidebar-text)]/70 hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-text)]/5'
         )}>
           <div className="flex items-center min-w-0 flex-1">
-            <IconComponent className={cn("w-5 h-5 flex-shrink-0", hasActiveChild ? "text-[--accent]" : "text-white/70 group-hover:text-white")} />
-            <span className={cn("ml-3 font-medium truncate", hasActiveChild && "text-white")}>{group.name}</span>
+            <IconComponent className={cn("w-5 h-5 flex-shrink-0 text-[var(--sidebar-text)]")} />
+            <span className={cn("ml-3 truncate", hasActiveChild && "text-[var(--sidebar-text)] font-medium")}>{group.name}</span>
           </div>
           <ArrowIcon
             className={cn(
-              "w-3 h-3 rotate-270 flex-shrink-0 text-white/50 transition-transform duration-200",
-              isOpen && "rotate-360 text-white"
+              "w-3 h-3 rotate-270 flex-shrink-0 text-[var(--sidebar-text)]/50 transition-transform duration-200",
+              isOpen && "rotate-360 text-[var(--sidebar-text)]"
             )}
           />
         </div>
       </CollapsibleTrigger>
       <CollapsibleContent className="overflow-hidden data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up">
         <div className="relative mt-1">
-          <div className="absolute left-[22px] top-0 bottom-0 w-px bg-gray-800" />
+          <div className="absolute left-[22px] top-0 bottom-0 w-px bg-[var(--sidebar-text)]/20" />
           <ul className="py-1 pr-3 space-y-1">
             {group.items.map((item) => {
               const isActive = isPathMatchingItem(pathname, item.href);
@@ -222,8 +222,8 @@ const SidebarGroup = ({ group, pathname, onNavItemClick }: SidebarGroupProps) =>
                     className={cn(
                       'flex items-center px-3 py-2 rounded-lg text-sm transition-all duration-200 ml-[34px]',
                       isActive
-                        ? 'bg-[--accent] text-white font-medium shadow-sm'
-                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                        ? 'bg-[var(--sidebar-text)] text-[var(--dashboard-sidebar-color)] font-medium shadow-sm'
+                        : 'text-[var(--sidebar-text)]/70 hover:text-[var(--sidebar-text)] hover:bg-[var(--sidebar-text)]/5'
                     )}
                   >
                     <span className="truncate">{item.name}</span>
@@ -266,8 +266,8 @@ const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
 
   return (
     <>
-      <div className="w-full h-full flex flex-col bg-[var(--sidebar-accent)] text-white relative">
-        <div className="py-5 px-4 h-[72px] flex items-center shrink-0 border-b border-gray-800">
+      <div className="w-full h-full flex flex-col bg-[var(--sidebar-accent)] text-[var(--sidebar-text)] relative">
+        <div className="py-5 px-4 h-[72px] flex items-center shrink-0 border-b border-[var(--sidebar-text)]/10">
           <Link href="/dashboard" className="block relative w-[110px] h-[30px]" onClick={handleNavItemClick}>
             <Image
               src={logoUrl || 'logo.png'}
@@ -299,12 +299,15 @@ const SidebarMobile = ({ onNavItemClick }: SidebarMobileProps) => {
           </ul>
         </nav>
 
-        <div className="p-4 border-t border-gray-800 shrink-0">
+        <div className="p-4 border-t border-white/10 shrink-0">
           <button
             onClick={handleLogoutClick}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg border border-gray-700/50 hover:bg-gray-800 hover:text-white hover:border-gray-600 transition-colors"
+            className={cn(
+              "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg border border-[var(--sidebar-text)]/10",
+              "text-[var(--sidebar-text)]/70 hover:bg-[var(--sidebar-text)]/5 hover:text-[var(--sidebar-text)] hover:border-[var(--sidebar-text)]/20 transition-all"
+            )}
           >
-            <Logout2Icon className="text-gray-400 w-4 h-4 shrink-0" />
+            <Logout2Icon className="text-[var(--sidebar-text)] w-4 h-4 shrink-0" />
             <span className="text-sm font-medium">Logout</span>
           </button>
         </div>

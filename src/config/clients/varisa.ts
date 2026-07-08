@@ -25,5 +25,6 @@ export const varisaConfig: ClientConfig = {
     enableStores: true,
     enablePaymentMethods: true,
     enableBundleManagement: true,
+    enablePickupLocation: true
   },
 };
