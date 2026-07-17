@@ -358,12 +358,68 @@ export default function ProductPage() {
               )}
             </div>
 
-            {/* Tax & Shipping */}
-            <div className="text-sm text-[var(--color-text)] opacity-60 space-y-1">
-              <p>Taxes included.</p>
-              <p>Shipping calculated at checkout.</p>
-            </div>
+            {/* Tabs: Description / Details / Shipping */}
+            <div className="space-y-5 border-t border-[var(--color-text)]/10 pt-5">
+              <div className="flex flex-wrap gap-3">
+                {tabLabels.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={`rounded-xl px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.id
+                      ? 'bg-[var(--color-primary)] text-white shadow-md'
+                      : 'bg-[var(--color-bg-secondary)] text-[var(--color-text)] opacity-70 hover:opacity-100'
+                      }`}
+                    onClick={() => setActiveTab(tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
+              <div className="border-t border-[var(--color-text)]/8 pt-5 text-sm leading-7 text-[var(--color-text)] opacity-65">
+                {activeTab === 'description' && (
+                  <div className="space-y-4">
+                    <p>{product.description || 'A carefully prepared product, perfect for any occasion.'}</p>
+                    {product.category && (
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-primary)]/30 px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)] hover:text-white"
+                        onClick={() =>
+                          router.push(getCategoryHref(product.category || '', storeCode))
+                        }
+                      >
+                        Explore {product.category}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'details' && (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {product.category && (
+                      <p><span className="font-bold text-[var(--color-text)]">Category:</span> {product.category}</p>
+                    )}
+                    {product.brand && (
+                      <p><span className="font-bold text-[var(--color-text)]">Brand:</span> {product.brand}</p>
+                    )}
+                    {product.itemSize && (
+                      <p><span className="font-bold text-[var(--color-text)]">Size:</span> {product.itemSize}</p>
+                    )}
+                    {product.color && (
+                      <p><span className="font-bold text-[var(--color-text)]">Color:</span> {product.color}</p>
+                    )}
+                    {product.unit && (
+                      <p><span className="font-bold text-[var(--color-text)]">Unit:</span> {product.unit}</p>
+                    )}
+                    {product.code && (
+                      <p><span className="font-bold text-[var(--color-text)]">Product code:</span> {product.code}</p>
+                    )}
+                  </div>
+                )}
+
+
+              </div>
+            </div>
 
             {/* Add to Cart */}
             <div className="border-t border-[var(--color-text)]/10 pt-6 mt-4">
@@ -458,68 +514,12 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {/* Tabs: Description / Details / Shipping */}
-            <div className="space-y-5 border-t border-[var(--color-text)]/10 pt-5">
-              <div className="flex flex-wrap gap-3">
-                {tabLabels.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    className={`rounded-xl px-5 py-3 text-sm font-bold transition-all ${activeTab === tab.id
-                      ? 'bg-[var(--color-primary)] text-white shadow-md'
-                      : 'bg-[var(--color-bg-secondary)] text-[var(--color-text)] opacity-70 hover:opacity-100'
-                      }`}
-                    onClick={() => setActiveTab(tab.id)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="border-t border-[var(--color-text)]/8 pt-5 text-sm leading-7 text-[var(--color-text)] opacity-65">
-                {activeTab === 'description' && (
-                  <div className="space-y-4">
-                    <p>{product.description || 'A carefully prepared product, perfect for any occasion.'}</p>
-                    {product.category && (
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-2 rounded-xl border border-[var(--color-primary)]/30 px-4 py-2 text-xs font-bold uppercase tracking-widest text-[var(--color-primary)] transition-all hover:bg-[var(--color-primary)] hover:text-white"
-                        onClick={() =>
-                          router.push(getCategoryHref(product.category || '', storeCode))
-                        }
-                      >
-                        Explore {product.category}
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {activeTab === 'details' && (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {product.category && (
-                      <p><span className="font-bold text-[var(--color-text)]">Category:</span> {product.category}</p>
-                    )}
-                    {product.brand && (
-                      <p><span className="font-bold text-[var(--color-text)]">Brand:</span> {product.brand}</p>
-                    )}
-                    {product.itemSize && (
-                      <p><span className="font-bold text-[var(--color-text)]">Size:</span> {product.itemSize}</p>
-                    )}
-                    {product.color && (
-                      <p><span className="font-bold text-[var(--color-text)]">Color:</span> {product.color}</p>
-                    )}
-                    {product.unit && (
-                      <p><span className="font-bold text-[var(--color-text)]">Unit:</span> {product.unit}</p>
-                    )}
-                    {product.code && (
-                      <p><span className="font-bold text-[var(--color-text)]">Product code:</span> {product.code}</p>
-                    )}
-                  </div>
-                )}
-
-
-              </div>
+            {/* Tax & Shipping */}
+            <div className="text-sm text-[var(--color-text)] opacity-60 space-y-1">
+              <p>Taxes included.</p>
+              <p>Shipping calculated at checkout.</p>
             </div>
+
           </div>
         </div>
 
