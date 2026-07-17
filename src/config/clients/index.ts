@@ -4,6 +4,7 @@ import { depotConfig } from './depot';
 import { vogueConfig } from './vogue';
 import { traditionalTasteV2Config } from './traditional-taste-v2';
 import { fortitudeConfig } from './fortitude';
+import { electroConfig } from './electro';
 
 /**
  * Registry of all available client configurations.
@@ -17,4 +18,5 @@ export const clientRegistry: Record<string, ClientConfig> = {
   'vogue': vogueConfig,
   'traditional-taste-v2': traditionalTasteV2Config,
   'fortitude': fortitudeConfig,
+  'electro': electroConfig,
 };

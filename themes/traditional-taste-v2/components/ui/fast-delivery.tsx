@@ -73,16 +73,13 @@ export default function FastDeliverySection() {
               </span>
 
               <h2 className="text-[var(--color-text)] text-3xl md:text-5xl font-bold leading-tight">
-                Homemade dishes,
+                Homemade dishes, delivered without leaving your home.
                 <span className="text-[var(--color-primary)] block mt-1">
-                  delivered to your door as soon as you order.
+                  Order today and enjoy only freshly prepared, carefully packaged meals from us.
                 </span>
               </h2>
 
-              <p className="text-[var(--color-text-muted)] text-lg md:text-xl mt-4 max-w-3xl leading-relaxed">
-                Enjoy fast delivery and premium quality without
-                leaving your home.
-              </p>
+
 
               {/* Feature Cards */}
               <div className="grid md:grid-cols-3 gap-6 mt-10">
