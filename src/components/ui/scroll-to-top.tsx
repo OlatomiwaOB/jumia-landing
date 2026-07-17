@@ -7,6 +7,11 @@ export default function ScrollToTop() {
   const [isVisible, setIsVisible] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
 
+  // Do not render the scroll-to-top button on the electro storefront
+  if (process.env.NEXT_PUBLIC_STORE_FRONT === 'electro') {
+    return null;
+  }
+
   const handleScroll = () => {
     // Show button when page is scrolled down
     if (window.scrollY > 300) {

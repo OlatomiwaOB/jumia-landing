@@ -30,13 +30,13 @@
         "./themes/*"
       ],
       "@theme": [
-        "./themes/depot"
+        "./themes/electro"
       ],
       "@theme/*": [
-        "./themes/depot/*"
+        "./themes/electro/*"
       ],
       "@brand": [
-        "./src/config/brands/depot.brand.json"
+        "./src/config/brands/electro.brand.json"
       ],
       "@/wagmi.config": [
         "./wagmi.config"
