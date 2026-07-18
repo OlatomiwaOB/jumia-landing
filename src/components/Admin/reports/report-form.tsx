@@ -275,7 +275,7 @@ export default function ReportForm() {
                             variant="outline"
                             onClick={handleSubmit(handleDownload)}
                             disabled={isDownloading}
-                            className="h-11 px-6 text-sidebar-accent border-sidebar-accent hover:bg-sidebar-accent/10"
+                            className="h-11 px-6 text-(var(--sidebar-text)) border-(var(--sidebar-accent)) hover:bg-(var(--sidebar-accent)/10)"
                         >
                             {isDownloading ? (
                                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Exporting</>

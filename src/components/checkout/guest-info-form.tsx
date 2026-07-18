@@ -432,11 +432,12 @@ const GuestInfoForm = ({
                               <div className="flex items-center gap-2">
                                 <div className="text-2xl">{option.icon}</div>
                                 <div className="font-semibold cursor-pointer text-checkout-text">{option.name}</div>
-                                {option.description && (
-                                  <span className="text-xs text-muted-foreground">({option.description})</span>
-                                )}
                               </div>
-                              <p className="text-sm text-muted-foreground mt-1">{option.estimatedArrival}</p>
+                              {option.description && (
+                                <span className="text-xs text-muted-foreground">{option.description}</span>
+                              )}
+
+                              <p className="text-sm text-muted-foreground mt-1 font-bold">{option.estimatedArrival}</p>
                             </div>
                             <div className="md:text-right mt-2 md:mt-0">
                               <p className="font-semibold text-checkout-text">{formatPrice(option.price, mainCcy() as any)}</p>

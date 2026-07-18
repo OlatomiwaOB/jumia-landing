@@ -89,22 +89,22 @@ const useDeliveryOptions = (sourceType?: string | undefined, totalWeight?: numbe
                 icon = '🌙';
             }
 
-            let estimatedArrival = 'Est. to arrive within ';
+            let estimatedArrival = 'Delivered in ~ ';
             if (item.estimatedTime && item.estimatedTimeType) {
                 const timeType = item.estimatedTimeType.toLowerCase();
                 if (timeType.includes('hour')) {
-                    estimatedArrival += `${item.estimatedTime} hour${item.estimatedTime > 1 ? 's' : ''}`;
+                    estimatedArrival += `${item.estimatedTime} hour${item.estimatedTime > 1 ? 's' : ''} (Subject to availability)`;
                 } else if (timeType.includes('day')) {
-                    estimatedArrival += `${item.estimatedTime} day${item.estimatedTime > 1 ? 's' : ''}`;
+                    estimatedArrival += `${item.estimatedTime} day${item.estimatedTime > 1 ? 's' : ''} (Subject to availability)`;
                 } else if (timeType.includes('week')) {
-                    estimatedArrival += `${item.estimatedTime} week${item.estimatedTime > 1 ? 's' : ''}`;
+                    estimatedArrival += `${item.estimatedTime} week${item.estimatedTime > 1 ? 's' : ''} (Subject to availability)`;
                 } else if (timeType.includes('minute')) {
-                    estimatedArrival += `${item.estimatedTime} minute${item.estimatedTime > 1 ? 's' : ''}`;
+                    estimatedArrival += `${item.estimatedTime} minute${item.estimatedTime > 1 ? 's' : ''} (Subject to availability)`;
                 } else {
-                    estimatedArrival += `${item.estimatedTime} ${item.estimatedTimeType}`;
+                    estimatedArrival += `${item.estimatedTime} ${item.estimatedTimeType} (Subject to availability)`;
                 }
             } else {
-                estimatedArrival = 'Standard delivery';
+                estimatedArrival = 'Standard delivery (Subject to availability)';
             }
 
             return {

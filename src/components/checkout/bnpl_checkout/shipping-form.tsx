@@ -944,16 +944,15 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                                       <span className="font-semibold cursor-pointer text-checkout-text">
                                         {option.name}
                                       </span>
-                                      {option.description && (
-                                        <span className="text-xs text-muted-foreground">({option.description})</span>
-                                      )}
                                     </div>
                                     <p className="font-semibold text-checkout-text shrink-0 mt-0.5 text-right">{formatPrice(option.price, mainCcy() as any)}</p>
                                   </div>
                                   <div className="text-sm text-muted-foreground flex flex-col gap-1 mt-1">
+                                    {option.description && (
+                                      <span className="text-xs text-muted-foreground">{option.description}</span>
+                                    )}
                                     <span className="flex items-center gap-1.5">
-                                      <Clock className="w-4 h-4 shrink-0" />
-                                      <span className="truncate">{option.estimatedArrival}</span>
+                                      <span className="truncate font-bold">{option.estimatedArrival}</span>
                                     </span>
                                   </div>
                                 </div>

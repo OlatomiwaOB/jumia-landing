@@ -86,7 +86,7 @@ export default function ProfilePage() {
           <h2 className="text-xl font-bold text-gray-900">Settings Account</h2>
           <Button
             onClick={navigateToEdit}
-            className="bg-sidebar-accent hover:bg-sidebar-accent/90 text-white px-6 font-medium"
+            className="bg-sidebar-accent hover:bg-(var(--sidebar-accent)/90) text-(var(--sidebar-text)) px-6 font-medium"
           >
             Edit Profile
           </Button>
