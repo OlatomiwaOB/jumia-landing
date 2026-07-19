@@ -78,6 +78,33 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  // Suppress X-Powered-By header for security
+  poweredByHeader: false,
+
+  // ---------------------------------------------------------------------------
+  // 🔒 STATIC SECURITY HEADERS
+  // ---------------------------------------------------------------------------
+  // CSP is NOT set here — it requires a per-request nonce and is handled
+  // entirely by src/middleware.ts. These are complementary static headers.
+  // ---------------------------------------------------------------------------
+  async headers() {
+    if (!isProd) return []
+
+    return [
+      {
+        // Apply to ALL routes including static files
+        source: '/(.*)',
+        headers: [
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self)' },
+        ],
+      },
+    ]
+  },
+
   images: {
     unoptimized: true,
     // remotePatterns: [

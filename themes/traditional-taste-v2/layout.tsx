@@ -3,7 +3,6 @@ import Footer from "./components/layout/footer";
 import Providers from './providers'
 import { Suspense } from "react";
 import { clientConfig } from '@/config/client-config';
-import { log } from "console";
 
 export default function TraditionalTasteLayout({
   children,
@@ -11,7 +10,7 @@ export default function TraditionalTasteLayout({
   children: React.ReactNode;
 }>) {
 
-  console.log('clientConfig', clientConfig());
+  // console.log('clientConfig', clientConfig());
 
   return (
     <div
