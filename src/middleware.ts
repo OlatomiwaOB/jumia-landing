@@ -39,13 +39,12 @@ function buildCsp(nonce: string): string {
     ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`
     : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`;
 
-  // In dev, Next.js Turbopack injects inline <style> tags dynamically for HMR.
-  // CSP spec: browsers IGNORE 'unsafe-inline' when a nonce is present.
-  // So in dev we must omit the nonce to let 'unsafe-inline' work for all styles.
-  // In prod, only our explicit <style nonce="..."> tags are allowed.
-  const styleSrc = isProd
-    ? `style-src 'self' 'nonce-${nonce}'`
-    : `style-src 'self' 'unsafe-inline'`;
+  // 'unsafe-inline' for styles in ALL environments.
+  // Unlike scripts, CSS injection is extremely low-risk for XSS.
+  // Next.js, Tailwind, and most CSS frameworks inject inline styles
+  // that cannot carry a nonce, so nonce-based style-src breaks layouts.
+  // Scripts remain strictly nonce-based (the critical XSS vector).
+  const styleSrc = `style-src 'self' 'unsafe-inline'`;
 
   return [
     // Default: deny everything not explicitly allowed
