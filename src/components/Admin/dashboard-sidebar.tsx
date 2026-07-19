@@ -204,7 +204,10 @@ const SidebarGroup = ({ group, pathname, hasGroupAccess, userPermissions }: Side
             collapsed && 'justify-center px-0'
           )}
         >
-          <IconComponent className="w-5 h-5 flex-shrink-0 text-[var(--sidebar-text)]" />
+          <IconComponent
+            className="w-5 h-5 flex-shrink-0 text-[var(--sidebar-text)]"
+            fill="var(--sidebar-text)"
+          />
           {!collapsed && <span className="ml-3 truncate">{group.name}</span>}
         </Link>
       </div>

@@ -10,6 +10,7 @@ import { headers } from "next/headers";
 import AlgorandWalletProvider from "./AlgorandWalletProvider";
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import { clientConfig } from "@/config/client-config";
+import { getNonce } from "@/lib/nonce";
 
 
 const funnelDisplay = Funnel_Display({
@@ -75,6 +76,9 @@ export default async function RootLayout({
     headersList.get("cookie") ?? ""
   );
 
+  // CSP nonce — generated per-request in middleware.ts
+  const nonce = await getNonce();
+
   // Generate CSS variables from ALL colors in the brand config.
   // Any color key added to the brand JSON automatically becomes a CSS variable.
   const colorVars = Object.entries(colors)
@@ -87,7 +91,7 @@ export default async function RootLayout({
         <meta name="google-site-verification" content="3mJ66FK4ohtkK2BWhKbmiHPwRx4DP6fIXyAJwDnuhM_fUBA" />
         <link rel="icon" href={images.favicon} type="image/x-icon" />
 
-        <style>
+        <style nonce={nonce}>
           {`
           :root {
               ${colorVars}

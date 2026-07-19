@@ -817,7 +817,7 @@ export default function EditStorePage() {
         <div className='mb-4'>
           <Button
             variant="ghost"
-            onClick={() => router.push('/admin-profile')}
+            onClick={() => router.push('/admin/admin-profile')}
             className="flex items-center gap-2 text-muted-foreground hover:text-white w-fit"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -1639,15 +1639,15 @@ export default function EditStorePage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/admin-profile')}
-              className="flex items-center gap-2 order-2 sm:order-1"
+              onClick={() => router.push('/admin/admin-profile')}
+              className="flex items-center gap-2 order-2 sm:order-1 hover:text-(var[--sidebar-text])"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={updateStoreMutation.isPending || isUploadingLogo || isUploadingBackground || isUploadingCac || isUploadingId}
-              className="gap-2 bg-accent hover:bg-accent/90 text-white order-1 sm:order-2"
+              className="gap-2 bg-accent hover:bg-accent/90 text-(var[--sidebar-text]) order-1 sm:order-2"
             >
               {updateStoreMutation.isPending ? (
                 <>
