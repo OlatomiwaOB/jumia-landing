@@ -240,6 +240,35 @@ export default function ProductPage() {
   /* ── MAIN PAGE ── */
   return (
     <div className="min-h-screen bg-[var(--color-bg-main)]">
+      {product?.note && (
+        <div className="w-full bg-red-600 text-white font-bold py-2 shadow-lg z-[100] overflow-hidden">
+          <style>{`
+            @keyframes marquee {
+              0% { transform: translateX(100%); }
+              100% { transform: translateX(-100%); }
+            }
+            .animate-marquee {
+              animation: marquee 25s linear infinite;
+            }
+            .animate-marquee:hover,
+            .animate-marquee:active {
+              animation-play-state: paused;
+            }
+          `}</style>
+          <div className="animate-marquee flex items-center text-[16px] md:text-[18px] tracking-wide whitespace-nowrap">
+            <div className="flex items-center gap-2 inline-flex py-1">
+              <Flame className="h-5 w-5" />
+              <span>{product.note}</span>
+              <span className="w-12 inline-block"></span>
+              <Flame className="h-5 w-5" />
+              <span>{product.note}</span>
+              <span className="w-12 inline-block"></span>
+              <Flame className="h-5 w-5" />
+              <span>{product.note}</span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-10">
 
         {/* BREADCRUMBS */}
@@ -496,7 +525,8 @@ export default function ProductPage() {
                         variantId: selectedVariantId || 0,
                         vat: currentVariant?.vat || product?.vat || 0,
                         discount: Number(product?.discount || 0),
-                        note: note
+                        note: note,
+                        notice: product?.note || null
                       } as any, localQty);
                       openCart();
                     }}

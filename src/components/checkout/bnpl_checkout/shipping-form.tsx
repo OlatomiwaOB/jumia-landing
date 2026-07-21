@@ -1062,7 +1062,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
                                   : ""
                                   }`}
                                 >
-                                  {formatPrice(store.amount || 0, mainCcy() as any)}</p>
+                                  {store?.amount > 0 ? formatPrice(store?.amount, mainCcy() as any) : 'Free'}</p>
                               </div>
                             </div>
                           </div>

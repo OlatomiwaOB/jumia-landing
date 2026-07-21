@@ -56,6 +56,7 @@ interface ProductFormData {
   variantEnabled?: boolean;
   weight: string;
   weightUnit: string;
+  note?: string;
 }
 
 interface CreateProductPageProps {
@@ -216,7 +217,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         imageURL: "", costPrice: "",
         barCode: "", brand: "", ccy: "NGN", color: "", itemSize: "", model: "",
         expiryDate: "", banner: false, featured: false, onSale: false,
-        oldPrice: "", discount: 0, vatEligible: false, weight: "", weightUnit: ""
+        oldPrice: "", discount: 0, vatEligible: false, weight: "", weightUnit: "", note: ""
       });
       isFormInitializedRef.current = true;
       isSelectReadyRef.current = true;
@@ -256,6 +257,7 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         weight: product?.weight?.toString() || "",
         weightUnit: product?.weightUnit || "",
         variantEnabled: !!product?.itemVariants?.length ? true : false,
+        note: product?.note || ""
       };
       reset(productObj);
       initialDataLoadedRef.current = true;
@@ -307,7 +309,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         vatRate: values?.vatEligible ? 7.5 : 0,
         weight: values.weight ? parseFloat(values.weight) : null,
         weightUnit: values.weightUnit || null,
-        variantEnabled: values?.variantEnabled || false
+        variantEnabled: values?.variantEnabled || false,
+        note: values?.note || null
       };
       await saveProduct(payload);
     } catch (error) {
@@ -410,6 +413,17 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                     {errors.productDescription && <p className="text-xs text-red-500 mt-1">{errors.productDescription.message}</p>}
                   </FormField>
                 </div>
+                <div className="col-span-2">
+                  <FormField label="Product Notice">
+                    <Textarea
+                      {...register("note")}
+                      placeholder="Enter product notice"
+                      rows={3}
+                      className="w-full"
+                    />
+                    {errors.note && <p className="text-xs text-red-500 mt-1">{errors.note.message}</p>}
+                  </FormField>
+                </div>
               </FormSection>
 
               <FormSection title="Product Specifications" subtitle="Additional product details and attributes.">
@@ -447,9 +461,9 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                   <Input {...register("model")} placeholder="Product model number" />
                 </FormField>
                 <FormField label="Expiry Date">
-                  <Input 
-                    type="date" 
-                    {...register("expiryDate")} 
+                  <Input
+                    type="date"
+                    {...register("expiryDate")}
                   />
                   {errors.expiryDate && <p className="text-xs text-red-500 mt-1">{errors.expiryDate.message}</p>}
                 </FormField>

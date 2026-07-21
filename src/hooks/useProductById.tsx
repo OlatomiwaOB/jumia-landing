@@ -76,6 +76,7 @@ export interface ProductApiResponse {
         weight: string;
         weightUnit: string;
         itemVariants?: ItemVariant[];
+        note?: string | null;
         /** Present when the product category is BUNDLE */
         bundleSubItems?: BundleSubItem[];
     };

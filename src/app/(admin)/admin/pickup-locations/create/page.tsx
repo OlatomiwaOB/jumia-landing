@@ -470,6 +470,7 @@ import useGetLookup from "@/app/hooks/useGetLookup";
 import { SelectOption } from '@/types';
 import { usePermission } from '@/hooks/usePermission';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
+import { getClientConfig } from '@/config/client-config';
 
 interface PickupLocationFormData {
     id: number;
@@ -511,6 +512,7 @@ export default function CreateEditPickupLocationPage() {
         toastMessage: "You don't have permission to manage pickup locations"
     });
 
+    const { enablePickupLocationDistance } = getClientConfig()?.features
     const searchParams = useSearchParams();
     const router = useRouter();
     const [isEditMode, setIsEditMode] = useState(false);
@@ -588,7 +590,7 @@ export default function CreateEditPickupLocationPage() {
         onSuccess: (data) => {
             if (data?.data?.code === '000') {
                 toast.success(isEditMode ? 'Pickup location updated successfully' : 'Pickup location created successfully');
-                router.push('/operations/pickup-locations');
+                router.push('/admin/pickup-locations');
             } else {
                 toast.error(data?.data?.desc || 'Failed to save pickup location');
             }
@@ -602,7 +604,7 @@ export default function CreateEditPickupLocationPage() {
         e.preventDefault();
         if (!formData.name.trim()) { toast.error('Name is required'); return; }
         if (!formData.location.trim()) { toast.error('Location is required'); return; }
-        if (formData.distance <= 0) { toast.error('Distance must be greater than 0'); return; }
+        if (formData.distance <= 0 && enablePickupLocationDistance) { toast.error('Distance must be greater than 0'); return; }
         if (!formData.timeframe.trim()) { toast.error('Timeframe is required'); return; }
         if (!formData.contact.trim()) { toast.error('Contact is required'); return; }
         saveLocationMutation.mutate(formData);
@@ -647,8 +649,8 @@ export default function CreateEditPickupLocationPage() {
                                     <Input name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter location name" required />
                                 </FormField>
 
-                                <FormField label="Amount" required>
-                                    <Input name="amount" type="number" step="0.01" min="0" value={formData.amount || ""} onChange={handleInputChange} placeholder="Enter amount" required />
+                                <FormField label="Amount">
+                                    <Input name="amount" type="number" step="0.01" min="0" value={formData.amount || ""} onChange={handleInputChange} placeholder="Enter amount" />
                                 </FormField>
 
                                 <div className="col-span-2">
@@ -657,14 +659,18 @@ export default function CreateEditPickupLocationPage() {
                                     </FormField>
                                 </div>
 
-                                <FormField label="Distance (meters)" required>
-                                    <Input name="distance" type="number" min="0" step="0.1" value={formData.distance} onChange={handleInputChange} placeholder="Enter distance in meters" required />
-                                    {formData.distance > 0 && (
-                                        <p className="text-xs text-medium-gray">
-                                            {formData.distance >= 1000 ? `${(formData.distance / 1000).toFixed(1)} kilometers` : `${formData.distance} meters`}
-                                        </p>
-                                    )}
-                                </FormField>
+                                {
+                                    enablePickupLocationDistance && (
+                                        <FormField label="Distance (meters)" required>
+                                            <Input name="distance" type="number" min="0" step="0.1" value={formData.distance} onChange={handleInputChange} placeholder="Enter distance in meters" required />
+                                            {formData.distance > 0 && (
+                                                <p className="text-xs text-medium-gray">
+                                                    {formData.distance >= 1000 ? `${(formData.distance / 1000).toFixed(1)} kilometers` : `${formData.distance} meters`}
+                                                </p>
+                                            )}
+                                        </FormField>
+                                    )
+                                }
 
                                 <FormField label="Timeframe" required>
                                     <Input name="timeframe" value={formData.timeframe} onChange={handleInputChange} placeholder="e.g., 9AM-5PM, Mon-Fri" required />

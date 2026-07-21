@@ -30,6 +30,7 @@ export interface ProductProps {
   imageClass?: string;
   vat?: string | number | null;
   weight?: number | string | null;
+  note?: string | null;
   itemVariants?: {
     id: number,
     size: string,
