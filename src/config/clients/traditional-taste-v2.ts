@@ -27,6 +27,7 @@ export const traditionalTasteV2Config: ClientConfig = {
     enableBundleManagement: false,
     enablePickupLocation: true,
     enableQtyInStoreView: false,
-    enablePickupLocationDistance: false
+    enablePickupLocationDistance: false,
+    enableAllowPreferenceSettings: true
   },
 };

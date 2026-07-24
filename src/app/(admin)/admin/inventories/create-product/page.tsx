@@ -26,7 +26,9 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { usePageMetadata } from "@/hooks/usePageMetadata";
 import { parse, isValid } from "date-fns";
 import { Day } from "react-day-picker";
-import { getClientIdentifiers } from "@/config/client-config";
+import { getClientConfig, getClientIdentifiers } from "@/config/client-config";
+import useGetLookup from "@/app/hooks/useGetLookup";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 interface ProductFormData {
   productId: string;
@@ -35,7 +37,7 @@ interface ProductFormData {
   productCategory: string;
   productCode: string;
   productPrice: string;
-  stockQuantity: number;
+  stockQuantity?: number;
   unitQuantity: string;
   imageURL: string;
   costPrice: string;
@@ -57,7 +59,24 @@ interface ProductFormData {
   weight: string;
   weightUnit: string;
   note?: string;
+  allowedPreferences?: string[];
 }
+
+const extractAllowedPreferences = (raw: any): string[] => {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw.map((item) => (typeof item === "string" ? item : item?.toString() || "")).filter(Boolean);
+  }
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map((item) => String(item)).filter(Boolean);
+    } catch {
+      return raw.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+};
 
 interface CreateProductPageProps {
   product?: any;
@@ -113,6 +132,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
     redirectToNotPermitted: true,
     toastMessage: "You don't have permission to manage inventory"
   });
+  const { enableAllowPreferenceSettings, enableQtyInStoreView } = getClientConfig()?.features
+  const preferenceOptions = useGetLookup("ITEM_PREFERENCE_OPTION", enableAllowPreferenceSettings)
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -217,7 +238,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         imageURL: "", costPrice: "",
         barCode: "", brand: "", ccy: "NGN", color: "", itemSize: "", model: "",
         expiryDate: "", banner: false, featured: false, onSale: false,
-        oldPrice: "", discount: 0, vatEligible: false, weight: "", weightUnit: "", note: ""
+        oldPrice: "", discount: 0, vatEligible: false, weight: "", weightUnit: "", note: "",
+        allowedPreferences: []
       });
       isFormInitializedRef.current = true;
       isSelectReadyRef.current = true;
@@ -257,7 +279,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         weight: product?.weight?.toString() || "",
         weightUnit: product?.weightUnit || "",
         variantEnabled: !!product?.itemVariants?.length ? true : false,
-        note: product?.note || ""
+        note: product?.note || "",
+        allowedPreferences: extractAllowedPreferences(product?.allowedPreferences)
       };
       reset(productObj);
       initialDataLoadedRef.current = true;
@@ -310,7 +333,8 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
         weight: values.weight ? parseFloat(values.weight) : null,
         weightUnit: values.weightUnit || null,
         variantEnabled: values?.variantEnabled || false,
-        note: values?.note || null
+        note: values?.note || null,
+        allowedPreferences: values?.allowedPreferences || []
       };
       await saveProduct(payload);
     } catch (error) {
@@ -467,6 +491,24 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                   />
                   {errors.expiryDate && <p className="text-xs text-red-500 mt-1">{errors.expiryDate.message}</p>}
                 </FormField>
+                {enableAllowPreferenceSettings !== false && (
+                  <div className="col-span-2">
+                    <FormField label="Allowed Preferences">
+                      <Controller
+                        name="allowedPreferences"
+                        control={control}
+                        render={({ field }) => (
+                          <MultiSelect
+                            options={preferenceOptions}
+                            value={field.value || []}
+                            onChange={field.onChange}
+                            placeholder="Select allowed preferences"
+                          />
+                        )}
+                      />
+                    </FormField>
+                  </div>
+                )}
               </FormSection>
 
               <FormSection title="Pricing" subtitle="Product pricing information.">
@@ -524,17 +566,20 @@ const CreateProductPage = ({ product, mode = product ? 'edit' : 'create' }: Crea
                     <p className="text-xs text-medium-gray mt-1">Product code cannot be changed</p>
                   </FormField>
                 )}
-                <FormField label="Stock Quantity" required>
-                  <Input
-                    type="number"
-                    {...register("stockQuantity", {
-                      required: "Stock quantity is required",
-                      min: { value: 0, message: "Stock quantity must be non-negative" },
-                      valueAsNumber: true
-                    })}
-                  />
-                  {errors.stockQuantity && <p className="text-xs text-red-500 mt-1">{errors.stockQuantity.message}</p>}
-                </FormField>
+                {
+                  enableQtyInStoreView && (
+                    <FormField label="Stock Quantity">
+                      <Input
+                        type="number"
+                        {...register("stockQuantity", {
+                          min: { value: 0, message: "Stock quantity must be non-negative" },
+                          valueAsNumber: true
+                        })}
+                      />
+                      {errors.stockQuantity && <p className="text-xs text-red-500 mt-1">{errors.stockQuantity.message}</p>}
+                    </FormField>
+                  )
+                }
                 <FormField label="Unit">
                   <Controller
                     name="unitQuantity" control={control}

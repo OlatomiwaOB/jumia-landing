@@ -186,6 +186,7 @@ import { BundleItemsModal, BundleTriggerBadge, type BundleSubItem } from '@/comp
 
 export interface CartItem {
     itemNote?: string;
+    preference?: string | null;
     itemCode: string;
     itemName: string;
     price: number;
@@ -273,239 +274,286 @@ export const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     const subtotal = order.cartItems?.reduce((s, i) => s + i.amount, 0) ?? 0;
     const ccy = order.ccy || '£';
     const canRate = order.orderStatus?.toLowerCase() === 'completed';
-    const hasNotes = !!order.orderNote || (order.cartItems?.some(item => !!item.itemNote));
+    const hasNotes = !!order.orderNote || (order.cartItems?.some(item => !!item.itemNote || !!item.preference));
 
     return (
         <>
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent
-                className="sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl gap-0 border-0 shadow-xl bg-[#F5F5F5]"
-                style={{
-                    scrollbarWidth: 'none',
-                    scrollbarColor: 'transparent',
-                }}
-            >
-                <DialogTitle className="sr-only">Order Details</DialogTitle>
+            <Dialog open={open} onOpenChange={onClose}>
+                <DialogContent
+                    className="sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl gap-0 border-0 shadow-xl bg-[#F5F5F5]"
+                    style={{
+                        scrollbarWidth: 'none',
+                        scrollbarColor: 'transparent',
+                    }}
+                >
+                    <DialogTitle className="sr-only">Order Details</DialogTitle>
 
-                <div className="px-2">
-                    <Tabs defaultValue="details" className="w-full">
-                        <div className="flex items-center justify-between mt-2 mb-4">
-                            <h2 className="text-md font-bold text-dark-gray">Order Details</h2>
-                            <TabsList>
-                                <TabsTrigger value="details">Details</TabsTrigger>
-                                {hasNotes && <TabsTrigger value="notes">Notes</TabsTrigger>}
-                            </TabsList>
-                        </div>
-
-                        <TabsContent value="details" className="m-0 border-none outline-none">
-                            <div className="pb-6 flex flex-col lg:flex-row gap-5">
-
-                    <div className="flex-1 space-y-4">
-
-                        <div className="bg-white rounded-2xl p-4 space-y-3">
-                            <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
-                                <div>
-                                    <p className="text-sm font-semibold text-dark-gray">{order.cartId}</p>
-                                    <p className="text-xs text-medium-gray">{order.orderDate}</p>
-                                </div>
-                                <div className="flex items-center gap-2 shrink-0">
-                                    {onTrackOrder && (
-                                        <Button size="xs" className='text-xs'
-                                            onClick={() => onTrackOrder(order)}>
-                                            <RoutingIcon className="w-3.5 h-3.5" />
-                                            Track Order
-                                        </Button>
-                                    )}
-                                    {canRate && onRateOrder && (
-                                        <Button onClick={() => onRateOrder(order)}
-                                            variant='ghost' className='border-2 border-border text-xs'
-                                            title="Rate Order" size='xs'>
-                                            <StarIcon className='w-2 h-2' />
-                                        </Button>
-                                    )}
-                                </div>
+                    <div className="px-2">
+                        <Tabs defaultValue="details" className="w-full">
+                            <div className="flex items-center justify-between mt-2 mb-4">
+                                <h2 className="text-md font-bold text-dark-gray">Order Details</h2>
+                                <TabsList>
+                                    <TabsTrigger value="details">Details</TabsTrigger>
+                                    {hasNotes && <TabsTrigger value="notes">Notes</TabsTrigger>}
+                                </TabsList>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
-                                {[
-                                    { label: 'Customer', value: order.customerName, accent: false },
-                                    { label: 'Payment Method', value: order.paymentMethod, accent: false },
-                                    { label: 'Payment Status', value: order.paymentStatus, accent: true },
-                                    { label: 'Delivery Type', value: order.deliveryOption, accent: true },
-                                    { label: 'Channel', value: order.channel, accent: false },
-                                ].map(({ label, value, accent }) => (
-                                    <div key={label} className="space-y-0.5">
-                                        <p className="text-xs text-medium-gray">{label}</p>
-                                        <p className={`text-sm font-medium ${accent ? 'text-green-600' : 'text-dark-gray'}`}>
-                                            {getDisplayValue(value).toLowerCase() === 'delivery' ? 'Delivery' : getDisplayValue(value).toLowerCase() === 'pickup' ? 'Pickup' : getDisplayValue(value).toLowerCase() === 'wallet' ? 'Wallet' : getDisplayValue(value).toLowerCase() === 'rexpay' ? 'Rexpay' : getDisplayValue(value).toLowerCase() === 'web' ? 'Web' : getDisplayValue(value).toLowerCase() === 'mobile' ? 'Mobile' : value}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                            <TabsContent value="details" className="m-0 border-none outline-none">
+                                <div className="pb-6 flex flex-col lg:flex-row gap-5">
 
-                        <div className="bg-white rounded-2xl p-4 space-y-3 overflow-hidden">
-                            <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
-                                <p className="text-sm font-semibold text-dark-gray">
-                                    Order Items ({order.cartItems?.length ?? 0})
-                                </p>
-                                <Badge className={`text-xs px-2 py-0.5 border font-medium ${getStatusColor(order.paymentStatus)}`}>
-                                    {order.orderStatus}
-                                </Badge>
-                            </div>
-                            <div className="">
-                                {order.cartItems?.length ? (
-                                    order.cartItems.map((item, i) => {
-                                        const hasBundle = Array.isArray(item.bundleSubItems) && item.bundleSubItems.length > 0;
-                                        return (
-                                            <div key={i} className="flex items-center gap-3 mb-2">
-                                                <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-gray-100 shrink-0">
-                                                    <Image src={item.picture || '/images/placeholder-image.png'} alt={item.itemName} fill
-                                                        className="object-cover" sizes="48px"
-                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder-image.png'; }} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-dark-gray truncate">{item.itemName}</p>
-                                                    <p className="text-xs text-medium-gray flex flex-wrap gap-x-2">
-                                                        <span>Code: {item.itemCode}</span>
-                                                        <span className='text-[#9E9E9E]'>•</span>
-                                                        <span>Qty: {item.quantity}</span>
-                                                        {item.discount > 0 && <><span className='text-[#9E9E9E]'>•</span><span className="text-green-600">Discount: {item.discount}%</span></>}
-                                                        {item.vat > 0 && <><span className='text-[#9E9E9E]'>•</span><span>VAT: {formatPrice(item.vat, ccy as CurrencyCode)}</span></>}
-                                                    </p>
-                                                    {hasBundle && (
-                                                        <div className="mt-1.5">
-                                                            <BundleTriggerBadge
-                                                                count={item.bundleSubItems!.length}
-                                                                onClick={(e) => { e.stopPropagation(); setBundleModal({ item }); }}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
+                                    <div className="flex-1 space-y-4">
+
+                                        <div className="bg-white rounded-2xl p-4 space-y-3">
+                                            <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
                                                 <div>
-                                                    <p className="text-sm font-medium text-dark-gray shrink-0">{formatPrice(item.amount, ccy as CurrencyCode)}</p>
-                                                    {item.discount > 0 && (
-                                                        <p className="text-xs text-medium-gray line-through">
-                                                            {formatPrice(item.oldPrice ?? 0, ccy as CurrencyCode)}
-                                                        </p>
+                                                    <p className="text-sm font-semibold text-dark-gray">{order.cartId}</p>
+                                                    <p className="text-xs text-medium-gray">{order.orderDate}</p>
+                                                </div>
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    {onTrackOrder && (
+                                                        <Button size="xs" className='text-xs py-2'
+                                                            onClick={() => onTrackOrder(order)}>
+                                                            <RoutingIcon className="w-3.5 h-3.5" />
+                                                            Track Order
+                                                        </Button>
+                                                    )}
+                                                    {canRate && onRateOrder && (
+                                                        <Button onClick={() => onRateOrder(order)}
+                                                            variant='ghost' className='border-2 border-border text-xs'
+                                                            title="Rate Order" size='xs'>
+                                                            <StarIcon className='w-2 h-2' />
+                                                        </Button>
                                                     )}
                                                 </div>
                                             </div>
-                                        );
-                                    })
-                                ) : (
-                                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                                        <ShoppingCart className="w-8 h-8 mb-2 opacity-40" />
-                                        <p className="text-sm">No items in this order</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="lg:w-56 shrink-0 space-y-4">
-                        <div className="bg-white rounded-2xl p-4 space-y-3">
-                            <p className="text-sm font-semibold text-dark-gray">Order Summary</p>
-                            {[
-                                { label: 'Subtotal', value: subtotal },
-                                { label: 'Tax', value: order.taxAmount },
-                                // { label: 'Delivery Fee', value: order.deliveryFee },
-                                // { label: 'Transaction Fee', value: order.transactionFee },
-                            ].map(({ label, value }) => (
-                                <div key={label} className="flex justify-between text-sm">
-                                    <span className="text-xs text-medium-gray">{label}</span>
-                                    <span className="text-xs font-medium text-dark-gray">{formatPrice(value ?? 0, ccy as CurrencyCode)}</span>
-                                </div>
-                            ))}
-                            {(order.totalDiscount ?? 0) > 0 && (
-                                <div className="flex justify-between text-sm">
-                                    <span className="text-xs text-medium-gray">Discount</span>
-                                    <span className="text-xs font-medium text-green-600">{formatPrice(order.totalDiscount, ccy as CurrencyCode)}</span>
-                                </div>
-                            )}
-                            <div className="pt-3 border-t border-gray-100 flex justify-between">
-                                <span className="text-sm font-semibold text-medium-gray">Total</span>
-                                <span className="text-sm font-bold text-dark-gray">{formatPrice(order.totalAmount, ccy as CurrencyCode)}</span>
-                            </div>
-                        </div>
-
-                        {order.deliveryAddress && (
-                            <div className="bg-white rounded-2xl p-4 space-y-3 overflow-hidden">
-                                <p className="text-sm font-semibold text-dark-gray">Delivery Information</p>
-                                <div className="flex items-start gap-2">
-                                    <MapPin className="w-3 h-3 text-medium-gray shrink-0 mt-0.5" />
-                                    <div className="text-sm font-semibold text-dark-gray">
-                                        <p className="text-medium-gray text-xs">{order.deliveryAddress.addressType || 'Address'}</p>
-                                        <p>
-                                            {order.deliveryAddress.street}
-                                            {order.deliveryAddress.landmark ? `, ${order.deliveryAddress.landmark}` : ''}
-                                            {order.deliveryAddress.city ? `, ${order.deliveryAddress.city}` : ''}
-                                            {order.deliveryAddress.state ? ` ${order.deliveryAddress.state}` : ''}
-                                            {order.deliveryAddress.postCode ? ` ${order.deliveryAddress.postCode}` : ''}
-                                            {order.deliveryAddress.country ? `, ${order.deliveryAddress.country}` : ''}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                            </div>
-                        </div>
-                    </TabsContent>
-
-                        {hasNotes && (
-                            <TabsContent value="notes" className="m-0 border-none outline-none pb-6">
-                                <div className="space-y-6">
-                                    {/* General Order Note */}
-                                    <div className="bg-white rounded-2xl p-5 space-y-3">
-                                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-                                            <FileText className="w-4 h-4 text-medium-gray" />
-                                            <h3 className="text-sm font-semibold text-dark-gray">General Order Note</h3>
-                                        </div>
-                                        {order.orderNote ? (
-                                            <p className="text-sm text-dark-gray whitespace-pre-wrap">{order.orderNote}</p>
-                                        ) : (
-                                            <p className="text-sm text-medium-gray italic">No general note provided for this order.</p>
-                                        )}
-                                    </div>
-
-                                    {/* Item Notes */}
-                                    <div className="bg-white rounded-2xl p-5 space-y-3">
-                                        <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-                                            <StickyNote className="w-4 h-4 text-medium-gray" />
-                                            <h3 className="text-sm font-semibold text-dark-gray">Item Notes</h3>
-                                        </div>
-                                        <div className="space-y-4">
-                                            {order.cartItems?.filter(item => item.itemNote).length > 0 ? (
-                                                order.cartItems.filter(item => item.itemNote).map((item, idx) => (
-                                                    <div key={idx} className="bg-[#F9F9F9] p-4 rounded-xl space-y-2">
-                                                        <p className="text-sm font-medium text-dark-gray">{item.itemName}</p>
-                                                        <p className="text-sm text-dark-gray whitespace-pre-wrap">{item.itemNote}</p>
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
+                                                {[
+                                                    { label: 'Customer', value: order.customerName, accent: false },
+                                                    { label: 'Payment Method', value: order.paymentMethod, accent: false },
+                                                    { label: 'Payment Status', value: order.paymentStatus === '00' ? 'Successful' : order.paymentStatus, accent: true },
+                                                    { label: 'Delivery Type', value: order.deliveryOption, accent: true },
+                                                    { label: 'Channel', value: order.channel, accent: false },
+                                                ].map(({ label, value, accent }) => (
+                                                    <div key={label} className="space-y-0.5">
+                                                        <p className="text-xs text-medium-gray">{label}</p>
+                                                        <p className={`text-sm font-medium ${accent ? 'text-green-600' : 'text-dark-gray'}`}>
+                                                            {getDisplayValue(value).toLowerCase() === 'delivery' ? 'Delivery' : getDisplayValue(value).toLowerCase() === 'pickup' ? 'Pickup' : getDisplayValue(value).toLowerCase() === 'wallet' ? 'Wallet' : getDisplayValue(value).toLowerCase() === 'rexpay' ? 'Rexpay' : getDisplayValue(value).toLowerCase() === 'web' ? 'Web' : getDisplayValue(value).toLowerCase() === 'mobile' ? 'Mobile' : value}
+                                                        </p>
                                                     </div>
-                                                ))
-                                            ) : (
-                                                <p className="text-sm text-medium-gray italic">No specific item notes provided.</p>
-                                            )}
+                                                ))}
+                                            </div>
                                         </div>
+
+                                        <div className="bg-white rounded-2xl p-4 space-y-3 overflow-hidden">
+                                            <div className="flex items-start justify-between gap-3 border-b border-gray-100 pb-3">
+                                                <p className="text-sm font-semibold text-dark-gray">
+                                                    Order Items ({order.cartItems?.length ?? 0})
+                                                </p>
+                                                <Badge className={`text-xs px-2 py-0.5 border font-medium ${getStatusColor(order.paymentStatus)}`}>
+                                                    {order.orderStatus}
+                                                </Badge>
+                                            </div>
+                                            <div className="">
+                                                {order.cartItems?.length ? (
+                                                    order.cartItems.map((item, i) => {
+                                                        const hasBundle = Array.isArray(item.bundleSubItems) && item.bundleSubItems.length > 0;
+                                                        return (
+                                                            <div key={i} className="flex items-center gap-3 mb-2">
+                                                                <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-gray-100 shrink-0">
+                                                                    <Image src={item.picture || '/images/placeholder-image.png'} alt={item.itemName} fill
+                                                                        className="object-cover" sizes="48px"
+                                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder-image.png'; }} />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-semibold text-dark-gray truncate">{item.itemName}</p>
+                                                                    <p className="text-xs text-medium-gray flex flex-wrap gap-x-2">
+                                                                        <span>Code: {item.itemCode}</span>
+                                                                        <span className='text-[#9E9E9E]'>•</span>
+                                                                        <span>Qty: {item.quantity}</span>
+                                                                        {item.discount > 0 && <><span className='text-[#9E9E9E]'>•</span><span className="text-green-600">Discount: {item.discount}%</span></>}
+                                                                        {item.vat > 0 && <><span className='text-[#9E9E9E]'>•</span><span>VAT: {formatPrice(item.vat, ccy as CurrencyCode)}</span></>}
+                                                                    </p>
+                                                                    {hasBundle && (
+                                                                        <div className="mt-1.5">
+                                                                            <BundleTriggerBadge
+                                                                                count={item.bundleSubItems!.length}
+                                                                                onClick={(e) => { e.stopPropagation(); setBundleModal({ item }); }}
+                                                                            />
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-medium text-dark-gray shrink-0">{formatPrice(item.amount, ccy as CurrencyCode)}</p>
+                                                                    {item.discount > 0 && (
+                                                                        <p className="text-xs text-medium-gray line-through">
+                                                                            {formatPrice(item.oldPrice ?? 0, ccy as CurrencyCode)}
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })
+                                                ) : (
+                                                    <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                                        <ShoppingCart className="w-8 h-8 mb-2 opacity-40" />
+                                                        <p className="text-sm">No items in this order</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="lg:w-56 shrink-0 space-y-4">
+                                        <div className="bg-white rounded-2xl p-4 space-y-3">
+                                            <p className="text-sm font-semibold text-dark-gray">Order Summary</p>
+                                            {[
+                                                { label: 'Subtotal', value: subtotal },
+                                                { label: 'Tax', value: order.taxAmount },
+                                                // { label: 'Delivery Fee', value: order.deliveryFee },
+                                                // { label: 'Transaction Fee', value: order.transactionFee },
+                                            ].map(({ label, value }) => (
+                                                <div key={label} className="flex justify-between text-sm">
+                                                    <span className="text-xs text-medium-gray">{label}</span>
+                                                    <span className="text-xs font-medium text-dark-gray">{formatPrice(value ?? 0, ccy as CurrencyCode)}</span>
+                                                </div>
+                                            ))}
+                                            {(order.totalDiscount ?? 0) > 0 && (
+                                                <div className="flex justify-between text-sm">
+                                                    <span className="text-xs text-medium-gray">Discount</span>
+                                                    <span className="text-xs font-medium text-green-600">{formatPrice(order.totalDiscount, ccy as CurrencyCode)}</span>
+                                                </div>
+                                            )}
+                                            <div className="pt-3 border-t border-gray-100 flex justify-between">
+                                                <span className="text-sm font-semibold text-medium-gray">Total</span>
+                                                <span className="text-sm font-bold text-dark-gray">{formatPrice(order.totalAmount, ccy as CurrencyCode)}</span>
+                                            </div>
+                                        </div>
+
+                                        {order.deliveryAddress && (
+                                            <div className="bg-white rounded-2xl p-4 space-y-3 overflow-hidden">
+                                                <p className="text-sm font-semibold text-dark-gray">Delivery Information</p>
+                                                <div className="flex items-start gap-2">
+                                                    <MapPin className="w-3 h-3 text-medium-gray shrink-0 mt-0.5" />
+                                                    <div className="text-sm font-semibold text-dark-gray">
+                                                        <p className="text-medium-gray text-xs">{order.deliveryAddress.addressType || 'Address'}</p>
+                                                        <p>
+                                                            {order.deliveryAddress.street}
+                                                            {order.deliveryAddress.landmark ? `, ${order.deliveryAddress.landmark}` : ''}
+                                                            {order.deliveryAddress.city ? `, ${order.deliveryAddress.city}` : ''}
+                                                            {order.deliveryAddress.state ? ` ${order.deliveryAddress.state}` : ''}
+                                                            {order.deliveryAddress.postCode ? ` ${order.deliveryAddress.postCode}` : ''}
+                                                            {order.deliveryAddress.country ? `, ${order.deliveryAddress.country}` : ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </TabsContent>
-                        )}
-                    </Tabs>
-                </div>
-            </DialogContent>
-        </Dialog>
 
-        {/* Bundle sub-items modal */}
-        {bundleModal && (
-            <BundleItemsModal
-                open={!!bundleModal}
-                onClose={() => setBundleModal(null)}
-                bundleName={bundleModal.item.itemName}
-                bundlePrice={bundleModal.item.price}
-                ccy={ccy}
-                subItems={bundleModal.item.bundleSubItems!}
-            />
-        )}
+                            {hasNotes && (
+                                <TabsContent value="notes" className="m-0 border-none outline-none pb-6">
+                                    <div className="space-y-6">
+                                        {/* General Order Note */}
+                                        <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm relative overflow-hidden">
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#ED6B2C] rounded-l-2xl"></div>
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center">
+                                                    <FileText className="w-4 h-4 text-[#ED6B2C]" />
+                                                </div>
+                                                <h3 className="text-sm font-semibold text-dark-gray">General Order Note</h3>
+                                            </div>
+                                            <div className="pl-[2.75rem]">
+                                                {order.orderNote ? (
+                                                    <p className="text-sm text-dark-gray/90 whitespace-pre-wrap leading-relaxed">{order.orderNote}</p>
+                                                ) : (
+                                                    <p className="text-sm text-medium-gray italic">No general note provided for this order.</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Item Notes */}
+                                        <div className="bg-white rounded-2xl p-5 space-y-4 border border-gray-100 shadow-sm">
+                                            <div className="flex items-center gap-3 mb-1 border-b border-gray-50 pb-3">
+                                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
+                                                    <StickyNote className="w-4 h-4 text-blue-500" />
+                                                </div>
+                                                <h3 className="text-sm font-semibold text-dark-gray">Item Notes</h3>
+                                            </div>
+                                            <div className="space-y-4">
+                                                {order.cartItems?.filter(item => item.itemNote || item.preference).length > 0 ? (
+                                                    order.cartItems.filter(item => item.itemNote || item.preference).map((item, idx) => (
+                                                        <div key={idx} className="bg-white border border-gray-100 p-4 rounded-2xl flex flex-col sm:flex-row gap-4 hover:shadow-sm transition-shadow">
+                                                            {/* Desktop Thumbnail */}
+                                                            <div className="w-12 h-12 relative rounded-xl overflow-hidden border border-gray-100 shrink-0 hidden sm:block">
+                                                                <Image src={item.picture || '/images/placeholder-image.png'} alt={item.itemName} fill
+                                                                    className="object-cover" sizes="48px"
+                                                                    onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder-image.png'; }} />
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4">
+                                                                    <div className="flex items-center sm:items-start gap-3">
+                                                                        {/* Mobile Thumbnail */}
+                                                                        <div className="w-10 h-10 relative rounded-lg overflow-hidden border border-gray-100 shrink-0 sm:hidden">
+                                                                            <Image src={item.picture || '/images/placeholder-image.png'} alt={item.itemName} fill
+                                                                                className="object-cover" sizes="40px"
+                                                                                onError={(e) => { (e.target as HTMLImageElement).src = '/images/placeholder-image.png'; }} />
+                                                                        </div>
+                                                                        <div className="flex flex-col gap-1.5 sm:gap-0 mt-0 sm:mt-0.5">
+                                                                            <p className="text-sm font-bold text-dark-gray leading-tight">{item.itemName}</p>
+                                                                            {item.preference && (
+                                                                                <div className="flex sm:hidden items-center gap-1.5">
+                                                                                    <span className="text-[10px] text-medium-gray font-medium uppercase tracking-wider">Allowed Preference:</span>
+                                                                                    <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-none px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider">
+                                                                                        {item.preference.replace(/_/g, ' ')}
+                                                                                    </Badge>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                    {item.preference && (
+                                                                        <div className="hidden sm:flex items-center gap-2 shrink-0 mt-0.5">
+                                                                            <span className="text-xs text-medium-gray font-medium uppercase tracking-wider">Allowed Preference:</span>
+                                                                            <Badge variant="secondary" className="bg-orange-50 text-orange-700 hover:bg-orange-100 border-none px-2.5 py-0.5 text-xs font-medium uppercase tracking-wider">
+                                                                                {item.preference.replace(/_/g, ' ')}
+                                                                            </Badge>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                                {item.itemNote && (
+                                                                    <div className="bg-[#F9F9F9] rounded-xl p-3 mt-3 border border-gray-50">
+                                                                        <p className="text-sm text-dark-gray/80 whitespace-pre-wrap leading-relaxed">{item.itemNote}</p>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-sm text-medium-gray italic pl-[2.75rem]">No specific item notes provided.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </TabsContent>
+                            )}
+                        </Tabs>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Bundle sub-items modal */}
+            {bundleModal && (
+                <BundleItemsModal
+                    open={!!bundleModal}
+                    onClose={() => setBundleModal(null)}
+                    bundleName={bundleModal.item.itemName}
+                    bundlePrice={bundleModal.item.price}
+                    ccy={ccy}
+                    subItems={bundleModal.item.bundleSubItems!}
+                />
+            )}
         </>
     );
 };

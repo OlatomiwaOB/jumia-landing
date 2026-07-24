@@ -31,6 +31,9 @@ export interface ProductProps {
   vat?: string | number | null;
   weight?: number | string | null;
   note?: string | null;
+  allowedPreferences?: string[] | string | null;
+  selectedPreference?: string | null;
+  preference?: string | null;
   itemVariants?: {
     id: number,
     size: string,

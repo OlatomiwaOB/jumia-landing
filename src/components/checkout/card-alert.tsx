@@ -145,7 +145,8 @@ const CardAlert = ({
       itemWeightUnit: item?.weightUnit || 'ltr',
       variantID: item?.variantId || 0,
       itemNote: item?.note || '',
-      bundleSubItems: item?.bundleSelections || []
+      bundleSubItems: item?.bundleSelections || [],
+      preference: item?.preference
     }))
 
     const totalAmount = orderTotal;

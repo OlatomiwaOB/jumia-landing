@@ -23,6 +23,9 @@ export interface MenuItem {
   weightUnit?: string;
   variantId?: any
   note?: string;
+  selectedPreference?: string;
+  preference?: string;
+  allowedPreferences?: string[] | null;
   /** Bundle sub-item selections — present only when the cart item is a BUNDLE product */
   bundleSelections?: BundleSubItem[];
   //   bg?: string;
@@ -199,7 +202,7 @@ export const useCart = create<CartStore>()(
         // We track seen codes/ids to apply VAT only once per product.
         const seen = new Set();
         return cart.reduce((total, item) => {
-          const identifier = item.code || item.id;
+          const identifier = item.variantId ? `${item.code || item.id}-${item.variantId}` : item.code || item.id;
           if (!seen.has(identifier)) {
             seen.add(identifier);
             return total + Number(item.vat || 0);

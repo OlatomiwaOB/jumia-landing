@@ -607,7 +607,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
     street: location.location?.split(',')[0] || '',
     postCode: '',
     state: '',
-    country: customer?.country || 'NG',
+    country: location?.country || 'UK',
     landmark: '',
     city: location.location?.split(',')[1]?.trim() || ''
   })) || [];
@@ -713,7 +713,7 @@ export const ShippingForm = ({ setCurrentStep, form, onShippingUpdate }: Shippin
   const handleStoreSelect = (store: any) => {
     setValue("pickupStore", store.id);
     setValue("selectedAddressId", store.id);
-    setValue('country', store.country || customer?.country || '');
+    setValue('country', store.country || 'UK' || '');
     setValue('addressType', 'WAREHOUSE');
     setValue('landmark', store.landmark || '');
     setValue('street', store.street || store.address || '');

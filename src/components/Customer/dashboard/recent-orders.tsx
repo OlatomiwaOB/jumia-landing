@@ -282,8 +282,11 @@ const Pagination: React.FC<{
           className="text-xs px-2.5 py-1 rounded-md border border-medium-gray disabled:opacity-40 hover:bg-gray-50 transition-colors">‹</button>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
           <button key={p} onClick={() => onChange(p)}
-            className={`text-xs w-7 h-7 rounded-md border transition-colors ${p === currentPage ? 'bg-faded-accent text-white border-border' : 'border-border hover:bg-gray-50'
-              }`}>{p}</button>
+            className={`text-xs w-7 h-7 rounded-md border transition-colors ${p === currentPage
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground font-extrabold border-border'
+              : 'border-border hover:bg-gray-50'
+              }`}
+          >{p}</button>
         ))}
         <button onClick={() => onChange(currentPage + 1)} disabled={currentPage === totalPages}
           className="text-xs px-2.5 py-1 rounded-md border border-medium-gray disabled:opacity-40 hover:bg-gray-50 transition-colors">›</button>

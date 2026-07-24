@@ -79,6 +79,7 @@ export interface ProductApiResponse {
         note?: string | null;
         /** Present when the product category is BUNDLE */
         bundleSubItems?: BundleSubItem[];
+        allowedPreferences: string[];
     };
 }
 
