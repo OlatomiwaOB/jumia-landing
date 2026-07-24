@@ -15,6 +15,8 @@ import Papa from 'papaparse';
 import { usePageMetadata } from '@/hooks/usePageMetadata';
 import useUser from '@/store/userStore';
 import { formatPrice } from '@/utils/helperfns';
+import RcTable from 'rc-table';
+import { getClientFeatures } from '@/config/client-config';
 
 interface PickupLocation {
     id: number;
@@ -100,6 +102,88 @@ export default function AdminPickupLocationsPage() {
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedLocation, setSelectedLocation] = useState<PickupLocation | null>(null);
     const ITEMS_PER_PAGE = 10;
+    const { enablePickupLocationDistance } = getClientFeatures();
+
+    const columns = [
+        {
+            title: 'S/N',
+            dataIndex: 'sn',
+            key: 'sn',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (_: any, __: any, index: number) => <p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</p>,
+        },
+        {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (name: string) => <p className="text-sm font-semibold text-dark-gray">{getDisplayValue(name)}</p>,
+        },
+        {
+            title: 'Location',
+            dataIndex: 'location',
+            key: 'location',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (location: string) => <p className="text-sm text-dark-gray max-w-[200px] truncate">{getDisplayValue(location)}</p>,
+        },
+        ...(enablePickupLocationDistance ? [{
+            title: 'Distance',
+            dataIndex: 'distance',
+            key: 'distance',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (distance: number) => <p className="text-sm text-dark-gray">{formatDistance(distance)}</p>,
+        }] : []),
+        {
+            title: 'Timeframe',
+            dataIndex: 'timeframe',
+            key: 'timeframe',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (timeframe: string) => <p className="text-sm text-dark-gray">{getDisplayValue(timeframe)}</p>,
+        },
+        {
+            title: 'Contact',
+            dataIndex: 'contact',
+            key: 'contact',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (contact: string) => <p className="text-sm text-dark-gray">{getDisplayValue(contact)}</p>,
+        },
+        {
+            title: 'Amount',
+            dataIndex: 'amount',
+            key: 'amount',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (amount: number) => <p className="text-sm font-medium text-dark-gray">{getDisplayValue(formatPrice(amount))}</p>,
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (status: string) => <Badge className={`text-[10px] px-2.5 py-0.5 border font-medium ${getStatusColor(status)}`}>{status}</Badge>,
+        },
+        {
+            title: '',
+            key: 'actions',
+            onHeaderCell: () => ({ className: "text-left px-3 py-3 text-sm font-semibold text-dark-gray whitespace-nowrap bg-white border-b-2 border-[#EEEEEE]" }),
+            onCell: () => ({ className: "px-3 py-3.5 whitespace-nowrap" }),
+            render: (_: any, record: PickupLocation) => (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                    <Button size="xs" variant="action" onClick={() => handleView(record)} title="View"><Eye className="w-4 h-4" /></Button>
+                    <Button size="xs" variant="action" onClick={() => handleEdit(record)} title="Edit">
+                        <EditIcon className="w-4 h-4" />
+                    </Button>
+                </div>
+            ),
+        },
+    ];
 
     const { data, isLoading, error, refetch } = useQuery({
         queryKey: ['admin-pickup-locations'],
@@ -139,7 +223,7 @@ export default function AdminPickupLocationsPage() {
         const csv = Papa.unparse(filtered.map((l) => ({
             'Name': l.name,
             'Location': l.location,
-            'Distance': formatDistance(l.distance),
+            ...(enablePickupLocationDistance ? { 'Distance': formatDistance(l.distance) } : {}),
             'Timeframe': l.timeframe,
             'Contact': l.contact,
             'Amount': l.amount,
@@ -206,41 +290,19 @@ export default function AdminPickupLocationsPage() {
                         ) : (
                             <>
                                 <div className="w-full overflow-x-auto bg-white rounded-2xl overflow-hidden">
-                                    <table className="w-full border-collapse">
-                                        <thead>
-                                            <tr className="border-b-2 border-[#EEEEEE]">
-                                                {['S/N', 'Name', 'Location', 'Distance', 'Timeframe', 'Contact', 'Amount', 'Status', ''].map((h) => (
-                                                    <th key={h} className="text-left px-3 py-3 text-sm font-semibold text-dark-gray">{h}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {paginated.map((l, idx) => (
-                                                <tr key={l.id}
-                                                    onClick={() => handleView(l)}
-                                                    className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-sidebar-accent/10 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
-                                                    <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm font-semibold text-dark-gray">{getDisplayValue(l.name)}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm text-dark-gray max-w-[200px] truncate">{getDisplayValue(l.location)}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{formatDistance(l.distance)}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{getDisplayValue(l.timeframe)}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{getDisplayValue(l.contact)}</p></td>
-                                                    <td className="px-3 py-3.5"><p className="text-sm font-medium text-dark-gray">{getDisplayValue(formatPrice(l.amount))}</p></td>
-                                                    <td className="px-3 py-3.5">
-                                                        <Badge className={`text-[10px] px-2.5 py-0.5 border font-medium ${getStatusColor(l.status)}`}>{l.status}</Badge>
-                                                    </td>
-                                                    <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
-                                                        <div className="flex items-center gap-1">
-                                                            <Button size="xs" variant="action" onClick={() => handleView(l)} title="View"><Eye className="w-4 h-4" /></Button>
-                                                            <Button size="xs" variant="action" onClick={() => handleEdit(l)} title="Edit">
-                                                                <EditIcon className="w-4 h-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                    <RcTable
+                                        className="w-full border-collapse"
+                                        columns={columns}
+                                        data={paginated}
+                                        rowKey="id"
+                                        rowClassName={(record, index) => `border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-sidebar-accent/10 transition-colors ${index === paginated.length - 1 ? 'border-b-0' : ''}`}
+                                        onRow={(record) => ({
+                                            onClick: () => handleView(record as PickupLocation)
+                                        })}
+                                        components={{
+                                            table: (props: any) => <table {...props} className="w-full border-collapse" />
+                                        }}
+                                    />
                                 </div>
                                 {Math.ceil(filtered.length / ITEMS_PER_PAGE) > 1 && (
                                     <TablePagination current={currentPage} total={filtered.length} perPage={ITEMS_PER_PAGE} onChange={setCurrentPage} />
@@ -258,7 +320,9 @@ export default function AdminPickupLocationsPage() {
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-semibold text-dark-gray truncate">{l.name}</p>
-                                        <p className="text-xs text-medium-gray mt-0.5">{formatDistance(l.distance)}</p>
+                                        {enablePickupLocationDistance && (
+                                            <p className="text-xs text-medium-gray mt-0.5">{formatDistance(l.distance)}</p>
+                                        )}
                                     </div>
                                     <Badge className={`text-[10px] px-2 py-0.5 border font-medium ${getStatusColor(l.status)}`}>{l.status}</Badge>
                                 </div>
