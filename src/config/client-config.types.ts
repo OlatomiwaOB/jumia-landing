@@ -164,6 +164,11 @@ export interface ClientFeatureFlags {
   enableBundleManagement: boolean;
   /** enable pickup location feature*/
   enablePickupLocation?: boolean;
+  /**enable qty in store view */
+  enableQtyInStoreView?: boolean;
+  /**enable pickup location distance feature */
+  enablePickupLocationDistance?: boolean;
+  enableAllowPreferenceSettings?: boolean
 }
 
 // ---------------------------------------------------------------------------

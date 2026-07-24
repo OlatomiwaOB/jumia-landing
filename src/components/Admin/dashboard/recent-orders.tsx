@@ -1122,7 +1122,7 @@ const Pagination: React.FC<{
             key={p}
             onClick={() => onChange(p)}
             className={`text-xs w-7 h-7 rounded-md border transition-colors ${p === currentPage
-              ? 'bg-faded-accent text-white border-border'
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground font-extrabold border-border'
               : 'border-border hover:bg-gray-50'
               }`}
           >

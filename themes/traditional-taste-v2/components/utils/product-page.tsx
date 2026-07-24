@@ -60,6 +60,14 @@ const Thumbnail = ({ image, index, activeImageIndex, setActiveImageIndex, produc
   );
 };
 
+const formatPreferenceText = (text: string) => {
+  if (!text) return '';
+  return text
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
+
 // Small update for PR testing
 export default function ProductPage() {
   const params = useParams();
@@ -118,11 +126,39 @@ export default function ProductPage() {
   console.log('current variant', currentVariant)
   console.log('current variant size', parseFloat(currentVariant?.size));
 
+  const allowedPreferences = useMemo(() => {
+    if (!product?.allowedPreferences) return [];
+    if (Array.isArray(product.allowedPreferences)) {
+      return product.allowedPreferences.filter(Boolean);
+    }
+    if (typeof product.allowedPreferences === 'string') {
+      try {
+        const parsed = JSON.parse(product.allowedPreferences);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      } catch {
+        return (product.allowedPreferences as string)
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+      }
+    }
+    return [];
+  }, [product?.allowedPreferences]);
+
+  const [selectedPreference, setSelectedPreference] = useState<string>('');
+  const [preferenceError, setPreferenceError] = useState<boolean>(false);
+
   // Local state for quantity before adding to cart
   const [localQty, setLocalQty] = useState(1);
 
   // Get cart quantity
-  const currentProductId = hasVariants && currentVariant ? `${product?.id}-${currentVariant.id}` : product?.id;
+  const currentProductId = useMemo(() => {
+    let baseId = hasVariants && currentVariant ? `${product?.id}-${currentVariant.id}` : `${product?.id}`;
+    if (selectedPreference) {
+      baseId += `-${selectedPreference}`;
+    }
+    return baseId;
+  }, [hasVariants, currentVariant, product?.id, selectedPreference]);
 
   const quantity = singleQuantity(currentProductId);
 
@@ -240,6 +276,35 @@ export default function ProductPage() {
   /* ── MAIN PAGE ── */
   return (
     <div className="min-h-screen bg-[var(--color-bg-main)]">
+      {product?.note && (
+        <div className="w-full bg-red-600 text-white font-bold py-2 shadow-lg z-[100] overflow-hidden">
+          <style>{`
+            @keyframes marquee {
+              0% { transform: translateX(100%); }
+              100% { transform: translateX(-100%); }
+            }
+            .animate-marquee {
+              animation: marquee 25s linear infinite;
+            }
+            .animate-marquee:hover,
+            .animate-marquee:active {
+              animation-play-state: paused;
+            }
+          `}</style>
+          <div className="animate-marquee flex items-center text-[16px] md:text-[18px] tracking-wide whitespace-nowrap">
+            <div className="flex items-center gap-2 inline-flex py-1">
+              <Flame className="h-5 w-5" />
+              <span>{product.note}</span>
+              <span className="w-12 inline-block"></span>
+              <Flame className="h-5 w-5" />
+              <span>{product.note}</span>
+              <span className="w-12 inline-block"></span>
+              <Flame className="h-5 w-5" />
+              <span>{product.note}</span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-10">
 
         {/* BREADCRUMBS */}
@@ -354,6 +419,43 @@ export default function ProductPage() {
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-text)] opacity-50 pointer-events-none" />
                   </div>
+                </div>
+              )}
+
+              {allowedPreferences.length > 0 && (
+                <div className="mt-4 flex flex-col gap-2 max-w-[200px]">
+                  <span className="font-bold text-[var(--color-text)] flex items-center gap-1">
+                    Spicy Preference <span className="text-red-500">*</span>
+                  </span>
+                  <div className="relative">
+                    <select
+                      value={selectedPreference}
+                      onChange={(e) => {
+                        setSelectedPreference(e.target.value);
+                        if (e.target.value) setPreferenceError(false);
+                      }}
+                      className={`w-full appearance-none text-base border rounded-xl p-3 pr-12 outline-none transition-all cursor-pointer ${
+                        preferenceError
+                          ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                          : 'border-[var(--color-text)]/20 focus:border-[var(--color-primary)] focus:ring-1 focus:ring-[var(--color-primary)] bg-transparent'
+                      }`}
+                    >
+                      <option value="" disabled className="text-gray-400">
+                        Select a preference...
+                      </option>
+                      {allowedPreferences.map((pref: string) => (
+                        <option key={pref} value={pref}>
+                          {formatPreferenceText(pref)}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-text)] opacity-50 pointer-events-none" />
+                  </div>
+                  {preferenceError && (
+                    <p className="text-xs font-bold text-red-500 mt-1">
+                      Please select a preference before adding to cart.
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -483,6 +585,11 @@ export default function ProductPage() {
                     type="button"
                     className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-4 font-bold text-white transition-all hover:bg-[var(--color-text)] hover:scale-[1.02] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => {
+                      if (allowedPreferences.length > 0 && !selectedPreference) {
+                        setPreferenceError(true);
+                        return;
+                      }
+                      setPreferenceError(false);
                       const itemWeight = hasVariants && currentVariant
                         ? currentVariant.weight
                         : (product.weight || 1);
@@ -496,14 +603,18 @@ export default function ProductPage() {
                         variantId: selectedVariantId || 0,
                         vat: currentVariant?.vat || product?.vat || 0,
                         discount: Number(product?.discount || 0),
-                        note: note
+                        note: note,
+                        notice: product?.note || null,
+                        selectedPreference: selectedPreference || null,
+                        preference: selectedPreference || null,
+                        allowedPreferences: product?.allowedPreferences || null,
                       } as any, localQty);
                       openCart();
                     }}
                   // disabled={(hasVariants && !selectedVariantId)}
                   >
                     <ShoppingBag className="h-5 w-5" />
-                    {((hasVariants && !selectedVariantId) ? 'SELECT AN OPTION' : 'ADD TO CART')}
+                    {((hasVariants && !selectedVariantId) ? 'SELECT AN OPTION' : (allowedPreferences.length > 0 && !selectedPreference) ? 'SELECT A PREFERENCE' : 'ADD TO CART')}
                   </button>
                 ) : (
                   <div className="flex flex-1 items-center justify-center rounded-xl bg-green-600 px-6 py-4 font-bold text-white">

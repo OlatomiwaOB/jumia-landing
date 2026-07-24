@@ -522,6 +522,16 @@ const GuestInfoForm = ({
                               </div>
                             </div>
                           </div>
+                          <div>
+                            <div className="text-right">
+                              <p className={`font-semibold text-checkout-text ${watchPickupStore === store.id
+                                ? "text-accent"
+                                : ""
+                                }`}
+                              >
+                                {store?.amount > 0 ? formatPrice(store?.amount, mainCcy() as any) : 'Free'}</p>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>

@@ -19,7 +19,7 @@ export interface LookupOptions {
 }
 
 
-const useGetLookup = (categoryCode: string) => {
+const useGetLookup = (categoryCode: string, isEnabled: boolean = true) => {
   const entityCode = getClientIdentifiers().entityCode;
   const { data: lookupData } = useQuery<AxiosResponse<LookupOptions[]>>({
     queryKey: [categoryCode],
@@ -30,7 +30,8 @@ const useGetLookup = (categoryCode: string) => {
         params: {
           entityCode: entityCode,
         },
-      })
+      }),
+    enabled: isEnabled
   });
 
   const lookupList: SelectOption[] =

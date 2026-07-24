@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Eye,
   Plus,
   Minus,
@@ -27,6 +28,14 @@ import { BundleSubItem } from '@/types';
 import { Button } from '@/components/ui/button';
 
 type DetailTab = 'description' | 'details';
+
+const formatPreferenceText = (text: string) => {
+  if (!text) return '';
+  return text
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+};
 
 // ─── Bundle group helper ──────────────────────────────────────────────────────
 
@@ -199,13 +208,42 @@ export default function VarisaThemeProductPage() {
     });
   };
 
+  const allowedPreferences = useMemo(() => {
+    if (!product?.allowedPreferences) return [];
+    if (Array.isArray(product.allowedPreferences)) {
+      return product.allowedPreferences.filter(Boolean);
+    }
+    if (typeof product.allowedPreferences === 'string') {
+      try {
+        const parsed = JSON.parse(product.allowedPreferences);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      } catch {
+        return (product.allowedPreferences as string)
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter(Boolean);
+      }
+    }
+    return [];
+  }, [product?.allowedPreferences]);
+
+  const [selectedPreference, setSelectedPreference] = useState<string>('');
+  const [preferenceError, setPreferenceError] = useState<boolean>(false);
+
   const handleAddBundleToCart = () => {
     if (!product || !canAddBundleToCart) return;
+    if (allowedPreferences.length > 0 && !selectedPreference) {
+      setPreferenceError(true);
+      return;
+    }
+    setPreferenceError(false);
     addToCart({
       ...product,
       salePrice: product.salePrice ?? product.oldPrice ?? 0,
       bundleSelections: Object.values(checkedItems).map((item: any) => ({ ...item, qtyChosen: 1 })),
       note,
+      selectedPreference: selectedPreference || null,
+      preference: selectedPreference || null,
     } as any);
     setIsBundleAdded(true);
     setTimeout(() => setIsBundleAdded(false), 3000);
@@ -229,7 +267,14 @@ export default function VarisaThemeProductPage() {
   const currentVariant = variants.find((v: any) => v.id === selectedVariantId);
   const price = currentVariant ? currentVariant.price : basePrice;
 
-  const currentProductId = hasVariants && currentVariant ? `${product?.id}-${currentVariant.id}` : product?.id;
+  const currentProductId = useMemo(() => {
+    let baseId = hasVariants && currentVariant ? `${product?.id}-${currentVariant.id}` : `${product?.id}`;
+    if (selectedPreference) {
+      baseId += `-${selectedPreference}`;
+    }
+    return baseId;
+  }, [hasVariants, currentVariant, product?.id, selectedPreference]);
+
   const quantity = singleQuantity(currentProductId);
 
   const prevVariantRef = useRef(selectedVariantId);
@@ -276,9 +321,22 @@ export default function VarisaThemeProductPage() {
       discount: Number(product?.discount || 0),
       weight: currentVariant?.weight || product?.weight || 0,
       note: note,
+      selectedPreference: selectedPreference || null,
+      preference: selectedPreference || null,
+      allowedPreferences: product?.allowedPreferences || null,
     };
-  }, [product, currentProductId, price, currentVariant, note]);
+  }, [product, currentProductId, price, currentVariant, note, selectedPreference]);
   const ccy = product?.ccy || '$';
+
+  const handleAddToCart = () => {
+    if (!productToCart) return;
+    if (allowedPreferences.length > 0 && !selectedPreference) {
+      setPreferenceError(true);
+      return;
+    }
+    setPreferenceError(false);
+    addToCart(productToCart as any);
+  };
 
   useEffect(() => {
     setActiveImageIndex(0);
@@ -287,6 +345,8 @@ export default function VarisaThemeProductPage() {
     setNote('');
     setCheckedItems({});
     setIsBundleAdded(false);
+    setSelectedPreference('');
+    setPreferenceError(false);
   }, [product?.id]);
 
   if (isLoading) {
@@ -476,6 +536,45 @@ export default function VarisaThemeProductPage() {
                   </div>
                 )}
 
+                {allowedPreferences.length > 0 && (
+                  <div className="mb-8 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900">
+                        Spicy Preference <span className="text-red-500">*</span>
+                      </h3>
+                    </div>
+                    <div className="relative">
+                      <select
+                        value={selectedPreference}
+                        onChange={(e) => {
+                          setSelectedPreference(e.target.value);
+                          if (e.target.value) setPreferenceError(false);
+                        }}
+                        className={`w-full appearance-none rounded-xl border-2 bg-white px-5 py-3.5 text-sm font-bold text-gray-700 outline-none transition-all cursor-pointer pr-10 ${
+                          preferenceError
+                            ? 'border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10'
+                            : 'border-gray-200 focus:border-accent focus:ring-4 focus:ring-accent/10'
+                        }`}
+                      >
+                        <option value="" disabled>
+                          Select a preference...
+                        </option>
+                        {allowedPreferences.map((pref: string) => (
+                          <option key={pref} value={pref}>
+                            {formatPreferenceText(pref)}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                    </div>
+                    {preferenceError && (
+                      <p className="text-xs font-bold text-red-500 mt-1">
+                        Please select a preference before adding to cart.
+                      </p>
+                    )}
+                  </div>
+                )}
+
                 {/* ── Bundle Selector (replaces Add to Cart area for BUNDLE products) ── */}
                 {isBundleProduct ? (
                   <div className="mb-10">
@@ -598,7 +697,7 @@ export default function VarisaThemeProductPage() {
 
                       {
                         quantity <= 0 && <Button
-                          onClick={() => addToCart(productToCart as any)}
+                          onClick={handleAddToCart}
                           disabled={(hasVariants && !selectedVariantId)}
                           className={`flex-grow w-full py-6 px-8 rounded-full font-black text-[15px] uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-3 bg-accent text-accent-foreground shadow-lg shadow-accent/30 hover:shadow-accent/40 hover:bg-accent/90 hover:-translate-y-1 
                         }`}
@@ -606,7 +705,9 @@ export default function VarisaThemeProductPage() {
                           <ShoppingCart className="w-5 h-5" />
                           {(hasVariants && !selectedVariantId)
                             ? 'Select an Option'
-                            : 'Add to Cart'}
+                            : (allowedPreferences.length > 0 && !selectedPreference)
+                              ? 'Select a Preference'
+                              : 'Add to Cart'}
                         </Button>
                       }
                     </div>

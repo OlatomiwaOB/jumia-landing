@@ -678,6 +678,7 @@ import UploadBulkForm from "../../upload/upload";
 import { toast } from "sonner";
 import Papa from "papaparse";
 import useUser from "@/store/userStore";
+import Table from "rc-table";
 import Image from "next/image";
 import placeholder from "@/components/images/placeholder-product.webp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1185,7 +1186,7 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [variantProduct, setVariantProduct] = useState<Product | null>(null);
     const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
-    const { enableBundleManagement } = getClientFeatures();
+    const { enableBundleManagement, enableQtyInStoreView } = getClientFeatures();
     const ITEMS_PER_PAGE = 10;
 
     const { data, isLoading, error, refetch } = useQuery({
@@ -1412,59 +1413,92 @@ const ProductsManager = ({ onCountChange }: ProductsManagerProps) => {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="w-full overflow-x-auto bg-white rounded-2xl overflow-hidden">
-                                        <table className="w-full border-collapse">
-                                            <thead>
-                                                <tr className="border-b-2 border-[#EEEEEE]">
-                                                    {['S/N', 'Image', 'Name', 'Category', 'Code', 'Price', 'Stock', ''].map((h) => (
-                                                        <th key={h} className="text-left px-3 py-3 text-sm font-semibold text-dark-gray">{h}</th>
-                                                    ))}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {paginated.map((p, idx) => (
-                                                    <tr key={p.id}
-                                                        onClick={() => handleView(p)}
-                                                        className={`border-b-2 border-[#EEEEEE] cursor-pointer hover:bg-sidebar-accent/10 transition-colors ${idx === paginated.length - 1 ? 'border-b-0' : ''}`}>
-                                                        <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</p></td>
-                                                        <td className="px-3 py-3.5">
-                                                            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">
-                                                                {p.picture ? (
-                                                                    <Image src={p.picture} alt={p.name} width={40} height={40} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    <Package className="w-5 h-5 text-gray-400" />
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-3 py-3.5"><p className="text-sm font-semibold text-dark-gray">{getDisplayValue(p.name)}</p></td>
-                                                        <td className="px-3 py-3.5"><Badge className="text-[10px] px-2 py-0.5 bg-gray-100 text-dark-gray border-gray-200">{getDisplayValue(p.category)}</Badge></td>
-                                                        <td className="px-3 py-3.5"><p className="text-sm font-mono text-dark-gray">{getDisplayValue(p.code)}</p></td>
-                                                        <td className="px-3 py-3.5"><p className="text-sm font-semibold text-green-700">{formatCurrency(p.salePrice, p.ccy)}</p></td>
-                                                        <td className="px-3 py-3.5"><p className="text-sm text-dark-gray">{p.qtyInStore} {p.unit}</p></td>
-                                                        <td className="px-3 py-3.5" onClick={(e) => e.stopPropagation()}>
-                                                            <div className="flex items-center gap-1">
-                                                                <Button size="xs" variant="action" onClick={() => handleView(p)} title="View"><Eye className="w-4 h-4" /></Button>
-                                                                <PermissionButton requiredPermissions={['MANAGE_INVENTORY']} requireAll={true} hideIfNoPermission={false}
-                                                                    tooltipMessage="No permission" onClick={() => handleEdit(p)} size="xs" variant="action">
-                                                                    <EditIcon className="w-4 h-4" />
-                                                                </PermissionButton>
-                                                                <Button size="xs" variant="action" onClick={() => handleDelete(p)} title="Delete" className="text-red-500 hover:text-red-700">
-                                                                    <Trash2 className="w-4 h-4" />
+                                    <div className="w-full overflow-x-auto bg-white rounded-2xl overflow-hidden [&_.rc-table-cell]:px-3 [&_.rc-table-cell]:py-3.5 [&_.rc-table-row]:border-b-2 [&_.rc-table-row]:border-[#EEEEEE] [&_.rc-table-row:last-child]:border-b-0 [&_.rc-table-thead_th]:text-left [&_.rc-table-thead_th]:text-sm [&_.rc-table-thead_th]:font-semibold [&_.rc-table-thead_th]:text-dark-gray [&_.rc-table-thead_tr]:border-b-2 [&_.rc-table-thead_tr]:border-[#EEEEEE] [&_table]:w-full [&_table]:border-collapse">
+                                        <Table
+                                            columns={[
+                                                {
+                                                    title: 'S/N',
+                                                    dataIndex: 'sn',
+                                                    key: 'sn',
+                                                    render: (_: any, __: any, idx: number) => (
+                                                        <p className="text-sm text-dark-gray">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</p>
+                                                    ),
+                                                },
+                                                {
+                                                    title: 'Image',
+                                                    dataIndex: 'picture',
+                                                    key: 'picture',
+                                                    render: (picture: string, record: Product) => (
+                                                        <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-200">
+                                                            {picture ? (
+                                                                <Image src={picture} alt={record.name} width={40} height={40} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <Package className="w-5 h-5 text-gray-400" />
+                                                            )}
+                                                        </div>
+                                                    )
+                                                },
+                                                {
+                                                    title: 'Name',
+                                                    dataIndex: 'name',
+                                                    key: 'name',
+                                                    render: (name: string) => <p className="text-sm font-semibold text-dark-gray">{getDisplayValue(name)}</p>
+                                                },
+                                                {
+                                                    title: 'Category',
+                                                    dataIndex: 'category',
+                                                    key: 'category',
+                                                    render: (category: string) => <Badge className="text-[10px] px-2 py-0.5 bg-gray-100 text-dark-gray border-gray-200">{getDisplayValue(category)}</Badge>
+                                                },
+                                                {
+                                                    title: 'Code',
+                                                    dataIndex: 'code',
+                                                    key: 'code',
+                                                    render: (code: string) => <p className="text-sm font-mono text-dark-gray">{getDisplayValue(code)}</p>
+                                                },
+                                                {
+                                                    title: 'Price',
+                                                    dataIndex: 'salePrice',
+                                                    key: 'price',
+                                                    render: (price: number, record: Product) => <p className="text-sm font-semibold text-green-700">{formatCurrency(price, record.ccy)}</p>
+                                                },
+                                                ...(enableQtyInStoreView ? [{
+                                                    title: 'Stock',
+                                                    key: 'stock',
+                                                    render: (_: any, record: Product) => <p className="text-sm text-dark-gray">{record.qtyInStore} {record.unit}</p>
+                                                }] : []),
+                                                {
+                                                    title: 'Actions',
+                                                    key: 'actions',
+                                                    render: (_: any, p: Product) => (
+                                                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                                            <Button size="xs" variant="action" onClick={() => handleView(p)} title="View"><Eye className="w-4 h-4" /></Button>
+                                                            <PermissionButton requiredPermissions={['MANAGE_INVENTORY']} requireAll={true} hideIfNoPermission={false}
+                                                                tooltipMessage="No permission" onClick={() => handleEdit(p)} size="xs" variant="action">
+                                                                <EditIcon className="w-4 h-4" />
+                                                            </PermissionButton>
+                                                            <Button size="xs" variant="action" onClick={() => handleDelete(p)} title="Delete" className="text-red-500 hover:text-red-700">
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button size="xs" variant="action" onClick={() => handleAddVariant(p)} title="Add Variant" className="text-blue-500 hover:text-blue-700">
+                                                                <Plus className="w-4 h-4" />
+                                                            </Button>
+                                                            {enableBundleManagement && p.category?.toUpperCase() === 'BUNDLE' && (
+                                                                <Button size="xs" variant="action" onClick={() => handleManageBundle(p)} title="Manage Bundle" className="text-purple-600 hover:text-purple-800">
+                                                                    <Package className="w-4 h-4" />
                                                                 </Button>
-                                                                <Button size="xs" variant="action" onClick={() => handleAddVariant(p)} title="Add Variant" className="text-blue-500 hover:text-blue-700">
-                                                                    <Plus className="w-4 h-4" />
-                                                                </Button>
-                                                                {enableBundleManagement && p.category?.toUpperCase() === 'BUNDLE' && (
-                                                                    <Button size="xs" variant="action" onClick={() => handleManageBundle(p)} title="Manage Bundle" className="text-purple-600 hover:text-purple-800">
-                                                                        <Package className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                }
+                                            ]}
+                                            data={paginated}
+                                            rowKey="id"
+                                            onRow={(record) => ({
+                                                onClick: () => handleView(record),
+                                                className: "cursor-pointer hover:bg-sidebar-accent/10 transition-colors",
+                                            })}
+                                        />
                                     </div>
                                     {Math.ceil(filtered.length / ITEMS_PER_PAGE) > 1 && (
                                         <TablePagination current={currentPage} total={filtered.length} perPage={ITEMS_PER_PAGE} onChange={setCurrentPage} />
