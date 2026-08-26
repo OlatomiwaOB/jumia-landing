@@ -156,7 +156,7 @@ const Footer = () => {
         {/* Bottom Section: Copyright & Payments */}
         <div className="flex flex-col-reverse lg:flex-row justify-between items-center gap-6 pt-8 border-t border-white/10 text-[13px] opacity-70 text-center">
           <p>
-            © {new Date().getFullYear()}, Traditional Taste. Powered by Shopify.
+            © {new Date().getFullYear()}, Traditional Taste.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -179,9 +179,9 @@ const Footer = () => {
                 VISA
               </div>
               {/* PayPal */}
-              <div className="px-2.5 py-1.5 bg-[#003087] text-white border border-[#004BCA] rounded-[6px] shadow-sm italic text-[12px] select-none">
+              {/* <div className="px-2.5 py-1.5 bg-[#003087] text-white border border-[#004BCA] rounded-[6px] shadow-sm italic text-[12px] select-none">
                 <span className="font-bold">Pay</span><span className="font-semibold text-blue-200">Pal</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
