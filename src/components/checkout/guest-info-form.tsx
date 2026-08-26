@@ -13,7 +13,6 @@ import { useRouter } from 'next/navigation';
 import useDeliveryOptions from '@/app/hooks/useDeliveryOptions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
 import { formatPrice } from '@/utils/helperfns';
 import { useCart } from '@/store/cart';
 import { useQuery } from '@tanstack/react-query';
@@ -22,6 +21,7 @@ import { Store, Clock } from 'lucide-react';
 import useGetLookup from '@/app/hooks/useGetLookup';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getClientConfig } from '@/config/client-config';
+import { RefundPolicyModal } from './refund-policy-modal';
 
 interface GuestInfoFormProps {
   form: UseFormReturn<GuestFormData>;
@@ -49,6 +49,7 @@ const GuestInfoForm = ({
   const { deliveryOptions, isLoading: isLoadingDeliveryOptions } = useDeliveryOptions('GUEST', variantWeight || undefined);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isRefundPolicyOpen, setIsRefundPolicyOpen] = useState(false);
   const watchShippingMethod = watch("shippingMethod");
   const watchShippingOption = watch("shippingOption");
   const watchPickupStore = watch("pickupStore");
@@ -172,11 +173,23 @@ const GuestInfoForm = ({
     };
   };
 
+  // Shipping/personal details are validated up-front; refund consent is captured
+  // in the modal, so its pending error must not block the modal from opening.
   const handleNext = async () => {
     const isValid = await trigger();
-    if (isValid) {
-      onContinue();
+
+    if (!isValid) {
+      const pendingErrors = Object.keys(form.formState.errors).filter((field) => field !== 'agreeTerms');
+      if (pendingErrors.length > 0) return;
     }
+
+    setIsRefundPolicyOpen(true);
+  };
+
+  const handleRefundPolicyConfirm = () => {
+    setValue('agreeTerms', true, { shouldValidate: true });
+    setIsRefundPolicyOpen(false);
+    onContinue();
   };
 
   return (
@@ -572,37 +585,18 @@ const GuestInfoForm = ({
             />
           </div>
 
-          <div className="mt-6 p-4 bg-accent/5 rounded-lg border border-accent/20">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="agreeTerms"
-                checked={watch('agreeTerms')}
-                onCheckedChange={(checked) => setValue('agreeTerms', checked as boolean, { shouldValidate: true })}
-                className="mt-1"
-              />
-              <div className="grid gap-1.5 leading-none">
-                <label
-                  htmlFor="agreeTerms"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  Accept terms and conditions
-                </label>
-                <p className="text-sm text-muted-foreground">
-                  You agree to our Terms of Service and Privacy Policy.
-                </p>
-              </div>
-            </div>
-            {errors.agreeTerms && (
-              <p className="text-xs text-destructive mt-2 ml-7">{errors.agreeTerms.message as string}</p>
-            )}
-          </div>
-
           <Button
             className="w-full bg-accent hover:bg-accent/90 text-white mt-6 py-6 text-lg"
             onClick={handleNext}
           >
-            Continue to Payment
+            Continue
           </Button>
+
+          <RefundPolicyModal
+            open={isRefundPolicyOpen}
+            onOpenChange={setIsRefundPolicyOpen}
+            onConfirm={handleRefundPolicyConfirm}
+          />
         </div>
       </div>
     </div>

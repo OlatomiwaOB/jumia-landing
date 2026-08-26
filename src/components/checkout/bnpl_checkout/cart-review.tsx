@@ -11,6 +11,7 @@ import ProductDetailsModal from '@/utils/checkout-product-details';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import axiosCustomer from "@/utils/fetch-function-customer";
+import { RefundPolicyModal } from "../refund-policy-modal";
 
 // interface CartItem {
 //   id?: number;
@@ -93,9 +94,10 @@ export const CartReview = ({
   const [selectedProduct, setSelectedProduct] = useState<CartItem | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [isViewAllModalOpen, setIsViewAllModalOpen] = useState(false);
+  const [isRefundPolicyOpen, setIsRefundPolicyOpen] = useState(false);
 
 
-  const { getValues, watch } = form;
+  const { getValues, watch, setValue } = form;
 
   const { data: pickupData } = useQuery({
     queryKey: ['pickup-locations'],
@@ -387,6 +389,14 @@ export const CartReview = ({
       }
     }
 
+    // All shipping data is valid — the customer must now consent to the refund
+    // policy before we commit the checkout data and move to payment.
+    setIsRefundPolicyOpen(true);
+  };
+
+  const proceedToPayment = () => {
+    const formValues = getValues();
+
     const pickupAmount = shippingMethod === 'pickup' && selectedStore
       ? getSelectedPickupLocation()?.amount || 0
       : 0;
@@ -424,6 +434,12 @@ export const CartReview = ({
     if (onTotalUpdate) onTotalUpdate(finalTotal);
 
     setCurrentStep('cart');
+  };
+
+  const handleRefundPolicyConfirm = () => {
+    setValue('agreeTerms', true, { shouldValidate: true });
+    setIsRefundPolicyOpen(false);
+    proceedToPayment();
   };
 
   const handleProductClick = (item: CartItem) => {
@@ -664,7 +680,7 @@ export const CartReview = ({
               onClick={handleContinueToPayment}
               disabled={isButtonDisabled}
             >
-              {isButtonDisabled ? "Complete Shipping Info" : "Continue to Payment"}
+              {isButtonDisabled ? "Complete Shipping Info" : "Continue"}
             </Button>
 
             {isButtonDisabled && (
@@ -687,6 +703,14 @@ export const CartReview = ({
           </p>
         </div>
       </div>
+
+      {!hideContinueButton && (
+        <RefundPolicyModal
+          open={isRefundPolicyOpen}
+          onOpenChange={setIsRefundPolicyOpen}
+          onConfirm={handleRefundPolicyConfirm}
+        />
+      )}
 
       <ProductDetailsModal
         isOpen={isProductModalOpen}

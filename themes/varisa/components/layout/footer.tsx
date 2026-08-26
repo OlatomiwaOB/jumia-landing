@@ -77,9 +77,9 @@ const PaymentIcons = () => {
         <span className="font-black italic text-white text-[11px] tracking-tight">VISA</span>
       </div>
       {/* PayPal */}
-      <div className="w-[38px] h-[24px] rounded flex items-center justify-center bg-[#003087] border border-white/10">
+      {/* <div className="w-[38px] h-[24px] rounded flex items-center justify-center bg-[#003087] border border-white/10">
         <span className="font-bold italic text-white text-[10px] tracking-tight">PayPal</span>
-      </div>
+      </div> */}
     </div>
   );
 };
@@ -189,7 +189,7 @@ export default function Footer() {
             {/* Bottom Right */}
             <div className="flex flex-col items-center md:items-end gap-5 w-full md:w-auto mt-2 md:mt-0">
               <PaymentIcons />
-              <div className="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-3">
+              {/* <div className="flex flex-wrap justify-center md:justify-end items-center gap-x-6 gap-y-3">
                 {navigation.customerService.map((item) => (
                   <Link
                     key={item.name}
@@ -199,7 +199,7 @@ export default function Footer() {
                     {item.name}
                   </Link>
                 ))}
-              </div>
+              </div> */}
             </div>
 
           </div>
