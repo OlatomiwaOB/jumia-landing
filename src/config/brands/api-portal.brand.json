@@ -1,0 +1,29 @@
+{
+  "app": {
+    "clientName": "API Portal",
+    "storefront": "api-portal"
+  },
+  "colors": {
+    "accent": "6366F1",
+    "accentForeground": "ffffff",
+    "accentColor2": "818CF8",
+    "accentColor3": "312E81",
+    "dashboardSidebar": "0F172A"
+  },
+  "logos": {
+    "primary": "",
+    "white": "",
+    "whiteFull": ""
+  },
+  "images": {
+    "banner": "",
+    "favicon": "/favicons/fortitude.ico"
+  },
+  "font": {
+    "family": "inter"
+  },
+  "metadata": {
+    "title": "API Portal | Home",
+    "description": "The ultimate API Portal Landing Page."
+  }
+}

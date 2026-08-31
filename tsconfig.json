@@ -30,13 +30,13 @@
         "./themes/*"
       ],
       "@theme": [
-        "./themes/electro"
+        "./themes/api-portal"
       ],
       "@theme/*": [
-        "./themes/electro/*"
+        "./themes/api-portal/*"
       ],
       "@brand": [
-        "./src/config/brands/electro.brand.json"
+        "./src/config/brands/api-portal.brand.json"
       ],
       "@/wagmi.config": [
         "./wagmi.config"

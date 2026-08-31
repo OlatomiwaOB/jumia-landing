@@ -5,6 +5,7 @@ import { vogueConfig } from './vogue';
 import { traditionalTasteV2Config } from './traditional-taste-v2';
 import { fortitudeConfig } from './fortitude';
 import { electroConfig } from './electro';
+import { apiPortalConfig } from './api-portal';
 
 /**
  * Registry of all available client configurations.
@@ -19,4 +20,5 @@ export const clientRegistry: Record<string, ClientConfig> = {
   'traditional-taste-v2': traditionalTasteV2Config,
   'fortitude': fortitudeConfig,
   'electro': electroConfig,
+  'api-portal': apiPortalConfig,
 };
