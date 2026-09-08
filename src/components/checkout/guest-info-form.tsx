@@ -382,12 +382,17 @@ const GuestInfoForm = ({
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Country *</Label>
-                      <SearchSelect
-                        options={countryOptions}
-                        value={watch('country')}
-                        onValueChange={(value) => { setValue('country', value, { shouldValidate: true }); trigger('country'); }}
-                        placeholder="Select country"
-                      />
+                      <select
+                        {...register('country', { required: 'Country is required' })}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      >
+                        <option value="" disabled>Select country</option>
+                        {countryOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                       {errors.country && <p className="text-xs text-destructive">{errors.country.message as string}</p>}
                     </div>
                     <div className="space-y-2">
