@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-1 cursor-pointer hover:underline text-orange-500 font-bold">
             <Star size={12} className="fill-orange-500" /> Sell on Jumia
           </div>
-          <div className="flex gap-4 items-center">
+          <div className="hidden sm:flex gap-4 items-center">
             <div className="flex items-center font-bold text-black tracking-tighter">
               JUMIA<Star size={10} className="text-orange-500 fill-orange-500 ml-[1px]"/>
             </div>
@@ -30,15 +30,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Sticky Header Wrapper */}
       <div className="sticky top-0 z-50 w-full shadow-sm">
         {/* Main Header */}
-        <header className="bg-white py-2">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center gap-8">
+        <header className="bg-white py-1 md:py-2">
+        {/* Phones: logo + icons on row 1, full-width search on row 2. md+: single row. */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-3 flex flex-wrap md:flex-nowrap items-center gap-x-4 gap-y-2 md:gap-8">
           {/* Logo */}
-          <a href="/" className="text-4xl font-black text-black tracking-tighter shrink-0 flex items-center pr-4">
-            JUMIA<Star size={20} className="text-orange-500 fill-orange-500 ml-1" />
+          <a href="/" className="text-2xl md:text-4xl font-black text-black tracking-tighter shrink-0 flex items-center md:pr-4">
+            JUMIA<Star className="w-4 h-4 md:w-5 md:h-5 text-orange-500 fill-orange-500 ml-1" />
           </a>
 
           {/* Search Bar */}
-          <div className="flex-grow flex items-center">
+          <div className="order-last md:order-none w-full md:w-auto md:flex-grow flex items-center">
             <div className="flex w-full bg-[#f1f1f2] rounded-md overflow-hidden border border-transparent focus-within:border-gray-300 transition-colors h-10">
               <div className="px-3 flex items-center text-gray-500">
                 <Search size={18} />
@@ -46,37 +47,41 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <input 
                 type="text" 
                 placeholder="Search products, brands and categories" 
-                className="w-full bg-transparent outline-none text-[14px] font-medium text-gray-900 placeholder-gray-500 h-full"
+                className="w-full min-w-0 bg-transparent outline-none text-[14px] font-medium text-gray-900 placeholder-gray-500 h-full"
               />
             </div>
-            <button className="bg-[#f68b1e] hover:bg-[#e07b1a] text-white font-bold px-8 h-10 ml-2 rounded-md shadow-sm transition-colors text-[14px] uppercase tracking-wide">
-              Search
+            <button
+              aria-label="Search"
+              className="bg-[#f68b1e] hover:bg-[#e07b1a] text-white font-bold px-3 md:px-8 h-10 ml-2 rounded-md shadow-sm transition-colors text-[14px] uppercase tracking-wide shrink-0"
+            >
+              <Search size={18} className="md:hidden" />
+              <span className="hidden md:inline">Search</span>
             </button>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-4 shrink-0">
-            <button className="flex items-center gap-2 hover:text-orange-500 font-bold text-[14px] transition-colors text-gray-900 px-2 py-2 rounded-md hover:bg-gray-100">
+          {/* Actions — icon-only below lg */}
+          <div className="flex items-center gap-1 lg:gap-4 shrink-0 ml-auto md:ml-0">
+            <button aria-label="Account" className="flex items-center gap-2 hover:text-orange-500 font-bold text-[14px] transition-colors text-gray-900 p-2 rounded-md hover:bg-gray-100">
               <User size={22} className="stroke-[2]" />
-              <span>Account</span>
-              <ChevronDown size={18} className="text-gray-600 stroke-[2]" />
+              <span className="hidden lg:inline">Account</span>
+              <ChevronDown size={18} className="text-gray-600 stroke-[2] hidden lg:block" />
             </button>
-            <button className="flex items-center gap-2 hover:text-orange-500 font-bold text-[14px] transition-colors text-gray-900 px-2 py-2 rounded-md hover:bg-gray-100">
+            <button aria-label="Help" className="hidden md:flex items-center gap-2 hover:text-orange-500 font-bold text-[14px] transition-colors text-gray-900 p-2 rounded-md hover:bg-gray-100">
               <HelpCircle size={22} className="stroke-[2]" />
-              <span>Help</span>
-              <ChevronDown size={18} className="text-gray-600 stroke-[2]" />
+              <span className="hidden lg:inline">Help</span>
+              <ChevronDown size={18} className="text-gray-600 stroke-[2] hidden lg:block" />
             </button>
-            <button className="flex items-center gap-2 hover:text-orange-500 font-bold text-[14px] transition-colors text-gray-900 px-2 py-2 rounded-md hover:bg-gray-100">
+            <button aria-label="Cart" className="flex items-center gap-2 hover:text-orange-500 font-bold text-[14px] transition-colors text-gray-900 p-2 rounded-md hover:bg-gray-100">
               <ShoppingCart size={22} className="stroke-[2]" />
-              <span>Cart</span>
+              <span className="hidden lg:inline">Cart</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Category Navigation Bar */}
-      <nav className="bg-white border-t border-gray-100 shadow-sm hidden md:block">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-3 flex items-center justify-between gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide text-gray-800">
+      <nav className="bg-white border-t border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-2.5 md:py-3 flex items-center lg:justify-between gap-5 lg:gap-4 overflow-x-auto whitespace-nowrap scrollbar-hide text-gray-800">
           <a href="#" className="flex items-center gap-2 text-[13px] font-bold hover:text-orange-500 transition-colors">
             <Store size={18} className="stroke-[2]" /> Official Store
           </a>

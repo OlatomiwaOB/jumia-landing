@@ -171,6 +171,16 @@ export default function Homepage(props: any) {
     return () => clearInterval(timer);
   }, []);
 
+  // Swipe left/right on touch screens (the arrows are hidden on phones)
+  const touchStartX = useRef<number | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 40) (dx < 0 ? next : prev)();
+    touchStartX.current = null;
+  };
+
   const slide = SLIDES[active];
 
   return (
@@ -178,6 +188,8 @@ export default function Homepage(props: any) {
       {/* ── HERO BANNER — full-width, edge to edge ── */}
       <div
         className="relative w-full overflow-hidden transition-colors duration-500"
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         style={{
           backgroundColor: slide.bg,
           minHeight: '260px',
@@ -214,7 +226,7 @@ export default function Homepage(props: any) {
 
         {/* ── LEFT TEXT CONTENT ── */}
         <div
-          className="relative z-20 flex flex-col justify-center h-full w-[55%]"
+          className="relative z-20 flex flex-col justify-center h-full w-[64%] sm:w-[55%]"
           style={{
             padding: 'clamp(16px, 3.5vw, 52px)',
             opacity: animating ? 0 : 1,
@@ -284,7 +296,7 @@ export default function Homepage(props: any) {
           </p>
 
           {/* Badges */}
-          <div style={{ marginTop: 'clamp(8px, 1.5vw, 14px)', display: 'flex', alignItems: 'center', gap: 'clamp(10px, 1.5vw, 20px)' }}>
+          <div className="hidden sm:flex" style={{ marginTop: 'clamp(8px, 1.5vw, 14px)', alignItems: 'center', gap: 'clamp(10px, 1.5vw, 20px)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <slide.badge1.icon size={20} color="white" strokeWidth={2} />
               <span style={{ color: 'white', fontSize: 'clamp(10px, 0.9vw, 12px)', fontWeight: 800, letterSpacing: '0.03em', lineHeight: 1.25 }}>
@@ -305,11 +317,12 @@ export default function Homepage(props: any) {
         <button
           onClick={prev}
           aria-label="Previous slide"
+          className="hidden md:flex"
           style={{
             position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)',
             zIndex: 30, width: '44px', height: '44px', borderRadius: '50%',
             background: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
             transition: 'transform 0.15s, background 0.15s',
           }}
@@ -323,11 +336,12 @@ export default function Homepage(props: any) {
         <button
           onClick={next}
           aria-label="Next slide"
+          className="hidden md:flex"
           style={{
             position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
             zIndex: 30, width: '44px', height: '44px', borderRadius: '50%',
             background: 'rgba(255,255,255,0.95)', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            alignItems: 'center', justifyContent: 'center',
             boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
             transition: 'transform 0.15s, background 0.15s',
           }}
@@ -587,7 +601,7 @@ function FlashSales() {
         {/* Left Nav */}
         <button
           onClick={scrollLeft}
-          className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity disabled:opacity-0"
+          className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full hidden md:flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity disabled:opacity-0"
         >
           <ChevronLeft size={24} className="text-gray-700" />
         </button>
@@ -641,7 +655,7 @@ function FlashSales() {
         {/* Right Nav */}
         <button
           onClick={scrollRight}
-          className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity"
+          className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full hidden md:flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity"
         >
           <ChevronRight size={24} className="text-gray-700" />
         </button>
@@ -699,7 +713,7 @@ function RecentlyViewed() {
       <div className="relative group/nav">
         <button
           onClick={scrollLeft}
-          className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity"
+          className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full hidden md:flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity"
         >
           <ChevronLeft size={24} className="text-gray-700" />
         </button>
@@ -731,7 +745,7 @@ function RecentlyViewed() {
 
         <button
           onClick={scrollRight}
-          className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity"
+          className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full hidden md:flex items-center justify-center shadow-lg border border-gray-100 opacity-0 group-hover/nav:opacity-100 transition-opacity"
         >
           <ChevronRight size={24} className="text-gray-700" />
         </button>
@@ -1001,7 +1015,7 @@ function ProductSection({
   return (
     <div className={`w-full rounded-2xl mt-4 pb-4 md:pb-5 overflow-hidden ${light ? 'bg-[#f1e9fd]' : 'bg-[#784ee6]'}`}>
       {/* Header */}
-      <div className="flex items-start justify-between p-4 md:p-5 md:pb-4">
+      <div className="flex items-start justify-between gap-3 p-4 md:p-5 md:pb-4">
         <div>
           <h2 className={`text-2xl md:text-[32px] font-extrabold tracking-tight leading-tight ${light ? 'text-[#784ee6]' : 'text-white'}`}>
             {title}
@@ -1013,7 +1027,7 @@ function ProductSection({
         {seeAll && (
           <a
             href="#"
-            className={`flex items-center gap-1.5 transition-colors px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium text-sm md:text-base shadow-sm shrink-0 ${
+            className={`flex items-center gap-1.5 transition-colors px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium text-sm md:text-base shadow-sm shrink-0 whitespace-nowrap ${
               light ? 'bg-[#784ee6] text-white hover:bg-[#6a40d8]' : 'bg-white text-[#784ee6] hover:bg-gray-100'
             }`}
           >
@@ -1355,14 +1369,14 @@ function LimitedStockDeals() {
   return (
     <div className="w-full bg-[#784ee6] rounded-2xl mt-4 pb-4 md:pb-5">
       {/* Header */}
-      <div className="flex items-start justify-between p-4 md:p-5 md:pb-4">
+      <div className="flex items-start justify-between gap-3 p-4 md:p-5 md:pb-4">
         <div>
           <h2 className="text-white text-2xl md:text-[32px] font-extrabold tracking-tight leading-tight">Limited Stock deals</h2>
           <p className="text-white/95 text-sm md:text-base mt-0.5">Up to 70% Off</p>
         </div>
         <a
           href="#"
-          className="flex items-center gap-1.5 bg-white text-[#784ee6] hover:bg-gray-100 transition-colors px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium text-sm md:text-base shadow-sm"
+          className="flex items-center gap-1.5 bg-white text-[#784ee6] hover:bg-gray-100 transition-colors px-4 py-2 md:px-6 md:py-2.5 rounded-full font-medium text-sm md:text-base shadow-sm shrink-0 whitespace-nowrap"
         >
           See All <ArrowRight size={18} />
         </a>
@@ -1652,7 +1666,7 @@ function ProductStrip({ products }: { products: StripProduct[] }) {
       <button
         onClick={() => scrollBy(-400)}
         aria-label="Scroll left"
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover/nav:opacity-100 transition-opacity"
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full hidden md:flex items-center justify-center shadow-lg opacity-0 group-hover/nav:opacity-100 transition-opacity"
       >
         <ChevronLeft size={24} className="text-gray-700" />
       </button>
@@ -1670,7 +1684,7 @@ function ProductStrip({ products }: { products: StripProduct[] }) {
       <button
         onClick={() => scrollBy(400)}
         aria-label="Scroll right"
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover/nav:opacity-100 transition-opacity"
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-white rounded-full hidden md:flex items-center justify-center shadow-lg opacity-0 group-hover/nav:opacity-100 transition-opacity"
       >
         <ChevronRight size={24} className="text-gray-700" />
       </button>

@@ -136,11 +136,11 @@ export default function FooterLinks() {
           </dl>
         </div>
 
-        {/* Socials + payment methods */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 mt-6">
+        {/* Socials + payment methods (stacked on phones — the icon rows need the full width) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-6 mt-6">
           <div>
             <Heading>Join Us On</Heading>
-            <div className="flex items-center gap-7 mt-6">
+            <div className="flex items-center gap-6 sm:gap-7 mt-4 sm:mt-6">
               {SOCIALS.map(social => (
                 <a key={social.name} href="#" aria-label={social.name} className="hover:opacity-75 transition-opacity">
                   <img src={social.src} alt={social.name} width={social.w} height={social.h} />
@@ -151,7 +151,7 @@ export default function FooterLinks() {
 
           <div>
             <Heading>Payment Methods</Heading>
-            <div className="flex items-center gap-6 mt-6">
+            <div className="flex items-center gap-6 mt-4 sm:mt-6">
               {PAYMENT_METHODS.map(method => (
                 <img key={method.name} src={method.src} alt={method.name} title={method.name} width={method.w} height={method.h} />
               ))}
