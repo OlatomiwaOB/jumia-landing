@@ -3,14 +3,20 @@
 import { useState, useEffect } from 'react';
 import { ChevronsUp } from 'lucide-react';
 
-export default function ScrollToTop() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+// Storefronts that should not render the scroll-to-top button
+const HIDDEN_ON_STOREFRONTS = ['electro', 'jumia'];
 
-  // Do not render the scroll-to-top button on the electro storefront
-  if (process.env.NEXT_PUBLIC_STORE_FRONT === 'electro') {
+export default function ScrollToTop() {
+  // Checked here, before any hooks run, so the hook order inside the button never changes
+  if (HIDDEN_ON_STOREFRONTS.includes(process.env.NEXT_PUBLIC_STORE_FRONT ?? '')) {
     return null;
   }
+  return <ScrollToTopButton />;
+}
+
+function ScrollToTopButton() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   const handleScroll = () => {
     // Show button when page is scrolled down

@@ -6,6 +6,7 @@ import { traditionalTasteV2Config } from './traditional-taste-v2';
 import { fortitudeConfig } from './fortitude';
 import { electroConfig } from './electro';
 import { apiPortalConfig } from './api-portal';
+import { jumiaConfig } from './jumia';
 
 /**
  * Registry of all available client configurations.
@@ -21,4 +22,5 @@ export const clientRegistry: Record<string, ClientConfig> = {
   'fortitude': fortitudeConfig,
   'electro': electroConfig,
   'api-portal': apiPortalConfig,
+  'jumia': jumiaConfig,
 };
